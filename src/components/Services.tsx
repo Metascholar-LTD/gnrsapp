@@ -1,105 +1,106 @@
-import { Bot, Brain, LineChart, Shield, Cpu, Zap } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
 export const Services = () => {
-  const services = [
-    {
-      icon: Bot,
-      title: "Robotic Automation",
-      description:
-        "Automate repetitive tasks and streamline your business processes with intelligent robotic process automation solutions.",
-    },
-    {
-      icon: Brain,
-      title: "Machine Learning",
-      description:
-        "Leverage advanced machine learning algorithms to unlock insights from your data and make smarter business decisions.",
-    },
-    {
-      icon: LineChart,
-      title: "Predictive Analysis",
-      description:
-        "Forecast trends and anticipate market changes with our powerful predictive analytics and data modeling tools.",
-    },
-    {
-      icon: Shield,
-      title: "Cyber Security",
-      description:
-        "Protect your digital assets with AI-powered security solutions that detect and prevent threats in real-time.",
-    },
-    {
-      icon: Cpu,
-      title: "Deep Learning",
-      description:
-        "Harness the power of neural networks and deep learning to solve complex problems and create innovative solutions.",
-    },
-    {
-      icon: Zap,
-      title: "Process Optimization",
-      description:
-        "Optimize your workflows and maximize efficiency with intelligent process automation and continuous improvement.",
-    },
-  ];
-
   return (
-    <section id="services" className="py-20 bg-secondary/30">
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <span className="text-primary font-semibold text-lg">Our Services</span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground">
-            Our Excellent AI Solutions{" "}
-            <span className="text-primary">for Your Business</span>
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            We offer comprehensive AI solutions tailored to your business needs. 
-            From automation to predictive analytics, we help you stay ahead in the digital age.
-          </p>
+    <div id="services" className="container-xxl service py-5">
+      <div className="container">
+        <div className="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style={{ maxWidth: '600px' }}>
+          <p className="d-inline-block border rounded text-primary fw-semi-bold py-1 px-3">Our Services</p>
+          <h1 className="display-5 mb-5">Comprehensive National Resources For All Ghanaians</h1>
         </div>
-
-        {/* Services Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <Card
-              key={index}
-              className="group p-8 hover:shadow-glow transition-all duration-300 border-2 hover:border-primary/50 hover:-translate-y-2"
-            >
-              <div className="space-y-4">
-                {/* Icon */}
-                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
-                  <service.icon className="w-8 h-8 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
+        <div className="row g-4 wow fadeInUp" data-wow-delay="0.3s">
+          <div className="col-lg-4">
+            <div className="nav nav-pills d-flex justify-content-between w-100 h-100 me-4">
+              <button className="nav-link w-100 d-flex align-items-center text-start border p-4 mb-4 active" data-bs-toggle="pill" data-bs-target="#tab-pane-1" type="button">
+                <h5 className="m-0"><i className="fa fa-graduation-cap me-3" style={{color: '#006B3F'}}></i>Education Resources</h5>
+              </button>
+              <button className="nav-link w-100 d-flex align-items-center text-start border p-4 mb-4" data-bs-toggle="pill" data-bs-target="#tab-pane-2" type="button">
+                <h5 className="m-0"><i className="fa fa-briefcase me-3" style={{color: '#FCD116'}}></i>Job Opportunities</h5>
+              </button>
+              <button className="nav-link w-100 d-flex align-items-center text-start border p-4 mb-4" data-bs-toggle="pill" data-bs-target="#tab-pane-3" type="button">
+                <h5 className="m-0"><i className="fa fa-newspaper me-3" style={{color: '#FF6B6B'}}></i>News & Updates</h5>
+              </button>
+              <button className="nav-link w-100 d-flex align-items-center text-start border p-4 mb-0" data-bs-toggle="pill" data-bs-target="#tab-pane-4" type="button">
+                <h5 className="m-0"><i className="fa fa-database me-3" style={{color: '#4ECDC4'}}></i>National Resources</h5>
+              </button>
+            </div>
+          </div>
+          <div className="col-lg-8">
+            <div className="tab-content w-100">
+              <div className="tab-pane fade show active" id="tab-pane-1">
+                <div className="row g-4">
+                  <div className="col-md-6" style={{ minHeight: '350px' }}>
+                    <div className="position-relative h-100">
+                      <img className="position-absolute rounded w-100 h-100" src="/img/service-1.jpg"
+                        style={{ objectFit: 'cover' }} alt="" />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <h3 className="mb-4">Comprehensive Education Resources</h3>
+                    <p className="mb-4">Access a wide range of educational opportunities including scholarships, courses, training programs, and educational institutions across Ghana. Find the right educational path for your career goals and personal development.</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Scholarship Opportunities</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Course Listings</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Educational Institutions</p>
+                    <a href="/education" className="btn btn-primary py-3 px-5 mt-3">Explore Education</a>
+                  </div>
                 </div>
-
-                {/* Content */}
-                <div className="space-y-3">
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-                    {service.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
-
-                {/* CTA Link */}
-                <Button
-                  variant="link"
-                  className="p-0 h-auto text-primary group-hover:translate-x-2 transition-transform duration-300"
-                >
-                  Learn More →
-                </Button>
               </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="text-center mt-12">
-          <Button size="lg">
-            View All Services
-          </Button>
+              <div className="tab-pane fade" id="tab-pane-2">
+                <div className="row g-4">
+                  <div className="col-md-6" style={{ minHeight: '350px' }}>
+                    <div className="position-relative h-100">
+                      <img className="position-absolute rounded w-100 h-100" src="/img/service-2.jpg"
+                        style={{ objectFit: 'cover' }} alt="" />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <h3 className="mb-4">Job Opportunities & Career Development</h3>
+                    <p className="mb-4">Browse thousands of job listings from top employers across Ghana. Find opportunities that match your skills and career aspirations. Access career resources, resume building tools, and professional development opportunities.</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Job Listings</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Career Resources</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Professional Development</p>
+                    <a href="/jobs" className="btn btn-primary py-3 px-5 mt-3">Browse Jobs</a>
+                  </div>
+                </div>
+              </div>
+              <div className="tab-pane fade" id="tab-pane-3">
+                <div className="row g-4">
+                  <div className="col-md-6" style={{ minHeight: '350px' }}>
+                    <div className="position-relative h-100">
+                      <img className="position-absolute rounded w-100 h-100" src="/img/service-3.jpg"
+                        style={{ objectFit: 'cover' }} alt="" />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <h3 className="mb-4">Latest News & National Updates</h3>
+                    <p className="mb-4">Stay informed with the latest news, announcements, and updates from across Ghana. Get real-time information about government policies, national events, and important developments affecting citizens.</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>National News</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Government Announcements</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Event Updates</p>
+                    <a href="/news" className="btn btn-primary py-3 px-5 mt-3">Read News</a>
+                  </div>
+                </div>
+              </div>
+              <div className="tab-pane fade" id="tab-pane-4">
+                <div className="row g-4">
+                  <div className="col-md-6" style={{ minHeight: '350px' }}>
+                    <div className="position-relative h-100">
+                      <img className="position-absolute rounded w-100 h-100" src="/img/service-4.jpg"
+                        style={{ objectFit: 'cover' }} alt="" />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <h3 className="mb-4">National Resources & Information</h3>
+                    <p className="mb-4">Access comprehensive national resources including government services, public information, statistics, and data. Find everything you need to know about Ghana's resources, services, and opportunities in one centralized location.</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Government Services</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>Public Information</p>
+                    <p><i className="fa fa-check text-primary me-3"></i>National Statistics</p>
+                    <a href="/contact" className="btn btn-primary py-3 px-5 mt-3">Learn More</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };

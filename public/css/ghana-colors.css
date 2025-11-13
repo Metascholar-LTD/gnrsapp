@@ -1,0 +1,186 @@
+/* Ghana Flag Colors - Strategic Application */
+
+/* Accent borders and highlights */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+.border-primary {
+    border-color: var(--primary) !important;
+}
+
+/* Section background with subtle Ghana colors */
+section {
+    position: relative;
+}
+
+section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        rgba(255, 107, 107, 0.6) 0%, 
+        rgba(255, 230, 109, 0.6) 25%, 
+        rgba(78, 205, 196, 0.6) 50%, 
+        rgba(0, 107, 63, 0.6) 75%, 
+        rgba(255, 230, 109, 0.6) 100%);
+    z-index: 1;
+}
+
+/* Ghana Yellow/Gold accents */
+.btn-primary {
+    background: linear-gradient(135deg, #006B3F 0%, #4ECDC4 100%) !important;
+    border: none !important;
+    transition: all 0.3s ease;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4ECDC4 0%, #006B3F 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 107, 63, 0.3);
+    color: white !important;
+}
+
+/* Service tabs with Ghana colors */
+.service .nav .nav-link.active {
+    background: linear-gradient(135deg, #006B3F 0%, #4ECDC4 100%) !important;
+    border-color: #006B3F !important;
+}
+
+.service .nav .nav-link:hover:not(.active) {
+    border-color: #FCD116 !important;
+    background: rgba(252, 209, 22, 0.1) !important;
+}
+
+.service .nav .nav-link.active h5,
+.service .nav .nav-link.active h5 i {
+    color: #FFFFFF !important;
+}
+
+/* Project hover effects with Ghana colors */
+.project-item:hover .project-title {
+    background: linear-gradient(135deg, #006B3F 0%, #4ECDC4 100%);
+    border-color: #006B3F;
+}
+
+/* Carousel controls with Ghana colors */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: #006B3F;
+    border: 10px solid #006B3F;
+}
+
+.carousel-control-prev-icon:hover,
+.carousel-control-next-icon:hover {
+    background-color: #4ECDC4;
+    border-color: #4ECDC4;
+}
+
+/* Footer links with Ghana accent */
+.footer .btn.btn-link:hover {
+    color: #FFE66D !important;
+}
+
+/* Navigation active state with Ghana green */
+.navbar .navbar-nav .nav-link.active {
+    color: #006B3F !important;
+    position: relative;
+}
+
+.navbar .navbar-nav .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 15px;
+    right: 15px;
+    height: 3px;
+    background: linear-gradient(90deg, #FF6B6B, #FFE66D, #4ECDC4, #006B3F);
+    border-radius: 3px 3px 0 0;
+}
+
+/* Badge and highlight colors */
+.badge-ghana-red {
+    background-color: var(--ghana-red);
+    color: white;
+}
+
+.badge-ghana-yellow {
+    background-color: var(--ghana-yellow);
+    color: var(--ghana-black);
+}
+
+.badge-ghana-green {
+    background-color: var(--ghana-green);
+    color: white;
+}
+
+/* Icon colors */
+.icon-ghana-red {
+    color: var(--ghana-red);
+}
+
+.icon-ghana-yellow {
+    color: var(--ghana-yellow);
+}
+
+.icon-ghana-green {
+    color: var(--ghana-green);
+}
+
+/* Gradient backgrounds */
+.bg-ghana-gradient {
+    background: linear-gradient(135deg, 
+        var(--ghana-red) 0%, 
+        var(--ghana-yellow) 25%, 
+        var(--ghana-green) 50%, 
+        var(--ghana-yellow) 75%, 
+        var(--ghana-red) 100%);
+}
+
+.bg-ghana-subtle {
+    background: linear-gradient(135deg, 
+        rgba(0, 107, 63, 0.05) 0%, 
+        rgba(252, 209, 22, 0.05) 50%, 
+        rgba(255, 107, 107, 0.05) 100%);
+}
+
+/* Section dividers */
+.section-divider {
+    height: 4px;
+    background: linear-gradient(90deg, 
+        var(--ghana-red) 0%, 
+        var(--ghana-yellow) 33%, 
+        var(--ghana-green) 66%, 
+        var(--ghana-yellow) 100%);
+    border: none;
+    margin: 3rem 0;
+}
+
+/* Card hover effects */
+.card-ghana-hover {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 107, 63, 0.1);
+}
+
+.card-ghana-hover:hover {
+    border-color: var(--ghana-green);
+    box-shadow: 0 10px 30px rgba(0, 107, 63, 0.15);
+    transform: translateY(-5px);
+}
+
+/* Text gradients */
+.text-ghana-gradient {
+    background: linear-gradient(135deg, var(--ghana-red), var(--ghana-yellow), var(--ghana-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+

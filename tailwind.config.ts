@@ -49,7 +49,11 @@ export default {
         },
         "hero-from": "hsl(var(--hero-gradient-from))",
         "hero-to": "hsl(var(--hero-gradient-to))",
-        "cyan-accent": "hsl(var(--cyan-accent))",
+        "ghana-red": "hsl(var(--ghana-red))",
+        "ghana-yellow": "hsl(var(--ghana-yellow))",
+        "ghana-green": "hsl(var(--ghana-green))",
+        "ghana-black": "hsl(var(--ghana-black))",
+        "ghana-white": "hsl(var(--ghana-white))",
       },
       boxShadow: {
         'glow': 'var(--shadow-glow)',

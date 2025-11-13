@@ -9,73 +9,80 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 220 20% 15%;
+    --foreground: 0 0% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 15%;
+    --card-foreground: 0 0% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 15%;
+    --popover-foreground: 0 0% 15%;
 
-    --primary: 220 75% 53%;
+    /* Ghana Green - Primary */
+    --primary: 165 70% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 100% 95%;
-    --secondary-foreground: 220 75% 53%;
+    /* Ghana Gold/Yellow - Secondary */
+    --secondary: 50 95% 70%;
+    --secondary-foreground: 0 0% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 165 30% 96%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 188 95% 50%;
+    /* Ghana Red - Accent */
+    --accent: 0 75% 70%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 75% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 220 75% 53%;
+    --border: 165 20% 90%;
+    --input: 165 20% 90%;
+    --ring: 165 70% 40%;
 
     --radius: 0.75rem;
 
-    /* AI Theme specific colors */
-    --hero-gradient-from: 220 85% 45%;
-    --hero-gradient-to: 220 75% 60%;
-    --cyan-accent: 188 95% 50%;
+    /* Ghana Flag Gradient - Light Versions */
+    --hero-gradient-from: 165 70% 45%;
+    --hero-gradient-to: 50 95% 75%;
+    --ghana-red: 0 75% 70%;
+    --ghana-yellow: 50 95% 70%;
+    --ghana-green: 165 70% 50%;
+    --ghana-black: 0 0% 30%;
+    --ghana-white: 0 0% 100%;
     
     /* Shadows and effects */
-    --shadow-glow: 0 10px 40px -10px hsl(220 75% 53% / 0.3);
+    --shadow-glow: 0 10px 40px -10px hsl(165 70% 40% / 0.2);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 220 25% 8%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 220 20% 12%;
-    --card-foreground: 210 40% 98%;
+    --card: 165 30% 12%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 220 20% 12%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 165 30% 12%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 220 75% 53%;
+    --primary: 165 70% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 50 80% 60%;
+    --secondary-foreground: 0 0% 15%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 165 30% 20%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 188 95% 50%;
+    --accent: 0 75% 65%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 220 75% 53%;
+    --border: 165 30% 25%;
+    --input: 165 30% 25%;
+    --ring: 165 70% 50%;
   }
 }
 

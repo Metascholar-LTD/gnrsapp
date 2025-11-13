@@ -1,20 +1,24 @@
+import { Spinner } from "@/components/Spinner";
 import { Navigation } from "@/components/Navigation";
-import { Hero } from "@/components/Hero";
+import { Carousel } from "@/components/Carousel";
 import { About } from "@/components/About";
 import { Services } from "@/components/Services";
-import { Contact } from "@/components/Contact";
+import { Projects } from "@/components/Projects";
 import { Footer } from "@/components/Footer";
+import { InitScripts } from "@/components/InitScripts";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <>
+      <InitScripts />
+      <Spinner />
       <Navigation />
-      <Hero />
+      <Carousel />
       <About />
       <Services />
-      <Contact />
+      <Projects />
       <Footer />
-    </div>
+    </>
   );
 };
 
