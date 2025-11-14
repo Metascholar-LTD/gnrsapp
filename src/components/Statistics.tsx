@@ -109,7 +109,7 @@ export const Statistics = () => {
         }}
       />
 
-      <div className="container py-5">
+      <div className="container py-5" style={{ maxWidth: '100%', paddingLeft: 'clamp(15px, 5vw, 80px)', paddingRight: 'clamp(15px, 5vw, 80px)' }}>
         <div className="row g-4">
           {/* Happy Clients */}
           <div className="col-lg-3 col-md-6 col-sm-6 text-center wow fadeInUp" data-wow-delay="0.1s">

@@ -1,8 +1,8 @@
 export const About = () => {
   return (
     <>
-      <div id="about" className="container-xxl py-5" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"' }}>
-        <div className="container">
+      <div id="about" className="container-fluid py-5" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"' }}>
+        <div className="container" style={{ maxWidth: '100%', paddingLeft: 'clamp(15px, 5vw, 80px)', paddingRight: 'clamp(15px, 5vw, 80px)' }}>
           <div className="row g-5 align-items-center mb-5">
             <div className="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
               <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
