@@ -157,6 +157,9 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const lastMousePos = useRef<MousePosition>({ x: 0, y: 0 });
   const animationFrame = useRef<number | null>(null);
+  const touchStartPos = useRef<MousePosition>({ x: 0, y: 0 });
+  const touchStartTime = useRef<number>(0);
+  const hasMoved = useRef<boolean>(false);
 
   // ==========================================
   // COMPUTED VALUES
@@ -407,25 +410,61 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
     setIsDragging(false);
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     const touch = e.touches[0];
+    const target = e.target as HTMLElement | null;
+    
+    // Check if touch is on an image (not the container)
+    const isImageClick = target?.closest('[data-image-node]');
+    
+    if (isImageClick) {
+      // Don't prevent default for image clicks - let click event fire
+      touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+      touchStartTime.current = Date.now();
+      hasMoved.current = false;
+      return;
+    }
+    
+    // For container drag, prevent default
+    e.preventDefault();
     setIsDragging(true);
     setVelocity({ x: 0, y: 0 });
     lastMousePos.current = { x: touch.clientX, y: touch.clientY };
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    touchStartTime.current = Date.now();
+    hasMoved.current = false;
   }, []);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
+    const touch = e.touches[0];
+    const target = e.target as HTMLElement | null;
+    const isImageClick = target?.closest('[data-image-node]');
+    
+    // Calculate movement distance
+    const deltaX = touch.clientX - touchStartPos.current.x;
+    const deltaY = touch.clientY - touchStartPos.current.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    // If moved more than 10px, consider it a drag
+    if (distance > 10) {
+      hasMoved.current = true;
+      
+      // If on image and moved, prevent click
+      if (isImageClick) {
+        e.preventDefault();
+        return;
+      }
+    }
+    
     if (!isDragging) return;
     e.preventDefault();
 
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - lastMousePos.current.x;
-    const deltaY = touch.clientY - lastMousePos.current.y;
+    const moveDeltaX = touch.clientX - lastMousePos.current.x;
+    const moveDeltaY = touch.clientY - lastMousePos.current.y;
 
     const rotationDelta = {
-      x: -deltaY * dragSensitivity,
-      y: deltaX * dragSensitivity
+      x: -moveDeltaY * dragSensitivity,
+      y: moveDeltaX * dragSensitivity
     };
 
     setRotation(prev => ({
@@ -442,7 +481,21 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
     lastMousePos.current = { x: touch.clientX, y: touch.clientY };
   }, [isDragging, dragSensitivity, clampRotationSpeed]);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    const target = e.target as HTMLElement | null;
+    const isImageClick = target?.closest('[data-image-node]');
+    
+    // If it was a tap on an image (not a drag), allow click to fire
+    if (isImageClick && !hasMoved.current) {
+      const timeSinceStart = Date.now() - touchStartTime.current;
+      // If tap was quick (< 300ms) and didn't move, let click event fire
+      if (timeSinceStart < 300) {
+        // Click will fire naturally, don't prevent it
+        setIsDragging(false);
+        return;
+      }
+    }
+    
     setIsDragging(false);
   }, []);
 
@@ -485,17 +538,26 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
 
-    // Touch events
+    // Touch events - use native listeners with passive: false to allow preventDefault
+    const handleTouchStartNative = (e: TouchEvent) => {
+      const target = e.target as Node | null;
+      if (target && container.contains(target)) {
+        handleTouchStart(e);
+      }
+    };
+    
+    document.addEventListener('touchstart', handleTouchStartNative, { passive: false });
     document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('touchend', handleTouchEnd as EventListener);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchstart', handleTouchStartNative);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isMounted, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
+  }, [isMounted, handleMouseMove, handleMouseUp, handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   // ==========================================
   // RENDER HELPERS
@@ -516,6 +578,7 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
     return (
       <div
         key={image.id}
+        data-image-node="true"
         className="absolute cursor-pointer select-none transition-transform duration-200 ease-out"
         style={{
           width: `${imageSize}px`,
@@ -524,11 +587,21 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
           top: `${containerSize/2 + position.y}px`,
           opacity: position.fadeOpacity,
           transform: `translate(-50%, -50%) scale(${finalScale})`,
-          zIndex: position.zIndex
+          zIndex: position.zIndex,
+          touchAction: 'manipulation'
         }}
         onMouseEnter={() => setHoveredIndex(index)}
         onMouseLeave={() => setHoveredIndex(null)}
         onClick={() => setSelectedImage(image)}
+        onTouchEnd={(e) => {
+          // If it was a tap (not a drag), trigger click
+          if (!hasMoved.current) {
+            const timeSinceStart = Date.now() - touchStartTime.current;
+            if (timeSinceStart < 300) {
+              setSelectedImage(image);
+            }
+          }
+        }}
       >
         <div className="relative w-full h-full rounded-full overflow-hidden shadow-lg border-2 border-white/20">
           <img
@@ -645,7 +718,6 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
           perspective: `${perspective}px`
         }}
         onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
       >
         <div className="relative w-full h-full" style={{ zIndex: 10 }}>
           {images.map((image, index) => renderImageNode(image, index))}
