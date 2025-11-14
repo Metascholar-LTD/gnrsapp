@@ -87,6 +87,13 @@ export const Projects = () => {
       <div className="container" style={{ maxWidth: '100%', paddingLeft: 'clamp(15px, 5vw, 80px)', paddingRight: 'clamp(15px, 5vw, 80px)' }}>
         <div className="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style={{ maxWidth: '600px' }}>
           <p className="d-inline-block border rounded text-primary fw-semi-bold py-1 px-3">Our Initiatives</p>
+          <div style={{ 
+            width: '100%', 
+            height: '1px', 
+            backgroundColor: 'rgba(0, 0, 0, 0.1)', 
+            margin: '16px auto 24px auto',
+            maxWidth: '200px'
+          }}></div>
           <h1 className="display-5 mb-5">Key National Resource Initiatives</h1>
         </div>
         <div className="owl-carousel project-carousel wow fadeInUp" data-wow-delay="0.3s">

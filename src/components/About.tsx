@@ -52,6 +52,13 @@ export const About = () => {
                   textTransform: 'uppercase'
                 }}>About Us</p>
               </div>
+              <div style={{ 
+                width: '100%', 
+                height: '1px', 
+                backgroundColor: 'rgba(44, 44, 44, 0.1)', 
+                marginBottom: '24px',
+                maxWidth: '200px'
+              }}></div>
               <h1 style={{ 
                 fontSize: '2.75rem',
                 fontWeight: 700,

@@ -17,6 +17,13 @@ export const WhyChooseUs = () => {
             >
               Why Choosing Us!
             </p>
+            <div style={{ 
+              width: '100%', 
+              height: '1px', 
+              backgroundColor: 'rgba(44, 44, 44, 0.1)', 
+              marginBottom: '24px',
+              maxWidth: '200px'
+            }}></div>
             <h1 
               className="display-5 mb-4"
               style={{
