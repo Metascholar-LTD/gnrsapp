@@ -6,16 +6,32 @@ export const About = () => {
           <div className="row g-5 align-items-center mb-5">
             <div className="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
               <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
-                <img 
+                <video 
                   className="img-fluid w-100" 
-                  src="/img/about.jpg" 
-                  alt="GNRS About" 
+                  src="https://res.cloudinary.com/dsypclqxk/video/upload/v1763129131/5400711_Coll_wavebreak_People_3840x2160_ufldaq.mp4" 
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   style={{ 
                     borderRadius: '16px',
                     boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-                    transition: 'transform 0.3s ease'
+                    transition: 'transform 0.3s ease',
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block'
                   }}
                 />
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                  borderRadius: '16px',
+                  pointerEvents: 'none'
+                }}></div>
               </div>
             </div>
             <div className="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">

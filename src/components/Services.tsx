@@ -29,8 +29,18 @@ export const Services = () => {
                 <div className="row g-4">
                   <div className="col-md-6" style={{ minHeight: '350px' }}>
                     <div className="position-relative h-100">
-                      <img className="position-absolute rounded w-100 h-100" src="/img/service-1.jpg"
-                        style={{ objectFit: 'cover' }} alt="" />
+                      <img className="position-absolute rounded w-100 h-100" src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763129777/portrait-student-wearing-medical-mask_gokjyh.jpg"
+                        style={{ objectFit: 'cover', filter: 'blur(1px)' }} alt="" />
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        borderRadius: '0.375rem',
+                        pointerEvents: 'none'
+                      }}></div>
                     </div>
                   </div>
                   <div className="col-md-6">
@@ -47,8 +57,18 @@ export const Services = () => {
                 <div className="row g-4">
                   <div className="col-md-6" style={{ minHeight: '350px' }}>
                     <div className="position-relative h-100">
-                      <img className="position-absolute rounded w-100 h-100" src="/img/service-2.jpg"
-                        style={{ objectFit: 'cover' }} alt="" />
+                      <img className="position-absolute rounded w-100 h-100" src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763130425/man-handshaking-his-employer-after-being-accepted-his-new-office-job_lo26fe.jpg"
+                        style={{ objectFit: 'cover', filter: 'blur(1px)' }} alt="" />
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        borderRadius: '0.375rem',
+                        pointerEvents: 'none'
+                      }}></div>
                     </div>
                   </div>
                   <div className="col-md-6">
@@ -65,8 +85,18 @@ export const Services = () => {
                 <div className="row g-4">
                   <div className="col-md-6" style={{ minHeight: '350px' }}>
                     <div className="position-relative h-100">
-                      <img className="position-absolute rounded w-100 h-100" src="/img/service-3.jpg"
-                        style={{ objectFit: 'cover' }} alt="" />
+                      <img className="position-absolute rounded w-100 h-100" src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763130727/handsome-african-american-male-journalist_usk3kl.jpg"
+                        style={{ objectFit: 'cover', filter: 'blur(1px)' }} alt="" />
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        borderRadius: '0.375rem',
+                        pointerEvents: 'none'
+                      }}></div>
                     </div>
                   </div>
                   <div className="col-md-6">
@@ -83,8 +113,18 @@ export const Services = () => {
                 <div className="row g-4">
                   <div className="col-md-6" style={{ minHeight: '350px' }}>
                     <div className="position-relative h-100">
-                      <img className="position-absolute rounded w-100 h-100" src="/img/service-4.jpg"
-                        style={{ objectFit: 'cover' }} alt="" />
+                      <img className="position-absolute rounded w-100 h-100" src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763130880/african-woman-hold-small-ghana-flag-hands_wtybxo.jpg"
+                        style={{ objectFit: 'cover', filter: 'blur(1px)' }} alt="" />
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        borderRadius: '0.375rem',
+                        pointerEvents: 'none'
+                      }}></div>
                     </div>
                   </div>
                   <div className="col-md-6">

@@ -92,8 +92,8 @@ export const Projects = () => {
         <div className="owl-carousel project-carousel wow fadeInUp" data-wow-delay="0.3s">
           <div className="project-item pe-5 pb-5">
             <div className="project-img mb-3">
-              <img className="img-fluid rounded" src="/img/service-1.jpg" alt="" />
-              <a href="/education"><i className="fa fa-link fa-3x text-primary"></i></a>
+              <img className="img-fluid rounded" src="/img/service-1.jpg" alt="" style={{ maxHeight: '300px', width: '100%', objectFit: 'cover' }} />
+              <a href="/education"></a>
             </div>
             <div className="project-title">
               <h4 className="mb-0">Education Access Program</h4>
@@ -101,8 +101,8 @@ export const Projects = () => {
           </div>
           <div className="project-item pe-5 pb-5">
             <div className="project-img mb-3">
-              <img className="img-fluid rounded" src="/img/service-2.jpg" alt="" />
-              <a href="/jobs"><i className="fa fa-link fa-3x text-primary"></i></a>
+              <img className="img-fluid rounded" src="/img/service-2.jpg" alt="" style={{ maxHeight: '300px', width: '100%', objectFit: 'cover' }} />
+              <a href="/jobs"></a>
             </div>
             <div className="project-title">
               <h4 className="mb-0">Employment Portal</h4>
@@ -110,8 +110,8 @@ export const Projects = () => {
           </div>
           <div className="project-item pe-5 pb-5">
             <div className="project-img mb-3">
-              <img className="img-fluid rounded" src="/img/service-3.jpg" alt="" />
-              <a href="/news"><i className="fa fa-link fa-3x text-primary"></i></a>
+              <img className="img-fluid rounded" src="/img/service-3.jpg" alt="" style={{ maxHeight: '300px', width: '100%', objectFit: 'cover' }} />
+              <a href="/news"></a>
             </div>
             <div className="project-title">
               <h4 className="mb-0">News & Information Hub</h4>
@@ -119,8 +119,8 @@ export const Projects = () => {
           </div>
           <div className="project-item pe-5 pb-5">
             <div className="project-img mb-3">
-              <img className="img-fluid rounded" src="/img/service-4.jpg" alt="" />
-              <a href="/contact"><i className="fa fa-link fa-3x text-primary"></i></a>
+              <img className="img-fluid rounded" src="/img/service-4.jpg" alt="" style={{ maxHeight: '300px', width: '100%', objectFit: 'cover' }} />
+              <a href="/contact"></a>
             </div>
             <div className="project-title">
               <h4 className="mb-0">Resource Database</h4>

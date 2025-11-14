@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { JoinUsButton } from "./JoinUsButton";
 
 export const Navigation = () => {
   const location = useLocation();
@@ -45,9 +46,38 @@ export const Navigation = () => {
             <small><i className="fa fa-map-marker-alt text-primary me-2"></i>Accra, Ghana</small>
             <small className="ms-4"><i className="fa fa-clock text-primary me-2"></i>Mon - Fri: 8.00 am - 5.00 pm</small>
           </div>
-          <div className="col-lg-6 px-5 text-end">
+          <div className="col-lg-6 px-5 text-end d-flex align-items-center justify-content-end">
             <small><i className="fa fa-envelope text-primary me-2"></i>info@gnrs.gov.gh</small>
             <small className="ms-4"><i className="fa fa-phone-alt text-primary me-2"></i>+233 XX XXX XXXX</small>
+            <div className="ms-4 d-flex align-items-center">
+              <a 
+                className="btn btn-light btn-sm-square rounded-circle ms-2" 
+                href="https://www.facebook.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
+                <i className="fab fa-facebook-f text-primary"></i>
+              </a>
+              <a 
+                className="btn btn-light btn-sm-square rounded-circle ms-2" 
+                href="https://www.twitter.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+              >
+                <i className="fab fa-twitter text-primary"></i>
+              </a>
+              <a 
+                className="btn btn-light btn-sm-square rounded-circle ms-2" 
+                href="https://www.linkedin.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+              >
+                <i className="fab fa-linkedin-in text-primary"></i>
+              </a>
+            </div>
           </div>
         </div>
         {/* Top Bar End */}
@@ -70,7 +100,7 @@ export const Navigation = () => {
           
           {/* Desktop Navbar - Always visible on lg and above */}
           <div className="d-none d-lg-flex navbar-collapse">
-            <div className="navbar-nav ms-auto p-4 p-lg-0">
+            <div className="navbar-nav ms-auto p-4 p-lg-0 d-flex align-items-center">
               <Link 
                 to="/" 
                 className={`nav-item nav-link ${isActive("/") ? "active" : ""}`}
@@ -159,36 +189,9 @@ export const Navigation = () => {
               >
                 Contact
               </Link>
-            </div>
-            {/* Social Media Icons - Desktop */}
-            <div className="d-none d-lg-flex ms-2">
-              <a 
-                className="btn btn-light btn-sm-square rounded-circle ms-3" 
-                href="https://www.facebook.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-              >
-                <small className="fab fa-facebook-f text-primary"></small>
-              </a>
-              <a 
-                className="btn btn-light btn-sm-square rounded-circle ms-3" 
-                href="https://www.twitter.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Twitter"
-              >
-                <small className="fab fa-twitter text-primary"></small>
-              </a>
-              <a 
-                className="btn btn-light btn-sm-square rounded-circle ms-3" 
-                href="https://www.linkedin.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-              >
-                <small className="fab fa-linkedin-in text-primary"></small>
-              </a>
+              <div className="d-flex align-items-center ms-3">
+                <JoinUsButton />
+              </div>
             </div>
           </div>
 
@@ -349,6 +352,9 @@ export const Navigation = () => {
                 <i className="fa fa-envelope me-3"></i>Contact
               </span>
             </Link>
+            <div className="px-4 mt-2">
+              <JoinUsButton className="w-full justify-center" onClick={closeMobileMenu} />
+            </div>
           </div>
 
           {/* Mobile Social Media Icons */}
