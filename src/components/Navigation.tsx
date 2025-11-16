@@ -128,6 +128,24 @@ export const Navigation = () => {
                       Past Questions Repository
                     </Link>
                   </li>
+                  <li>
+                    <Link 
+                      to="/education/lecture-notes" 
+                      className="dropdown-item"
+                      onClick={closeMobileMenu}
+                    >
+                      Lecture Note
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/education/trial-questions" 
+                      className="dropdown-item"
+                      onClick={closeMobileMenu}
+                    >
+                      Trial Questions
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <Link 
@@ -281,6 +299,20 @@ export const Navigation = () => {
                   onClick={closeMobileMenu}
                 >
                   <i className="fa fa-file-alt me-3"></i>Past Questions Repository
+                </Link>
+                <Link 
+                  to="/education/lecture-notes" 
+                  className="mobile-dropdown-item"
+                  onClick={closeMobileMenu}
+                >
+                  <i className="fa fa-book-open me-3"></i>Lecture Note
+                </Link>
+                <Link 
+                  to="/education/trial-questions" 
+                  className="mobile-dropdown-item"
+                  onClick={closeMobileMenu}
+                >
+                  <i className="fa fa-question-circle me-3"></i>Trial Questions
                 </Link>
               </div>
             </div>
