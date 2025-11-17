@@ -348,6 +348,7 @@ const TrialQuestions = () => {
                 <h2 className="text-3xl font-bold mb-2 text-slate-900">
                   All Trial Questions
                 </h2>
+                <div className="h-px bg-slate-200 mb-2"></div>
                 <p className="text-lg text-slate-600">
                   {filteredQuestions.length} {filteredQuestions.length === 1 ? 'set' : 'sets'} found
                 </p>

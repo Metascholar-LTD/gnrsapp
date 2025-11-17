@@ -326,6 +326,7 @@ const LectureNotes = () => {
                 <h2 className="text-3xl font-bold mb-2 text-slate-900">
                   All Lecture Notes
                 </h2>
+                <div className="h-px bg-slate-200 mb-2"></div>
                 <p className="text-lg text-slate-600">
                   {filteredNotes.length} {filteredNotes.length === 1 ? 'note' : 'notes'} found
                 </p>
