@@ -103,3 +103,48 @@ All colors MUST be HSL.
     font-weight: 600;
   }
 }
+
+/* Diced Hero Section CSS Variables */
+:root {
+  --diced-hero-section-top-text: #2c3e50;
+  --diced-hero-section-main-gradient-from: #16a085;
+  --diced-hero-section-main-gradient-to: #2980b9;
+  --diced-hero-section-main-gradient-foreground: #16a085;
+  --diced-hero-section-separator: #f59e0b;
+  --diced-hero-section-sub-text: #34495e;
+  --diced-hero-section-button-bg: #f59e0b;
+  --diced-hero-section-button-fg: #ffffff;
+  --diced-hero-section-button-hover-bg: #d97706;
+  --diced-hero-section-button-hover-fg: #fff;
+}
+
+.dark {
+  --diced-hero-section-top-text: #f7f7ff;
+  --diced-hero-section-main-gradient-from: #9F4EFF;
+  --diced-hero-section-main-gradient-to: #00A6FB;
+  --diced-hero-section-main-gradient-foreground: #9F4EFF;
+  --diced-hero-section-separator: #086CA2;
+  --diced-hero-section-sub-text: #f7f7ff;
+  --diced-hero-section-button-bg: #00A6FB;
+  --diced-hero-section-button-fg: #0A0A0A;
+  --diced-hero-section-button-hover-bg: #9F4EFF;
+  --diced-hero-section-button-hover-fg: #FFFFFF;
+}
+
+/* Scholarship Card Alternative Style (Uiverse-inspired) */
+.scholarship-card-alt {
+  transition: all 0.5s ease-in-out;
+}
+
+.scholarship-card-alt:hover {
+  border-radius: 0;
+}
+
+.border-rotate {
+  transform: rotate(10deg);
+  transition: all 0.5s ease-in-out;
+}
+
+.group:hover .border-rotate {
+  transform: rotate(0deg);
+}

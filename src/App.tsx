@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import PastQuestions from "./pages/PastQuestions";
 import LectureNotes from "./pages/LectureNotes";
 import TrialQuestions from "./pages/TrialQuestions";
+import ScholarshipHub from "./pages/Scholarship-Hub";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/education/past-questions" element={<PastQuestions />} />
           <Route path="/education/lecture-notes" element={<LectureNotes />} />
           <Route path="/education/trial-questions" element={<TrialQuestions />} />
+          <Route path="/scholarship-hub" element={<ScholarshipHub />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
