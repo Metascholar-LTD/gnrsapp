@@ -712,14 +712,6 @@ const ScholarshipHub = () => {
                           <p className="text-xs text-[#bd9f67] font-medium drop-shadow-md">{scholarship.provider}</p>
                         </div>
                         
-                        {scholarship.featured && (
-                          <div className="absolute top-3 left-3 z-10">
-                            <Badge className="px-2.5 py-1 text-xs font-bold bg-[#bd9f67] text-[#243137] border-0 shadow-lg">
-                              Featured
-                            </Badge>
-                          </div>
-                        )}
-                        
                         {scholarship.verified && (
                           <div className="absolute top-3 right-3 z-10">
                             <div className="bg-[#243137]/90 backdrop-blur-sm rounded-full p-1 shadow-lg border border-[#bd9f67]">
@@ -775,6 +767,7 @@ const ScholarshipHub = () => {
                         <Button 
                           size="sm"
                           className="w-full bg-[#bd9f67] hover:bg-[#bd9f67]/90 text-[#243137] font-semibold shadow-md hover:shadow-lg transition-all group-hover:scale-105 h-9 text-xs"
+                          onClick={() => window.location.href = `/scholarship/${scholarship.id}`}
                         >
                           View Details
                           <ArrowRight className="ml-2 w-3.5 h-3.5" />
