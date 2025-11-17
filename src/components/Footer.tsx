@@ -24,7 +24,7 @@ export const Footer = () => {
           <div className="container">
             <div className="row g-8">
               {/* Company Info */}
-              <div className="col-lg-4 col-md-6 mb-6 mb-lg-0">
+              <div className="col-lg-3 col-md-6 mb-6 mb-lg-0">
                 <div className="mb-4">
                   <Link to="/" className="text-decoration-none">
                     <img 
@@ -407,8 +407,165 @@ export const Footer = () => {
                 </ul>
               </div>
 
+              {/* Partner Networks */}
+              <div className="col-lg-2 col-md-6 mb-6 mb-lg-0">
+                <h5 className="text-white mb-4" style={{ 
+                  fontSize: '1.1rem', 
+                  fontWeight: 600,
+                  letterSpacing: '0.5px'
+                }}>
+                  Partner Networks
+                </h5>
+                <ul className="list-unstyled" style={{ padding: 0 }}>
+                  <li className="mb-3">
+                    <a 
+                      href="https://academicdigital.space/" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-decoration-none d-flex align-items-center"
+                      style={{
+                        color: '#9CA3AF',
+                        fontSize: '0.9rem',
+                        transition: 'all 0.3s ease',
+                        fontWeight: 400
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#3B82F6';
+                        e.currentTarget.style.transform = 'translateX(5px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#9CA3AF';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }}
+                    >
+                      <img 
+                        src="https://res.cloudinary.com/dsypclqxk/image/upload/v1756325702/Meta_fqxtsp.jpg" 
+                        alt="Metascholar Institute Logo" 
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          marginRight: '10px',
+                          borderRadius: '4px',
+                          objectFit: 'cover',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span>Metascholar Institute</span>
+                    </a>
+                  </li>
+                  <li className="mb-3">
+                    <a 
+                      href="https://metascholarturnitinmoodle.com/" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-decoration-none d-flex align-items-center"
+                      style={{
+                        color: '#9CA3AF',
+                        fontSize: '0.9rem',
+                        transition: 'all 0.3s ease',
+                        fontWeight: 400
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#3B82F6';
+                        e.currentTarget.style.transform = 'translateX(5px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#9CA3AF';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }}
+                    >
+                      <img 
+                        src="https://res.cloudinary.com/dsypclqxk/image/upload/v1758014075/tn_elksc3.png" 
+                        alt="Metascholar Turnitin Logo" 
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          marginRight: '10px',
+                          borderRadius: '4px',
+                          objectFit: 'cover',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span>Metascholar Turnitin</span>
+                    </a>
+                  </li>
+                  <li className="mb-3">
+                    <a 
+                      href="https://scholarindexing.com/" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-decoration-none d-flex align-items-center"
+                      style={{
+                        color: '#9CA3AF',
+                        fontSize: '0.9rem',
+                        transition: 'all 0.3s ease',
+                        fontWeight: 400
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#3B82F6';
+                        e.currentTarget.style.transform = 'translateX(5px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#9CA3AF';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }}
+                    >
+                      <img 
+                        src="https://res.cloudinary.com/dsypclqxk/image/upload/v1758014075/SIS_wcdf5h.png" 
+                        alt="Scholar Indexing Logo" 
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          marginRight: '10px',
+                          borderRadius: '4px',
+                          objectFit: 'cover',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span>Scholar Indexing</span>
+                    </a>
+                  </li>
+                  <li className="mb-3">
+                    <a 
+                      href="https://ijmsirjournal.com/index.php/ojs" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-decoration-none d-flex align-items-center"
+                      style={{
+                        color: '#9CA3AF',
+                        fontSize: '0.9rem',
+                        transition: 'all 0.3s ease',
+                        fontWeight: 400
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#3B82F6';
+                        e.currentTarget.style.transform = 'translateX(5px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#9CA3AF';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }}
+                    >
+                      <img 
+                        src="https://res.cloudinary.com/dsypclqxk/image/upload/v1758014188/IJMSIR_ljip1d.jpg" 
+                        alt="CUG International Journal Logo" 
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          marginRight: '10px',
+                          borderRadius: '4px',
+                          objectFit: 'cover',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span>CUG International Journal</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
               {/* Newsletter */}
-              <div className="col-lg-4 col-md-6">
+              <div className="col-lg-3 col-md-6">
                 <h5 className="text-white mb-4" style={{ 
                   fontSize: '1.1rem', 
                   fontWeight: 600,
