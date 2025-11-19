@@ -39,7 +39,7 @@ export const Navigation = () => {
 
   return (
     <>
-      <div className="container-fluid fixed-top px-0 wow fadeIn" data-wow-delay="0.1s">
+      <div className="container-fluid fixed-top px-0 wow fadeIn" data-wow-delay="0.1s" style={{ zIndex: 1030 }}>
         {/* Top Bar Start */}
         <div className="top-bar row gx-0 align-items-center d-none d-lg-flex">
           <div className="col-lg-6 px-5 text-start">
@@ -172,7 +172,25 @@ export const Navigation = () => {
                       className="dropdown-item"
                       onClick={closeMobileMenu}
                     >
-                      Job Listings
+                      Browse Jobs
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/jobs/post-job" 
+                      className="dropdown-item"
+                      onClick={closeMobileMenu}
+                    >
+                      Post a Job
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/jobs/find-talent" 
+                      className="dropdown-item"
+                      onClick={closeMobileMenu}
+                    >
+                      Find Talent
                     </Link>
                   </li>
                   <li>
@@ -348,7 +366,21 @@ export const Navigation = () => {
                   className="mobile-dropdown-item"
                   onClick={closeMobileMenu}
                 >
-                  <i className="fa fa-list me-3"></i>Job Listings
+                  <i className="fa fa-list me-3"></i>Browse Jobs
+                </Link>
+                <Link 
+                  to="/jobs/post-job" 
+                  className="mobile-dropdown-item"
+                  onClick={closeMobileMenu}
+                >
+                  <i className="fa fa-plus-circle me-3"></i>Post a Job
+                </Link>
+                <Link 
+                  to="/jobs/find-talent" 
+                  className="mobile-dropdown-item"
+                  onClick={closeMobileMenu}
+                >
+                  <i className="fa fa-users me-3"></i>Find Talent
                 </Link>
                 <Link 
                   to="/jobs/career-resources" 
