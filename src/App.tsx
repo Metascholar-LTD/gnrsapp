@@ -10,12 +10,6 @@ import LectureNotes from "./pages/LectureNotes";
 import TrialQuestions from "./pages/TrialQuestions";
 import ScholarshipHub from "./pages/Scholarship-Hub";
 import ScholarshipView from "./pages/ScholarshipView";
-import JobListings from "./pages/jobs/JobListings";
-import JobDetails from "./pages/jobs/JobDetails";
-import PostJob from "./pages/jobs/PostJob";
-import FindTalent from "./pages/jobs/FindTalent";
-import CareerResources from "./pages/jobs/CareerResources";
-import ProfessionalDevelopment from "./pages/jobs/ProfessionalDevelopment";
 
 const queryClient = new QueryClient();
 
@@ -38,13 +32,6 @@ const App = () => (
           <Route path="/education/trial-questions" element={<TrialQuestions />} />
           <Route path="/scholarship-hub" element={<ScholarshipHub />} />
           <Route path="/scholarship/:id" element={<ScholarshipView />} />
-          {/* Jobs Routes */}
-          <Route path="/jobs/listings" element={<JobListings />} />
-          <Route path="/jobs/:id" element={<JobDetails />} />
-          <Route path="/jobs/post-job" element={<PostJob />} />
-          <Route path="/jobs/find-talent" element={<FindTalent />} />
-          <Route path="/jobs/career-resources" element={<CareerResources />} />
-          <Route path="/jobs/professional-development" element={<ProfessionalDevelopment />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
