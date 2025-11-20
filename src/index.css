@@ -148,3 +148,58 @@ All colors MUST be HSL.
 .group:hover .border-rotate {
   transform: rotate(0deg);
 }
+
+/* Slow blinking border animation for email input - when NOT active */
+@keyframes slow-blink-border {
+  0%, 100% {
+    border-color: rgb(251 113 133 / 0.5);
+    box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.3);
+  }
+  50% {
+    border-color: rgb(251 113 133 / 1);
+    box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.15);
+  }
+}
+
+.email-input-blinking {
+  animation: slow-blink-border 2s ease-in-out infinite;
+}
+
+.email-input-blinking:focus,
+.email-input-blinking:focus-visible {
+  animation: none;
+  border-color: rgb(251 113 133 / 1);
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.2);
+  outline: none;
+}
+
+/* Remove global section divider line on Browse Jobs page */
+.browse-page section::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Tighten hero-to-companies transition on Browse Jobs page */
+.browse-page .companies-section {
+  margin-top: -1rem;
+  padding-top: 2.25rem;
+}
+
+@media (min-width: 768px) {
+  .browse-page .companies-section {
+    margin-top: -1.5rem;
+    padding-top: 2.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .browse-page .companies-section {
+    margin-top: -2rem;
+    padding-top: 3rem;
+  }
+}
+
+/* Position the hero bottom SVG wave */
+.browse-page .bottom-wave svg {
+  transform: translateY(8px);
+}

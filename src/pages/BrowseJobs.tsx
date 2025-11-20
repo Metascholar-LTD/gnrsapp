@@ -3,9 +3,94 @@ import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
 import { Spinner } from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Search, Briefcase, MapPin, Building2, Sparkles } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowRight, Search, Briefcase, MapPin, Building2, Sparkles, Layers, Factory, Map } from "lucide-react";
 import { motion } from "framer-motion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import AnimatedSelect from "@/components/ui/animated-select";
+import { useState } from "react";
+
+// Job Categories Data
+const JOB_CATEGORIES = [
+  { id: '1', label: 'Management', value: 'management', description: 'Leadership and executive roles', icon: '💼' },
+  { id: '2', label: 'Services', value: 'services', description: 'Customer-facing service positions', icon: '🤝' },
+  { id: '3', label: 'Production, maintenance, quality', value: 'production', description: 'Manufacturing and quality control', icon: '⚙️' },
+  { id: '4', label: 'Accounting, controlling, finance', value: 'finance', description: 'Financial and accounting roles', icon: '💰' },
+  { id: '5', label: 'HR, training', value: 'hr', description: 'Human resources and development', icon: '👥' },
+  { id: '6', label: 'Tourism, hotel business and catering', value: 'tourism', description: 'Hospitality and tourism sector', icon: '🏨' },
+  { id: '7', label: 'Health and social professions', value: 'health', description: 'Healthcare and social services', icon: '🏥' },
+];
+
+// Job Industries Data
+const JOB_INDUSTRIES = [
+  { id: '1', label: 'IT, software engineering, Internet', value: 'it', description: 'Technology and software development', icon: '💻' },
+  { id: '2', label: 'Marketing, communication, media', value: 'marketing', description: 'Marketing and media roles', icon: '📢' },
+  { id: '3', label: 'Distribution, selling, wholesale', value: 'distribution', description: 'Sales and distribution', icon: '📦' },
+  { id: '4', label: 'Education, training', value: 'education', description: 'Teaching and training positions', icon: '📚' },
+  { id: '5', label: 'Services other', value: 'services_other', description: 'Various service industries', icon: '🔧' },
+  { id: '6', label: 'Banking, insurance, finance', value: 'banking', description: 'Financial services sector', icon: '🏦' },
+  { id: '7', label: 'Agriculture, fisheries', value: 'agriculture', description: 'Agriculture and fisheries', icon: '🌾' },
+];
+
+// Job Regions Data
+const JOB_REGIONS = [
+  { id: '1', label: 'Ashanti', value: 'ashanti', description: 'Central Ghana region', icon: '📍' },
+  { id: '2', label: 'Brong Ahafo', value: 'brong_ahafo', description: 'Western central region', icon: '📍' },
+  { id: '3', label: 'Eastern', value: 'eastern', description: 'Eastern Ghana region', icon: '📍' },
+  { id: '4', label: 'Upper West', value: 'upper_west', description: 'Northwestern region', icon: '📍' },
+  { id: '5', label: 'Volta', value: 'volta', description: 'Eastern coastal region', icon: '📍' },
+  { id: '6', label: 'Western', value: 'western', description: 'Southwestern region', icon: '📍' },
+  { id: '7', label: 'Northern', value: 'northern', description: 'Northern Ghana region', icon: '📍' },
+];
+
+// Job Filter Card Component
+const JobFilterCard = ({ 
+  title, 
+  icon, 
+  data, 
+  defaultValue 
+}: { 
+  title: string; 
+  icon: React.ReactNode; 
+  data: any[]; 
+  defaultValue: string;
+}) => {
+  const [selectedValue, setSelectedValue] = useState(defaultValue);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+      className="bg-white rounded-[32px] shadow-xl p-5 sm:p-6 border border-rose-50 flex flex-col min-h-[200px]"
+    >
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 text-slate-700">
+          {icon}
+        </div>
+        <h3 className="text-lg font-bold text-slate-900">
+          {title}
+        </h3>
+      </div>
+      <div className="h-px w-full bg-slate-200 mb-4" />
+      
+      <div className="flex-1 flex items-start justify-center w-full overflow-visible">
+        <div className="w-full">
+          <AnimatedSelect 
+            data={data} 
+            defaultValue={defaultValue}
+            id={title.toLowerCase().replace(/\s+/g, '-')}
+            onChange={(value) => {
+              setSelectedValue(value);
+              console.log(`Selected ${title}:`, value);
+            }}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 const BrowseJobs = () => {
   return (
@@ -14,13 +99,14 @@ const BrowseJobs = () => {
       <Spinner />
       <Navigation />
       
-      {/* Hero Section - Inspired by diced hero section design */}
-      <section 
-        className="relative min-h-[85vh] flex items-center justify-center overflow-hidden"
-        style={{ 
-          paddingTop: '140px',
-        }}
-      >
+      <div className="browse-page">
+        {/* Hero Section - Inspired by diced hero section design */}
+        <section 
+          className="relative min-h-[85vh] flex items-center justify-center overflow-hidden"
+          style={{ 
+            paddingTop: '140px',
+          }}
+        >
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -146,7 +232,7 @@ const BrowseJobs = () => {
         </div>
         
         {/* Bottom Wave Decoration */}
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="bottom-wave absolute bottom-0 left-0 right-0">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             viewBox="0 0 1440 120" 
@@ -160,10 +246,54 @@ const BrowseJobs = () => {
             />
           </svg>
         </div>
-      </section>
+        </section>
 
-      {/* Companies Hiring Section */}
-      <section className="py-20 bg-slate-50 relative overflow-hidden">
+        {/* Available Job Opportunities Section */}
+        <section className="py-12 md:py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-8"
+            >
+              <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto">
+                Browse through our curated list of job openings
+              </p>
+            </motion.div>
+            
+            {/* Search Bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="max-w-3xl mx-auto"
+            >
+              <div className="relative bg-white rounded-2xl shadow-lg border border-slate-200 p-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100">
+                    <Search className="w-5 h-5 text-slate-600" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search jobs by title, company, or location..."
+                    className="flex-1 h-12 text-sm focus:outline-none placeholder:text-slate-400"
+                  />
+                  <Button 
+                    className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-12 rounded-xl font-semibold"
+                  >
+                    Search
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Companies Hiring Section */}
+        <section className="companies-section py-20 bg-slate-50 relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
@@ -438,33 +568,281 @@ const BrowseJobs = () => {
             </div>
           </motion.div>
 
-          {/* CTA Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-center mt-8 sm:mt-12 lg:mt-16"
-          >
-            <p className="text-slate-600 mb-4 sm:mb-6 text-base sm:text-lg px-4">
-              Looking for your dream job? Use our search to find opportunities with these companies and more.
-            </p>
-            <Button
-              onClick={() => {
-                const element = document.getElementById('jobs-section');
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="bg-slate-900 hover:bg-slate-800 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              <Search className="w-5 h-5 mr-2" />
-              Search All Jobs
-            </Button>
-          </motion.div>
         </div>
       </section>
 
-      {/* Jobs Section Placeholder */}
-      <section id="jobs-section" className="py-20 bg-white">
+        {/* Jobs Overview Section */}
+        <section className="jobs-overview-section py-20 relative overflow-hidden">
+          {/* Gradient Background */}
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              background: "radial-gradient(125% 125% at 50% 10%, #fff 40%, #475569 100%)",
+            }}
+          />
+          <div className="container mx-auto px-4 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+                Committed to employment in Ghana and in Africa
+              </h2>
+            </motion.div>
+
+            <div className="grid gap-6 md:grid-cols-3 items-start">
+              {/* Jobs by Category */}
+              <JobFilterCard
+                title="Jobs by Category"
+                icon={<Layers className="w-5 h-5" />}
+                data={JOB_CATEGORIES}
+                defaultValue="management"
+              />
+
+              {/* Jobs by Industry */}
+              <JobFilterCard
+                title="Jobs by Industry"
+                icon={<Factory className="w-5 h-5" />}
+                data={JOB_INDUSTRIES}
+                defaultValue="it"
+              />
+
+              {/* Jobs by Region */}
+              <JobFilterCard
+                title="Jobs by Region"
+                icon={<Map className="w-5 h-5" />}
+                data={JOB_REGIONS}
+                defaultValue="ashanti"
+              />
+            </div>
+
+            <div className="mt-10 flex flex-col md:flex-row items-center justify-center gap-4">
+              <Button className="bg-rose-600 hover:bg-rose-500 text-white px-10 py-6 text-base rounded-full font-semibold shadow-lg hover:shadow-xl transition-all">
+                Create your account now
+              </Button>
+            </div>
+
+            <div className="mt-10 rounded-[28px] bg-slate-50 border border-slate-200 text-slate-900 px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 shadow-lg">
+              <p className="text-base sm:text-lg font-medium text-center md:text-left text-slate-800 w-full md:w-auto">
+                Receive by email job offers that interest you!
+              </p>
+              <div className="h-8 w-px bg-slate-300 hidden md:block"></div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="email-input-blinking w-full sm:flex-1 md:w-[420px] bg-rose-50/50 text-slate-900 placeholder:text-slate-900/60 border-2 border-rose-300/50 rounded-xl px-4 sm:px-6 py-3 sm:py-4 focus-visible:ring-0 transition-all text-sm sm:text-base"
+                />
+                <Button className="bg-rose-500 text-white hover:bg-rose-600 font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-full whitespace-nowrap shadow-md hover:shadow-lg transition-all w-full sm:w-auto text-sm sm:text-base">
+                  activate your email alert
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Last Jobs Section */}
+        <section className="py-20 bg-slate-50 relative overflow-hidden">
+          {/* Subtle Pattern Background */}
+          <div className="absolute inset-0 opacity-[0.03]">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}></div>
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
+            {/* Section Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+                Recently Added Jobs
+              </h2>
+            </motion.div>
+
+            {/* Job Cards Grid */}
+            <div className="grid gap-6 md:grid-cols-3 mb-8">
+              {/* Job Card 1 */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
+              >
+                {/* Company Logo */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-full border-4 border-blue-900 bg-yellow-400 flex items-center justify-center flex-shrink-0">
+                    <div className="text-center">
+                      <div className="text-blue-900 font-bold text-xs leading-tight">WGU</div>
+                      <div className="text-blue-900 text-[8px] leading-tight">wgu.edu</div>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[8px] text-blue-900 font-semibold leading-tight">WESTERN GOVERNORS UNIVERSITY</div>
+                  </div>
+                </div>
+
+                {/* Job Title */}
+                <h3 className="text-lg font-bold text-blue-900 mb-2">
+                  Marketing Manager- Accra
+                </h3>
+
+                {/* Date & Company */}
+                <div className="text-sm text-slate-600 mb-3">
+                  <span>19.11.2025 | </span>
+                  <span className="underline">WESTERN GOVERNORS UNIVERSITY</span>
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-slate-700 mb-4 line-clamp-3 leading-relaxed">
+                  Western Governors University (WGU) is seeking an experienced and innovative Marketing Manager to lead the development and execution of marketing strategies that promote the university's mission and offerings. This remote position plays a pivotal role in enhancing WGU's brand presence, driving...
+                </p>
+
+                {/* Region & City */}
+                <div className="space-y-2 pt-2 border-t border-slate-200">
+                  <div className="text-sm font-semibold text-blue-900">
+                    Region: <span className="font-normal text-slate-700">Greater Accra</span>
+                  </div>
+                  <div className="h-px w-16 bg-slate-300"></div>
+                  <div className="text-sm font-semibold text-blue-900">
+                    Town/City: <span className="font-normal text-slate-700">East Legon</span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Job Card 2 */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
+              >
+                {/* Company Logo */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center flex-shrink-0">
+                    <div className="flex items-center gap-1">
+                      <span className="text-2xl font-bold" style={{ color: '#3B82F6' }}>C</span>
+                      <span className="text-2xl font-bold" style={{ color: '#10B981' }}>o</span>
+                      <span className="text-2xl font-bold" style={{ color: '#FBBF24' }}>L</span>
+                      <span className="text-2xl font-bold" style={{ color: '#EF4444' }}>i</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Title */}
+                <h3 className="text-lg font-bold text-blue-900 mb-2">
+                  Field Network Technician- Da...
+                </h3>
+
+                {/* Date & Company */}
+                <div className="text-sm text-slate-600 mb-3">
+                  <span>19.11.2025 | </span>
+                  <span className="underline">COLI LINK GHANA LIMITED</span>
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-slate-700 mb-4 line-clamp-4 leading-relaxed">
+                  We are looking for a Field Network Technician. Responsibilities: Survey, Install and Setup Wi-Fi connection for customers of the company. Troubleshoot connectivity and hardware issues of customers of the company. Submit Field Technical Report on jobs daily. Respond promptly to reports forwarded
+                </p>
+
+                {/* Region & City */}
+                <div className="space-y-2 pt-2 border-t border-slate-200">
+                  <div className="text-sm font-semibold text-blue-900">
+                    Region: <span className="font-normal text-slate-700">Greater Accra</span>
+                  </div>
+                  <div className="h-px w-16 bg-slate-300"></div>
+                  <div className="text-sm font-semibold text-blue-900">
+                    Town/City: <span className="font-normal text-slate-700">East Legon</span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Job Card 3 */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
+              >
+                {/* Company Logo */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-xl bg-slate-100 border-2 border-slate-300 flex items-center justify-center flex-shrink-0 relative">
+                    <div className="text-slate-500 text-2xl">✉</div>
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded rotate-12 border border-red-600">
+                      CONFIDENTIAL
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Title */}
+                <h3 className="text-lg font-bold text-blue-900 mb-2">
+                  Operations and Project Assist...
+                </h3>
+
+                {/* Date & Company */}
+                <div className="text-sm text-slate-600 mb-3">
+                  <span>21.10.2025 | </span>
+                  <span className="underline">N.C.</span>
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-slate-700 mb-4 line-clamp-3 leading-relaxed">
+                  Operations & Project Assistant (Ghana) Help us bring calm and clarity to the world - starting in Ghana. We're building something that matters: a global method to help people reduce stress, prevent burnout, and take back control of their mental well-being. Our first pilot starts in Ghana - and...
+                </p>
+
+                {/* Region & City */}
+                <div className="space-y-2 pt-2 border-t border-slate-200">
+                  <div className="text-sm font-semibold text-blue-900">
+                    Region: <span className="font-normal text-slate-700">Greater Accra</span>
+                  </div>
+                  <div className="h-px w-16 bg-slate-300"></div>
+                  <div className="text-sm font-semibold text-blue-900">
+                    Town/City: <span className="font-normal text-slate-700">East Legon</span>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Separator Line */}
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              whileInView={{ opacity: 1, scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="mb-8"
+            >
+              <div className="relative h-px bg-slate-300">
+                <div className="absolute left-1/2 -translate-x-1/2 w-32 h-px bg-blue-900"></div>
+              </div>
+            </motion.div>
+
+            {/* Show all Jobs Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-center"
+            >
+              <Button className="bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 font-semibold px-8 py-3 rounded-xl transition-all shadow-sm hover:shadow-md">
+                Show all Jobs
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Jobs Section Placeholder */}
+        <section id="jobs-section" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900">
@@ -505,6 +883,7 @@ const BrowseJobs = () => {
           </div>
         </div>
       </section>
+      </div>
 
       <Footer />
     </>
