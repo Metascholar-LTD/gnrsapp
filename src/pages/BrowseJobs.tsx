@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import AnimatedSelect from "@/components/ui/animated-select";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Job Categories Data
 const JOB_CATEGORIES = [
@@ -93,6 +94,8 @@ const JobFilterCard = ({
 };
 
 const BrowseJobs = () => {
+  const navigate = useNavigate();
+  
   return (
     <>
       <InitScripts />
@@ -834,7 +837,10 @@ const BrowseJobs = () => {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="text-center"
             >
-              <Button className="bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 font-semibold px-8 py-3 rounded-xl transition-all shadow-sm hover:shadow-md">
+              <Button 
+                onClick={() => navigate('/jobs/all')}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 font-semibold px-8 py-3 rounded-xl transition-all shadow-sm hover:shadow-md"
+              >
                 Show all Jobs
               </Button>
             </motion.div>
