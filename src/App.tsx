@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { TwentyFirstToolbar } from "@21st-extension/toolbar-react";
+import { ReactPlugin } from "@21st-extension/react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PastQuestions from "./pages/PastQuestions";
@@ -10,6 +12,7 @@ import LectureNotes from "./pages/LectureNotes";
 import TrialQuestions from "./pages/TrialQuestions";
 import ScholarshipHub from "./pages/Scholarship-Hub";
 import ScholarshipView from "./pages/ScholarshipView";
+import BrowseJobs from "./pages/BrowseJobs";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +25,7 @@ const routerFutureFlags = {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <TwentyFirstToolbar config={{ plugins: [ReactPlugin] }} />
       <Toaster />
       <Sonner />
       <BrowserRouter future={routerFutureFlags}>
@@ -32,6 +36,7 @@ const App = () => (
           <Route path="/education/trial-questions" element={<TrialQuestions />} />
           <Route path="/scholarship-hub" element={<ScholarshipHub />} />
           <Route path="/scholarship/:id" element={<ScholarshipView />} />
+          <Route path="/jobs/browse" element={<BrowseJobs />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

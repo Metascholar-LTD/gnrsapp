@@ -168,11 +168,29 @@ export const Navigation = () => {
                 <ul className="dropdown-menu" aria-labelledby="jobsDropdown">
                   <li>
                     <Link 
-                      to="/jobs/listings" 
+                      to="/jobs/browse" 
                       className="dropdown-item"
                       onClick={closeMobileMenu}
                     >
-                      Job Listings
+                      Browse Jobs
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/jobs/post" 
+                      className="dropdown-item"
+                      onClick={closeMobileMenu}
+                    >
+                      Post a Job
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/jobs/find-talent" 
+                      className="dropdown-item"
+                      onClick={closeMobileMenu}
+                    >
+                      Find Talent
                     </Link>
                   </li>
                   <li>
@@ -344,11 +362,25 @@ export const Navigation = () => {
               </div>
               <div className="mobile-dropdown-menu">
                 <Link 
-                  to="/jobs/listings" 
+                  to="/jobs/browse" 
                   className="mobile-dropdown-item"
                   onClick={closeMobileMenu}
                 >
-                  <i className="fa fa-list me-3"></i>Job Listings
+                  <i className="fa fa-list me-3"></i>Browse Jobs
+                </Link>
+                <Link 
+                  to="/jobs/post" 
+                  className="mobile-dropdown-item"
+                  onClick={closeMobileMenu}
+                >
+                  <i className="fa fa-plus-circle me-3"></i>Post a Job
+                </Link>
+                <Link 
+                  to="/jobs/find-talent" 
+                  className="mobile-dropdown-item"
+                  onClick={closeMobileMenu}
+                >
+                  <i className="fa fa-users me-3"></i>Find Talent
                 </Link>
                 <Link 
                   to="/jobs/career-resources" 
