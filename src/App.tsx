@@ -14,6 +14,8 @@ import ScholarshipHub from "./pages/Scholarship-Hub";
 import ScholarshipView from "./pages/ScholarshipView";
 import BrowseJobs from "./pages/BrowseJobs";
 import AllJobs from "./pages/AllJobs";
+import JobDetails from "./pages/JobDetails";
+import CompanyDetails from "./pages/CompanyDetails";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,8 @@ const App = () => (
           <Route path="/scholarship/:id" element={<ScholarshipView />} />
           <Route path="/jobs/browse" element={<BrowseJobs />} />
           <Route path="/jobs/all" element={<AllJobs />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/companies/:name" element={<CompanyDetails />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

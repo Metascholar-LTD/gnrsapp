@@ -96,6 +96,52 @@ const JobFilterCard = ({
 const BrowseJobs = () => {
   const navigate = useNavigate();
   
+  // Job data for Recently Added Jobs section
+  const recentJobs = [
+    {
+      id: "recent-1",
+      title: "Marketing Manager- Accra",
+      company: "WESTERN GOVERNORS UNIVERSITY",
+      companyLogo: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=200&h=200&fit=crop&auto=format",
+      description: "Western Governors University (WGU) is seeking an experienced and innovative Marketing Manager to lead the development and execution of marketing strategies that promote the university's mission and offerings. This remote position plays a pivotal role in enhancing WGU's brand presence, driving...",
+      educationLevel: "Bachelor",
+      experienceLevel: "5 to 10 years",
+      contractType: "Permanent contract",
+      region: "Greater Accra",
+      city: "East Legon",
+      skills: ["Marketing", "Strategy", "Communication"],
+      date: "19.11.2025",
+    },
+    {
+      id: "recent-2",
+      title: "Field Network Technician- Da...",
+      company: "COLI LINK GHANA LIMITED",
+      companyLogo: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&h=200&fit=crop&auto=format",
+      description: "We are looking for a Field Network Technician. Responsibilities: Survey, Install and Setup Wi-Fi connection for customers of the company. Troubleshoot connectivity and hardware issues of customers of the company. Submit Field Technical Report on jobs daily. Respond promptly to reports forwarded",
+      educationLevel: "HND",
+      experienceLevel: "2 to 5 years",
+      contractType: "Permanent contract",
+      region: "Greater Accra",
+      city: "East Legon",
+      skills: ["Networking", "Technical Support", "Wi-Fi"],
+      date: "19.11.2025",
+    },
+    {
+      id: "recent-3",
+      title: "Operations and Project Assist...",
+      company: "N.C.",
+      companyLogo: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=200&fit=crop&auto=format",
+      description: "Operations & Project Assistant (Ghana) Help us bring calm and clarity to the world - starting in Ghana. We're building something that matters: a global method to help people reduce stress, prevent burnout, and take back control of their mental well-being. Our first pilot starts in Ghana - and...",
+      educationLevel: "Bachelor",
+      experienceLevel: "2 to 5 years",
+      contractType: "Permanent contract",
+      region: "Greater Accra",
+      city: "East Legon",
+      skills: ["Operations", "Project Management", "Administration"],
+      date: "21.10.2025",
+    },
+  ];
+  
   return (
     <>
       <InitScripts />
@@ -348,10 +394,7 @@ const BrowseJobs = () => {
               <div className="flex-shrink-0 w-full lg:w-[calc(25%-0.75rem)]">
                 <div 
                   className="group relative bg-white rounded-2xl p-4 sm:p-6 border-4 border-red-600 cursor-pointer transform transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl h-full"
-                  onClick={() => {
-                    const element = document.getElementById('jobs-section');
-                    element?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={() => navigate('/jobs/all', { state: { company: 'WESTERN GOVERNORS UNIVERSITY' } })}
                 >
                   {/* Featured Badge */}
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 transition-transform duration-500 ease-out group-hover:scale-110">
@@ -516,10 +559,7 @@ const BrowseJobs = () => {
                     >
                       <div
                         className="group relative h-full bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:border-slate-900 transition-all duration-300 cursor-pointer transform hover:-translate-y-2 hover:shadow-2xl"
-                        onClick={() => {
-                          const element = document.getElementById('jobs-section');
-                          element?.scrollIntoView({ behavior: 'smooth' });
-                        }}
+                        onClick={() => navigate('/jobs/all', { state: { company: company.name } })}
                       >
                         {/* Hover Effect Overlay */}
                         <div className="absolute inset-0 bg-slate-900 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
@@ -679,6 +719,7 @@ const BrowseJobs = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
+                onClick={() => navigate(`/jobs/${recentJobs[0].id}`, { state: { job: recentJobs[0] } })}
               >
                 {/* Company Logo */}
                 <div className="flex items-center gap-4 mb-4">
@@ -728,6 +769,7 @@ const BrowseJobs = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
+                onClick={() => navigate(`/jobs/${recentJobs[1].id}`, { state: { job: recentJobs[1] } })}
               >
                 {/* Company Logo */}
                 <div className="flex items-center gap-4 mb-4">
@@ -776,6 +818,7 @@ const BrowseJobs = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
+                onClick={() => navigate(`/jobs/${recentJobs[2].id}`, { state: { job: recentJobs[2] } })}
               >
                 {/* Company Logo */}
                 <div className="flex items-center gap-4 mb-4">
@@ -846,49 +889,6 @@ const BrowseJobs = () => {
             </motion.div>
           </div>
         </section>
-
-        {/* Jobs Section Placeholder */}
-        <section id="jobs-section" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900">
-              Available Job Opportunities
-            </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Browse through our curated list of job openings
-            </p>
-          </div>
-          
-          {/* Search Bar */}
-          <div className="max-w-3xl mx-auto mb-12">
-            <div className="relative bg-white rounded-2xl shadow-lg border border-slate-200 p-2">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100">
-                  <Search className="w-5 h-5 text-slate-600" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search jobs by title, company, or location..."
-                  className="flex-1 h-12 text-sm focus:outline-none placeholder:text-slate-400"
-                />
-                <Button 
-                  className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-12 rounded-xl font-semibold"
-                >
-                  Search
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Placeholder for job listings */}
-          <div className="text-center py-20">
-            <Briefcase className="w-16 h-16 mx-auto mb-4 text-slate-400" />
-            <p className="text-lg text-slate-600">
-              Job listings will be displayed here
-            </p>
-          </div>
-        </div>
-      </section>
       </div>
 
       <Footer />

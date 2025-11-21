@@ -174,7 +174,8 @@ All colors MUST be HSL.
 }
 
 /* Remove global section divider line on Browse Jobs page */
-.browse-page section::before {
+.browse-page section::before,
+.job-details-page section::before {
   content: none !important;
   display: none !important;
 }
