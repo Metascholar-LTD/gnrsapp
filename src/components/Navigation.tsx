@@ -116,7 +116,7 @@ export const Navigation = () => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Education
+                  Education Hub
                 </Link>
                 <ul className="dropdown-menu" aria-labelledby="educationDropdown">
                   <li>
@@ -163,7 +163,7 @@ export const Navigation = () => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Jobs
+                  Career & Employment
                 </Link>
                 <ul className="dropdown-menu" aria-labelledby="jobsDropdown">
                   <li>
@@ -214,16 +214,16 @@ export const Navigation = () => {
                 </ul>
               </div>
               <Link 
-                to="/news" 
-                className={`nav-item nav-link ${isActive("/news") ? "active" : ""}`}
-              >
-                News
-              </Link>
-              <Link 
                 to="/contact" 
                 className={`nav-item nav-link ${isActive("/contact") ? "active" : ""}`}
               >
-                Contact
+                Hands & Skills
+              </Link>
+              <Link 
+                to="/news" 
+                className={`nav-item nav-link ${isActive("/news") ? "active" : ""}`}
+              >
+                News & Info
               </Link>
               <div className="d-flex align-items-center ms-3">
                 <JoinUsButton />
