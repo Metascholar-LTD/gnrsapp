@@ -218,7 +218,7 @@ h6,
 
 /*** Header ***/
 #header-carousel {
-    margin-top: 115px;
+    margin-top: 0;
 }
 
 .carousel-item {
@@ -279,10 +279,6 @@ h6,
 }
 
 @media (max-width: 768px) {
-    #header-carousel {
-        margin-top: 70px;
-    }
-    
     #header-carousel .carousel-item {
         height: 500px;
     }

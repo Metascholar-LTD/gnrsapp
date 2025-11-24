@@ -96,11 +96,38 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Source Sans Pro', system-ui, sans-serif;
+    margin: 0;
+    overflow-x: hidden;
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Crimson Text', Georgia, serif;
     font-weight: 600;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  section {
+    padding-block: clamp(2rem, 5vw, 4.5rem);
+    position: relative;
+  }
+
+  section::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  @media (max-width: 991.98px) {
+    section {
+      padding-block: clamp(1.5rem, 4vw, 3.25rem);
+    }
   }
 }
 

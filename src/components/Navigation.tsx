@@ -1680,14 +1680,32 @@ export const Navigation = () => {
         .mega-menu-wrapper {
           display: flex;
           min-height: 320px;
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 2rem 3rem;
+          width: 100%;
+          max-width: none;
+          margin: 0;
+          padding: 2rem clamp(2rem, 5vw, 4.5rem);
+          box-sizing: border-box;
+          gap: clamp(1.5rem, 2vw, 2.75rem);
+        }
+
+        @media (min-width: 1600px) {
+          .mega-menu-wrapper {
+            padding-left: clamp(4rem, 8vw, 6.5rem);
+            padding-right: clamp(4rem, 8vw, 6.5rem);
+            gap: clamp(2rem, 3vw, 3.5rem);
+          }
+        }
+
+        @media (max-width: 1199.98px) {
+          .mega-menu-wrapper {
+            padding: 1.5rem 1.75rem;
+            gap: 1.25rem;
+          }
         }
 
         /* Left Sidebar */
         .mega-menu-sidebar {
-          width: 240px;
+          width: clamp(220px, 18vw, 320px);
           background: #F8F9FA;
           padding: 0;
           border-right: 2px solid rgba(0, 107, 63, 0.1);
