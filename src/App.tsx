@@ -16,6 +16,25 @@ import BrowseJobs from "./pages/BrowseJobs";
 import AllJobs from "./pages/AllJobs";
 import JobDetails from "./pages/JobDetails";
 import CompanyDetails from "./pages/CompanyDetails";
+import ShsBeceQuestions from "./pages/education/ShsBeceQuestions";
+import StudyGuides from "./pages/education/StudyGuides";
+import Ebooks from "./pages/education/Ebooks";
+import CourseSearch from "./pages/education/CourseSearch";
+import CourseRecommendations from "./pages/education/CourseRecommendations";
+import DepartmentalResources from "./pages/education/DepartmentalResources";
+import ResearchTools from "./pages/education/ResearchTools";
+import InternshipGuidance from "./pages/education/InternshipGuidance";
+import DiscussionForums from "./pages/education/DiscussionForums";
+import StudyGroups from "./pages/education/StudyGroups";
+import AlumniConnect from "./pages/education/AlumniConnect";
+import Mentorship from "./pages/education/Mentorship";
+import CampusAnnouncements from "./pages/education/CampusAnnouncements";
+import AcademicNotifications from "./pages/education/AcademicNotifications";
+import CgpaCalculator from "./pages/education/CgpaCalculator";
+import TimetableBuilder from "./pages/education/TimetableBuilder";
+import AiTutor from "./pages/education/AiTutor";
+import MyResources from "./pages/education/MyResources";
+import LearningPath from "./pages/education/LearningPath";
 
 const queryClient = new QueryClient();
 
@@ -35,8 +54,27 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/education/past-questions" element={<PastQuestions />} />
+          <Route path="/education/shs-bece-questions" element={<ShsBeceQuestions />} />
           <Route path="/education/lecture-notes" element={<LectureNotes />} />
           <Route path="/education/trial-questions" element={<TrialQuestions />} />
+          <Route path="/education/study-guides" element={<StudyGuides />} />
+          <Route path="/education/ebooks" element={<Ebooks />} />
+          <Route path="/education/course-search" element={<CourseSearch />} />
+          <Route path="/education/course-recommendations" element={<CourseRecommendations />} />
+          <Route path="/education/departmental-resources" element={<DepartmentalResources />} />
+          <Route path="/education/research-tools" element={<ResearchTools />} />
+          <Route path="/education/internship-guidance" element={<InternshipGuidance />} />
+          <Route path="/education/discussion-forums" element={<DiscussionForums />} />
+          <Route path="/education/study-groups" element={<StudyGroups />} />
+          <Route path="/education/alumni-connect" element={<AlumniConnect />} />
+          <Route path="/education/mentorship" element={<Mentorship />} />
+          <Route path="/education/campus-announcements" element={<CampusAnnouncements />} />
+          <Route path="/education/academic-notifications" element={<AcademicNotifications />} />
+          <Route path="/education/cgpa-calculator" element={<CgpaCalculator />} />
+          <Route path="/education/timetable-builder" element={<TimetableBuilder />} />
+          <Route path="/education/ai-tutor" element={<AiTutor />} />
+          <Route path="/education/my-resources" element={<MyResources />} />
+          <Route path="/education/learning-path" element={<LearningPath />} />
           <Route path="/scholarship-hub" element={<ScholarshipHub />} />
           <Route path="/scholarship/:id" element={<ScholarshipView />} />
           <Route path="/jobs/browse" element={<BrowseJobs />} />

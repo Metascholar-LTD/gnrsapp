@@ -41,6 +41,18 @@ All colors MUST be HSL.
     --input: 165 20% 90%;
     --ring: 165 70% 40%;
 
+    /* Education hub premium palette (Elsevier + MetaConsult inspired) */
+    --edu-navy: 224 67% 18%;
+    --edu-indigo: 224 67% 41%;
+    --edu-slate: 220 16% 28%;
+    --edu-amber: 15 100% 55%;
+    --edu-amber-soft: 15 100% 70%;
+    --edu-emerald: 165 65% 42%;
+    --edu-sand: 42 36% 94%;
+    --edu-cloud: 210 25% 97%;
+    --edu-border: 220 18% 85%;
+    --education-hero-image: url("https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1600&q=80");
+
     --radius: 0.75rem;
 
     /* Ghana Flag Gradient - Light Versions */
@@ -123,6 +135,27 @@ All colors MUST be HSL.
     content: none !important;
     display: none !important;
   }
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-animate="fade-up"] {
+  animation: fade-up 0.8s ease forwards;
+  opacity: 0;
+}
+
+[data-animate="fade-up"][data-delay="1"] { animation-delay: 0.05s; }
+[data-animate="fade-up"][data-delay="2"] { animation-delay: 0.1s; }
+[data-animate="fade-up"][data-delay="3"] { animation-delay: 0.15s; }
+[data-animate="fade-up"][data-delay="4"] { animation-delay: 0.2s; }
 
   @media (max-width: 991.98px) {
     section {
@@ -230,4 +263,150 @@ All colors MUST be HSL.
 /* Position the hero bottom SVG wave */
 .browse-page .bottom-wave svg {
   transform: translateY(8px);
+}
+
+/* Education hub theming */
+.education-hero {
+  position: relative;
+  overflow: hidden;
+  --hero-start: hsl(var(--edu-navy) / 0.95);
+  --hero-end: hsl(var(--edu-indigo) / 0.9);
+  --hero-accent-1: hsl(var(--edu-amber) / 0.18);
+  --hero-accent-2: hsl(var(--edu-emerald) / 0.24);
+  --hero-glow: hsl(var(--edu-amber) / 0.4);
+  background-image:
+    linear-gradient(135deg, var(--hero-start), var(--hero-end)),
+    var(--education-hero-image);
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+
+.education-hero::before,
+.education-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.education-hero::before {
+  background: radial-gradient(circle at 20% 20%, var(--hero-accent-1), transparent 45%),
+              radial-gradient(circle at 80% 10%, var(--hero-accent-2), transparent 40%);
+  mix-blend-mode: screen;
+}
+
+.education-hero::after {
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 199h200v1H0zM0 149h200v1H0zM0 99h200v1H0zM0 49h200v1H0zM149 0v200h1V0zM99 0v200h1V0zM49 0v200h1V0z' fill='rgba(255,255,255,0.05)' fill-rule='evenodd'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+.education-hero .hero-glow {
+  position: absolute;
+  inset: auto auto -120px 50%;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, var(--hero-glow), transparent 60%);
+  filter: blur(40px);
+  transform: translateX(-50%);
+  opacity: 0.45;
+}
+
+.education-stat-card {
+  backdrop-filter: blur(12px);
+  background: hsla(0 0% 100% / 0.08);
+  border: 1px solid hsla(0 0% 100% / 0.15);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 40px hsla(224 67% 12% / 0.35);
+}
+
+.education-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.education-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 10% 10%, hsl(var(--edu-emerald) / 0.07), transparent 40%),
+                    radial-gradient(circle at 90% 20%, hsl(var(--edu-amber) / 0.08), transparent 45%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+
+.education-section-muted {
+  background: linear-gradient(180deg, hsl(var(--edu-cloud)), #fff);
+}
+
+.education-layout .education-section:nth-of-type(even) {
+  background: linear-gradient(180deg, #fff, hsl(var(--edu-sand)));
+}
+
+.education-card {
+  position: relative;
+  border-radius: 1.75rem;
+  border: 1px solid hsl(var(--edu-border) / 0.9);
+  background: linear-gradient(140deg, hsl(var(--edu-cloud)), #fff);
+  box-shadow: 0 20px 40px hsla(221 27% 30% / 0.08);
+}
+
+.education-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at top right, hsl(var(--edu-amber) / 0.25), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.education-card:hover::before {
+  opacity: 1;
+}
+
+.education-card .icon-badge {
+  background: linear-gradient(145deg, hsl(var(--edu-amber) / 0.15), hsl(var(--edu-emerald) / 0.15));
+  border: 1px solid hsl(var(--edu-border) / 0.6);
+}
+
+.education-hero[data-theme="amber"] {
+  --hero-start: hsl(24 92% 46% / 0.95);
+  --hero-end: hsl(12 84% 32% / 0.92);
+  --hero-accent-1: hsl(42 90% 60% / 0.22);
+  --hero-accent-2: hsl(8 80% 55% / 0.2);
+  --hero-glow: hsl(28 96% 68% / 0.35);
+}
+
+.education-hero[data-theme="emerald"] {
+  --hero-start: hsl(156 61% 32% / 0.95);
+  --hero-end: hsl(183 47% 27% / 0.92);
+  --hero-accent-1: hsl(165 80% 45% / 0.22);
+  --hero-accent-2: hsl(199 82% 62% / 0.2);
+  --hero-glow: hsl(166 82% 58% / 0.35);
+}
+
+.education-hero[data-theme="violet"] {
+  --hero-start: hsl(264 64% 40% / 0.95);
+  --hero-end: hsl(292 62% 32% / 0.92);
+  --hero-accent-1: hsl(289 83% 65% / 0.22);
+  --hero-accent-2: hsl(249 79% 70% / 0.2);
+  --hero-glow: hsl(284 83% 72% / 0.35);
+}
+
+.education-hero[data-theme="slate"] {
+  --hero-start: hsl(215 24% 22% / 0.95);
+  --hero-end: hsl(226 31% 14% / 0.92);
+  --hero-accent-1: hsl(200 30% 45% / 0.2);
+  --hero-accent-2: hsl(260 30% 35% / 0.18);
+  --hero-glow: hsl(210 36% 60% / 0.28);
+}
+
+.education-hero[data-theme="indigo"] {
+  --hero-start: hsl(var(--edu-navy) / 0.95);
+  --hero-end: hsl(var(--edu-indigo) / 0.9);
+  --hero-accent-1: hsl(var(--edu-amber) / 0.18);
+  --hero-accent-2: hsl(var(--edu-emerald) / 0.24);
+  --hero-glow: hsl(var(--edu-amber) / 0.4);
 }

@@ -12,11 +12,11 @@ export const JoinUsButton = ({ to = "/join", className = "", onClick }: JoinUsBu
     <Link
       to={to}
       onClick={onClick}
-      className={`group relative overflow-hidden border-2 cursor-pointer transition-all duration-500 ease-out 
+      className={`group relative overflow-hidden border-2 cursor-pointer transition-all duration-500 ease-out
                   shadow-md hover:shadow-indigo-500/30 hover:scale-[1.02] active:scale-95
-                  inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
-                  border-indigo-500/40 bg-gradient-to-br from-indigo-500/40 via-indigo-400/40 to-indigo-500/60
-                  self-center
+                  inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-md text-sm
+                  border-indigo-500/40 bg-gradient-to-br from-indigo-500/35 via-indigo-400/35 to-indigo-500/55
+                  self-center min-w-[110px]
                   ${className}`}
       style={{ height: 'fit-content', lineHeight: '1.5' }}
     >
@@ -29,8 +29,8 @@ export const JoinUsButton = ({ to = "/join", className = "", onClick }: JoinUsBu
       {/* Content */}
       <div className="relative z-10 flex items-center gap-2">
         {/* Icon */}
-        <div className="p-1.5 rounded-md bg-gradient-to-br from-indigo-500/50 to-indigo-400/30 backdrop-blur-sm group-hover:from-indigo-400/60 group-hover:to-indigo-500/40 transition-all duration-300">
-          <UserPlus className="w-4 h-4 text-white group-hover:text-white/90 transition-all duration-300 group-hover:scale-110 drop-shadow-lg" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-indigo-500/50 to-indigo-400/30 backdrop-blur-sm group-hover:from-indigo-400/60 group-hover:to-indigo-500/40 transition-all duration-300">
+          <UserPlus className="h-4 w-4 text-white group-hover:text-white/90 transition-all duration-300 group-hover:scale-110 drop-shadow-lg" />
         </div>
 
         {/* Text */}
