@@ -1,6 +1,7 @@
 import { ReactNode, useState } from "react";
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -141,14 +142,14 @@ const CgpaCalculator = () => {
   return (
     <EducationPageLayout
       title="CGPA Calculator"
-      description="Run precise GPA projections with live grade points and scenario planning."
+      description=""
       breadcrumbs={[
         { label: "Home", href: "/" },
         { label: "Education Hub" },
         { label: "CGPA Calculator" },
       ]}
       heroTheme="emerald"
-      heroImage="https://images.unsplash.com/photo-1498079022511-d15614cb1c02?auto=format&fit=crop&w=2000&q=80"
+      heroVideo="https://res.cloudinary.com/dsypclqxk/video/upload/v1756304053/consult_ss4dm2.mp4"
       heroStats={[
         { label: "Students tracking CGPA", value: "9,860" },
         { label: "Grade scales supported", value: "4" },
@@ -157,8 +158,8 @@ const CgpaCalculator = () => {
       ]}
       heroActions={
         <>
-          <Button variant="hero">Export summary</Button>
-          <Button variant="hero-outline">Sync with advisor</Button>
+          <HeroButton onClick={() => console.log("Export summary")}>Export summary</HeroButton>
+          <HeroButton onClick={() => console.log("Sync with advisor")}>Sync with advisor</HeroButton>
         </>
       }
     >
@@ -287,13 +288,11 @@ const CgpaCalculator = () => {
         </EducationSection>
 
         <div className="relative isolate overflow-hidden rounded-[24px] sm:rounded-[32px] md:rounded-[40px] lg:rounded-[56px] border border-white/10 shadow-[0_45px_120px_rgba(10,10,20,0.45)] mx-2 sm:mx-4 md:mx-0" data-animate="fade-up">
-          <video
+          <img
             className="absolute inset-0 h-full w-full object-cover"
-            src="https://res.cloudinary.com/dsypclqxk/video/upload/v1756304053/consult_ss4dm2.mp4"
-            autoPlay
-            playsInline
-            muted
-            loop
+            src="https://images.unsplash.com/photo-1498079022511-d15614cb1c02?auto=format&fit=crop&w=2000&q=80"
+            alt="Students collaborating"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-[#17141e]/85" />
           <EducationSection

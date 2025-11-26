@@ -1,6 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Button } from "@/components/ui/button";
 import {
   BookmarkCheck,
@@ -79,9 +80,9 @@ const StudyGuides = () => (
       { label: "Avg. Completion Rate", value: "86%" },
     ]}
     heroActions={
-      <Button className="h-11 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+      <HeroButton onClick={() => console.log("Browse editorial calendar")}>
         Browse editorial calendar
-      </Button>
+      </HeroButton>
     }
   >
     <div className="space-y-16">

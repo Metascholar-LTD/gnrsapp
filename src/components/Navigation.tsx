@@ -202,7 +202,6 @@ export const Navigation = () => {
                           <div className="col-lg-4">
                             <h6 className="mega-menu-section-title">Search & Discovery</h6>
                             <ul className="mega-menu-list">
-                              <li><Link to="/education/course-search" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-search me-2"></i>Course-Based Search</Link></li>
                               <li><Link to="/education/course-recommendations" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-lightbulb me-2"></i>Course Recommendation Engine</Link></li>
                               <li><Link to="/education/departmental-resources" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-building me-2"></i>Departmental Resources</Link></li>
                               <li><Link to="/education/research-tools" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-microscope me-2"></i>Integrated Research Tools</Link></li>
@@ -1067,9 +1066,6 @@ export const Navigation = () => {
                   </Link>
                   <Link to="/education/shs-bece-questions" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-book me-3"></i>SHS and BECE Past Questions
-                  </Link>
-                  <Link to="/education/course-search" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-search me-3"></i>Course-Based Search
                   </Link>
                   <Link to="/education/lecture-notes" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-book-open me-3"></i>Lecture Notes & E-learning

@@ -1,7 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { Button } from "@/components/ui/button";
+import { HeroButton } from "@/components/education/HeroButton";
 import {
   Link2,
   Briefcase,
@@ -50,14 +50,14 @@ const AlumniConnect = () => (
       { label: "Scholarships funded", value: "₵4.1m" },
     ]}
     heroActions={
-      <div className="flex flex-col gap-3">
-        <Button className="h-11 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+      <>
+        <HeroButton onClick={() => console.log("Become a mentor")}>
           Become a mentor
-        </Button>
-        <Button variant="outline" className="h-11 rounded-xl border-slate-300">
+        </HeroButton>
+        <HeroButton onClick={() => console.log("Submit alumni story")}>
           Submit alumni story
-        </Button>
-      </div>
+        </HeroButton>
+      </>
     }
   >
     <div className="space-y-16">

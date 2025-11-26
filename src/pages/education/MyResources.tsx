@@ -1,7 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { Button } from "@/components/ui/button";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Bookmark, Folder, Share, Cloud, Lock, Tag } from "lucide-react";
 
 const resourceFeatures: InfoCardItem[] = [
@@ -41,9 +41,9 @@ const MyResources = () => (
       { label: "Storage provided", value: "15GB" },
     ]}
     heroActions={
-      <Button className="h-11 rounded-xl bg-blue-600 text-white hover:bg-blue-500">
+      <HeroButton onClick={() => console.log("Organise my library")}>
         Organise my library
-      </Button>
+      </HeroButton>
     }
   >
     <div className="space-y-16">

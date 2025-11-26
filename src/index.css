@@ -269,17 +269,34 @@ All colors MUST be HSL.
 .education-hero {
   position: relative;
   overflow: hidden;
-  --hero-start: hsl(var(--edu-navy) / 0.95);
-  --hero-end: hsl(var(--edu-indigo) / 0.9);
-  --hero-accent-1: hsl(var(--edu-amber) / 0.18);
-  --hero-accent-2: hsl(var(--edu-emerald) / 0.24);
-  --hero-glow: hsl(var(--edu-amber) / 0.4);
-  background-image:
-    linear-gradient(135deg, var(--hero-start), var(--hero-end)),
-    var(--education-hero-image);
+  background-image: var(--education-hero-image);
   background-size: cover;
   background-position: center;
+  background-color: #020409;
   color: #fff;
+}
+
+.education-hero__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.education-hero__video-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(6, 9, 18, 0.35), transparent 55%),
+    radial-gradient(circle at 70% 20%, rgba(2, 3, 8, 0.28), transparent 60%),
+    rgba(4, 6, 12, 0.35);
+  mix-blend-mode: multiply;
+  pointer-events: none;
 }
 
 .education-hero::before,
@@ -291,14 +308,11 @@ All colors MUST be HSL.
 }
 
 .education-hero::before {
-  background: radial-gradient(circle at 20% 20%, var(--hero-accent-1), transparent 45%),
-              radial-gradient(circle at 80% 10%, var(--hero-accent-2), transparent 40%);
-  mix-blend-mode: screen;
+  background: rgba(2, 3, 8, 0.62);
 }
 
 .education-hero::after {
-  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 199h200v1H0zM0 149h200v1H0zM0 99h200v1H0zM0 49h200v1H0zM149 0v200h1V0zM99 0v200h1V0zM49 0v200h1V0z' fill='rgba(255,255,255,0.05)' fill-rule='evenodd'/%3E%3C/svg%3E");
-  opacity: 0.5;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.65));
 }
 
 .education-hero .hero-glow {
@@ -306,10 +320,53 @@ All colors MUST be HSL.
   inset: auto auto -120px 50%;
   width: 480px;
   height: 480px;
-  background: radial-gradient(circle, var(--hero-glow), transparent 60%);
+  background: radial-gradient(circle, rgba(15, 23, 42, 0.45), transparent 60%);
   filter: blur(40px);
   transform: translateX(-50%);
   opacity: 0.45;
+}
+
+.education-hero .hero-title-separator {
+  width: 100px;
+  height: 4px;
+  border-radius: 999px;
+  background-image: linear-gradient(120deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25));
+}
+
+/* Education Hero Button - Stable expanded state */
+.education-hero-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 140px;
+  height: 38px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition-duration: 0.2s;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
+  background-color: rgba(248, 249, 252, 0.95);
+  padding: 0 20px;
+}
+
+.education-hero-btn__text {
+  color: #0f172a;
+  font-size: 0.95em;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.education-hero-btn:hover {
+  box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.3);
+}
+
+.education-hero-btn:active {
+  transform: translate(2px, 2px);
 }
 
 .education-stat-card {
@@ -371,42 +428,6 @@ All colors MUST be HSL.
   border: 1px solid hsl(var(--edu-border) / 0.6);
 }
 
-.education-hero[data-theme="amber"] {
-  --hero-start: hsl(24 92% 46% / 0.95);
-  --hero-end: hsl(12 84% 32% / 0.92);
-  --hero-accent-1: hsl(42 90% 60% / 0.22);
-  --hero-accent-2: hsl(8 80% 55% / 0.2);
-  --hero-glow: hsl(28 96% 68% / 0.35);
-}
-
-.education-hero[data-theme="emerald"] {
-  --hero-start: hsl(156 61% 32% / 0.95);
-  --hero-end: hsl(183 47% 27% / 0.92);
-  --hero-accent-1: hsl(165 80% 45% / 0.22);
-  --hero-accent-2: hsl(199 82% 62% / 0.2);
-  --hero-glow: hsl(166 82% 58% / 0.35);
-}
-
-.education-hero[data-theme="violet"] {
-  --hero-start: hsl(264 64% 40% / 0.95);
-  --hero-end: hsl(292 62% 32% / 0.92);
-  --hero-accent-1: hsl(289 83% 65% / 0.22);
-  --hero-accent-2: hsl(249 79% 70% / 0.2);
-  --hero-glow: hsl(284 83% 72% / 0.35);
-}
-
-.education-hero[data-theme="slate"] {
-  --hero-start: hsl(215 24% 22% / 0.95);
-  --hero-end: hsl(226 31% 14% / 0.92);
-  --hero-accent-1: hsl(200 30% 45% / 0.2);
-  --hero-accent-2: hsl(260 30% 35% / 0.18);
-  --hero-glow: hsl(210 36% 60% / 0.28);
-}
-
-.education-hero[data-theme="indigo"] {
-  --hero-start: hsl(var(--edu-navy) / 0.95);
-  --hero-end: hsl(var(--edu-indigo) / 0.9);
-  --hero-accent-1: hsl(var(--edu-amber) / 0.18);
-  --hero-accent-2: hsl(var(--edu-emerald) / 0.24);
-  --hero-glow: hsl(var(--edu-amber) / 0.4);
+.education-hero[data-theme] {
+  /* theme attribute now only used for analytics hooks; colors remain consistent */
 }

@@ -1,7 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { Button } from "@/components/ui/button";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Megaphone, CalendarDays, AlertTriangle, ClipboardList, BellRing, Radio } from "lucide-react";
 
 const announcementTypes: InfoCardItem[] = [
@@ -41,14 +41,14 @@ const CampusAnnouncements = () => (
       { label: "Departments onboarded", value: "42" },
     ]}
     heroActions={
-      <div className="flex flex-col gap-3">
-        <Button className="h-11 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+      <>
+        <HeroButton onClick={() => console.log("Submit announcement")}>
           Submit announcement
-        </Button>
-        <Button variant="outline" className="h-11 rounded-xl border-slate-300">
+        </HeroButton>
+        <HeroButton onClick={() => console.log("View communications policy")}>
           View communications policy
-        </Button>
-      </div>
+        </HeroButton>
+      </>
     }
   >
     <div className="space-y-16">

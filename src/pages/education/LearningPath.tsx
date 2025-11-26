@@ -1,7 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { Button } from "@/components/ui/button";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Route, Map, Sparkles, Gauge, Target, ClipboardCheck } from "lucide-react";
 
 const pathFeatures: InfoCardItem[] = [
@@ -41,9 +41,9 @@ const LearningPath = () => (
       { label: "Industry-aligned goals", value: "48%" },
     ]}
     heroActions={
-      <Button className="h-11 rounded-xl bg-blue-600 text-white hover:bg-blue-500">
+      <HeroButton onClick={() => console.log("Design my roadmap")}>
         Design my roadmap
-      </Button>
+      </HeroButton>
     }
   >
     <div className="space-y-16">

@@ -1,7 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { Button } from "@/components/ui/button";
+import { HeroButton } from "@/components/education/HeroButton";
 import {
   Sparkles,
   UserCheck,
@@ -50,9 +50,7 @@ const CourseRecommendations = () => (
       { label: "Drop rate reduction", value: "31%" },
     ]}
     heroActions={
-      <Button className="h-11 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
-        Build my personalised plan
-      </Button>
+      <HeroButton onClick={() => console.log("Build my personalised plan")}>Build my personalised plan</HeroButton>
     }
   >
     <div className="space-y-16">

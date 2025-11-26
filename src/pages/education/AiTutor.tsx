@@ -1,6 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Button } from "@/components/ui/button";
 import {
   Bot,
@@ -49,9 +50,9 @@ const AiTutor = () => (
       { label: "Languages supported", value: "7" },
     ]}
     heroActions={
-      <Button className="h-11 rounded-xl bg-blue-600 text-white hover:bg-blue-500">
+      <HeroButton onClick={() => console.log("Launch tutor workspace")}>
         Launch tutor workspace
-      </Button>
+      </HeroButton>
     }
   >
     <div className="space-y-16">

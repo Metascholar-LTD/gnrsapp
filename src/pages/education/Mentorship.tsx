@@ -1,6 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Button } from "@/components/ui/button";
 import {
   HeartHandshake,
@@ -50,14 +51,14 @@ const Mentorship = () => (
       { label: "Mentor retention", value: "93%" },
     ]}
     heroActions={
-      <div className="flex flex-col gap-3">
-        <Button className="h-11 rounded-xl bg-blue-600 text-white hover:bg-blue-500">
+      <>
+        <HeroButton onClick={() => console.log("Apply as mentee")}>
           Apply as mentee
-        </Button>
-        <Button variant="outline" className="h-11 rounded-xl border-slate-300">
+        </HeroButton>
+        <HeroButton onClick={() => console.log("Volunteer as mentor")}>
           Volunteer as mentor
-        </Button>
-      </div>
+        </HeroButton>
+      </>
     }
   >
     <div className="space-y-16">

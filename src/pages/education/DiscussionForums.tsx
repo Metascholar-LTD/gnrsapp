@@ -1,6 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Button } from "@/components/ui/button";
 import {
   MessageCircle,
@@ -49,9 +50,9 @@ const DiscussionForums = () => (
       { label: "Average response time", value: "23 mins" },
     ]}
     heroActions={
-      <Button className="h-11 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+      <HeroButton onClick={() => console.log("Join a featured discussion")}>
         Join a featured discussion
-      </Button>
+      </HeroButton>
     }
   >
     <div className="space-y-16">

@@ -1,7 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { Button } from "@/components/ui/button";
+import { HeroButton } from "@/components/education/HeroButton";
 import {
   Users2,
   Timer,
@@ -49,14 +49,10 @@ const StudyGroups = () => (
       { label: "Peer-led sessions", value: "68%" },
     ]}
     heroActions={
-      <div className="flex flex-col gap-3">
-        <Button className="h-11 rounded-xl bg-blue-600 text-white hover:bg-blue-500">
-          Create a group
-        </Button>
-        <Button variant="outline" className="h-11 rounded-xl border-slate-300">
-          Find an open slot
-        </Button>
-      </div>
+      <>
+        <HeroButton onClick={() => console.log("Create a group")}>Create a group</HeroButton>
+        <HeroButton onClick={() => console.log("Find an open slot")}>Find an open slot</HeroButton>
+      </>
     }
   >
     <div className="space-y-16">

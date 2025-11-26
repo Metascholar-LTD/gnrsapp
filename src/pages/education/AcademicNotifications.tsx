@@ -1,7 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { Button } from "@/components/ui/button";
+import { HeroButton } from "@/components/education/HeroButton";
 import { Bell, Clock, CalendarCheck, PhoneCall, Inbox } from "lucide-react";
 
 const notificationModes: InfoCardItem[] = [
@@ -41,9 +41,9 @@ const AcademicNotifications = () => (
       { label: "Advisor interventions", value: "98% within 24h" },
     ]}
     heroActions={
-      <Button className="h-11 rounded-xl bg-slate-900 text-white hover:bg-slate-800">
+      <HeroButton onClick={() => console.log("Personalise notifications")}>
         Personalise notifications
-      </Button>
+      </HeroButton>
     }
   >
     <div className="space-y-16">

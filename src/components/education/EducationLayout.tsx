@@ -77,6 +77,8 @@ interface EducationPageLayoutProps {
   heroActions?: ReactNode;
   heroTheme?: HeroTheme;
   heroImage?: string;
+  heroVideo?: string;
+  heroVideoPoster?: string;
   children: ReactNode;
 }
 
@@ -92,6 +94,8 @@ export const EducationPageLayout = ({
   heroActions,
   heroTheme,
   heroImage,
+  heroVideo,
+  heroVideoPoster,
   children,
 }: EducationPageLayoutProps) => {
   const { theme: derivedTheme, signature } = deriveTheme(title, heroTheme);
@@ -114,10 +118,25 @@ export const EducationPageLayout = ({
         style={heroStyles}
         data-theme={derivedTheme}
       >
+        {heroVideo ? (
+          <>
+            <video
+              className="education-hero__video"
+              src={heroVideo}
+              poster={heroVideoPoster || chosenHero}
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-hidden="true"
+            />
+            <div className="education-hero__video-overlay" aria-hidden="true" />
+          </>
+        ) : null}
         <div className="hero-glow" aria-hidden="true" />
         <div className="container mx-auto px-4 relative z-10">
-          <Breadcrumb className="text-white/80">
-            <BreadcrumbList className="text-[11px] uppercase tracking-[0.35em] text-white/70">
+          <Breadcrumb className="text-white">
+            <BreadcrumbList className="text-[11px] uppercase tracking-[0.35em] text-white">
               {breadcrumbs.map((crumb, index) => {
                 const isLast = index === breadcrumbs.length - 1;
 
@@ -131,13 +150,13 @@ export const EducationPageLayout = ({
                       ) : isLast ? (
                         <BreadcrumbPage className="text-white">{crumb.label}</BreadcrumbPage>
                       ) : (
-                        <BreadcrumbLink className="hover:text-white" href={crumb.href || "#"}>
+                        <BreadcrumbLink className="hover:text-white text-white" href={crumb.href || "#"}>
                           {crumb.label}
                         </BreadcrumbLink>
                       )}
                     </BreadcrumbItem>
                     {!isLast ? (
-                      <BreadcrumbSeparator className="text-white/70">
+                      <BreadcrumbSeparator className="text-white">
                         <ChevronsRight className="h-3.5 w-3.5" />
                       </BreadcrumbSeparator>
                     ) : null}
@@ -148,14 +167,17 @@ export const EducationPageLayout = ({
           </Breadcrumb>
 
           <div className="mt-8 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-4xl space-y-5">
-              <p className="text-xs uppercase tracking-[0.4em] text-white/70">Education Hub</p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight">{title}</h1>
-              <p className="text-lg md:text-xl text-white/85 leading-relaxed">{description}</p>
+            <div className="max-w-4xl space-y-5 text-white">
+              <p className="text-xs uppercase tracking-[0.4em] text-white">Education Hub</p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight text-white">
+                {title}
+              </h1>
+              <div className="hero-title-separator" aria-hidden="true" />
+              <p className="text-lg md:text-xl text-white leading-relaxed">{description}</p>
             </div>
 
             {heroActions && (
-              <div className="flex flex-col gap-3 rounded-2xl border border-white/20 bg-white/5 p-4 backdrop-blur">
+              <div className="flex flex-col gap-3">
                 {heroActions}
               </div>
             )}
@@ -164,11 +186,11 @@ export const EducationPageLayout = ({
           {heroStats && heroStats.length > 0 && (
             <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {heroStats.map((stat) => (
-                <div key={stat.label} className="education-stat-card px-6 py-5">
-                  <p className="text-[11px] uppercase tracking-[0.35em] text-white/60">
+                <div key={stat.label} className="education-stat-card px-6 py-5 text-white">
+                  <p className="text-[11px] uppercase tracking-[0.35em] text-white">
                     {stat.label}
                   </p>
-                  <p className="text-3xl font-semibold mt-2">{stat.value}</p>
+                  <p className="text-3xl font-semibold mt-2 text-white">{stat.value}</p>
                 </div>
               ))}
             </div>

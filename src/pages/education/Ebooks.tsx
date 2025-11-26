@@ -1,7 +1,7 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { Button } from "@/components/ui/button";
+import { HeroButton } from "@/components/education/HeroButton";
 import {
   Library,
   Globe,
@@ -67,7 +67,7 @@ const accessModels = [
 const Ebooks = () => (
   <EducationPageLayout
     title="E-books & Training Resources"
-    description="A premium, rights-cleared digital library that combines Elsevier-grade scientific texts with Udemy-style learning aids."
+    description=""
     breadcrumbs={[
       { label: "Home", href: "/" },
       { label: "Education Hub" },
@@ -80,14 +80,10 @@ const Ebooks = () => (
       { label: "Faculty curated lists", value: "132" },
     ]}
     heroActions={
-      <div className="flex flex-col gap-3">
-        <Button className="h-11 rounded-xl bg-blue-600 text-white hover:bg-blue-500">
-          Launch library portal
-        </Button>
-        <Button variant="outline" className="h-11 rounded-xl border-slate-300">
-          Request institutional license
-        </Button>
-      </div>
+      <>
+        <HeroButton onClick={() => console.log("Launch library portal")}>Launch library portal</HeroButton>
+        <HeroButton onClick={() => console.log("Request institutional license")}>Request institutional license</HeroButton>
+      </>
     }
   >
     <div className="space-y-16">
