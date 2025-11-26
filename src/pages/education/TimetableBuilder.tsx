@@ -2,7 +2,6 @@ import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
 import { HeroButton } from "@/components/education/HeroButton";
-import { Button } from "@/components/ui/button";
 import {
   Calendar,
   Layers,
@@ -50,9 +49,7 @@ const TimetableBuilder = () => (
       { label: "Shared planners", value: "2,360" },
     ]}
     heroActions={
-      <HeroButton onClick={() => console.log("Launch builder")}>
-        Launch builder
-      </HeroButton>
+      <HeroButton onClick={() => console.log("Launch builder")}>Launch builder</HeroButton>
     }
   >
     <div className="space-y-16">

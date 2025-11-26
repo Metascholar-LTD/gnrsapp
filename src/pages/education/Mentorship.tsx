@@ -2,7 +2,6 @@ import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
 import { HeroButton } from "@/components/education/HeroButton";
-import { Button } from "@/components/ui/button";
 import {
   HeartHandshake,
   BookOpen,
@@ -52,12 +51,8 @@ const Mentorship = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Apply as mentee")}>
-          Apply as mentee
-        </HeroButton>
-        <HeroButton onClick={() => console.log("Volunteer as mentor")}>
-          Volunteer as mentor
-        </HeroButton>
+        <HeroButton onClick={() => console.log("Apply as mentee")}>Apply as mentee</HeroButton>
+        <HeroButton onClick={() => console.log("Volunteer as mentor")}>Volunteer as mentor</HeroButton>
       </>
     }
   >

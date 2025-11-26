@@ -69,12 +69,8 @@ const ResearchTools = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Request research workspace")}>
-          Request research workspace
-        </HeroButton>
-        <HeroButton onClick={() => console.log("Schedule onboarding call")}>
-          Schedule onboarding call
-        </HeroButton>
+        <HeroButton onClick={() => console.log("Request research workspace")}>Request research workspace</HeroButton>
+        <HeroButton onClick={() => console.log("Schedule onboarding call")}>Schedule onboarding call</HeroButton>
       </>
     }
   >

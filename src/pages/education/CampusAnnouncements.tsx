@@ -42,12 +42,8 @@ const CampusAnnouncements = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Submit announcement")}>
-          Submit announcement
-        </HeroButton>
-        <HeroButton onClick={() => console.log("View communications policy")}>
-          View communications policy
-        </HeroButton>
+        <HeroButton onClick={() => console.log("Submit announcement")}>Submit announcement</HeroButton>
+        <HeroButton onClick={() => console.log("View communications policy")}>View communications policy</HeroButton>
       </>
     }
   >

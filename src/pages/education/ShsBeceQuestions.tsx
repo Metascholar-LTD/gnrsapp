@@ -2,7 +2,6 @@ import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
 import { HeroButton } from "@/components/education/HeroButton";
-import { Button } from "@/components/ui/button";
 import {
   BookOpenCheck,
   Calculator,
@@ -101,12 +100,8 @@ const ShsBeceQuestions = () => {
       ]}
       heroActions={
         <>
-          <HeroButton onClick={() => console.log("Download latest master pack")}>
-            Download latest master pack
-          </HeroButton>
-          <HeroButton onClick={() => console.log("View marking schemes")}>
-            View marking schemes
-          </HeroButton>
+          <HeroButton onClick={() => console.log("Download latest master pack")}>Download latest master pack</HeroButton>
+          <HeroButton onClick={() => console.log("View marking schemes")}>View marking schemes</HeroButton>
         </>
       }
     >
