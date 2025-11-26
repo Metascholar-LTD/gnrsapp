@@ -10,8 +10,9 @@ import NotFound from "./pages/NotFound";
 import PastQuestions from "./pages/PastQuestions";
 import LectureNotes from "./pages/LectureNotes";
 import TrialQuestions from "./pages/TrialQuestions";
-import ScholarshipHub from "./pages/Scholarship-Hub";
-import ScholarshipView from "./pages/ScholarshipView";
+import ScholarshipHub from "./pages/scholarship/ScholarshipHub";
+import ScholarshipView from "./pages/scholarship/ScholarshipView";
+import FieldBasedScholarships from "./pages/scholarship/FieldBasedScholarships";
 import BrowseJobs from "./pages/BrowseJobs";
 import AllJobs from "./pages/AllJobs";
 import JobDetails from "./pages/JobDetails";
@@ -73,6 +74,7 @@ const App = () => (
           <Route path="/education/ai-tutor" element={<AiTutor />} />
           <Route path="/education/my-resources" element={<MyResources />} />
           <Route path="/education/learning-path" element={<LearningPath />} />
+          <Route path="/scholarship-hub/field-based" element={<FieldBasedScholarships />} />
           <Route path="/scholarship-hub" element={<ScholarshipHub />} />
           <Route path="/scholarship/:id" element={<ScholarshipView />} />
           <Route path="/jobs/browse" element={<BrowseJobs />} />
