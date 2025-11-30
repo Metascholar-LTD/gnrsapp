@@ -336,7 +336,6 @@ export const Navigation = () => {
                             <ul className="mega-menu-list">
                               <li><Link to="/scholarship-hub" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-globe me-2"></i>Global Scholarships Bank</Link></li>
                               <li><Link to="/scholarship-hub/field-based" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-tags me-2"></i>Field-Based Scholarships</Link></li>
-                              <li><Link to="/scholarship-hub/verified" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-check-circle me-2"></i>Verified Scholarships Only</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
@@ -1157,9 +1156,6 @@ export const Navigation = () => {
                     </Link>
                   <Link to="/scholarship-hub/field-based" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-tags me-3"></i>Field-Based Scholarships
-                  </Link>
-                  <Link to="/scholarship-hub/verified" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-check-circle me-3"></i>Verified Scholarships Only
                   </Link>
                 </div>
                 <div className="mobile-dropdown-section">
