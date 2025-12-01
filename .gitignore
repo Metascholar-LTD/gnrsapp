@@ -22,8 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-/Finanza
 /meta-consult
-/AI-html-1.0.0
-/coffee-master
-/wefind_final
+/Resume_Builder
