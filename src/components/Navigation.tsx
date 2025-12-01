@@ -460,7 +460,6 @@ export const Navigation = () => {
                               <li><Link to="/jobs/cv-builder" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-file-alt me-2"></i>Smart CV Builder</Link></li>
                               <li><Link to="/jobs/cover-letter" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-envelope me-2"></i>Cover Letter Generator</Link></li>
                               <li><Link to="/jobs/ai-interview" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-robot me-2"></i>AI Interview Assistant</Link></li>
-                              <li><Link to="/jobs/application-tracker" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-clipboard-list me-2"></i>Job Application Tracker</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
@@ -1201,9 +1200,6 @@ export const Navigation = () => {
                   </Link>
                   <Link to="/jobs/career-pathfinder" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-route me-3"></i>Career Pathfinder Tool
-                  </Link>
-                  <Link to="/jobs/application-tracker" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-clipboard-list me-3"></i>Job Application Tracker
                   </Link>
                   <Link to="/jobs/saved-jobs" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-bookmark me-3"></i>Saved Jobs & Recommendations
