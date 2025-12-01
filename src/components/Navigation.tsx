@@ -409,7 +409,6 @@ export const Navigation = () => {
                           <div className="col-lg-12">
                             <h6 className="mega-menu-section-title">Application Tools & Resources</h6>
                             <ul className="mega-menu-list">
-                              <li><Link to="/scholarship-hub/alerts" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-bell me-2"></i>Scholarship Alerts</Link></li>
                               <li><Link to="/scholarship-hub/essay-builder" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-file-alt me-2"></i>Essay/SoP Builder</Link></li>
                               <li><Link to="/scholarship-hub/saved" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-bookmark me-2"></i>My Saved Scholarships</Link></li>
                             </ul>
@@ -1187,9 +1186,6 @@ export const Navigation = () => {
                 </div>
                 <div className="mobile-dropdown-section">
                   <div className="mobile-dropdown-section-title">Scholarship Tools</div>
-                  <Link to="/scholarship-hub/alerts" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-bell me-3"></i>Scholarship Alerts
-                  </Link>
                   <Link to="/scholarship-hub/essay-builder" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-file-alt me-3"></i>Essay/SoP Builder
                   </Link>

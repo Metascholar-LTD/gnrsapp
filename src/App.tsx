@@ -16,6 +16,7 @@ import FieldBasedScholarships from "./pages/scholarship/FieldBasedScholarships";
 import GetFundScholarships from "./pages/scholarship/GetFundScholarships";
 import GnpcScholarships from "./pages/scholarship/GnpcScholarships";
 import MtnScholarships from "./pages/scholarship/MtnScholarships";
+import OtherLocalScholarships from "./pages/scholarship/OtherLocalScholarships";
 import BrowseJobs from "./pages/BrowseJobs";
 import AllJobs from "./pages/AllJobs";
 import JobDetails from "./pages/JobDetails";
@@ -81,6 +82,7 @@ const App = () => (
           <Route path="/scholarship-hub/getfund" element={<GetFundScholarships />} />
           <Route path="/scholarship-hub/gnpc" element={<GnpcScholarships />} />
           <Route path="/scholarship-hub/mtn" element={<MtnScholarships />} />
+          <Route path="/scholarship-hub/other-local" element={<OtherLocalScholarships />} />
           <Route path="/scholarship-hub" element={<ScholarshipHub />} />
           <Route path="/scholarship/:id" element={<ScholarshipView />} />
           <Route path="/jobs/browse" element={<BrowseJobs />} />
