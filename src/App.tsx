@@ -21,6 +21,10 @@ import BrowseJobs from "./pages/BrowseJobs";
 import AllJobs from "./pages/AllJobs";
 import JobDetails from "./pages/JobDetails";
 import CompanyDetails from "./pages/CompanyDetails";
+import InternshipListings from "./pages/jobs/InternshipListings";
+import NationalServiceSupport from "./pages/jobs/NationalServiceSupport";
+import GraduateRecruitment from "./pages/jobs/GraduateRecruitment";
+import YouthEmploymentAgency from "./pages/jobs/YouthEmploymentAgency";
 import ShsBeceQuestions from "./pages/education/ShsBeceQuestions";
 import StudyGuides from "./pages/education/StudyGuides";
 import Ebooks from "./pages/education/Ebooks";
@@ -87,6 +91,10 @@ const App = () => (
           <Route path="/scholarship/:id" element={<ScholarshipView />} />
           <Route path="/jobs/browse" element={<BrowseJobs />} />
           <Route path="/jobs/all" element={<AllJobs />} />
+          <Route path="/jobs/internships" element={<InternshipListings />} />
+          <Route path="/jobs/nss" element={<NationalServiceSupport />} />
+          <Route path="/jobs/graduate-recruitment" element={<GraduateRecruitment />} />
+          <Route path="/jobs/yea-jobs" element={<YouthEmploymentAgency />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/companies/:name" element={<CompanyDetails />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
