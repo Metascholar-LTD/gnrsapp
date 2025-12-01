@@ -343,11 +343,6 @@ const YouthEmploymentAgency = () => {
                     alt={program.title}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <div className="absolute top-2 left-2">
-                    <div className={`w-10 h-10 rounded-lg ${program.color} flex items-center justify-center text-xl shadow-sm`}>
-                      {program.icon}
-                    </div>
-                  </div>
                 </div>
 
                 {/* Content Section - Tight Spacing */}

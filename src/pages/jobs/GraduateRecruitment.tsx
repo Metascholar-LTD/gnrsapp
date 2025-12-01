@@ -312,12 +312,6 @@ const GraduateRecruitment = () => {
                     alt={program.title}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <div className="absolute top-2 left-2">
-                    <Badge className="bg-amber-500 text-white font-semibold text-[10px] px-2 py-0.5 rounded-full">
-                      <Sparkles className="w-2.5 h-2.5 mr-1" />
-                      FEATURED
-                    </Badge>
-                  </div>
                 </div>
 
                 {/* Content Section - Tight Spacing */}

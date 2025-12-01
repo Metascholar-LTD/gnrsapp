@@ -465,7 +465,6 @@ export const Navigation = () => {
                           <div className="col-lg-4">
                             <h6 className="mega-menu-section-title">Career Growth</h6>
                             <ul className="mega-menu-list">
-                              <li><Link to="/jobs/career-pathfinder" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-route me-2"></i>Career Pathfinder Tool</Link></li>
                               <li><Link to="/jobs/skill-assessment" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-clipboard-check me-2"></i>Skill Assessment Tests</Link></li>
                               <li><Link to="/jobs/career-resources" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-book me-2"></i>Career Resources</Link></li>
                               <li><Link to="/jobs/professional-development" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-chart-line me-2"></i>Professional Development</Link></li>
@@ -1197,9 +1196,6 @@ export const Navigation = () => {
                   </Link>
                   <Link to="/jobs/ai-interview" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-robot me-3"></i>AI Interview Assistant
-                  </Link>
-                  <Link to="/jobs/career-pathfinder" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-route me-3"></i>Career Pathfinder Tool
                   </Link>
                   <Link to="/jobs/saved-jobs" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-bookmark me-3"></i>Saved Jobs & Recommendations
