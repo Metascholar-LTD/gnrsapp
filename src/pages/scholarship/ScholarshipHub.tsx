@@ -6,6 +6,7 @@ import { Spinner } from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ScholarshipCard } from "@/components/ui/scholarship-card";
 import { 
   Search, 
   Filter,
@@ -23,7 +24,10 @@ import {
   BookOpen,
   Globe,
   Clock,
-  FileText
+  FileText,
+  Sparkles,
+  Globe2,
+  Briefcase
 } from "lucide-react";
 import {
   Select,
@@ -55,6 +59,18 @@ interface Scholarship {
   verified: boolean;
   imageUrl?: string;
   featured: boolean;
+  source?: string; // "mtn", "getfund", "gnpc", "other-local", "field-based"
+  fieldOfStudy?: string[];
+  // For Other Local Scholarships
+  type?: string;
+  tag?: string;
+  bullets?: string[];
+  statusNote?: string;
+  // For GETFund
+  color?: string;
+  // For GNPC
+  keyPoints?: string[];
+  route?: string;
 }
 
 interface Testimonial {
@@ -73,6 +89,7 @@ const ScholarshipHub = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   // Statistics refs for counter animation
@@ -80,8 +97,244 @@ const ScholarshipHub = () => {
   const isStatsInView = useInView(statsRef, { once: true, margin: "-100px" });
   const [counters, setCounters] = useState({ scholarships: 0, students: 0, awarded: 0, countries: 0 });
 
-  // Mock scholarships data
-  const scholarships: Scholarship[] = [
+  // All scholarships from all pages - Global Scholarship Bank
+  const allScholarships: Scholarship[] = [
+    // MTN Scholarships (1)
+    {
+      id: "mtn-bright-scholarship",
+      title: "MTN Ghana Foundation Bright Scholarship",
+      provider: "MTN Ghana Foundation",
+      amount: "Tuition & Academic Support",
+      currency: "GHS",
+      category: "Need-Based",
+      deadline: "2025-05-31",
+      location: "Ghana",
+      level: "Undergraduate & TVET",
+      description: "Bright Scholarship from MTN Ghana Foundation supports brilliant but needy Ghanaians studying first-degree programmes and technical/vocational skills training at public tertiary institutions.",
+      requirements: ["First-year or continuing student", "Ghanaian citizen, brilliant but needy", "Good conduct, strong academic performance"],
+      verified: true,
+      featured: true,
+      source: "mtn",
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1764597983/compressed_young-man-dressed-yellow-holding-phone-coffee-cup_puiiii.jpg"
+    },
+    // GETFund Scholarships (3)
+    {
+      id: "getfund-local-undergraduate",
+      title: "Local Undergraduate Scholarship Application",
+      provider: "Ghana Education Trust Fund",
+      amount: "Varies",
+      currency: "GHS",
+      category: "Need-Based",
+      deadline: "2024-05-15",
+      location: "Ghana",
+      level: "Undergraduate",
+      description: "Support for Ghana-based undergraduate studies at accredited public tertiary institutions.",
+      requirements: ["Ghanaian citizenship", "Admission to accredited university", "Financial need"],
+      verified: true,
+      featured: true,
+      source: "getfund",
+      color: "from-[#fef4e6] to-[#fde3c2]",
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
+    },
+    {
+      id: "getfund-local-postgraduate",
+      title: "Local Postgraduate Scholarship Application",
+      provider: "Ghana Education Trust Fund",
+      amount: "Varies",
+      currency: "GHS",
+      category: "Need-Based",
+      deadline: "2024-05-15",
+      location: "Ghana",
+      level: "Graduate",
+      description: "Funding for postgraduate studies (Masters, PhD and professional programmes) within Ghana.",
+      requirements: ["Ghanaian citizenship", "Admission to accredited university", "Financial need"],
+      verified: true,
+      featured: true,
+      source: "getfund",
+      color: "from-[#fef3ff] to-[#f5e5ff]",
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763129777/portrait-student-wearing-medical-mask_gokjyh.jpg"
+    },
+    {
+      id: "getfund-foreign-postgraduate",
+      title: "Foreign Postgraduate Scholarship Application",
+      provider: "Ghana Education Trust Fund",
+      amount: "Varies",
+      currency: "USD",
+      category: "Merit-Based",
+      deadline: "2024-05-15",
+      location: "Foreign",
+      level: "Graduate",
+      description: "Limited funding support for postgraduate studies in accredited foreign universities.",
+      requirements: ["Ghanaian citizenship", "Admission to foreign university", "Academic excellence"],
+      verified: true,
+      featured: true,
+      source: "getfund",
+      color: "from-[#e9f5ff] to-[#d8ecff]",
+      imageUrl: "https://images.unsplash.com/photo-1529074963764-98f45c47344b?q=80&w=1600&auto=format&fit=crop"
+    },
+    // GNPC Scholarships (4)
+    {
+      id: "gnpc-local-undergraduate",
+      title: "Local Undergraduate Scholarship",
+      provider: "GNPC Foundation",
+      amount: "Tuition & Stipend",
+      currency: "GHS",
+      category: "Need-Based",
+      deadline: "2024-11-30",
+      location: "Ghana",
+      level: "Undergraduate",
+      description: "Supports Ghanaian undergraduates admitted into accredited public tertiary institutions who demonstrate academic promise and financial need.",
+      requirements: ["Ghanaian citizens with admission to a GTEC-accredited institution", "First-year or continuing students with minimum GPA 2.0"],
+      verified: true,
+      featured: true,
+      source: "gnpc",
+      keyPoints: ["Ghanaian citizens with admission to a GTEC-accredited institution", "First-year or continuing students with minimum GPA 2.0"],
+      route: "/scholarship/gnpc-local-undergraduate",
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
+    },
+    {
+      id: "gnpc-local-postgraduate",
+      title: "Local Postgraduate Scholarship",
+      provider: "GNPC Foundation",
+      amount: "Tuition & Research Support",
+      currency: "GHS",
+      category: "Merit & Need-Based",
+      deadline: "2024-12-10",
+      location: "Ghana",
+      level: "Postgraduate",
+      description: "Targets graduates with at least Second Class Lower who have secured admission into postgraduate programmes in Ghana.",
+      requirements: ["Ghanaian citizenship", "Admission into a postgraduate programme", "At least Second Class Lower Division"],
+      verified: true,
+      featured: true,
+      source: "gnpc",
+      keyPoints: ["Ghanaian citizenship and admission to public or private tertiary institution in Ghana", "At least Second Class Lower in first degree"],
+      route: "/scholarship/gnpc-local-postgraduate",
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763129777/portrait-student-wearing-medical-mask_gokjyh.jpg"
+    },
+    {
+      id: "gnpc-foreign-postgraduate",
+      title: "Foreign Postgraduate Scholarship",
+      provider: "GNPC Foundation",
+      amount: "Tuition & Stipend (Varies)",
+      currency: "USD",
+      category: "Merit-Based",
+      deadline: "2024-12-31",
+      location: "Foreign",
+      level: "Postgraduate",
+      description: "Provides competitive support for Ghanaians admitted into relevant Masters and PhD programmes abroad, especially in STEM and strategic areas.",
+      requirements: ["Ghanaian citizenship", "Admission offer from a recognised foreign university", "At least Second Class Lower Division"],
+      verified: true,
+      featured: true,
+      source: "gnpc",
+      keyPoints: ["Admission offer from a recognised foreign tertiary institution", "Second Class Lower (Masters) or relevant postgraduate degree (PhD)"],
+      route: "/scholarship/gnpc-foreign-postgraduate",
+      imageUrl: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=1600&auto=format&fit=crop"
+    },
+    {
+      id: "gnpc-capacity-building",
+      title: "Capacity Building & Professional Development",
+      provider: "GNPC Foundation",
+      amount: "Varies",
+      currency: "GHS",
+      category: "Professional Development",
+      deadline: "2024-12-31",
+      location: "Ghana",
+      level: "Professional",
+      description: "Short-term programmes and certifications to deepen expertise for public servants and professionals supporting the energy sector and wider economy.",
+      requirements: ["Public servants and professionals", "Skills upgrade needs", "Aligned with national development"],
+      verified: true,
+      featured: false,
+      source: "gnpc",
+      keyPoints: ["Structured for knowledge and skills upgrade", "Focus on public servants and key sector professionals"],
+      route: "/scholarship/gnpc-capacity-building",
+      imageUrl: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1600&auto=format&fit=crop"
+    },
+    // Other Local Scholarships (4) - Ghana Scholarships Secretariat
+    {
+      id: "national-merit",
+      title: "National Merit Scholarships",
+      provider: "Ghana Scholarships Secretariat",
+      amount: "Varies",
+      currency: "GHS",
+      category: "Merit & Need-Based",
+      deadline: "2024-12-31",
+      location: "Ghana · All Regions",
+      level: "Undergraduate",
+      description: "Core national scholarship awards for brilliant but needy Ghanaians at the tertiary level. Focused on academic excellence, leadership potential and equity across districts.",
+      requirements: ["High-performing students from SHS into tertiary", "Accredited public and private institutions"],
+      verified: true,
+      featured: true,
+      source: "other-local",
+      type: "Local | Merit & Need-Based",
+      tag: "For top-performing Ghanaian students",
+      bullets: ["Targets high-performing students from SHS into tertiary", "Supports students in accredited public and private institutions", "Considers both academic records and financial need", "Aligns with Ghana's long-term human capital development goals"],
+      statusNote: "Announced periodically by the Ghana Scholarships Secretariat.",
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
+    },
+    {
+      id: "local-tertiary",
+      title: "Local Tertiary Scholarships",
+      provider: "Ghana Scholarships Secretariat",
+      amount: "Varies",
+      currency: "GHS",
+      category: "Need-Based",
+      deadline: "2024-05-15",
+      location: "Universities, Technical Universities, Colleges",
+      level: "Undergraduate",
+      description: "Covers tuition and approved academic-related costs for students attending accredited tertiary institutions within Ghana.",
+      requirements: ["Open to students in NAB / GTEC accredited institutions", "Continuing & fresh students apply within specific annual windows"],
+      verified: true,
+      featured: true,
+      source: "other-local",
+      type: "Local | Tertiary",
+      tag: "Study within Ghana",
+      bullets: ["Open to students in NAB / GTEC accredited institutions", "Includes universities, technical universities and polytechnics", "Also covers nursing, teacher training and agriculture colleges", "Continuing & fresh students apply within specific annual windows"],
+      statusNote: "Continuing students: 1 April – 15 May · Late-admitted new students: 1–30 September (per official schedule).",
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg"
+    },
+    {
+      id: "district-level",
+      title: "District-Level Scholarships",
+      provider: "Ghana Scholarships Secretariat",
+      amount: "Varies",
+      currency: "GHS",
+      category: "Need-Based",
+      deadline: "2024-12-31",
+      location: "District Scholarship Committees",
+      level: "Undergraduate",
+      description: "A decentralised scholarship system where applicants are vetted, interviewed and selected at the district level to ensure fairness and inclusion.",
+      requirements: ["Applications tied to your district of residence or schooling", "District panels conduct interviews and shortlisting"],
+      verified: true,
+      featured: true,
+      source: "other-local",
+      type: "Local | District-Managed",
+      tag: "Decentralised support",
+      bullets: ["Applications tied to your district of residence or schooling", "District panels conduct interviews and shortlisting", "Details verified directly with your institution", "Designed to spread opportunity beyond major cities"],
+      statusNote: "Applicants complete online processes and appear before district interview panels.",
+      imageUrl: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1600&auto=format&fit=crop"
+    },
+    {
+      id: "foreign-tertiary",
+      title: "Foreign Tertiary Scholarships",
+      provider: "Ghana Scholarships Secretariat",
+      amount: "Varies",
+      currency: "USD",
+      category: "Merit-Based",
+      deadline: "2024-12-31",
+      location: "Partner Countries & Institutions",
+      level: "Graduate",
+      description: "Scholarship offers received under Bilateral Cooperation Agreements for Ghanaian students to pursue undergraduate and postgraduate studies abroad.",
+      requirements: ["Managed in partnership with Ministry of Foreign Affairs & Regional Integration", "Includes interviews and committee-based selection"],
+      verified: true,
+      featured: true,
+      source: "other-local",
+      type: "Foreign | Bilateral & Competitive",
+      tag: "Study abroad, return to lead",
+      bullets: ["Managed in partnership with Ministry of Foreign Affairs & Regional Integration", "Publicity via Scholarships Secretariat website and national media", "Includes interviews and committee-based selection", "Awarding country gives final approval and issues offers"],
+      statusNote: "Calls are published on the official Scholarships Secretariat website when available.",
+      imageUrl: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=1600&auto=format&fit=crop"
+    },
+    // Field-Based Scholarships (from FieldBasedScholarships page)
     { 
       id: "1", 
       title: "Mastercard Foundation Scholars Program", 
@@ -96,23 +349,9 @@ const ScholarshipHub = () => {
       requirements: ["Minimum GPA 3.5", "Financial need", "Leadership potential"],
       verified: true,
       featured: true,
+      source: "field-based",
+      fieldOfStudy: ["Engineering & Technology", "Health Sciences & Medicine", "Business & Economics", "Agriculture & Environmental Sciences", "Education", "Social Sciences"],
       imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg"
-    },
-    { 
-      id: "2", 
-      title: "Ghana Education Trust Fund (GETFund)", 
-      provider: "Government of Ghana",
-      amount: "50000",
-      currency: "GHS",
-      category: "Need-Based",
-      deadline: "2024-11-15",
-      location: "Ghana",
-      level: "Graduate",
-      description: "Government scholarship for Ghanaian students pursuing higher education.",
-      requirements: ["Ghanaian citizenship", "Admission to accredited university", "Financial need"],
-      verified: true,
-      featured: true,
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
     },
     { 
       id: "3", 
@@ -128,6 +367,8 @@ const ScholarshipHub = () => {
       requirements: ["2+ years work experience", "Bachelor's degree", "English proficiency"],
       verified: true,
       featured: true,
+      source: "field-based",
+      fieldOfStudy: ["Business & Economics", "Social Sciences", "Arts & Humanities", "Law & Legal Studies"],
       imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392704/portrait-young-woman-with-laptop-hands-outside-school_yktf28.jpg"
     },
     { 
@@ -144,6 +385,8 @@ const ScholarshipHub = () => {
       requirements: ["Bachelor's degree", "English proficiency", "Academic excellence"],
       verified: true,
       featured: false,
+      source: "field-based",
+      fieldOfStudy: ["All Fields"],
       imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392935/19234_tbfzs9.jpg"
     },
     { 
@@ -160,6 +403,8 @@ const ScholarshipHub = () => {
       requirements: ["Bachelor's degree", "Academic excellence", "Research proposal"],
       verified: true,
       featured: false,
+      source: "field-based",
+      fieldOfStudy: ["Engineering & Technology", "Natural Sciences", "Computer Science & IT"],
       imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg"
     },
     { 
@@ -176,6 +421,8 @@ const ScholarshipHub = () => {
       requirements: ["Commonwealth citizen", "Bachelor's degree", "Academic excellence"],
       verified: true,
       featured: false,
+      source: "field-based",
+      fieldOfStudy: ["Health Sciences & Medicine", "Education", "Social Sciences"],
       imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
     },
     { 
@@ -192,6 +439,8 @@ const ScholarshipHub = () => {
       requirements: ["Bachelor's degree", "Academic excellence", "Language proficiency"],
       verified: true,
       featured: false,
+      source: "field-based",
+      fieldOfStudy: ["Engineering & Technology", "Business & Economics", "Arts & Humanities"],
       imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392704/portrait-young-woman-with-laptop-hands-outside-school_yktf28.jpg"
     },
     { 
@@ -208,9 +457,86 @@ const ScholarshipHub = () => {
       requirements: ["French proficiency", "Bachelor's degree", "Academic excellence"],
       verified: true,
       featured: false,
+      source: "field-based",
+      fieldOfStudy: ["All Fields"],
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392935/19234_tbfzs9.jpg"
+    },
+    { 
+      id: "9", 
+      title: "Rhodes Scholarships", 
+      provider: "Rhodes Trust",
+      amount: "Full Coverage",
+      currency: "GBP",
+      category: "Merit-Based",
+      deadline: "2024-10-15",
+      location: "United Kingdom",
+      level: "Graduate",
+      description: "World's oldest and most prestigious international scholarship program.",
+      requirements: ["Academic excellence", "Leadership potential", "Service to others"],
+      verified: true,
+      featured: true,
+      source: "field-based",
+      fieldOfStudy: ["All Fields"],
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg"
+    },
+    { 
+      id: "10", 
+      title: "Gates Cambridge Scholarships", 
+      provider: "Bill & Melinda Gates Foundation",
+      amount: "Full Coverage",
+      currency: "GBP",
+      category: "Merit-Based",
+      deadline: "2024-10-11",
+      location: "United Kingdom",
+      level: "Graduate",
+      description: "Full-cost scholarships for outstanding applicants from outside the UK.",
+      requirements: ["Academic excellence", "Leadership potential", "Commitment to improving lives"],
+      verified: true,
+      featured: true,
+      source: "field-based",
+      fieldOfStudy: ["All Fields"],
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
+    },
+    { 
+      id: "11", 
+      title: "MIT-Africa Program", 
+      provider: "Massachusetts Institute of Technology",
+      amount: "Full Tuition",
+      currency: "USD",
+      category: "Merit-Based",
+      deadline: "2024-11-30",
+      location: "United States",
+      level: "Graduate",
+      description: "Scholarships for African students pursuing STEM fields at MIT.",
+      requirements: ["African citizenship", "STEM background", "Academic excellence"],
+      verified: true,
+      featured: false,
+      source: "field-based",
+      fieldOfStudy: ["Engineering & Technology", "Natural Sciences", "Computer Science & IT"],
+      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392704/portrait-young-woman-with-laptop-hands-outside-school_yktf28.jpg"
+    },
+    { 
+      id: "12", 
+      title: "WHO Scholarships for Health Sciences", 
+      provider: "World Health Organization",
+      amount: "Full Coverage",
+      currency: "USD",
+      category: "Merit-Based",
+      deadline: "2024-12-15",
+      location: "Global",
+      level: "Graduate",
+      description: "Scholarships for students pursuing public health and medical research.",
+      requirements: ["Health sciences background", "Commitment to public health", "Academic excellence"],
+      verified: true,
+      featured: false,
+      source: "field-based",
+      fieldOfStudy: ["Health Sciences & Medicine"],
       imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392935/19234_tbfzs9.jpg"
     },
   ];
+
+  // Use allScholarships as the main data source
+  const scholarships = allScholarships;
 
   const testimonials: Testimonial[] = [
     {
@@ -239,6 +565,14 @@ const ScholarshipHub = () => {
   const categories = Array.from(new Set(scholarships.map(s => s.category))).sort();
   const levels = Array.from(new Set(scholarships.map(s => s.level))).sort();
   const locations = Array.from(new Set(scholarships.map(s => s.location))).sort();
+  const sources = Array.from(new Set(scholarships.map(s => s.source).filter(Boolean))).sort();
+  const sourceNames: Record<string, string> = {
+    "mtn": "MTN Ghana Foundation",
+    "getfund": "Ghana Education Trust Fund",
+    "gnpc": "GNPC Foundation",
+    "other-local": "Ghana Scholarships Secretariat",
+    "field-based": "International & Field-Based"
+  };
 
   // Filtering logic
   const filteredScholarships = scholarships.filter(scholarship => {
@@ -250,8 +584,9 @@ const ScholarshipHub = () => {
     const matchesCategory = !selectedCategory || scholarship.category === selectedCategory;
     const matchesLevel = !selectedLevel || scholarship.level === selectedLevel;
     const matchesLocation = !selectedLocation || scholarship.location === selectedLocation;
+    const matchesSource = !selectedSource || scholarship.source === selectedSource;
     
-    return matchesSearch && matchesCategory && matchesLevel && matchesLocation;
+    return matchesSearch && matchesCategory && matchesLevel && matchesLocation && matchesSource;
   });
 
   const clearAllFilters = () => {
@@ -259,9 +594,10 @@ const ScholarshipHub = () => {
     setSelectedCategory(null);
     setSelectedLevel(null);
     setSelectedLocation(null);
+    setSelectedSource(null);
   };
 
-  const hasActiveFilters = selectedCategory || selectedLevel || selectedLocation;
+  const hasActiveFilters = selectedCategory || selectedLevel || selectedLocation || selectedSource;
 
   // Counter animation
   useEffect(() => {
@@ -283,7 +619,7 @@ const ScholarshipHub = () => {
         }, interval);
       };
 
-      animateCounter('scholarships', 250);
+      animateCounter('scholarships', allScholarships.length);
       animateCounter('students', 5000);
       animateCounter('awarded', 1200);
       animateCounter('countries', 45);
@@ -343,10 +679,10 @@ const ScholarshipHub = () => {
       >
         <div className="container mx-auto px-4 relative z-10">
           <DicedHeroSection
-            topText="Discover"
-            mainText="Scholarship Excellence"
-            subMainText="Unlock your potential with access to thousands of prestigious scholarship opportunities from around the world. From fully-funded Master's programs to undergraduate grants, discover the perfect funding solution for your academic journey and transform your educational dreams into reality."
-            buttonText="Explore Scholarships"
+            topText="Global Scholarship Bank"
+            mainText="All Scholarships in One Place"
+            subMainText="Comprehensive collection of all scholarship opportunities from MTN, GETFund, GNPC, Ghana Scholarships Secretariat, and international programs. Find the perfect funding solution for your academic journey."
+            buttonText="Browse All Scholarships"
             slides={[
               {
                 title: "International Students",
@@ -478,10 +814,10 @@ const ScholarshipHub = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900">
-                Featured Scholarship Opportunities
+                Global Scholarship Bank
               </h2>
               <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-                Discover the most prestigious and comprehensive scholarship programs available for students
+                All scholarships from all pages organized by provider. Each scholarship maintains its original card design.
               </p>
             </motion.div>
           </div>
@@ -584,6 +920,25 @@ const ScholarshipHub = () => {
                               </SelectContent>
                             </Select>
                           </div>
+
+                          <div>
+                            <label className="text-sm font-medium text-slate-700 mb-2 block">Provider/Source</label>
+                            <Select
+                              value={selectedSource || undefined}
+                              onValueChange={(value) => setSelectedSource(value || null)}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="All Providers" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {sources.map((src) => (
+                                  <SelectItem key={src} value={src}>
+                                    {sourceNames[src] || src}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
                     </PopoverContent>
@@ -630,6 +985,16 @@ const ScholarshipHub = () => {
                     />
                   </Badge>
                 )}
+                
+                {selectedSource && (
+                  <Badge className="px-3 py-1.5 flex items-center gap-2 bg-slate-700 text-white">
+                    {sourceNames[selectedSource] || selectedSource}
+                    <X 
+                      className="w-3 h-3 cursor-pointer" 
+                      onClick={() => setSelectedSource(null)}
+                    />
+                  </Badge>
+                )}
 
                 <Button 
                   variant="ghost" 
@@ -643,7 +1008,7 @@ const ScholarshipHub = () => {
             )}
           </div>
 
-          {/* Scholarships Grid */}
+          {/* Scholarships organized by source */}
           {filteredScholarships.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -667,127 +1032,155 @@ const ScholarshipHub = () => {
               </Button>
             </motion.div>
           ) : (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              {filteredScholarships.map((scholarship) => (
-                <motion.div
-                  key={scholarship.id}
-                  variants={cardVariants}
-                  whileHover={{ scale: 1.05, transition: { duration: 0.5 } }}
-                  className="group"
-                >
-                  <div 
-                    className="relative h-full overflow-hidden flex flex-col scholarship-card-alt group"
-                    style={{
-                      background: '#243137',
-                      borderRadius: '10px',
-                      transition: 'all 0.5s ease-in-out',
-                    }}
+            <div className="space-y-16">
+              {/* Group scholarships by source */}
+              {["mtn", "getfund", "gnpc", "other-local", "field-based"].map((source) => {
+                const sourceScholarships = filteredScholarships.filter(s => s.source === source);
+                if (sourceScholarships.length === 0) return null;
+
+                const sourceNames: Record<string, string> = {
+                  "mtn": "MTN Ghana Foundation",
+                  "getfund": "Ghana Education Trust Fund (GETFund)",
+                  "gnpc": "GNPC Foundation",
+                  "other-local": "Ghana Scholarships Secretariat",
+                  "field-based": "International & Field-Based Scholarships"
+                };
+
+                return (
+                  <motion.div
+                    key={source}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-6"
                   >
-                    {/* Animated Border */}
-                    <div 
-                      className="absolute inset-0 border-2 border-[#bd9f67] opacity-0 group-hover:opacity-100 group-hover:inset-[15px] transition-all duration-500 ease-in-out border-rotate"
-                    />
-
-                    {/* Image Section with Title Overlay */}
-                    {scholarship.imageUrl && (
-                      <div className="relative h-56 overflow-hidden">
-                        <motion.img
-                          src={scholarship.imageUrl}
-                          alt={scholarship.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#243137] via-[#243137]/80 to-[#243137]/40"></div>
-                        
-                        {/* Title and Provider Overlay */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-                          <h3 className="text-lg font-bold mb-1 text-white line-clamp-2 group-hover:text-[#bd9f67] transition-colors duration-500 drop-shadow-lg">
-                            {scholarship.title}
-                          </h3>
-                          <p className="text-xs text-[#bd9f67] font-medium drop-shadow-md">{scholarship.provider}</p>
-                        </div>
-                        
-                        {scholarship.verified && (
-                          <div className="absolute top-3 right-3 z-10">
-                            <div className="bg-[#243137]/90 backdrop-blur-sm rounded-full p-1 shadow-lg border border-[#bd9f67]">
-                              <CheckCircle2 className="w-5 h-5 text-[#bd9f67]" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Content Section */}
-                    <div className="px-5 pt-4 pb-5 flex flex-col flex-1 relative z-10">
-
-                      <div className="space-y-1.5 mb-3 flex-1">
-                        <div className="flex items-center gap-3 text-sm text-[#bd9f67]/90">
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="w-3.5 h-3.5 text-[#bd9f67]" />
-                            <span className="font-semibold text-white text-xs">
-                              {scholarship.amount} {scholarship.currency !== scholarship.amount && scholarship.currency}
-                            </span>
-                          </div>
-                          <span className="text-[#bd9f67]/60">•</span>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-3.5 h-3.5 text-[#bd9f67]" />
-                            <span className="text-white text-xs">{scholarship.location}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-[#bd9f67]/90">
-                          <GraduationCap className="w-3.5 h-3.5 text-[#bd9f67]" />
-                          <span className="text-white">{scholarship.level}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-[#bd9f67]/90">
-                          <Calendar className="w-3.5 h-3.5 text-[#bd9f67]" />
-                          <span className="text-white">Deadline: {formatDate(scholarship.deadline)}</span>
-                        </div>
-                        {getDaysUntilDeadline(scholarship.deadline) > 0 && (
-                          <div className="flex items-center gap-2 text-xs">
-                            <Clock className="w-3.5 h-3.5 text-[#bd9f67]" />
-                            <span className="text-[#bd9f67] font-semibold">
-                              {getDaysUntilDeadline(scholarship.deadline)} days left
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="pt-3 border-t border-[#bd9f67]/30">
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="text-xs bg-[#243137] border-[#bd9f67] text-[#bd9f67] py-0.5 px-2">
-                            {scholarship.category}
-                          </Badge>
-                        </div>
-                        
-                        <Button 
-                          size="sm"
-                          className="w-full bg-[#bd9f67] hover:bg-[#bd9f67]/90 text-[#243137] font-semibold shadow-md hover:shadow-lg transition-all group-hover:scale-105 h-9 text-xs"
-                          onClick={() => window.location.href = `/scholarship/${scholarship.id}`}
-                        >
-                          View Details
-                          <ArrowRight className="ml-2 w-3.5 h-3.5" />
-                        </Button>
-                      </div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+                      <h3 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
+                        {source === "mtn" && <Briefcase className="h-6 w-6 text-yellow-500" />}
+                        {source === "getfund" && <GraduationCap className="h-6 w-6 text-blue-600" />}
+                        {source === "gnpc" && <Award className="h-6 w-6 text-emerald-600" />}
+                        {source === "other-local" && <Globe2 className="h-6 w-6 text-emerald-500" />}
+                        {source === "field-based" && <Globe className="h-6 w-6 text-slate-600" />}
+                        {sourceNames[source]}
+                      </h3>
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
                     </div>
 
-                    {/* Bottom Text Animation */}
-                    <span 
-                      className="absolute left-1/2 bottom-3 transform -translate-x-1/2 text-[6px] uppercase text-[#bd9f67] bg-[#243137] px-2 opacity-0 group-hover:opacity-100 transition-all duration-500"
-                      style={{
-                        letterSpacing: '7px',
-                      }}
+                    {/* Render cards - All use same grid layout and card size */}
+                    <motion.div
+                      variants={containerVariants}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true }}
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     >
-                      {scholarship.category}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+                      {sourceScholarships.map((scholarship) => (
+                        <motion.div
+                          key={scholarship.id}
+                          variants={cardVariants}
+                          whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
+                          className="group"
+                          onClick={() => {
+                            if (scholarship.route) {
+                              window.location.href = scholarship.route;
+                            } else if (scholarship.source === "mtn") {
+                              window.location.href = "/scholarship/mtn-bright-scholarship";
+                            } else {
+                              window.location.href = `/scholarship/${scholarship.id}`;
+                            }
+                          }}
+                        >
+                          {/* Standard Card Style - Same size for all */}
+                          <div 
+                            className="relative h-full overflow-hidden flex flex-col scholarship-card-alt group cursor-pointer"
+                            style={{
+                              background: '#243137',
+                              borderRadius: '10px',
+                              transition: 'all 0.5s ease-in-out',
+                            }}
+                          >
+                            <div className="absolute inset-0 border-2 border-[#bd9f67] opacity-0 group-hover:opacity-100 group-hover:inset-[15px] transition-all duration-500 ease-in-out" />
+                            {scholarship.imageUrl && (
+                              <div className="relative h-56 overflow-hidden">
+                                <motion.img
+                                  src={scholarship.imageUrl}
+                                  alt={scholarship.title}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#243137] via-[#243137]/80 to-[#243137]/40" />
+                                <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                                  <h3 className="text-lg font-bold mb-1 text-white line-clamp-2 group-hover:text-[#bd9f67] transition-colors duration-500 drop-shadow-lg">
+                                    {scholarship.title}
+                                  </h3>
+                                  <p className="text-xs text-[#bd9f67] font-medium drop-shadow-md">{scholarship.provider}</p>
+                                </div>
+                                {scholarship.verified && (
+                                  <div className="absolute top-3 right-3 z-10">
+                                    <div className="bg-[#243137]/90 backdrop-blur-sm rounded-full p-1 shadow-lg border border-[#bd9f67]">
+                                      <CheckCircle2 className="w-5 h-5 text-[#bd9f67]" />
+                                    </div>
+                                  </div>
+                                )}
+                                {/* Special badge for MTN */}
+                                {scholarship.source === "mtn" && (
+                                  <div className="absolute top-3 left-3 z-10">
+                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-400 text-black text-xs font-bold shadow-lg">
+                                      <Sparkles className="w-3 h-3" />
+                                      MTN BRIGHT
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            <div className="px-5 pt-4 pb-5 flex flex-col flex-1 relative z-10">
+                              <div className="space-y-1.5 mb-3 flex-1">
+                                <div className="flex items-center gap-3 text-sm text-[#bd9f67]/90">
+                                  <div className="flex items-center gap-2">
+                                    <DollarSign className="w-3.5 h-3.5 text-[#bd9f67]" />
+                                    <span className="font-semibold text-white text-xs">
+                                      {scholarship.amount} {scholarship.currency !== scholarship.amount && scholarship.currency}
+                                    </span>
+                                  </div>
+                                  <span className="text-[#bd9f67]/60">•</span>
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="w-3.5 h-3.5 text-[#bd9f67]" />
+                                    <span className="text-white text-xs">{scholarship.location}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-[#bd9f67]/90">
+                                  <GraduationCap className="w-3.5 h-3.5 text-[#bd9f67]" />
+                                  <span className="text-white">{scholarship.level}</span>
+                                </div>
+                                {/* Show description for Other Local scholarships */}
+                                {scholarship.source === "other-local" && scholarship.description && (
+                                  <p className="text-xs text-slate-300/80 line-clamp-2 mt-2">
+                                    {scholarship.description}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="pt-3 border-t border-[#bd9f67]/30">
+                                <Badge variant="outline" className="text-xs bg-[#243137] border-[#bd9f67] text-[#bd9f67] py-0.5 px-2 mb-2">
+                                  {scholarship.category}
+                                </Badge>
+                                <Button 
+                                  size="sm"
+                                  className="w-full bg-[#bd9f67] hover:bg-[#bd9f67]/90 text-[#243137] font-semibold shadow-md hover:shadow-lg transition-all group-hover:scale-105 h-9 text-xs"
+                                >
+                                  View Details
+                                  <ArrowRight className="ml-2 w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </div>
           )}
         </div>
       </section>

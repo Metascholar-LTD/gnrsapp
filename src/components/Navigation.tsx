@@ -318,10 +318,6 @@ export const Navigation = () => {
                         <i className="fa fa-map-marker-alt me-2"></i>
                         <span>Local Scholarships</span>
                       </div>
-                      <div className="mega-menu-nav-item" data-section="funding">
-                        <i className="fa fa-graduation-cap me-2"></i>
-                        <span>Funding by Level</span>
-                      </div>
                       <div className="mega-menu-nav-item" data-section="tools">
                         <i className="fa fa-tools me-2"></i>
                         <span>Scholarship Tools</span>
@@ -379,31 +375,6 @@ export const Navigation = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="mega-menu-section" id="section-funding">
-                        <div className="row g-2">
-                          <div className="col-lg-4">
-                            <h6 className="mega-menu-section-title">By Education Level</h6>
-                            <ul className="mega-menu-list">
-                              <li><Link to="/scholarship-hub/undergraduate" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-user-graduate me-2"></i>Undergraduate Funding</Link></li>
-                              <li><Link to="/scholarship-hub/masters" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-graduation-cap me-2"></i>Masters Funding</Link></li>
-                              <li><Link to="/scholarship-hub/phd" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-user-md me-2"></i>PhD/Postdoc Funding</Link></li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-4">
-                            <div className="mega-menu-featured-image">
-                              <div className="mega-menu-image-card">
-                                <div className="mega-menu-image-placeholder">
-                                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg" alt="Graduation ceremony" />
-                                </div>
-                                <div className="mega-menu-image-content">
-                                  <h6>Find Your Level</h6>
-                                  <p className="small mb-0">Browse scholarships tailored to your education level.</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                       <div className="mega-menu-section" id="section-tools">
                         <div className="row g-2">
                           <div className="col-lg-12">
@@ -455,11 +426,6 @@ export const Navigation = () => {
                             <ul className="mega-menu-list">
                               <li><Link to="/jobs/browse" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-search me-2"></i>Verified Job Listings</Link></li>
                               <li><Link to="/jobs/all" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-list me-2"></i>All Jobs</Link></li>
-                              <li><Link to="/jobs/national-directory" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-map me-2"></i>National Jobs Directory</Link></li>
-                              <li><Link to="/jobs/location-filter" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-filter me-2"></i>Region → Municipality → Town</Link></li>
-                              <li><Link to="/jobs/type-filter" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-tags me-2"></i>Job Type Filtering</Link></li>
-                              <li><Link to="/jobs/featured" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-star me-2"></i>Featured Jobs</Link></li>
-                              <li><Link to="/jobs/alerts" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-bell me-2"></i>Job Alerts</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
@@ -1173,18 +1139,6 @@ export const Navigation = () => {
                   </Link>
                 </div>
                 <div className="mobile-dropdown-section">
-                  <div className="mobile-dropdown-section-title">Funding by Level</div>
-                  <Link to="/scholarship-hub/undergraduate" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-user-graduate me-3"></i>Undergraduate Funding
-                  </Link>
-                  <Link to="/scholarship-hub/masters" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-graduation-cap me-3"></i>Masters Funding
-                  </Link>
-                  <Link to="/scholarship-hub/phd" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-user-md me-3"></i>PhD/Postdoc Funding
-                  </Link>
-                </div>
-                <div className="mobile-dropdown-section">
                   <div className="mobile-dropdown-section-title">Scholarship Tools</div>
                   <Link to="/scholarship-hub/essay-builder" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-file-alt me-3"></i>Essay/SoP Builder
@@ -1221,15 +1175,6 @@ export const Navigation = () => {
                   <Link to="/jobs/all" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-list me-3"></i>All Jobs
                   </Link>
-                  <Link to="/jobs/national-directory" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-map me-3"></i>National Jobs Directory
-                  </Link>
-                  <Link to="/jobs/location-filter" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-filter me-3"></i>Region → Municipality → Town
-                  </Link>
-                  <Link to="/jobs/type-filter" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-tags me-3"></i>Job Type Filtering
-                  </Link>
                   <Link to="/jobs/internships" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-briefcase me-3"></i>Internship Listings
                   </Link>
@@ -1241,12 +1186,6 @@ export const Navigation = () => {
                   </Link>
                   <Link to="/jobs/yea-jobs" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-users me-3"></i>Youth Employment Agency
-                  </Link>
-                  <Link to="/jobs/featured" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-star me-3"></i>Featured Jobs
-                  </Link>
-                  <Link to="/jobs/alerts" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-bell me-3"></i>Job Alerts
                   </Link>
                 </div>
                 <div className="mobile-dropdown-section">
