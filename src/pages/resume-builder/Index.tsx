@@ -92,7 +92,7 @@ const Index = () => {
                 beautiful templates, and ATS optimization built in. 100% free.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 mb-10">
-                <Link to="/jobs/cv-builder/builder">
+                <Link to="/join" state={{ from: "/jobs/cv-builder/builder" }}>
                   <Button size="lg" className="w-full sm:w-auto">
                     Create your resume
                   </Button>

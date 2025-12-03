@@ -50,6 +50,7 @@ import ResumeBuilderAbout from "./pages/resume-builder/About";
 import ResumeBuilderLogin from "./pages/resume-builder/Login";
 import ResumeBuilderSignup from "./pages/resume-builder/Signup";
 import ResumeBuilderNotFound from "./pages/resume-builder/NotFound";
+import Join from "./pages/Join";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -105,6 +106,8 @@ const App = () => (
           <Route path="/jobs/yea-jobs" element={<YouthEmploymentAgency />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/companies/:name" element={<CompanyDetails />} />
+          {/* Auth Routes */}
+          <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}
           <Route path="/jobs/cv-builder" element={<ResumeBuilderIndex />} />
           <Route path="/jobs/cv-builder/builder" element={<ResumeBuilderBuilder />} />

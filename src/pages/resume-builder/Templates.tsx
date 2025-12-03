@@ -127,7 +127,7 @@ const Templates = () => {
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             You can always change your template later. Your content stays the same.
           </p>
-          <Link to="/jobs/cv-builder/builder">
+          <Link to="/join" state={{ from: "/jobs/cv-builder/builder" }}>
             <Button size="lg">
               Start Building Now
             </Button>

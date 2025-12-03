@@ -372,13 +372,22 @@ body:has(.resume-builder-app) section {
 .resume-builder-app main,
 .resume-builder-app .resume-builder-main {
   margin: 0 !important;
-  padding-top: 4rem !important;
+  padding-top: 0 !important;
+}
+
+/* Navigation top bar height compensation */
+.resume-builder-app .top-bar {
+  height: auto !important;
+}
+
+.resume-builder-app .navbar {
+  margin-top: 0 !important;
 }
 
 @media (min-width: 1024px) {
   .resume-builder-app main,
   .resume-builder-app .resume-builder-main {
-    padding-top: 5rem !important;
+    padding-top: 0 !important;
   }
 }
 
@@ -400,6 +409,73 @@ body:has(.resume-builder-app) section {
   z-index: 1000 !important;
   margin: 0 !important;
   padding: 0 !important;
+}
+
+/* CRITICAL: Preserve Bootstrap navbar styles for resume builder pages */
+.resume-builder-app .navbar {
+  background: #FFFFFF !important;
+}
+
+.resume-builder-app .navbar .navbar-nav .nav-link {
+  padding: 25px 15px !important;
+  color: var(--tertiary, #555555) !important;
+  font-weight: 500 !important;
+  outline: none !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif !important;
+}
+
+.resume-builder-app .navbar .navbar-nav .nav-link:hover,
+.resume-builder-app .navbar .navbar-nav .nav-link.active {
+  color: var(--primary, #006B3F) !important;
+}
+
+/* CRITICAL: Preserve Bootstrap button styles for navbar buttons - HIGH SPECIFICITY */
+.resume-builder-app .navbar .navbar-nav .nav-link.btn {
+  padding: 0.5rem 1rem !important;
+  margin-left: 0.5rem !important;
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  transition: 0.5s !important;
+  display: inline-block !important;
+  text-decoration: none !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif !important;
+}
+
+.resume-builder-app .navbar .navbar-nav .nav-link.btn.btn-primary {
+  background-color: #006B3F !important;
+  color: #F5F5F5 !important;
+  border: none !important;
+}
+
+.resume-builder-app .navbar .navbar-nav .nav-link.btn.btn-primary:hover {
+  background-color: #005a33 !important;
+  color: #F5F5F5 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 107, 63, 0.3);
+}
+
+.resume-builder-app .navbar .navbar-nav .nav-link.btn.btn-primary.text-white {
+  color: #FFFFFF !important;
+}
+
+@media (max-width: 991.98px) {
+  .resume-builder-app .navbar .navbar-nav {
+    margin-top: 10px !important;
+    border-top: 1px solid rgba(0, 0, 0, .07) !important;
+    background: #FFFFFF !important;
+  }
+
+  .resume-builder-app .navbar .navbar-nav .nav-link {
+    padding: 10px 0 !important;
+  }
+  
+  .resume-builder-app .navbar .navbar-nav .nav-link.btn {
+    margin-top: 10px !important;
+    margin-left: 0 !important;
+    text-align: center !important;
+    display: block !important;
+    width: 100% !important;
+  }
 }
 
 
@@ -488,10 +564,11 @@ body:has(.resume-builder-app) section {
 }
 
 /* Button overrides - HIGH SPECIFICITY */
-.resume-builder-app button,
-.resume-builder-app [role="button"],
-.resume-builder-app .btn,
-.resume-builder-app [class*="button"] {
+/* EXCEPTION: Bootstrap navbar buttons should use Bootstrap styles - handled above */
+.resume-builder-app button:not(.navbar button):not(.navbar .btn):not(.navbar .nav-link),
+.resume-builder-app [role="button"]:not(.navbar [role="button"]):not(.navbar .btn):not(.navbar .nav-link),
+.resume-builder-app .btn:not(.navbar .btn):not(.navbar .nav-link.btn),
+.resume-builder-app [class*="button"]:not(.navbar [class*="button"]):not(.navbar .nav-link) {
   font-family: 'DM Sans', system-ui, sans-serif !important;
   border-radius: calc(var(--radius)) !important;
 }

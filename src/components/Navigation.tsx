@@ -10,6 +10,9 @@ export const Navigation = () => {
   // For now, default to false (not logged in) - will show Join Us button
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
+  // Check if we're on resume builder pages
+  const isResumeBuilderPage = location.pathname.startsWith("/jobs/cv-builder");
+  
   const isActive = (path: string) => {
     if (path === "/" && location.pathname === "/") return true;
     if (path !== "/" && location.pathname.startsWith(path)) return true;
@@ -93,33 +96,33 @@ export const Navigation = () => {
           <div className="col-lg-6 px-5 text-end d-flex align-items-center justify-content-end">
             <small><i className="fa fa-envelope text-primary me-2"></i>info@gnrs.gov.gh</small>
             <small className="ms-4"><i className="fa fa-phone-alt text-primary me-2"></i>+233 XX XXX XXXX</small>
-            <div className="ms-4 d-flex align-items-center">
+            <div className="ms-4 top-bar-social-icons">
               <a 
-                className="btn btn-light btn-sm-square rounded-circle ms-2" 
+                className="top-bar-social-icon" 
                 href="https://www.facebook.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="Facebook"
               >
-                <i className="fab fa-facebook-f text-primary"></i>
+                <i className="fab fa-facebook-f"></i>
               </a>
               <a 
-                className="btn btn-light btn-sm-square rounded-circle ms-2" 
+                className="top-bar-social-icon" 
                 href="https://www.twitter.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="Twitter"
               >
-                <i className="fab fa-twitter text-primary"></i>
+                <i className="fab fa-twitter"></i>
               </a>
               <a 
-                className="btn btn-light btn-sm-square rounded-circle ms-2" 
+                className="top-bar-social-icon" 
                 href="https://www.linkedin.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
               >
-                <i className="fab fa-linkedin-in text-primary"></i>
+                <i className="fab fa-linkedin-in"></i>
               </a>
             </div>
           </div>
@@ -145,6 +148,38 @@ export const Navigation = () => {
           {/* Desktop Navbar - Always visible on lg and above */}
           <div className="d-none d-lg-flex navbar-collapse">
             <div className="navbar-nav ms-auto p-4 p-lg-0 d-flex align-items-center">
+              {isResumeBuilderPage ? (
+                <>
+                  <Link 
+                    to="/jobs/cv-builder" 
+                    className={`nav-item nav-link ${isActive("/jobs/cv-builder") && location.pathname === "/jobs/cv-builder" ? "active" : ""}`}
+                  >
+                    Home
+                  </Link>
+                  <Link 
+                    to="/jobs/cv-builder/templates" 
+                    className={`nav-item nav-link ${isActive("/jobs/cv-builder/templates") ? "active" : ""}`}
+                  >
+                    Templates
+                  </Link>
+                  <Link 
+                    to="/jobs/cv-builder/about" 
+                    className={`nav-item nav-link ${isActive("/jobs/cv-builder/about") ? "active" : ""}`}
+                  >
+                    About
+                  </Link>
+                  <div className="d-flex align-items-center ms-3">
+                    <Link 
+                      to="/join" 
+                      state={{ from: "/jobs/cv-builder/builder" }}
+                      className="btn btn-primary"
+                    >
+                      Start Free
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
               <Link 
                 to="/" 
                 className={`nav-item nav-link ${isActive("/") ? "active" : ""}`}
@@ -786,7 +821,7 @@ export const Navigation = () => {
                 </div>
               </div>
               {/* Account Dropdown - Only show when user is logged in */}
-              {isLoggedIn && (
+              {!isResumeBuilderPage && isLoggedIn && (
                 <div className="nav-item dropdown">
                   <Link 
                     to="/account" 
@@ -931,11 +966,13 @@ export const Navigation = () => {
                   </li>
                 </ul>
               </div>
-              {/* Join Us Button - Only show when user is NOT logged in */}
-              {!isLoggedIn && (
+              {/* Join Us Button - Only show when user is NOT logged in and NOT on resume builder */}
+              {!isResumeBuilderPage && !isLoggedIn && (
                 <div className="d-flex align-items-center ms-3">
                   <JoinUsButton />
                 </div>
+              )}
+                </>
               )}
             </div>
           </div>
@@ -993,6 +1030,40 @@ export const Navigation = () => {
         
         <div className="mobile-sidebar-content">
           <div className="mobile-nav-links">
+            {isResumeBuilderPage ? (
+              <>
+                <Link 
+                  to="/jobs/cv-builder" 
+                  className={`mobile-nav-link ${isActive("/jobs/cv-builder") && location.pathname === "/jobs/cv-builder" ? "active" : ""}`}
+                  onClick={closeMobileMenu}
+                >
+                  <span>Home</span>
+                </Link>
+                <Link 
+                  to="/jobs/cv-builder/templates" 
+                  className={`mobile-nav-link ${isActive("/jobs/cv-builder/templates") ? "active" : ""}`}
+                  onClick={closeMobileMenu}
+                >
+                  <span>Templates</span>
+                </Link>
+                <Link 
+                  to="/jobs/cv-builder/about" 
+                  className={`mobile-nav-link ${isActive("/jobs/cv-builder/about") ? "active" : ""}`}
+                  onClick={closeMobileMenu}
+                >
+                  <span>About</span>
+                </Link>
+                <Link 
+                  to="/join" 
+                  state={{ from: "/jobs/cv-builder/builder" }}
+                  className="btn btn-primary mt-2"
+                  onClick={closeMobileMenu}
+                >
+                  Start Free
+                </Link>
+              </>
+            ) : (
+              <>
             <Link 
               to="/" 
               className={`mobile-nav-link ${isActive("/") ? "active" : ""}`}
@@ -1474,8 +1545,8 @@ export const Navigation = () => {
                 </div>
               </div>
             </div>
-            {/* Account Dropdown - Only show when user is logged in */}
-            {isLoggedIn && (
+            {/* Account Dropdown - Only show when user is logged in and NOT on resume builder */}
+            {!isResumeBuilderPage && isLoggedIn && (
               <div className="mobile-nav-dropdown">
                 <div 
                   className={`mobile-nav-link ${isActive("/account") ? "active" : ""}`}
@@ -1521,11 +1592,13 @@ export const Navigation = () => {
                 </div>
               </div>
             )}
-            {/* Join Us Button - Only show when user is NOT logged in */}
-            {!isLoggedIn && (
+            {/* Join Us Button - Only show when user is NOT logged in and NOT on resume builder */}
+            {!isResumeBuilderPage && !isLoggedIn && (
               <div className="px-4 mt-2">
                 <JoinUsButton className="w-full justify-center" onClick={closeMobileMenu} />
               </div>
+            )}
+              </>
             )}
           </div>
 
@@ -2069,6 +2142,41 @@ export const Navigation = () => {
           height: 1.5em;
           font-size: 1.2rem;
           color: var(--primary);
+        }
+
+        /* Top Bar Social Icons */
+        .top-bar-social-icons {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-left: 1rem;
+        }
+
+        .top-bar-social-icon {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #f8f9fa;
+          border: 1px solid #dee2e6;
+          border-radius: 50%;
+          color: #000000;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          font-size: 0.875rem;
+        }
+
+        .top-bar-social-icon:hover {
+          background-color: #000000;
+          border-color: #000000;
+          color: #ffffff;
+          transform: translateY(-2px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .top-bar-social-icon i {
+          line-height: 1;
         }
       `}</style>
     </>

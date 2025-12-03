@@ -20,6 +20,11 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link to="/jobs/cv-builder" className="flex items-center gap-2.5 group">
+            <img 
+              src="https://res.cloudinary.com/dsypclqxk/image/upload/v1762441822/Metscholar_iyoxrw.png" 
+              alt="MetaScholar Logo" 
+              className="h-10 w-10 object-contain"
+            />
             <span className="font-display text-xl font-bold text-foreground">
               MetaResume
             </span>
@@ -45,12 +50,7 @@ const Navbar = () => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link to="/jobs/cv-builder/login">
-              <Button variant="ghost" size="sm">
-                Log in
-              </Button>
-            </Link>
-            <Link to="/jobs/cv-builder/builder">
+            <Link to="/join" state={{ from: "/jobs/cv-builder/builder" }}>
               <Button size="sm">
                 Start Free
               </Button>
@@ -86,12 +86,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
-                <Link to="/jobs/cv-builder/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full" size="sm">
-                    Log in
-                  </Button>
-                </Link>
-                <Link to="/jobs/cv-builder/builder" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/join" state={{ from: "/jobs/cv-builder/builder" }} onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full" size="sm">
                     Start Free
                   </Button>
