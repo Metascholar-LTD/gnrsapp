@@ -5,6 +5,14 @@ export default {
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {
+    screens: {
+      // Match meta-consult breakpoints - Mobile: 0-767px, Tablet: 768-1199px, Desktop: 1200px+
+      'sm': '640px',   // Small mobile
+      'md': '768px',   // Tablet start (matches meta-consult tablet)
+      'lg': '1024px',  // Large tablet
+      'xl': '1200px',  // Desktop start (matches meta-consult desktop)
+      '2xl': '1600px', // Large desktop (matches meta-consult large)
+    },
     container: {
       center: true,
       padding: "2rem",

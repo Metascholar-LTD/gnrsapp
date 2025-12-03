@@ -43,6 +43,14 @@ import TimetableBuilder from "./pages/education/TimetableBuilder";
 import AiTutor from "./pages/education/AiTutor";
 import MyResources from "./pages/education/MyResources";
 import LearningPath from "./pages/education/LearningPath";
+import ResumeBuilderIndex from "./pages/resume-builder/Index";
+import ResumeBuilderBuilder from "./pages/resume-builder/Builder";
+import ResumeBuilderTemplates from "./pages/resume-builder/Templates";
+import ResumeBuilderAbout from "./pages/resume-builder/About";
+import ResumeBuilderLogin from "./pages/resume-builder/Login";
+import ResumeBuilderSignup from "./pages/resume-builder/Signup";
+import ResumeBuilderNotFound from "./pages/resume-builder/NotFound";
+import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +105,13 @@ const App = () => (
           <Route path="/jobs/yea-jobs" element={<YouthEmploymentAgency />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/companies/:name" element={<CompanyDetails />} />
+          {/* Resume Builder Routes */}
+          <Route path="/jobs/cv-builder" element={<ResumeBuilderIndex />} />
+          <Route path="/jobs/cv-builder/builder" element={<ResumeBuilderBuilder />} />
+          <Route path="/jobs/cv-builder/templates" element={<ResumeBuilderTemplates />} />
+          <Route path="/jobs/cv-builder/about" element={<ResumeBuilderAbout />} />
+          <Route path="/jobs/cv-builder/login" element={<ResumeBuilderLogin />} />
+          <Route path="/jobs/cv-builder/signup" element={<ResumeBuilderSignup />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

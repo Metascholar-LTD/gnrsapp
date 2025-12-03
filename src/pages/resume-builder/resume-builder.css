@@ -1,0 +1,946 @@
+/* Resume Builder Complete CSS Isolation - EXACT match to Resume_Builder/src/index.css */
+/* All styles are scoped to .resume-builder-app class */
+/* This file MUST be loaded after index.css to override global styles */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+/* CRITICAL: Override global body styles when inside resume builder */
+body:has(.resume-builder-app),
+html:has(.resume-builder-app) body {
+  background-color: hsl(40 33% 96%) !important;
+  color: hsl(220 30% 15%) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+  overflow-x: hidden !important;
+}
+
+/* Hide main site navigation when on resume builder pages - BUT NOT sidebar nav */
+/* Only target nav elements that are direct children of body, not nested ones */
+body:has(.resume-builder-app) > nav:not(.resume-builder-nav),
+body:has(.resume-builder-app) > header nav:not(.resume-builder-nav),
+body:has(.resume-builder-app) header:not(.resume-builder-app header):not(.resume-builder-nav),
+body:has(.resume-builder-app) footer:not(.resume-builder-app footer) {
+  display: none !important;
+}
+
+/* CRITICAL: Ensure sidebar nav is ALWAYS visible - override any hiding rules */
+.resume-builder-app aside nav {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: auto !important;
+}
+
+/* Ensure nav buttons are visible */
+.resume-builder-app aside nav button {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Override global heading fonts */
+body:has(.resume-builder-app) h1,
+body:has(.resume-builder-app) h2,
+body:has(.resume-builder-app) h3,
+body:has(.resume-builder-app) h4,
+body:has(.resume-builder-app) h5,
+body:has(.resume-builder-app) h6 {
+  font-family: 'Playfair Display', serif !important;
+}
+
+/* Override global section padding - allow py-* classes */
+body:has(.resume-builder-app) section {
+  padding-block: 0 !important;
+}
+
+/* Reset and isolate resume builder from global styles */
+.resume-builder-app,
+.resume-builder-app *,
+.resume-builder-app *::before,
+.resume-builder-app *::after {
+  box-sizing: border-box;
+}
+
+/* Override ALL CSS variables with Resume Builder's exact values - EXACT from Resume_Builder */
+.resume-builder-app {
+  /* Core colors - EXACT from Resume_Builder */
+  --background: 40 33% 96% !important;
+  --foreground: 220 30% 15% !important;
+  --card: 40 30% 98% !important;
+  --card-foreground: 220 30% 15% !important;
+  --popover: 40 30% 98% !important;
+  --popover-foreground: 220 30% 15% !important;
+  --primary: 0 70% 65% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 220 25% 20% !important;
+  --secondary-foreground: 0 0% 100% !important;
+  --muted: 40 20% 90% !important;
+  --muted-foreground: 220 15% 45% !important;
+  --accent: 175 60% 45% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --destructive: 0 84.2% 60.2% !important;
+  --destructive-foreground: 210 40% 98% !important;
+  --border: 40 20% 88% !important;
+  --input: 40 20% 88% !important;
+  --ring: 0 70% 65% !important;
+  --radius: 0.75rem !important;
+  
+  /* Sidebar variables */
+  --sidebar-background: 40 30% 98% !important;
+  --sidebar-foreground: 220 30% 15% !important;
+  --sidebar-primary: 0 70% 65% !important;
+  --sidebar-primary-foreground: 0 0% 100% !important;
+  --sidebar-accent: 40 20% 94% !important;
+  --sidebar-accent-foreground: 220 30% 15% !important;
+  --sidebar-border: 40 20% 88% !important;
+  --sidebar-ring: 0 70% 65% !important;
+  
+  /* Custom tokens */
+  --gradient-hero: linear-gradient(135deg, hsl(40 33% 96%) 0%, hsl(40 25% 92%) 100%) !important;
+  --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(40 30% 98%) 100%) !important;
+  --gradient-primary: linear-gradient(135deg, hsl(0 70% 65%) 0%, hsl(350 70% 55%) 100%) !important;
+  --shadow-soft: 0 4px 20px -4px hsl(220 30% 15% / 0.08) !important;
+  --shadow-card: 0 8px 30px -8px hsl(220 30% 15% / 0.12) !important;
+  --shadow-hover: 0 12px 40px -12px hsl(220 30% 15% / 0.18) !important;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  /* Base styles */
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Typography - EXACT from Resume_Builder */
+.resume-builder-app h1,
+.resume-builder-app h2,
+.resume-builder-app h3,
+.resume-builder-app h4,
+.resume-builder-app h5,
+.resume-builder-app h6 {
+  font-family: 'Playfair Display', serif !important;
+  font-weight: 600 !important;
+  color: hsl(var(--foreground)) !important;
+  margin: 0 !important;
+}
+
+.resume-builder-app .font-display {
+  font-family: 'Playfair Display', serif !important;
+}
+
+.resume-builder-app .font-sans {
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+}
+
+/* Utility classes - EXACT from Resume_Builder */
+.resume-builder-app .gradient-hero {
+  background: var(--gradient-hero) !important;
+}
+
+.resume-builder-app .gradient-card {
+  background: var(--gradient-card) !important;
+}
+
+.resume-builder-app .gradient-primary {
+  background: var(--gradient-primary) !important;
+}
+
+.resume-builder-app .shadow-soft {
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.resume-builder-app .shadow-card {
+  box-shadow: var(--shadow-card) !important;
+}
+
+.resume-builder-app .shadow-hover {
+  box-shadow: var(--shadow-hover) !important;
+}
+
+.resume-builder-app .transition-smooth {
+  transition: var(--transition-smooth) !important;
+}
+
+.resume-builder-app .text-balance {
+  text-wrap: balance !important;
+}
+
+/* Custom scrollbar - EXACT from Resume_Builder */
+.resume-builder-app ::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.resume-builder-app ::-webkit-scrollbar-track {
+  background: hsl(var(--muted)) !important;
+  border-radius: 4px !important;
+}
+
+.resume-builder-app ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3) !important;
+  border-radius: 4px !important;
+}
+
+.resume-builder-app ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5) !important;
+}
+
+/* Animation keyframes - EXACT from Resume_Builder */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
+  50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.5); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Animation classes - EXACT from Resume_Builder */
+.resume-builder-app .animate-float {
+  animation: float 6s ease-in-out infinite !important;
+}
+
+.resume-builder-app .animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards !important;
+}
+
+.resume-builder-app .animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards !important;
+}
+
+.resume-builder-app .animate-scale-in {
+  animation: scale-in 0.4s ease-out forwards !important;
+}
+
+.resume-builder-app .animate-shimmer {
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent) !important;
+  background-size: 200% 100% !important;
+  animation: shimmer 2s infinite !important;
+}
+
+.resume-builder-app .animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite !important;
+}
+
+.resume-builder-app .animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards !important;
+}
+
+.resume-builder-app .animate-rotate-slow {
+  animation: rotate-slow 20s linear infinite !important;
+}
+
+.resume-builder-app .animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite !important;
+}
+
+.resume-builder-app .animation-delay-100 { animation-delay: 100ms !important; }
+.resume-builder-app .animation-delay-200 { animation-delay: 200ms !important; }
+.resume-builder-app .animation-delay-300 { animation-delay: 300ms !important; }
+.resume-builder-app .animation-delay-400 { animation-delay: 400ms !important; }
+.resume-builder-app .animation-delay-500 { animation-delay: 500ms !important; }
+.resume-builder-app .animation-delay-600 { animation-delay: 600ms !important; }
+.resume-builder-app .animation-delay-700 { animation-delay: 700ms !important; }
+
+/* Glassmorphism - EXACT from Resume_Builder */
+.resume-builder-app .glass {
+  background: hsl(var(--card) / 0.7) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid hsl(var(--border) / 0.5) !important;
+}
+
+/* Gradient text - EXACT from Resume_Builder */
+.resume-builder-app .gradient-text {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Hover card effect - EXACT from Resume_Builder */
+.resume-builder-app .hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.resume-builder-app .hover-lift:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: var(--shadow-hover) !important;
+}
+
+/* CRITICAL: Override global section styles - allow py-* classes to work */
+.resume-builder-app section::before {
+  content: none !important;
+  display: none !important;
+}
+
+.resume-builder-app section {
+  margin: 0 !important;
+  padding-block: 0 !important;
+  position: relative !important;
+}
+
+/* Allow Tailwind py-* classes to work */
+.resume-builder-app section[class*="py-"] {
+  padding-block: 0 !important;
+}
+
+.resume-builder-app section.py-20 {
+  padding-top: 5rem !important;
+  padding-bottom: 5rem !important;
+}
+
+.resume-builder-app section.py-16 {
+  padding-top: 4rem !important;
+  padding-bottom: 4rem !important;
+}
+
+.resume-builder-app section.py-12 {
+  padding-top: 3rem !important;
+  padding-bottom: 3rem !important;
+}
+
+@media (min-width: 1024px) {
+  .resume-builder-app section.lg\:py-32 {
+    padding-top: 8rem !important;
+    padding-bottom: 8rem !important;
+  }
+  
+  .resume-builder-app section.lg\:py-28 {
+    padding-top: 7rem !important;
+    padding-bottom: 7rem !important;
+  }
+  
+  .resume-builder-app section.lg\:py-20 {
+    padding-top: 5rem !important;
+    padding-bottom: 5rem !important;
+  }
+  
+  .resume-builder-app section.lg\:py-16 {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+  }
+}
+
+/* Layout fixes - prevent global CSS from affecting spacing */
+.resume-builder-app {
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+}
+
+.resume-builder-app main,
+.resume-builder-app .resume-builder-main {
+  margin: 0 !important;
+  padding-top: 4rem !important;
+}
+
+@media (min-width: 1024px) {
+  .resume-builder-app main,
+  .resume-builder-app .resume-builder-main {
+    padding-top: 5rem !important;
+  }
+}
+
+/* Prevent global section padding from affecting layout */
+.resume-builder-app section {
+  padding-top: 5rem !important;
+  padding-bottom: 5rem !important;
+}
+
+@media (min-width: 1024px) {
+  .resume-builder-app section {
+    padding-top: 7rem !important;
+    padding-bottom: 7rem !important;
+  }
+}
+
+/* Ensure nav doesn't conflict */
+.resume-builder-nav {
+  z-index: 1000 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+
+/* Override ALL Tailwind utilities that might be conflicting */
+.resume-builder-app [class*="bg-background"] {
+  background-color: hsl(var(--background)) !important;
+}
+
+.resume-builder-app [class*="text-background"] {
+  color: hsl(var(--background)) !important;
+}
+
+.resume-builder-app .bg-primary,
+.resume-builder-app [class*="bg-primary"]:not([class*="text-primary"]) {
+  background-color: hsl(var(--primary)) !important;
+}
+
+.resume-builder-app .text-primary,
+.resume-builder-app [class*="text-primary"]:not([class*="bg-primary"]) {
+  color: hsl(var(--primary)) !important;
+}
+
+.resume-builder-app .bg-secondary,
+.resume-builder-app [class*="bg-secondary"]:not([class*="text-secondary"]) {
+  background-color: hsl(var(--secondary)) !important;
+}
+
+.resume-builder-app .text-secondary-foreground,
+.resume-builder-app [class*="text-secondary-foreground"] {
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.resume-builder-app .bg-muted,
+.resume-builder-app [class*="bg-muted"] {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.resume-builder-app .text-muted-foreground,
+.resume-builder-app [class*="text-muted-foreground"] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.resume-builder-app .bg-card,
+.resume-builder-app [class*="bg-card"] {
+  background-color: hsl(var(--card)) !important;
+}
+
+.resume-builder-app .text-card-foreground,
+.resume-builder-app [class*="text-card-foreground"] {
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.resume-builder-app .bg-white {
+  background-color: #ffffff !important;
+}
+
+.resume-builder-app .text-white {
+  color: #ffffff !important;
+}
+
+.resume-builder-app .bg-slate-900,
+.resume-builder-app [class*="bg-slate-900"] {
+  background-color: hsl(var(--secondary)) !important;
+}
+
+.resume-builder-app .text-slate-900,
+.resume-builder-app [class*="text-slate-900"] {
+  color: hsl(220 30% 15%) !important;
+}
+
+.resume-builder-app .border-slate-200,
+.resume-builder-app [class*="border-slate-200"] {
+  border-color: hsl(var(--border)) !important;
+}
+
+.resume-builder-app .hover\:bg-slate-100\/80:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.resume-builder-app .hover\:bg-white\/90:hover {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.resume-builder-app .shadow-slate-900\/20 {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Button overrides - HIGH SPECIFICITY */
+.resume-builder-app button,
+.resume-builder-app [role="button"],
+.resume-builder-app .btn,
+.resume-builder-app [class*="button"] {
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+  border-radius: calc(var(--radius)) !important;
+}
+
+.resume-builder-app button[class*="bg-primary"],
+.resume-builder-app [class*="bg-primary"]:not([class*="text-primary"]),
+.resume-builder-app button:not([class*="variant"]):not([class*="bg-"]) {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.resume-builder-app button[class*="variant-default"],
+.resume-builder-app [class*="variant-default"] {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: none !important;
+}
+
+.resume-builder-app button[class*="variant-outline"],
+.resume-builder-app [class*="variant-outline"] {
+  border: 1px solid hsl(var(--border)) !important;
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.resume-builder-app button[class*="variant-outline"]:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.resume-builder-app button[class*="variant-ghost"],
+.resume-builder-app [class*="variant-ghost"] {
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+  border: none !important;
+}
+
+.resume-builder-app button[class*="variant-ghost"]:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.resume-builder-app button[class*="variant-secondary"],
+.resume-builder-app [class*="variant-secondary"] {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.resume-builder-app button[class*="variant-hero"],
+.resume-builder-app [class*="variant-hero"],
+.resume-builder-app button.bg-white,
+.resume-builder-app button[class*="bg-white"] {
+  background-color: #ffffff !important;
+  color: hsl(220 30% 15%) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  font-weight: 600 !important;
+}
+
+.resume-builder-app button[class*="variant-hero"]:hover,
+.resume-builder-app button.bg-white:hover,
+.resume-builder-app button[class*="bg-white"]:hover {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Input and form elements - EXACT styling */
+.resume-builder-app input,
+.resume-builder-app textarea,
+.resume-builder-app select {
+  background-color: hsl(var(--background)) !important;
+  border-color: hsl(var(--input)) !important;
+  color: hsl(var(--foreground)) !important;
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5rem !important;
+  height: 2.5rem !important;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: calc(var(--radius)) !important;
+}
+
+@media (min-width: 768px) {
+  .resume-builder-app input,
+  .resume-builder-app textarea,
+  .resume-builder-app select {
+    font-size: 0.875rem !important;
+  }
+}
+
+.resume-builder-app input::placeholder,
+.resume-builder-app textarea::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.resume-builder-app input:focus,
+.resume-builder-app textarea:focus,
+.resume-builder-app select:focus {
+  border-color: hsl(var(--ring)) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2) !important;
+}
+
+.resume-builder-app label {
+  color: hsl(var(--foreground)) !important;
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  line-height: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Container utility - ensure it works */
+.resume-builder-app .container {
+  width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+@media (min-width: 1024px) {
+  .resume-builder-app .container {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+/* Checkbox styling */
+.resume-builder-app input[type="checkbox"] {
+  width: 1rem !important;
+  height: 1rem !important;
+  border-radius: 0.25rem !important;
+  border: 1px solid hsl(var(--input)) !important;
+  background-color: hsl(var(--background)) !important;
+  cursor: pointer !important;
+}
+
+.resume-builder-app input[type="checkbox"]:checked {
+  background-color: hsl(var(--primary)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+.resume-builder-app [data-state="checked"] {
+  background-color: hsl(var(--primary)) !important;
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Card styles */
+.resume-builder-app [class*="bg-card"],
+.resume-builder-app .card {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+/* Border colors */
+.resume-builder-app [class*="border"],
+.resume-builder-app .border {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Text colors */
+.resume-builder-app [class*="text-foreground"],
+.resume-builder-app .text-foreground {
+  color: hsl(var(--foreground)) !important;
+}
+
+.resume-builder-app [class*="text-secondary"],
+.resume-builder-app .text-secondary-foreground {
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+/* Override any global link styles */
+.resume-builder-app a {
+  color: hsl(var(--primary)) !important;
+}
+
+.resume-builder-app a:hover {
+  color: hsl(var(--primary) / 0.8) !important;
+}
+
+/* Ensure all text is readable */
+.resume-builder-app p,
+.resume-builder-app span,
+.resume-builder-app div {
+  color: inherit !important;
+}
+
+/* Prevent global CSS from adding margins/padding */
+.resume-builder-app * {
+  --tw-text-opacity: 1 !important;
+}
+
+/* FINAL OVERRIDE LAYER - Maximum specificity */
+.resume-builder-app.resume-builder-app.resume-builder-app {
+  isolation: isolate;
+}
+
+.resume-builder-app.resume-builder-app.resume-builder-app button,
+.resume-builder-app.resume-builder-app.resume-builder-app input,
+.resume-builder-app.resume-builder-app.resume-builder-app textarea,
+.resume-builder-app.resume-builder-app.resume-builder-app select,
+.resume-builder-app.resume-builder-app.resume-builder-app label {
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+}
+
+.resume-builder-app.resume-builder-app.resume-builder-app h1,
+.resume-builder-app.resume-builder-app.resume-builder-app h2,
+.resume-builder-app.resume-builder-app.resume-builder-app h3,
+.resume-builder-app.resume-builder-app.resume-builder-app h4,
+.resume-builder-app.resume-builder-app.resume-builder-app h5,
+.resume-builder-app.resume-builder-app.resume-builder-app h6 {
+  font-family: 'Playfair Display', serif !important;
+}
+
+/* Ensure flex and grid utilities work correctly */
+.resume-builder-app .flex {
+  display: flex !important;
+}
+
+.resume-builder-app .grid {
+  display: grid !important;
+}
+
+.resume-builder-app .items-center {
+  align-items: center !important;
+}
+
+.resume-builder-app .justify-center {
+  justify-content: center !important;
+}
+
+.resume-builder-app .justify-between {
+  justify-content: space-between !important;
+}
+
+.resume-builder-app .gap-2 {
+  gap: 0.5rem !important;
+}
+
+.resume-builder-app .gap-3 {
+  gap: 0.75rem !important;
+}
+
+.resume-builder-app .gap-4 {
+  gap: 1rem !important;
+}
+
+.resume-builder-app .gap-6 {
+  gap: 1.5rem !important;
+}
+
+.resume-builder-app .gap-8 {
+  gap: 2rem !important;
+}
+
+.resume-builder-app .gap-12 {
+  gap: 3rem !important;
+}
+
+.resume-builder-app .gap-16 {
+  gap: 4rem !important;
+}
+
+/* Text alignment */
+.resume-builder-app .text-center {
+  text-align: center !important;
+}
+
+.resume-builder-app .text-left {
+  text-align: left !important;
+}
+
+/* Spacing utilities */
+.resume-builder-app .mb-2 {
+  margin-bottom: 0.5rem !important;
+}
+
+.resume-builder-app .mb-4 {
+  margin-bottom: 1rem !important;
+}
+
+.resume-builder-app .mb-6 {
+  margin-bottom: 1.5rem !important;
+}
+
+.resume-builder-app .mb-8 {
+  margin-bottom: 2rem !important;
+}
+
+.resume-builder-app .mb-10 {
+  margin-bottom: 2.5rem !important;
+}
+
+.resume-builder-app .mb-16 {
+  margin-bottom: 4rem !important;
+}
+
+.resume-builder-app .mt-4 {
+  margin-top: 1rem !important;
+}
+
+.resume-builder-app .mt-6 {
+  margin-top: 1.5rem !important;
+}
+
+.resume-builder-app .space-y-2 > * + * {
+  margin-top: 0.5rem !important;
+}
+
+.resume-builder-app .space-y-3 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+.resume-builder-app .space-y-4 > * + * {
+  margin-top: 1rem !important;
+}
+
+.resume-builder-app .space-y-6 > * + * {
+  margin-top: 1.5rem !important;
+}
+
+/* CRITICAL: Ensure sidebar displays vertically on tablet/desktop - Match meta-consult breakpoints */
+/* Tablet: 768px - 1199px */
+@media (min-width: 768px) {
+  /* Show sidebar on tablet/desktop - FORCE visibility */
+  .resume-builder-app aside {
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Ensure sidebar nav displays vertically - FORCE visibility */
+  .resume-builder-app aside nav {
+    flex-direction: column !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+  }
+  
+  .resume-builder-app aside nav.space-y-1 > * + * {
+    margin-top: 0.25rem !important;
+  }
+  
+  /* Ensure sidebar nav buttons are full width and visible */
+  .resume-builder-app aside nav button {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Hide mobile horizontal nav on tablet/desktop */
+  .resume-builder-app div[class*="tablet:hidden"],
+  .resume-builder-app div[class*="md:hidden"] {
+    display: none !important;
+  }
+}
+
+/* Desktop: 1200px+ - Optimize for larger screens */
+@media (min-width: 1200px) {
+  .resume-builder-app aside {
+    width: 16rem !important; /* 256px */
+  }
+}
+
+/* Mobile: 0px - 767px */
+@media (max-width: 767px) {
+  .resume-builder-app aside[class*="hidden"],
+  .resume-builder-app aside[class*="md:flex"] {
+    display: none !important;
+  }
+  
+  /* Ensure mobile nav is visible and properly sized */
+  .resume-builder-app div[class*="md:hidden"] {
+    display: flex !important;
+    height: auto !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+  }
+  
+  /* Mobile form optimizations */
+  .resume-builder-app input,
+  .resume-builder-app textarea {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  /* Mobile spacing */
+  .resume-builder-app .space-y-6 > * + * {
+    margin-top: 1.25rem !important;
+  }
+  
+  .resume-builder-app .space-y-4 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  /* Mobile text sizes */
+  .resume-builder-app h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  .resume-builder-app p {
+    font-size: 0.875rem !important;
+  }
+  
+  /* Ensure main content takes full width on mobile */
+  .resume-builder-app main {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Mobile preview should take full width */
+  .resume-builder-app main > div {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Tablet: 768px - 1199px - Optimize spacing */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .resume-builder-app aside {
+    width: 14rem !important; /* 224px */
+  }
+  
+  .resume-builder-app .max-w-2xl {
+    max-width: 42rem !important;
+  }
+  
+  /* Hide mobile nav on tablet */
+  .resume-builder-app div[class*="md:hidden"] {
+    display: none !important;
+  }
+  
+  /* Ensure main content takes remaining space */
+  .resume-builder-app main {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Scrollbar hide utility for mobile nav */
+.resume-builder-app .scrollbar-hide {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.resume-builder-app .scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
