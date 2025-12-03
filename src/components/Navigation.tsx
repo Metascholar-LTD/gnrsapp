@@ -168,15 +168,6 @@ export const Navigation = () => {
                   >
                     About
                   </Link>
-                  <div className="d-flex align-items-center ms-3">
-                    <Link 
-                      to="/join" 
-                      state={{ from: "/jobs/cv-builder/builder" }}
-                      className="btn btn-primary"
-                    >
-                      Start Free
-                    </Link>
-                  </div>
                 </>
               ) : (
                 <>
@@ -1052,14 +1043,6 @@ export const Navigation = () => {
                   onClick={closeMobileMenu}
                 >
                   <span>About</span>
-                </Link>
-                <Link 
-                  to="/join" 
-                  state={{ from: "/jobs/cv-builder/builder" }}
-                  className="btn btn-primary mt-2"
-                  onClick={closeMobileMenu}
-                >
-                  Start Free
                 </Link>
               </>
             ) : (

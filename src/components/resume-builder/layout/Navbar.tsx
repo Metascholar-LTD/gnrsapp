@@ -48,14 +48,6 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Link to="/join" state={{ from: "/jobs/cv-builder/builder" }}>
-              <Button size="sm">
-                Start Free
-              </Button>
-            </Link>
-          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -85,13 +77,6 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
-                <Link to="/join" state={{ from: "/jobs/cv-builder/builder" }} onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full" size="sm">
-                    Start Free
-                  </Button>
-                </Link>
-              </div>
             </div>
           </div>
         )}
