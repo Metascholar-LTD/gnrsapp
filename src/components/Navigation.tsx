@@ -494,7 +494,6 @@ export const Navigation = () => {
                               <li><Link to="/jobs/skill-assessment" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-clipboard-check me-2"></i>Skill Assessment Tests</Link></li>
                               <li><Link to="/jobs/career-resources" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-book me-2"></i>Career Resources</Link></li>
                               <li><Link to="/jobs/professional-development" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-chart-line me-2"></i>Professional Development</Link></li>
-                              <li><Link to="/jobs/saved-jobs" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-bookmark me-2"></i>Saved Jobs & Recommendations</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
@@ -585,23 +584,23 @@ export const Navigation = () => {
                           <div className="col-lg-4">
                             <h6 className="mega-menu-section-title">Skilled Trades</h6>
                             <ul className="mega-menu-list">
-                              <li><Link to="/skilled-workers/electricians" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-bolt me-2"></i>Electricians</Link></li>
-                              <li><Link to="/skilled-workers/carpenters" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-hammer me-2"></i>Carpenters</Link></li>
-                              <li><Link to="/skilled-workers/plumbers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-faucet me-2"></i>Plumbers</Link></li>
-                              <li><Link to="/skilled-workers/masons" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-building me-2"></i>Masons</Link></li>
-                              <li><Link to="/skilled-workers/welders" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-fire me-2"></i>Welders</Link></li>
-                              <li><Link to="/skilled-workers/painters" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-paint-brush me-2"></i>Painters</Link></li>
+                              <li><Link to="/skilled-workers?category=electricians" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-bolt me-2"></i>Electricians</Link></li>
+                              <li><Link to="/skilled-workers?category=carpenters" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-hammer me-2"></i>Carpenters</Link></li>
+                              <li><Link to="/skilled-workers?category=plumbers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-faucet me-2"></i>Plumbers</Link></li>
+                              <li><Link to="/skilled-workers?category=masons" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-building me-2"></i>Masons</Link></li>
+                              <li><Link to="/skilled-workers?category=welders" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-fire me-2"></i>Welders</Link></li>
+                              <li><Link to="/skilled-workers?category=painters" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-paint-brush me-2"></i>Painters</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
                             <h6 className="mega-menu-section-title">Personal Services</h6>
                             <ul className="mega-menu-list">
-                              <li><Link to="/skilled-workers/tailors" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-cut me-2"></i>Tailors</Link></li>
-                              <li><Link to="/skilled-workers/barbers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-scissors me-2"></i>Barbers</Link></li>
-                              <li><Link to="/skilled-workers/hairdressers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-spray-can me-2"></i>Hairdressers</Link></li>
-                              <li><Link to="/skilled-workers/mechanics" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-car me-2"></i>Auto Mechanics</Link></li>
-                              <li><Link to="/skilled-workers/caterers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-utensils me-2"></i>Caterers</Link></li>
-                              <li><Link to="/skilled-workers/all" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-ellipsis-h me-2"></i>More Categories</Link></li>
+                              <li><Link to="/skilled-workers?category=tailors" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-cut me-2"></i>Tailors</Link></li>
+                              <li><Link to="/skilled-workers?category=barbers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-scissors me-2"></i>Barbers</Link></li>
+                              <li><Link to="/skilled-workers?category=hairdressers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-spray-can me-2"></i>Hairdressers</Link></li>
+                              <li><Link to="/skilled-workers?category=mechanics" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-car me-2"></i>Auto Mechanics</Link></li>
+                              <li><Link to="/skilled-workers?category=caterers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-utensils me-2"></i>Caterers</Link></li>
+                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-ellipsis-h me-2"></i>Browse All Categories</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
@@ -624,18 +623,18 @@ export const Navigation = () => {
                           <div className="col-lg-4">
                             <h6 className="mega-menu-section-title">Search & Browse</h6>
                             <ul className="mega-menu-list">
-                              <li><Link to="/skilled-workers/search" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-search me-2"></i>Skill-Based Search</Link></li>
-                              <li><Link to="/skilled-workers/location-search" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-map-marker-alt me-2"></i>Location-Based Search</Link></li>
-                              <li><Link to="/skilled-workers/portfolios" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-images me-2"></i>Worker Portfolio</Link></li>
-                              <li><Link to="/skilled-workers/reviews" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-star me-2"></i>Ratings & Reviews</Link></li>
+                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-search me-2"></i>Browse Directory</Link></li>
+                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-map-marker-alt me-2"></i>Search by Location</Link></li>
+                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-images me-2"></i>View Worker Profiles</Link></li>
+                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-star me-2"></i>Ratings & Reviews</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
-                            <h6 className="mega-menu-section-title">Contact & Booking</h6>
+                            <h6 className="mega-menu-section-title">Directory Features</h6>
                             <ul className="mega-menu-list">
-                              <li><Link to="/skilled-workers/verified" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-check-circle me-2"></i>Verified Badges</Link></li>
-                              <li><Link to="/skilled-workers/contact" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-phone me-2"></i>Direct Call/WhatsApp</Link></li>
-                              <li><Link to="/skilled-workers/booking" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-calendar-check me-2"></i>Booking/Request Service</Link></li>
+                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-check-circle me-2"></i>Verified Workers</Link></li>
+                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-phone me-2"></i>Direct Contact</Link></li>
+                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-calendar-check me-2"></i>Service Requests</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
@@ -1251,9 +1250,6 @@ export const Navigation = () => {
                   <Link to="/jobs/ai-interview" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-robot me-3"></i>AI Interview Assistant
                   </Link>
-                  <Link to="/jobs/saved-jobs" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-bookmark me-3"></i>Saved Jobs & Recommendations
-                  </Link>
                   <Link to="/jobs/skill-assessment" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-clipboard-check me-3"></i>Skill Assessment Tests
                   </Link>
@@ -1375,65 +1371,65 @@ export const Navigation = () => {
               <div className="mobile-dropdown-menu">
                 <div className="mobile-dropdown-section">
                   <div className="mobile-dropdown-section-title">Artisan Directory</div>
-                  <Link to="/skilled-workers/electricians" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=electricians" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-bolt me-3"></i>Electricians
                   </Link>
-                  <Link to="/skilled-workers/carpenters" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=carpenters" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-hammer me-3"></i>Carpenters
                   </Link>
-                  <Link to="/skilled-workers/plumbers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=plumbers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-faucet me-3"></i>Plumbers
                   </Link>
-                  <Link to="/skilled-workers/masons" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=masons" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-building me-3"></i>Masons
                   </Link>
-                  <Link to="/skilled-workers/tailors" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=tailors" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-cut me-3"></i>Tailors
                   </Link>
-                  <Link to="/skilled-workers/barbers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=barbers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-scissors me-3"></i>Barbers
                   </Link>
-                  <Link to="/skilled-workers/hairdressers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=hairdressers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-spray-can me-3"></i>Hairdressers
                   </Link>
-                  <Link to="/skilled-workers/mechanics" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=mechanics" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-car me-3"></i>Auto Mechanics
                   </Link>
-                  <Link to="/skilled-workers/painters" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=painters" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-paint-brush me-3"></i>Painters
                   </Link>
-                  <Link to="/skilled-workers/welders" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=welders" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-fire me-3"></i>Welders
                   </Link>
-                  <Link to="/skilled-workers/caterers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers?category=caterers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-utensils me-3"></i>Caterers
                   </Link>
-                  <Link to="/skilled-workers/all" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-ellipsis-h me-3"></i>More Categories
+                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                    <i className="fa fa-ellipsis-h me-3"></i>Browse All Categories
                   </Link>
                 </div>
                 <div className="mobile-dropdown-section">
                   <div className="mobile-dropdown-section-title">Discover & Hire</div>
-                  <Link to="/skilled-workers/search" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-search me-3"></i>Skill-Based Search
+                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                    <i className="fa fa-search me-3"></i>Browse Directory
                   </Link>
-                  <Link to="/skilled-workers/location-search" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-map-marker-alt me-3"></i>Location-Based Search
+                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                    <i className="fa fa-map-marker-alt me-3"></i>Search by Location
                   </Link>
-                  <Link to="/skilled-workers/portfolios" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-images me-3"></i>Worker Portfolio
+                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                    <i className="fa fa-images me-3"></i>View Worker Profiles
                   </Link>
-                  <Link to="/skilled-workers/reviews" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-star me-3"></i>Ratings & Reviews
                   </Link>
-                  <Link to="/skilled-workers/verified" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-check-circle me-3"></i>Verified Badges
+                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                    <i className="fa fa-check-circle me-3"></i>Verified Workers
                   </Link>
-                  <Link to="/skilled-workers/contact" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-phone me-3"></i>Direct Call/WhatsApp
+                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                    <i className="fa fa-phone me-3"></i>Direct Contact
                   </Link>
-                  <Link to="/skilled-workers/booking" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-calendar-check me-3"></i>Booking/Request Service
+                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
+                    <i className="fa fa-calendar-check me-3"></i>Service Requests
                   </Link>
                 </div>
                 <div className="mobile-dropdown-section">

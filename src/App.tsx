@@ -3,8 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { TwentyFirstToolbar } from "@21st-extension/toolbar-react";
-import { ReactPlugin } from "@21st-extension/react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PastQuestions from "./pages/PastQuestions";
@@ -51,6 +49,7 @@ import ResumeBuilderLogin from "./pages/resume-builder/Login";
 import ResumeBuilderSignup from "./pages/resume-builder/Signup";
 import ResumeBuilderNotFound from "./pages/resume-builder/NotFound";
 import Join from "./pages/Join";
+import SkilledWorkers from "./pages/SkilledWorkers";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -64,7 +63,6 @@ const routerFutureFlags = {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <TwentyFirstToolbar config={{ plugins: [ReactPlugin] }} />
       <Toaster />
       <Sonner />
       <BrowserRouter future={routerFutureFlags}>
@@ -106,6 +104,8 @@ const App = () => (
           <Route path="/jobs/yea-jobs" element={<YouthEmploymentAgency />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/companies/:name" element={<CompanyDetails />} />
+          {/* Skilled Workers Directory */}
+          <Route path="/skilled-workers" element={<SkilledWorkers />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}
