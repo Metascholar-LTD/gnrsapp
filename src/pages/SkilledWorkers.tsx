@@ -15,11 +15,12 @@ import {
   User,
   Wrench,
   UtensilsCrossed,
-  Search,
-  MapPin,
-  Filter
+  Filter,
+  Sparkles
 } from "lucide-react";
+import { WorkerCarousel } from "@/components/ui/worker-carousel";
 import { motion } from "framer-motion";
+import TextType from "@/components/ui/TextType";
 
 // Completely isolated styles - no global CSS dependencies
 const isolatedStyles = `
@@ -362,199 +363,6 @@ const isolatedStyles = `
     #sw-hero-text {
       font-size: 1.125rem;
     }
-  }
-  
-  #sw-search-container {
-    max-width: 100%;
-    margin: 1rem 0 0 0;
-    width: 100%;
-  }
-  
-  @media (min-width: 640px) {
-    #sw-search-container {
-      max-width: 42rem;
-      margin: 1.5rem 0 0 0;
-    }
-  }
-  
-  @media (min-width: 768px) {
-    #sw-search-container {
-      margin: 2rem 0 0 0;
-    }
-  }
-  
-  #sw-search-bar {
-    background-color: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(12px);
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  @media (min-width: 640px) {
-    #sw-search-bar {
-      flex-direction: row;
-      align-items: center;
-      border-radius: 9999px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    }
-  }
-  
-  #sw-search-input-wrapper {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 0.5rem;
-  }
-  
-  @media (min-width: 640px) {
-    #sw-search-input-wrapper {
-      gap: 0.75rem;
-      padding-left: 1rem;
-      padding-right: 1rem;
-      background-color: transparent;
-      border-radius: 0;
-    }
-  }
-  
-  .sw-search-icon {
-    width: 1.125rem;
-    height: 1.125rem;
-  }
-  
-  @media (min-width: 640px) {
-    .sw-search-icon {
-      width: 1.25rem;
-      height: 1.25rem;
-    }
-  }
-  
-  #sw-search-input {
-    flex: 1;
-    outline: none;
-    border: none;
-    color: #374151;
-    background-color: transparent;
-    font-size: 0.875rem;
-    font-family: 'DM Sans', system-ui, sans-serif;
-  }
-  
-  @media (min-width: 640px) {
-    #sw-search-input {
-      font-size: 1rem;
-    }
-  }
-  
-  #sw-search-input::placeholder {
-    color: #9ca3af;
-  }
-  
-  .sw-btn-icon {
-    width: 0.875rem;
-    height: 0.875rem;
-    margin-right: 0.375rem;
-  }
-  
-  @media (min-width: 640px) {
-    .sw-btn-icon {
-      width: 1rem;
-      height: 1rem;
-      margin-right: 0.5rem;
-    }
-  }
-  
-  .sw-btn span {
-    display: inline-block;
-  }
-  
-  #sw-search-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    width: 100%;
-  }
-  
-  @media (min-width: 640px) {
-    #sw-search-buttons {
-      flex-direction: row;
-      align-items: center;
-      width: auto;
-    }
-  }
-  
-  .sw-btn {
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    border-radius: 0.5rem;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    white-space: nowrap;
-  }
-  
-  @media (min-width: 640px) {
-    .sw-btn {
-      border-radius: 9999px;
-    }
-  }
-  
-  .sw-btn-ghost {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: #4b5563;
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    width: 100%;
-  }
-  
-  @media (min-width: 640px) {
-    .sw-btn-ghost {
-      background-color: transparent;
-      width: auto;
-      padding: 0.5rem 1rem;
-    }
-  }
-  
-  .sw-btn-ghost:hover {
-    color: #111827;
-    background-color: rgba(0, 0, 0, 0.08);
-  }
-  
-  @media (min-width: 640px) {
-    .sw-btn-ghost:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
-  }
-  
-  .sw-btn-primary {
-    background-color: #2563eb;
-    color: #ffffff;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.875rem;
-    width: 100%;
-  }
-  
-  @media (min-width: 640px) {
-    .sw-btn-primary {
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      width: auto;
-    }
-  }
-  
-  .sw-btn-primary:hover {
-    background-color: #1d4ed8;
   }
   
   #sw-section {
@@ -947,6 +755,561 @@ const isolatedStyles = `
     margin: 0.5rem 0 0 0;
     font-family: 'DM Sans', system-ui, sans-serif;
   }
+  
+  #sw-trusted-section {
+    background-color: #ffffff;
+    padding: 4rem 0;
+    width: 100%;
+  }
+  
+  @media (min-width: 768px) {
+    #sw-trusted-section {
+      padding: 5rem 0;
+    }
+  }
+  
+  #sw-trusted-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    #sw-trusted-inner {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    #sw-trusted-inner {
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }
+  }
+  
+  #sw-trusted-heading {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  @media (min-width: 768px) {
+    #sw-trusted-heading {
+      margin-bottom: 4rem;
+    }
+  }
+  
+  #sw-trusted-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+  }
+  
+  @media (min-width: 640px) {
+    #sw-trusted-title {
+      font-size: 2.25rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    #sw-trusted-title {
+      font-size: 2.75rem;
+    }
+  }
+  
+  .sw-trusted-title-part1 {
+    color: hsl(200, 50%, 30%);
+    margin-right: 0.5rem;
+  }
+  
+  .sw-trusted-title-part2 {
+    color: hsl(220, 70%, 50%);
+    display: inline-block;
+    min-width: 200px;
+    text-align: left;
+  }
+  
+  @media (min-width: 768px) {
+    .sw-trusted-title-part2 {
+      min-width: 250px;
+    }
+  }
+  
+  #sw-trusted-logos-container {
+    background-color: #ffffff;
+    border-radius: 1.5rem;
+    padding: 2.5rem 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  @media (min-width: 768px) {
+    #sw-trusted-logos-container {
+      padding: 3rem 2rem;
+      border-radius: 2rem;
+    }
+  }
+  
+  #sw-trusted-marquee-wrapper {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+  
+  #sw-trusted-marquee-container {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    animation: sw-marquee-scroll 40s linear infinite;
+    will-change: transform;
+    width: fit-content;
+  }
+  
+  @media (min-width: 768px) {
+    #sw-trusted-marquee-container {
+      gap: 4rem;
+    }
+  }
+  
+  @keyframes sw-marquee-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  
+  .sw-trusted-logo {
+    flex-shrink: 0;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: all 0.3s ease;
+    filter: grayscale(0%) brightness(1) contrast(1.1);
+  }
+  
+  @media (min-width: 768px) {
+    .sw-trusted-logo {
+      height: 4rem;
+    }
+  }
+  
+  .sw-trusted-logo:hover {
+    opacity: 1;
+    filter: grayscale(0%) brightness(1.05) contrast(1.15);
+    transform: scale(1.05);
+  }
+  
+  .sw-trusted-logo img {
+    max-height: 100%;
+    max-width: 120px;
+    object-fit: contain;
+    filter: brightness(1) contrast(1.1);
+  }
+  
+  @media (min-width: 768px) {
+    .sw-trusted-logo img {
+      max-width: 150px;
+    }
+  }
+  
+  .sw-community-logo {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 3rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  @media (min-width: 768px) {
+    .sw-community-logo {
+      min-width: 150px;
+      height: 4rem;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+    }
+  }
+  
+  .sw-community-logo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #1e1e3e 0%, #1a2a4e 100%);
+  }
+  
+  .sw-community-logo-text {
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  
+  @media (min-width: 768px) {
+    .sw-community-logo-text {
+      font-size: 1rem;
+    }
+  }
+  
+  #sw-streamline-section {
+    background: linear-gradient(135deg, hsl(40, 20%, 98%) 0%, hsl(40, 15%, 97%) 100%);
+    padding: 5rem 0;
+    width: 100%;
+    position: relative;
+  }
+  
+  @media (min-width: 768px) {
+    #sw-streamline-section {
+      padding: 6rem 0;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    #sw-streamline-section {
+      padding: 8rem 0;
+    }
+  }
+  
+  #sw-streamline-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    #sw-streamline-inner {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    #sw-streamline-inner {
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }
+  }
+  
+  #sw-streamline-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  
+  @media (min-width: 768px) {
+    #sw-streamline-header {
+      margin-bottom: 5rem;
+    }
+  }
+  
+  #sw-streamline-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 1.5rem 0;
+    font-family: 'Playfair Display', serif;
+    color: hsl(220, 30%, 15%);
+  }
+  
+  @media (min-width: 640px) {
+    #sw-streamline-title {
+      font-size: 2rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    #sw-streamline-title {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    #sw-streamline-title {
+      font-size: 2.75rem;
+    }
+  }
+  
+  .sw-streamline-title-highlight {
+    color: hsl(220, 70%, 50%);
+  }
+  
+  #sw-streamline-subtitle {
+    font-size: 1.125rem;
+    color: hsl(220, 15%, 45%);
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  
+  @media (min-width: 768px) {
+    #sw-streamline-subtitle {
+      font-size: 1.25rem;
+    }
+  }
+  
+  #sw-streamline-features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  @media (min-width: 768px) {
+    #sw-streamline-features {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
+    }
+  }
+  
+  .sw-feature-card {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  @media (min-width: 768px) {
+    .sw-feature-card {
+      border-radius: 1.25rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+  }
+  
+  .sw-feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sw-feature-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  @media (min-width: 768px) {
+    .sw-feature-image {
+      height: 240px;
+    }
+  }
+  
+  .sw-feature-content {
+    padding: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .sw-feature-content {
+      padding: 2rem;
+    }
+  }
+  
+  .sw-feature-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    color: hsl(220, 30%, 15%);
+    font-family: 'Playfair Display', serif;
+  }
+  
+  @media (min-width: 768px) {
+    .sw-feature-title {
+      font-size: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+  }
+  
+  .sw-feature-description {
+    font-size: 0.9375rem;
+    color: hsl(220, 15%, 45%);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.6;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  
+  @media (min-width: 768px) {
+    .sw-feature-description {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+  }
+  
+  .sw-feature-link {
+    color: hsl(220, 70%, 50%);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  
+  .sw-feature-link:hover {
+    color: hsl(220, 70%, 45%);
+  }
+  
+  @media (min-width: 768px) {
+    .sw-feature-link {
+      font-size: 1rem;
+    }
+  }
+  
+  #sw-industries-section {
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+  
+  @media (min-width: 640px) {
+    #sw-industries-section {
+      padding: 2.5rem 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    #sw-industries-section {
+      padding: 3rem 2rem;
+    }
+  }
+  
+  #sw-industries-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  #sw-industries-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    #sw-industries-header {
+      margin-bottom: 2rem;
+    }
+  }
+  
+  #sw-industries-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: hsl(220, 30%, 15%);
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    line-height: 1.2;
+  }
+  
+  @media (min-width: 640px) {
+    #sw-industries-title {
+      font-size: 1.875rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    #sw-industries-title {
+      font-size: 2.25rem;
+    }
+  }
+  
+  #sw-industries-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  
+  @media (min-width: 640px) {
+    #sw-industries-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.875rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    #sw-industries-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+  
+  .sw-industry-card {
+    position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  @media (min-width: 640px) {
+    .sw-industry-card {
+      border-radius: 0.625rem;
+    }
+  }
+  
+  .sw-industry-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sw-industry-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .sw-industry-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.5) 50%, transparent 100%);
+    padding: 0.75rem 0.625rem 0.625rem;
+    color: #ffffff;
+  }
+  
+  @media (min-width: 640px) {
+    .sw-industry-overlay {
+      padding: 1rem 0.75rem 0.75rem;
+    }
+  }
+  
+  .sw-industry-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (min-width: 640px) {
+    .sw-industry-label {
+      font-size: 0.875rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .sw-industry-label {
+      font-size: 0.9375rem;
+    }
+  }
 `;
 
 // Category definitions
@@ -965,9 +1328,26 @@ const PERSONAL_SERVICES = [
   { id: 'hairdressers', label: 'Hairdressers', icon: User, color: '#f43f5e' },
   { id: 'mechanics', label: 'Auto Mechanics', icon: Wrench, color: '#475569' },
   { id: 'caterers', label: 'Caterers', icon: UtensilsCrossed, color: '#22c55e' },
+  { id: 'cleaners', label: 'Cleaners', icon: Sparkles, color: '#06b6d4' },
 ];
 
 const ALL_CATEGORIES = [...SKILLED_TRADES, ...PERSONAL_SERVICES];
+
+// Industry images for the grid section
+const INDUSTRY_IMAGES = [
+  { id: 'electricians', url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&h=450&fit=crop', alt: 'Electrician at work' },
+  { id: 'carpenters', url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=450&fit=crop', alt: 'Carpenter crafting' },
+  { id: 'plumbers', url: 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&h=450&fit=crop', alt: 'Plumber fixing pipes' },
+  { id: 'masons', url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&h=450&fit=crop', alt: 'Mason building' },
+  { id: 'welders', url: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&h=450&fit=crop', alt: 'Welder working' },
+  { id: 'painters', url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&h=450&fit=crop', alt: 'Painter applying finish' },
+  { id: 'tailors', url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=450&fit=crop', alt: 'Tailor sewing' },
+  { id: 'barbers', url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=450&fit=crop', alt: 'Barber cutting hair' },
+  { id: 'hairdressers', url: 'https://images.unsplash.com/photo-1560066984-138dadb4e035?w=600&h=450&fit=crop', alt: 'Hairdresser styling' },
+  { id: 'mechanics', url: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&h=450&fit=crop', alt: 'Auto mechanic working' },
+  { id: 'caterers', url: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&h=450&fit=crop', alt: 'Caterer preparing food' },
+  { id: 'cleaners', url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&h=450&fit=crop', alt: 'Cleaner at work' },
+];
 
 // Carousel images data
 const CAROUSEL_IMAGES = [
@@ -1123,33 +1503,6 @@ const SkilledWorkers = () => {
                 </motion.p>
               </motion.div>
 
-              {/* Search Bar */}
-              <motion.div
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-                id="sw-search-container"
-              >
-                <div id="sw-search-bar">
-                  <div id="sw-search-input-wrapper">
-                    <Search className="sw-search-icon" style={{ color: '#9ca3af', flexShrink: 0 }} />
-                    <input
-                      type="text"
-                      placeholder="Search by name, skill, or location..."
-                      id="sw-search-input"
-                    />
-                  </div>
-                  <div id="sw-search-buttons">
-                    <button className="sw-btn sw-btn-ghost">
-                      <MapPin className="sw-btn-icon" />
-                      <span>Location</span>
-                    </button>
-                    <button className="sw-btn sw-btn-primary">
-                      Search
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
             </div>
           </div>
         </div>
@@ -1291,6 +1644,302 @@ const SkilledWorkers = () => {
         </div>
       </div>
 
+      {/* Featured Workers Carousel Section */}
+      <WorkerCarousel
+        title="The smartest staffing solution for your business"
+        subtitle="Find, hire, and pay temporary workers"
+        workers={[
+          {
+            id: '1',
+            name: 'Michael Chen',
+            title: 'Senior Software Engineer, Cloud Infrastructure',
+            description: 'Working with this team completely changed our infrastructure game. The support and expertise were incredible. They delivered beyond our expectations and helped us scale to millions of users.',
+            image: 'https://plus.unsplash.com/premium_photo-1689977807477-a579eda91fa2?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+            githubUrl: '#',
+            twitterUrl: '#',
+            youtubeUrl: '#',
+            linkedinUrl: '#',
+          },
+          {
+            id: '2',
+            name: 'Jessica Roberts',
+            title: 'Lead Data Scientist, InsightX',
+            description: 'The data analytics platform they built gave our team the confidence and tools needed for true data-driven decisions. Their dashboarding capabilities went above and beyond our expectations.',
+            image: 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=600&q=80',
+            githubUrl: '#',
+            twitterUrl: '#',
+            youtubeUrl: '#',
+            linkedinUrl: '#',
+          },
+          {
+            id: '3',
+            name: 'William Carter',
+            title: 'VP Product, NovaLabs',
+            description: 'NovaLabs helped our products find the perfect market fit. Their engineering team exceeded every delivery milestone and provided exceptional technical leadership.',
+            image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=600&q=80',
+            githubUrl: '#',
+            twitterUrl: '#',
+            youtubeUrl: '#',
+            linkedinUrl: '#',
+          },
+        ]}
+      />
+
+      {/* Trusted Brands Section */}
+      <div id="sw-trusted-section">
+        <div id="sw-trusted-inner">
+          <div id="sw-trusted-heading">
+            <h2 id="sw-trusted-title">
+              <span className="sw-trusted-title-part1">Trusted nationwide by </span>
+              <span className="sw-trusted-title-part2">
+                <TextType
+                  text={["top brands", "institutions", "communities"]}
+                  typingSpeed={120}
+                  pauseDuration={3000}
+                  deletingSpeed={50}
+                  showCursor={true}
+                  cursorCharacter="|"
+                  as="span"
+                />
+              </span>
+            </h2>
+          </div>
+          
+          <div id="sw-trusted-logos-container">
+            <div id="sw-trusted-marquee-wrapper">
+              <div id="sw-trusted-marquee-container">
+                {/* Alternating pattern: Brand, Institution, Community */}
+                {/* Set 1 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872570/OIP_uoujra.webp" alt="Unilever - Manufacturing & Construction" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379495/46600902-ca9e-407d-9392-06a45b9d9b1a.png" alt="University of Ghana" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Greater Accra</span>
+                  </div>
+                </div>
+                {/* Set 2 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872441/R_c78wwd.jpg" alt="Coca-Cola - Manufacturing & Facilities" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379648/e9c10d56-1f3e-4151-8123-93d77fefe7aa.png" alt="KNUST" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Ashanti</span>
+                  </div>
+                </div>
+                {/* Set 3 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872599/OIP_vorv7r.webp" alt="Guinness - Manufacturing & Maintenance" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379582/9c190837-92c2-4230-b205-4ab9f0c8c6a1.png" alt="University of Cape Coast" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Western</span>
+                  </div>
+                </div>
+                {/* Set 4 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872686/OIP_xhdwgc.webp" alt="Samsung - Electronics & Installation" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379384/9c8b41be-3e40-4ee3-8ae5-8951832cd82c.png" alt="GIMPA" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Eastern</span>
+                  </div>
+                </div>
+                {/* Set 5 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872756/MTN-EYG-Logo_fjhupw.jpg" alt="MTN - Infrastructure & Construction" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379251/673184a4-9fd7-433b-b33e-ab7871fa5a1b.png" alt="University of Education, Winneba" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Central</span>
+                  </div>
+                </div>
+                {/* Set 6 - Remaining items */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872848/bbd99004fb6d86d23948c9a4524b729c_Edited_km1ycp.jpg" alt="Telecel - Infrastructure & Maintenance" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Northern</span>
+                  </div>
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872500/OIP_hrtnxv.webp" alt="Ecobank - Facilities & Construction" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Volta</span>
+                  </div>
+                </div>
+                {/* Duplicate set for seamless loop */}
+                {/* Set 1 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872570/OIP_uoujra.webp" alt="Unilever - Manufacturing & Construction" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379495/46600902-ca9e-407d-9392-06a45b9d9b1a.png" alt="University of Ghana" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Greater Accra</span>
+                  </div>
+                </div>
+                {/* Set 2 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872441/R_c78wwd.jpg" alt="Coca-Cola - Manufacturing & Facilities" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379648/e9c10d56-1f3e-4151-8123-93d77fefe7aa.png" alt="KNUST" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Ashanti</span>
+                  </div>
+                </div>
+                {/* Set 3 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872599/OIP_vorv7r.webp" alt="Guinness - Manufacturing & Maintenance" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379582/9c190837-92c2-4230-b205-4ab9f0c8c6a1.png" alt="University of Cape Coast" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Western</span>
+                  </div>
+                </div>
+                {/* Set 4 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872686/OIP_xhdwgc.webp" alt="Samsung - Electronics & Installation" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379384/9c8b41be-3e40-4ee3-8ae5-8951832cd82c.png" alt="GIMPA" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Eastern</span>
+                  </div>
+                </div>
+                {/* Set 5 */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872756/MTN-EYG-Logo_fjhupw.jpg" alt="MTN - Infrastructure & Construction" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763379251/673184a4-9fd7-433b-b33e-ab7871fa5a1b.png" alt="University of Education, Winneba" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Central</span>
+                  </div>
+                </div>
+                {/* Set 6 - Remaining items */}
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872848/bbd99004fb6d86d23948c9a4524b729c_Edited_km1ycp.jpg" alt="Telecel - Infrastructure & Maintenance" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Northern</span>
+                  </div>
+                </div>
+                <div className="sw-trusted-logo">
+                  <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764872500/OIP_hrtnxv.webp" alt="Ecobank - Facilities & Construction" />
+                </div>
+                <div className="sw-trusted-logo">
+                  <div className="sw-community-logo">
+                    <span className="sw-community-logo-text">Volta</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Streamline Staffing Section */}
+      <div id="sw-streamline-section">
+        <div id="sw-streamline-inner">
+          <div id="sw-streamline-header">
+            <h2 id="sw-streamline-title">
+              Streamline your Skills in <span className="sw-streamline-title-highlight">one, simple platform</span>
+            </h2>
+            <p id="sw-streamline-subtitle">
+              Finding skilled workers has never been easier.
+            </p>
+          </div>
+          
+          <div id="sw-streamline-features">
+            {/* Post Feature */}
+            <div className="sw-feature-card">
+              <img 
+                src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&h=400&fit=crop" 
+                alt="Post a position" 
+                className="sw-feature-image"
+              />
+              <div className="sw-feature-content">
+                <h3 className="sw-feature-title">Post</h3>
+                <p className="sw-feature-description">
+                  Create a position, location and pay rate. Post to the entire community of over 2 million workers or your selected favorites.
+                </p>
+                <a href="#" className="sw-feature-link">
+                  See Shift Management →
+                </a>
+              </div>
+            </div>
+            
+            {/* Hire Feature */}
+            <div className="sw-feature-card">
+              <img 
+                src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop" 
+                alt="Hire workers" 
+                className="sw-feature-image"
+              />
+              <div className="sw-feature-content">
+                <h3 className="sw-feature-title">Hire</h3>
+                <p className="sw-feature-description">
+                  Select the candidates who best fit your needs or let Smart Hire our AI-powered hiring system select for you.
+                </p>
+                <a href="#" className="sw-feature-link">
+                  See Smart Hire →
+                </a>
+              </div>
+            </div>
+            
+            {/* Pay Feature */}
+            <div className="sw-feature-card">
+              <img 
+                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop" 
+                alt="Pay workers" 
+                className="sw-feature-image"
+              />
+              <div className="sw-feature-content">
+                <h3 className="sw-feature-title">Pay</h3>
+                <p className="sw-feature-description">
+                  Once the shift is completed simply approve or modify the time sheet. GigSmart for Business handles payment on your behalf.
+                </p>
+                <a href="#" className="sw-feature-link">
+                  See Payments →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Results Section */}
       {selectedCategory && (
         <div id="sw-results">
@@ -1312,6 +1961,38 @@ const SkilledWorkers = () => {
           </div>
         </div>
       )}
+
+      {/* Industries Grid Section */}
+      <div id="sw-industries-section">
+        <div id="sw-industries-inner">
+          <div id="sw-industries-header">
+            <h2 id="sw-industries-title">
+              Every industry, any role - We've got it
+            </h2>
+          </div>
+          <div id="sw-industries-grid">
+            {ALL_CATEGORIES.map((category) => {
+              const industryImage = INDUSTRY_IMAGES.find(img => img.id === category.id);
+              return (
+                <div
+                  key={category.id}
+                  className="sw-industry-card"
+                  onClick={() => handleCategoryClick(category.id)}
+                >
+                  <img
+                    src={industryImage?.url || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&h=450&fit=crop'}
+                    alt={industryImage?.alt || category.label}
+                    className="sw-industry-image"
+                  />
+                  <div className="sw-industry-overlay">
+                    <p className="sw-industry-label">{category.label}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       <Footer />
     </div>
