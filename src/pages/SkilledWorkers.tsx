@@ -1335,15 +1335,15 @@ const ALL_CATEGORIES = [...SKILLED_TRADES, ...PERSONAL_SERVICES];
 
 // Industry images for the grid section
 const INDUSTRY_IMAGES = [
-  { id: 'electricians', url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&h=450&fit=crop', alt: 'Electrician at work' },
-  { id: 'carpenters', url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=450&fit=crop', alt: 'Carpenter crafting' },
-  { id: 'plumbers', url: 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&h=450&fit=crop', alt: 'Plumber fixing pipes' },
-  { id: 'masons', url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&h=450&fit=crop', alt: 'Mason building' },
+  { id: 'electricians', url: 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&h=450&fit=crop', alt: 'Electrician at work' },
+  { id: 'carpenters', url: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1764878198/7c210d59277846477cf2d897f65ef507_xvfmm2.jpg', alt: 'Carpenter crafting' },
+  { id: 'plumbers', url: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1764878533/R_bulkfp.jpg', alt: 'Plumber fixing pipes' },
+  { id: 'masons', url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&h=450&fit=crop', alt: 'Mason building' },
   { id: 'welders', url: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&h=450&fit=crop', alt: 'Welder working' },
   { id: 'painters', url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&h=450&fit=crop', alt: 'Painter applying finish' },
   { id: 'tailors', url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=450&fit=crop', alt: 'Tailor sewing' },
-  { id: 'barbers', url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=450&fit=crop', alt: 'Barber cutting hair' },
-  { id: 'hairdressers', url: 'https://images.unsplash.com/photo-1560066984-138dadb4e035?w=600&h=450&fit=crop', alt: 'Hairdresser styling' },
+  { id: 'barbers', url: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1764877793/young-african-american-man-visiting-barbershop_dwrst6.jpg', alt: 'Barber cutting hair' },
+  { id: 'hairdressers', url: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1764878066/stylist-woman-taking-care-her-client-afro-hair_vn7c53.jpg', alt: 'Hairdresser styling' },
   { id: 'mechanics', url: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&h=450&fit=crop', alt: 'Auto mechanic working' },
   { id: 'caterers', url: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&h=450&fit=crop', alt: 'Caterer preparing food' },
   { id: 'cleaners', url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&h=450&fit=crop', alt: 'Cleaner at work' },
