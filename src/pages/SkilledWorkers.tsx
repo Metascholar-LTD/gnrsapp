@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -1384,6 +1384,7 @@ const CAROUSEL_IMAGES = [
 ];
 
 const SkilledWorkers = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     searchParams.get('category') || null
@@ -1635,8 +1636,8 @@ const SkilledWorkers = () => {
             id="sw-browse-all-wrapper"
           >
             <button
-              onClick={() => setSelectedCategory(null)}
-              className={`sw-btn-browse ${selectedCategory === null ? 'sw-btn-browse-active' : ''}`}
+              onClick={() => navigate('/skilled-workers/browse')}
+              className="sw-btn-browse"
             >
               Browse All Categories
             </button>

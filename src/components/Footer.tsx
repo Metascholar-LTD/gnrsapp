@@ -28,7 +28,7 @@ export const Footer = () => {
                 <div className="mb-4">
                   <Link to="/" className="text-decoration-none">
                     <img 
-                      src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763063197/of_Participation_ovlz1n.png" 
+                      src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764944554/Of_Participation_-_1_-_Edited_l53t4f.png" 
                       alt="GNRS Logo" 
                       style={{ 
                         height: '65px', 

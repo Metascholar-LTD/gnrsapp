@@ -133,7 +133,7 @@ export const Navigation = () => {
         <nav className="navbar navbar-expand-lg navbar-light py-lg-0 px-lg-5 wow fadeIn" data-wow-delay="0.1s">
           <Link to="/" className="navbar-brand ms-4 ms-lg-0" onClick={closeMobileMenu}>
             <img 
-              src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763063197/of_Participation_ovlz1n.png" 
+              src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764944554/Of_Participation_-_1_-_Edited_l53t4f.png" 
               alt="GNRS Logo" 
               style={{ 
                 height: '65px', 
@@ -588,7 +588,6 @@ export const Navigation = () => {
                           <div className="col-lg-4">
                             <h6 className="mega-menu-section-title">Search & Browse</h6>
                             <ul className="mega-menu-list">
-                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-search me-2"></i>Browse Directory</Link></li>
                               <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-map-marker-alt me-2"></i>Search by Location</Link></li>
                               <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-images me-2"></i>View Worker Profiles</Link></li>
                               <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-star me-2"></i>Ratings & Reviews</Link></li>
@@ -598,7 +597,6 @@ export const Navigation = () => {
                             <h6 className="mega-menu-section-title">Directory Features</h6>
                             <ul className="mega-menu-list">
                               <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-check-circle me-2"></i>Verified Workers</Link></li>
-                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-phone me-2"></i>Direct Contact</Link></li>
                               <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-calendar-check me-2"></i>Service Requests</Link></li>
                             </ul>
                           </div>
@@ -624,16 +622,7 @@ export const Navigation = () => {
                             <ul className="mega-menu-list">
                               <li><Link to="/skilled-workers/create-profile" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-user-plus me-2"></i>Create Professional Profile</Link></li>
                               <li><Link to="/skilled-workers/upload-samples" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-upload me-2"></i>Upload Work Samples</Link></li>
-                              <li><Link to="/skilled-workers/manage-reviews" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-comments me-2"></i>Manage Reviews</Link></li>
-                              <li><Link to="/skilled-workers/pricing" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-dollar-sign me-2"></i>Pricing and Quotations</Link></li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-4">
-                            <h6 className="mega-menu-section-title">Business Growth</h6>
-                            <ul className="mega-menu-list">
-                              <li><Link to="/skilled-workers/visibility" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-chart-line me-2"></i>Visibility Boost Packages</Link></li>
-                              <li><Link to="/skilled-workers/training" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-graduation-cap me-2"></i>Skill Training Resources</Link></li>
-                              <li><Link to="/skilled-workers/analytics" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-chart-bar me-2"></i>Customer Analytics</Link></li>
+                              <li><Link to="/skilled-workers/pricing" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-dollar-sign me-2"></i>Pricing</Link></li>
                             </ul>
                           </div>
                           <div className="col-lg-4">
@@ -964,7 +953,7 @@ export const Navigation = () => {
       <div className={`mobile-sidebar ${isMobileMenuOpen ? 'mobile-sidebar-open' : ''}`}>
         <div className="mobile-sidebar-header">
           <img 
-            src="https://res.cloudinary.com/dsypclqxk/image/upload/v1763063197/of_Participation_ovlz1n.png" 
+            src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764944554/Of_Participation_-_1_-_Edited_l53t4f.png" 
             alt="GNRS Logo" 
             style={{ 
               height: '50px', 
@@ -1352,9 +1341,6 @@ export const Navigation = () => {
                     <i className="fa fa-check-circle me-3"></i>Verified Workers
                   </Link>
                   <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-phone me-3"></i>Direct Contact
-                  </Link>
-                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-calendar-check me-3"></i>Service Requests
                   </Link>
                 </div>
@@ -1366,11 +1352,8 @@ export const Navigation = () => {
                   <Link to="/skilled-workers/upload-samples" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-upload me-3"></i>Upload Work Samples
                   </Link>
-                  <Link to="/skilled-workers/manage-reviews" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-comments me-3"></i>Manage Reviews
-                  </Link>
                   <Link to="/skilled-workers/pricing" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-dollar-sign me-3"></i>Pricing and Quotations
+                    <i className="fa fa-dollar-sign me-3"></i>Pricing
                   </Link>
                   <Link to="/skilled-workers/visibility" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-chart-line me-3"></i>Visibility Boost Packages
