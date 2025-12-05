@@ -1,3 +1,5 @@
+import { HomepageButton } from "@/components/ui/HomepageButton";
+
 export const Contact = () => {
   return (
     <div className="container-xxl py-5">
@@ -34,7 +36,7 @@ export const Contact = () => {
                   </div>
                 </div>
                 <div className="col-12">
-                  <button className="btn btn-primary py-3 px-5" type="submit">Send Message</button>
+                  <HomepageButton type="submit">Send Message</HomepageButton>
                 </div>
               </div>
             </form>

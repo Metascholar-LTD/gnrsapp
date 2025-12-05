@@ -35,19 +35,7 @@ section::before {
 }
 
 /* Ghana Yellow/Gold accents */
-.btn-primary {
-    background: linear-gradient(135deg, #006B3F 0%, #4ECDC4 100%) !important;
-    border: none !important;
-    transition: all 0.3s ease;
-    color: white !important;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #4ECDC4 0%, #006B3F 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 107, 63, 0.3);
-    color: white !important;
-}
+/* Old .btn-primary styles removed - now using HomepageButton component */
 
 /* Service tabs with Ghana colors */
 .service .nav .nav-link.active {

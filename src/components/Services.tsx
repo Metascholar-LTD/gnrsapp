@@ -1,3 +1,5 @@
+import { HomepageButton } from "@/components/ui/HomepageButton";
+
 export const Services = () => {
   return (
     <div id="services" className="container-fluid service py-5" style={{ backgroundColor: '#FAFAFA' }}>
@@ -56,7 +58,9 @@ export const Services = () => {
                     <p><i className="fa fa-check text-primary me-3"></i>Scholarship Opportunities</p>
                     <p><i className="fa fa-check text-primary me-3"></i>Course Listings</p>
                     <p><i className="fa fa-check text-primary me-3"></i>Educational Institutions</p>
-                    <a href="/education" className="btn btn-primary py-3 px-5 mt-3">Explore Education</a>
+                    <div className="mt-3">
+                      <HomepageButton to="/education">Explore Education</HomepageButton>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -84,7 +88,9 @@ export const Services = () => {
                     <p><i className="fa fa-check text-primary me-3"></i>Job Listings</p>
                     <p><i className="fa fa-check text-primary me-3"></i>Career Resources</p>
                     <p><i className="fa fa-check text-primary me-3"></i>Professional Development</p>
-                    <a href="/jobs" className="btn btn-primary py-3 px-5 mt-3">Browse Jobs</a>
+                    <div className="mt-3">
+                      <HomepageButton to="/jobs">Browse Jobs</HomepageButton>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -112,7 +118,9 @@ export const Services = () => {
                     <p><i className="fa fa-check text-primary me-3"></i>National News</p>
                     <p><i className="fa fa-check text-primary me-3"></i>Government Announcements</p>
                     <p><i className="fa fa-check text-primary me-3"></i>Event Updates</p>
-                    <a href="/news" className="btn btn-primary py-3 px-5 mt-3">Read News</a>
+                    <div className="mt-3">
+                      <HomepageButton to="/news">Read News</HomepageButton>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -140,7 +148,9 @@ export const Services = () => {
                     <p><i className="fa fa-check text-primary me-3"></i>Government Services</p>
                     <p><i className="fa fa-check text-primary me-3"></i>Public Information</p>
                     <p><i className="fa fa-check text-primary me-3"></i>National Statistics</p>
-                    <a href="/contact" className="btn btn-primary py-3 px-5 mt-3">Learn More</a>
+                    <div className="mt-3">
+                      <HomepageButton to="/contact">Learn More</HomepageButton>
+                    </div>
                   </div>
                 </div>
               </div>

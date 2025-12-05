@@ -1,3 +1,5 @@
+import { HomepageButton } from "@/components/ui/HomepageButton";
+
 export const WhyChooseUs = () => {
   return (
     <div className="container-fluid py-5">
@@ -44,17 +46,9 @@ export const WhyChooseUs = () => {
             >
               The Ghana National Resource System (GNRS) stands out as the premier platform for accessing essential national resources. We provide comprehensive, reliable, and accessible services that connect every Ghanaian with opportunities for education, employment, and national information. Our commitment to excellence and user satisfaction makes us the trusted choice for millions of citizens across Ghana.
             </p>
-            <a 
-              href="#services" 
-              className="btn btn-primary py-3 px-5"
-              style={{
-                borderRadius: '8px',
-                fontWeight: 600,
-                fontSize: '1rem'
-              }}
-            >
+            <HomepageButton href="#services">
               Explore More
-            </a>
+            </HomepageButton>
           </div>
 
           {/* Right Side - Feature Cards */}
