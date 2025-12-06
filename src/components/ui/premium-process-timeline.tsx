@@ -96,9 +96,12 @@ const TimelineContent = ({ step }: { step: ProcessStep }) => (
     <p className="mt-4 text-slate-700 dark:text-slate-300">{step.description}</p>
     <div className="mt-6 grid sm:grid-cols-2 gap-4">
       {step.details.map((detail, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <div className="w-5 h-5 bg-green-500/10 dark:bg-green-500/20 text-green-500 rounded-full flex items-center justify-center text-xs">✓</div>
-          <span className="text-sm text-slate-700 dark:text-slate-300">{detail}</span>
+        <div 
+          key={i} 
+          className="flex items-center gap-3 p-3 rounded-lg transition-all duration-300 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:shadow-md hover:scale-[1.02] group"
+        >
+          <div className="w-6 h-6 bg-green-500/10 dark:bg-green-500/20 text-green-500 rounded-full flex items-center justify-center text-sm transition-all duration-300 group-hover:bg-green-500/20 dark:group-hover:bg-green-500/30 group-hover:scale-110">✓</div>
+          <span className="text-base font-medium text-slate-700 dark:text-slate-300 transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{detail}</span>
         </div>
       ))}
     </div>

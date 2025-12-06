@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
 import { Spinner } from "@/components/Spinner";
-import { Briefcase, User, Check } from "lucide-react";
+import { Briefcase, User } from "lucide-react";
 import { motion } from "framer-motion";
+import { FeatureCard } from "@/components/ui/grid-feature-cards";
+import { cn } from "@/lib/utils";
 
 const isolatedStyles = `
   #swj-page-wrapper {
@@ -270,6 +272,44 @@ const isolatedStyles = `
 
 type RoleType = 'employer' | 'worker' | null;
 
+type ViewAnimationProps = {
+	delay?: number;
+	className?: string;
+	children: React.ReactNode;
+};
+
+function AnimatedContainer({ className, delay = 0.1, children }: ViewAnimationProps) {
+	const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
+
+	useEffect(() => {
+		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+		setShouldReduceMotion(mediaQuery.matches);
+		
+		const handleChange = (e: MediaQueryListEvent) => {
+			setShouldReduceMotion(e.matches);
+		};
+		
+		mediaQuery.addEventListener('change', handleChange);
+		return () => mediaQuery.removeEventListener('change', handleChange);
+	}, []);
+
+	if (shouldReduceMotion) {
+		return <div className={className}>{children}</div>;
+	}
+
+	return (
+		<motion.div
+			initial={{ filter: 'blur(4px)', translateY: -8, opacity: 0 }}
+			whileInView={{ filter: 'blur(0px)', translateY: 0, opacity: 1 }}
+			viewport={{ once: true }}
+			transition={{ delay, duration: 0.8 }}
+			className={className}
+		>
+			{children}
+		</motion.div>
+	);
+}
+
 const SkilledWorkersJoin = () => {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<RoleType>(null);
@@ -317,58 +357,63 @@ const SkilledWorkersJoin = () => {
 
       <div id="swj-main-content">
         <div id="swj-container">
-          <motion.h1
-            id="swj-title"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+          <AnimatedContainer className="mx-auto max-w-3xl text-center mb-8">
+            <h2 className="text-3xl font-bold tracking-wide text-balance md:text-4xl lg:text-5xl xl:font-extrabold">
+              Join as an employer or skilled worker
+            </h2>
+            <p className="text-muted-foreground mt-4 text-sm tracking-wide text-balance md:text-base">
+              Choose your path and start connecting with opportunities today.
+            </p>
+          </AnimatedContainer>
+
+          <AnimatedContainer
+            delay={0.4}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 mb-8 md:mb-12"
           >
-            Join as an employer or skilled worker
-          </motion.h1>
-
-          <div id="swj-cards-container">
-            {/* Employer Card */}
             <motion.div
-              className={`swj-role-card ${selectedRole === 'employer' ? 'selected' : ''}`}
               onClick={() => handleRoleSelect('employer')}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              className={cn(
+                "cursor-pointer transition-all rounded-lg",
+                selectedRole === 'employer' && "ring-2 ring-blue-500 ring-offset-2"
+              )}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="swj-radio-button">
-                <div className="swj-radio-dot"></div>
-              </div>
-              <div className="swj-icon-wrapper">
-                <Briefcase className="swj-icon" />
-              </div>
-              <p className="swj-role-text">
-                I'm an employer, hiring for a project
-              </p>
+              <FeatureCard
+                feature={{
+                  title: "I'm an employer, hiring for a project",
+                  icon: Briefcase,
+                  description: "Post job opportunities and find skilled professionals for your projects. Access a pool of verified talent ready to work."
+                }}
+                className={cn(
+                  "h-full",
+                  selectedRole === 'employer' && "bg-blue-50/50 dark:bg-blue-950/20"
+                )}
+              />
             </motion.div>
 
-            {/* Skilled Worker Card */}
             <motion.div
-              className={`swj-role-card ${selectedRole === 'worker' ? 'selected' : ''}`}
               onClick={() => handleRoleSelect('worker')}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              className={cn(
+                "cursor-pointer transition-all rounded-lg",
+                selectedRole === 'worker' && "ring-2 ring-blue-500 ring-offset-2"
+              )}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="swj-radio-button">
-                <div className="swj-radio-dot"></div>
-              </div>
-              <div className="swj-icon-wrapper">
-                <User className="swj-icon" />
-              </div>
-              <p className="swj-role-text">
-                I'm a skilled worker, looking for work
-              </p>
+              <FeatureCard
+                feature={{
+                  title: "I'm a skilled worker, looking for work",
+                  icon: User,
+                  description: "Showcase your skills and connect with employers. Find opportunities that match your expertise and career goals."
+                }}
+                className={cn(
+                  "h-full",
+                  selectedRole === 'worker' && "bg-blue-50/50 dark:bg-blue-950/20"
+                )}
+              />
             </motion.div>
-          </div>
+          </AnimatedContainer>
 
           <motion.button
             id="swj-action-button"

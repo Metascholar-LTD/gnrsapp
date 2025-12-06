@@ -59,17 +59,17 @@ section::before {
     border-color: #006B3F;
 }
 
-/* Carousel controls with Ghana colors */
+/* Carousel controls with blue theme */
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
-    background-color: #006B3F;
-    border: 10px solid #006B3F;
+    background-color: #2563eb;
+    border: 10px solid #2563eb;
 }
 
 .carousel-control-prev-icon:hover,
 .carousel-control-next-icon:hover {
-    background-color: #4ECDC4;
-    border-color: #4ECDC4;
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
 }
 
 /* Footer links with Ghana accent */
