@@ -867,15 +867,19 @@ const SkilledWorkersBrowse = () => {
                 <div key={letter} className="swb-category-group">
                   <h3 className="swb-category-letter">{letter}</h3>
                   <div className="swb-category-grid">
-                    {groupedCategories[letter].map((category, index) => (
-                      <Link
-                        key={`${letter}-${index}`}
-                        to={`/skilled-workers?category=${encodeURIComponent(category.name.toLowerCase())}`}
-                        className="swb-category-item"
-                      >
-                        {category.name}
-                      </Link>
-                    ))}
+                    {groupedCategories[letter].map((category, index) => {
+                      // Convert category name to URL-friendly slug
+                      const slug = category.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                      return (
+                        <Link
+                          key={`${letter}-${index}`}
+                          to={`/skilled-workers/category/${slug}`}
+                          className="swb-category-item"
+                        >
+                          {category.name}
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               ))}

@@ -52,6 +52,8 @@ import Join from "./pages/Join";
 import SkilledWorkers from "./pages/SkilledWorkers";
 import SkilledWorkersBrowse from "./pages/SkilledWorkersBrowse";
 import SkilledWorkersJoin from "./pages/SkilledWorkersJoin";
+import { SkilledWorkerProfile } from "./pages/SkilledWorkerProfile";
+import { SkilledWorkersList } from "./pages/SkilledWorkersList";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -110,6 +112,8 @@ const App = () => (
           <Route path="/skilled-workers" element={<SkilledWorkers />} />
           <Route path="/skilled-workers/browse" element={<SkilledWorkersBrowse />} />
           <Route path="/skilled-workers/join" element={<SkilledWorkersJoin />} />
+          <Route path="/skilled-workers/category/:category" element={<SkilledWorkersList />} />
+          <Route path="/skilled-workers/profile/:id" element={<SkilledWorkerProfile />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}

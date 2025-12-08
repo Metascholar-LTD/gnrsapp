@@ -331,7 +331,7 @@ export const Navigation = () => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Global Scholarships Bank
+                  Scholarships Bank
                 </Link>
                 <div className="dropdown-menu mega-menu-content" aria-labelledby="scholarshipDropdown">
                   <div className="mega-menu-wrapper">
