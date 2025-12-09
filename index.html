@@ -37,9 +37,250 @@
     <link href="/css/style.css" rel="stylesheet">
     <!-- Ghana Flag Colors -->
     <link href="/css/ghana-colors.css" rel="stylesheet">
+    <!-- Prevent white flash - set dark background and loader immediately -->
+    <style>
+      html, body {
+        background-color: #000000 !important;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      body.loaded,
+      body.preloaded,
+      html.loaded,
+      html.preloaded {
+        overflow: auto !important;
+        overflow-x: hidden !important;
+        background-color: transparent !important;
+      }
+      #root {
+        background-color: #000000 !important;
+        opacity: 0;
+      }
+      body.loaded #root,
+      body.preloaded #root {
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+        background-color: transparent !important;
+      }
+      /* Loader visible immediately before React loads - NO TRANSITIONS */
+      #loader-wrapper {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 99999999 !important;
+        background: rgba(0, 0, 0, 0.95) !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        transition: none !important;
+      }
+      /* Allow hiding when body has loaded classes */
+      body.loaded #loader-wrapper,
+      body.preloaded #loader-wrapper,
+      #loader-wrapper[style*="display: none"],
+      #loader-wrapper[style*="opacity: 0"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        z-index: -1 !important;
+        pointer-events: none !important;
+      }
+      #page {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        opacity: 1 !important;
+        transition: none !important;
+      }
+      #ighex {
+        position: fixed !important;
+        bottom: clamp(20px, 4vh, 30px) !important;
+        left: 0 !important;
+        right: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+      }
+      .preloader {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) rotateY(180deg) rotateZ(-60deg) !important;
+        font-size: clamp(7px, 1.5vw, 10px) !important;
+        width: 3.75em !important;
+        height: 4.25em !important;
+        margin-left: -1.875em !important;
+        margin-top: -2.125em !important;
+      }
+      .preloader .slice {
+        border-top: 1.125em solid transparent !important;
+        border-left: 1.875em solid #e74c3c !important;
+        border-bottom: 1em solid transparent !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 50% !important;
+        transform-origin: left bottom !important;
+      }
+      body.loaded #loader-wrapper,
+      body.preloaded #loader-wrapper {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        display: none !important;
+        transition: opacity 0.3s ease-out, visibility 0s 0.3s;
+      }
+      /* System Pill Badge - Same style as meta-consult */
+      #system-pill {
+        position: absolute !important;
+        top: calc(50% - clamp(140px, 16vh, 180px)) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        text-align: center !important;
+        z-index: 10 !important;
+        display: inline-block !important;
+        padding: clamp(0.375rem, 1.5vw, 0.5rem) clamp(0.75rem, 3vw, 1rem) !important;
+        border-radius: 9999px !important;
+        border: 1px solid rgba(251, 146, 60, 0.3) !important;
+        background: linear-gradient(to right, rgba(255, 237, 213, 0.7), rgba(255, 255, 255, 0.9)) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        transition: transform 0.3s ease !important;
+        white-space: nowrap !important;
+        max-width: calc(100vw - 2rem) !important;
+        overflow: hidden !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
+        font-display: swap !important;
+      }
+      #system-pill:hover {
+        transform: translateX(-50%) scale(1.05) !important;
+      }
+      #system-pill h2 {
+        font-size: clamp(0.75rem, 2.5vw, 1.125rem) !important;
+        font-weight: 600 !important;
+        color: #152c6a !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.5 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: inline-block !important;
+        max-width: 100% !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
+        font-display: swap !important;
+      }
+      /* Responsive phrase box */
+      #phrase_box {
+        width: clamp(250px, 70vw, 320px) !important;
+        height: clamp(100px, 25vh, 150px) !important;
+        max-width: 95vw !important;
+        overflow: visible !important;
+      }
+      #phrase_box svg {
+        overflow: visible !important;
+      }
+      #phrase_box text,
+      #phrase_box tspan {
+        white-space: nowrap !important;
+        overflow: visible !important;
+        word-wrap: normal !important;
+        word-break: keep-all !important;
+      }
+      /* Responsive adjustments for loader */
+      @media (max-width: 768px) {
+        #ighex {
+          bottom: clamp(20px, 5vh, 30px) !important;
+        }
+        .preloader {
+          font-size: clamp(7px, 2vw, 10px) !important;
+        }
+        #phrase_box {
+          width: clamp(250px, 75vw, 300px) !important;
+          height: clamp(100px, 30vh, 150px) !important;
+          overflow: visible !important;
+        }
+        #system-pill {
+          top: calc(50% - clamp(140px, 16vh, 170px)) !important;
+          padding: clamp(0.5rem, 2vw, 0.65rem) clamp(1rem, 4vw, 1.25rem) !important;
+        }
+        #system-pill h2 {
+          font-size: clamp(0.85rem, 3vw, 1.1rem) !important;
+        }
+      }
+      @media (max-width: 480px) {
+        #ighex {
+          bottom: clamp(15px, 4vh, 25px) !important;
+        }
+        .preloader {
+          font-size: clamp(6px, 1.8vw, 8px) !important;
+        }
+        #phrase_box {
+          width: clamp(220px, 80vw, 280px) !important;
+          height: clamp(80px, 25vh, 120px) !important;
+          overflow: visible !important;
+        }
+        #system-pill {
+          top: calc(50% - clamp(130px, 15vh, 160px)) !important;
+          padding: clamp(0.45rem, 1.8vw, 0.6rem) clamp(0.9rem, 3.5vw, 1.15rem) !important;
+          max-width: calc(100vw - 1rem) !important;
+        }
+        #system-pill h2 {
+          font-size: clamp(0.8rem, 2.8vw, 1rem) !important;
+        }
+      }
+      @media (min-width: 1024px) {
+        #system-pill {
+          top: calc(50% - clamp(150px, 17vh, 190px)) !important;
+        }
+      }
+    </style>
   </head>
 
   <body>
+    <!-- Loader HTML - shows immediately before React loads -->
+    <div id="loader-wrapper">
+      <div id="page">
+        <div id="phrase_box">
+          <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet" style="overflow: visible;">
+            <defs>
+              <mask id="mask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">
+                <linearGradient id="linearGradient" gradientUnits="objectBoundingBox" x2="0" y2="1">
+                  <stop stop-color="white" stop-opacity="0" offset="0%" />
+                  <stop stop-color="white" stop-opacity="1" offset="30%" />
+                  <stop stop-color="white" stop-opacity="1" offset="70%" />
+                  <stop stop-color="white" stop-opacity="0" offset="100%" />
+                </linearGradient>
+                <rect width="100%" height="100%" fill="url(#linearGradient)" />
+              </mask>
+            </defs>
+            <g width="100%" height="100%" style="mask: url(#mask); overflow: visible;">
+              <g id="phrases" style="overflow: visible;"></g>
+            </g>
+          </svg>
+        </div>
+        <div id="ighex">
+          <div class="preloader loading">
+            <span class="slice"></span>
+            <span class="slice"></span>
+            <span class="slice"></span>
+            <span class="slice"></span>
+            <span class="slice"></span>
+            <span class="slice"></span>
+          </div>
+        </div>
+        <div id="system-pill" class="system-pill">
+          <h2>Ghana National Resources System</h2>
+        </div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     

@@ -1,4 +1,3 @@
-import { Spinner } from "@/components/Spinner";
 import { Navigation } from "@/components/Navigation";
 import { Carousel } from "@/components/Carousel";
 import { About } from "@/components/About";
@@ -16,7 +15,6 @@ const Index = () => {
   return (
     <>
       <InitScripts />
-      <Spinner />
       <Navigation />
       <Carousel />
       <About />

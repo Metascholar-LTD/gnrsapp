@@ -589,13 +589,6 @@ export const Navigation = () => {
                             <h6 className="mega-menu-section-title">Search & Browse</h6>
                             <ul className="mega-menu-list">
                               <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-map-marker-alt me-2"></i>Search by Location</Link></li>
-                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-images me-2"></i>View Worker Profiles</Link></li>
-                              <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-star me-2"></i>Ratings & Reviews</Link></li>
-                            </ul>
-                          </div>
-                          <div className="col-lg-4">
-                            <h6 className="mega-menu-section-title">Directory Features</h6>
-                            <ul className="mega-menu-list">
                               <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-check-circle me-2"></i>Verified Workers</Link></li>
                               <li><Link to="/skilled-workers" className="mega-menu-item" onClick={closeMobileMenu}><i className="fa fa-calendar-check me-2"></i>Service Requests</Link></li>
                             </ul>
@@ -643,6 +636,14 @@ export const Navigation = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+              <div className="nav-item">
+                <Link 
+                  to="/directories" 
+                  className={`nav-link ${isActive("/directories") ? "active" : ""}`}
+                >
+                  Directories
+                </Link>
               </div>
               <div className="nav-item dropdown mega-menu">
                 <Link 
@@ -1332,12 +1333,6 @@ export const Navigation = () => {
                     <i className="fa fa-map-marker-alt me-3"></i>Search by Location
                   </Link>
                   <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-images me-3"></i>View Worker Profiles
-                  </Link>
-                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
-                    <i className="fa fa-star me-3"></i>Ratings & Reviews
-                  </Link>
-                  <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
                     <i className="fa fa-check-circle me-3"></i>Verified Workers
                   </Link>
                   <Link to="/skilled-workers" className="mobile-dropdown-item" onClick={closeMobileMenu}>
@@ -1366,6 +1361,17 @@ export const Navigation = () => {
                   </Link>
                 </div>
               </div>
+            </div>
+            <div className="mobile-nav-item">
+              <Link 
+                to="/directories" 
+                className={`mobile-nav-link ${isActive("/directories") ? "active" : ""}`}
+                onClick={closeMobileMenu}
+              >
+                <span>
+                  <i className="fa fa-folder me-3"></i>Directories
+                </span>
+              </Link>
             </div>
             {/* Admin/Staff Dashboard - Conditionally rendered based on user role */}
             <div className="mobile-nav-dropdown" id="mobileAdminDashboardNav" style={{ display: 'none' }}>

@@ -5,6 +5,10 @@ import React, {
   useState,
 } from "react";
 import { gsap } from "gsap";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import "./staggered-menu.css";
 
 export interface StaggeredMenuItem {
@@ -27,6 +31,7 @@ export interface StaggeredMenuProps {
   displaySocials?: boolean;
   displayItemNumbering?: boolean;
   className?: string;
+  logoUrl?: string;
   menuButtonColor?: string;
   openMenuButtonColor?: string;
   accentColor?: string;
@@ -46,6 +51,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   displaySocials = true,
   displayItemNumbering = true,
   className,
+  logoUrl = '/src/assets/logos/reactbits-gh-white.svg',
   menuButtonColor = "#fff",
   openMenuButtonColor = "#fff",
   changeMenuColorOnOpen = true,
@@ -57,25 +63,73 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   onItemSelect,
 }: StaggeredMenuProps) => {
   const [open, setOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(0);
   const openRef = useRef(false);
+  
+  // Handle responsive width and sidebar width
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 1024);
+    };
+    
+    const updateSidebarWidth = () => {
+      if (panelRef.current && open) {
+        const width = panelRef.current.offsetWidth;
+        setSidebarWidth(width);
+      } else {
+        setSidebarWidth(0);
+      }
+    };
+    
+    checkMobile();
+    
+    // Update sidebar width when panel opens/closes
+    if (open) {
+      // Small delay to ensure panel is rendered
+      const timeoutId = setTimeout(() => {
+        updateSidebarWidth();
+      }, 50);
+      
+      // Also update on resize
+      const handleResize = () => {
+        checkMobile();
+        updateSidebarWidth();
+      };
+      
+      window.addEventListener('resize', handleResize);
+      
+      // Use ResizeObserver for more accurate width tracking
+      const observer = new ResizeObserver(() => {
+        updateSidebarWidth();
+      });
+      
+      if (panelRef.current) {
+        observer.observe(panelRef.current);
+      }
+      
+      return () => {
+        clearTimeout(timeoutId);
+        window.removeEventListener('resize', handleResize);
+        observer.disconnect();
+      };
+    } else {
+      setSidebarWidth(0);
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      return () => window.removeEventListener('resize', checkMobile);
+    }
+  }, [open]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const preLayersRef = useRef<HTMLDivElement | null>(null);
   const preLayerElsRef = useRef<HTMLElement[]>([]);
 
-  const plusHRef = useRef<HTMLSpanElement | null>(null);
-  const plusVRef = useRef<HTMLSpanElement | null>(null);
-  const iconRef = useRef<HTMLSpanElement | null>(null);
-
-  const textInnerRef = useRef<HTMLSpanElement | null>(null);
-  const textWrapRef = useRef<HTMLSpanElement | null>(null);
-  const [textLines, setTextLines] = useState<string[]>(["Menu", "Close"]);
+  // Removed old refs - no longer needed with new button design
 
   const openTlRef = useRef<gsap.core.Timeline | null>(null);
   const closeTweenRef = useRef<gsap.core.Tween | null>(null);
-  const spinTweenRef = useRef<gsap.core.Tween | null>(null);
-  const textCycleAnimRef = useRef<gsap.core.Tween | null>(null);
-  const colorTweenRef = useRef<gsap.core.Tween | null>(null);
   const toggleBtnRef = useRef<HTMLButtonElement | null>(null);
   const busyRef = useRef(false);
   const itemEntranceTweenRef = useRef<gsap.core.Tween | null>(null);
@@ -85,12 +139,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       const panel = panelRef.current;
       const preContainer = preLayersRef.current;
 
-      const plusH = plusHRef.current;
-      const plusV = plusVRef.current;
-      const icon = iconRef.current;
-      const textInner = textInnerRef.current;
-
-      if (!panel || !plusH || !plusV || !icon || !textInner) return;
+      if (!panel) return;
 
       let preLayers: HTMLElement[] = [];
       if (preContainer) {
@@ -101,21 +150,12 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       preLayerElsRef.current = preLayers;
 
       const offscreen = position === "left" ? -100 : 100;
-      gsap.set([panel, ...preLayers], { xPercent: offscreen });
-
-      gsap.set(plusH, { transformOrigin: "50% 50%", rotate: 0 });
-      gsap.set(plusV, { transformOrigin: "50% 50%", rotate: 90 });
-      gsap.set(icon, { rotate: 0, transformOrigin: "50% 50%" });
-
-      gsap.set(textInner, { yPercent: 0 });
-
-      if (toggleBtnRef.current) {
-        gsap.set(toggleBtnRef.current, { color: menuButtonColor });
-      }
+      // Panel slide is handled by Framer Motion, only set prelayers
+      gsap.set(preLayers, { xPercent: offscreen });
     });
 
     return () => ctx.revert();
-  }, [menuButtonColor, position]);
+  }, [position]);
 
   const buildOpenTimeline = useCallback(() => {
     const panel = panelRef.current;
@@ -148,7 +188,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       el,
       start: Number(gsap.getProperty(el, "xPercent")),
     }));
-    const panelStart = Number(gsap.getProperty(panel, "xPercent"));
+    // Panel slide is handled by Framer Motion, not GSAP
 
     if (itemEls.length) {
       gsap.set(itemEls, { yPercent: 140, rotate: 10 });
@@ -176,18 +216,10 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
     const lastTime = layerStates.length ? (layerStates.length - 1) * 0.07 : 0;
     const panelInsertTime = lastTime + (layerStates.length ? 0.08 : 0);
-    const panelDuration = 0.65;
-
-    tl.fromTo(
-      panel,
-      { xPercent: panelStart },
-      { xPercent: 0, duration: panelDuration, ease: "power4.out" },
-      panelInsertTime
-    );
+    // Panel slide animation removed - handled by Framer Motion
 
     if (itemEls.length) {
-      const itemsStartRatio = 0.15;
-      const itemsStart = panelInsertTime + panelDuration * itemsStartRatio;
+      const itemsStart = panelInsertTime + 0.1; // Start items animation shortly after layers
       tl.to(
         itemEls,
         {
@@ -215,7 +247,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     }
 
     if (socialTitle || socialLinks.length) {
-      const socialsStart = panelInsertTime + panelDuration * 0.4;
+      const socialsStart = panelInsertTime + 0.3; // Start socials animation after items
 
       if (socialTitle) {
         tl.to(
@@ -269,132 +301,39 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     const layers = preLayerElsRef.current;
     if (!panel) return;
 
-    const all: HTMLElement[] = [...layers, panel];
-    closeTweenRef.current?.kill();
-    const offscreen = position === "left" ? -100 : 100;
-
-    closeTweenRef.current = gsap.to(all, {
-      xPercent: offscreen,
-      duration: 0.32,
-      ease: "power3.in",
-      overwrite: "auto",
-      onComplete: () => {
-        const itemEls = Array.from(
-          panel.querySelectorAll(".sm-panel-itemLabel")
-        ) as HTMLElement[];
-        if (itemEls.length) {
-          gsap.set(itemEls, { yPercent: 140, rotate: 10 });
-        }
-
-        const numberEls = Array.from(
-          panel.querySelectorAll(
-            ".sm-panel-list[data-numbering] .sm-panel-item"
-          )
-        ) as HTMLElement[];
-        if (numberEls.length) {
-          gsap.set(numberEls, { ["--sm-num-opacity" as any]: 0 });
-        }
-
-        const socialTitle = panel.querySelector(
-          ".sm-socials-title"
-        ) as HTMLElement | null;
-        const socialLinks = Array.from(
-          panel.querySelectorAll(".sm-socials-link")
-        ) as HTMLElement[];
-        if (socialTitle) gsap.set(socialTitle, { opacity: 0 });
-        if (socialLinks.length) gsap.set(socialLinks, {
-          y: 25,
-          opacity: 0,
-        });
-        busyRef.current = false;
-      },
-    });
-  }, [position]);
-
-  const animateIcon = useCallback((opening: boolean) => {
-    const icon = iconRef.current;
-    if (!icon) return;
-    spinTweenRef.current?.kill();
-
-    if (opening) {
-      spinTweenRef.current = gsap.to(icon, {
-        rotate: 225,
-        duration: 0.8,
-        ease: "power4.out",
-        overwrite: "auto",
-      });
-    } else {
-      spinTweenRef.current = gsap.to(icon, {
-        rotate: 0,
-        duration: 0.35,
-        ease: "power3.inOut",
-        overwrite: "auto",
-      });
+    // Panel slide is handled by Framer Motion, only reset item states
+    const itemEls = Array.from(
+      panel.querySelectorAll(".sm-panel-itemLabel")
+    ) as HTMLElement[];
+    if (itemEls.length) {
+      gsap.set(itemEls, { yPercent: 140, rotate: 10 });
     }
+
+    const numberEls = Array.from(
+      panel.querySelectorAll(
+        ".sm-panel-list[data-numbering] .sm-panel-item"
+      )
+    ) as HTMLElement[];
+    if (numberEls.length) {
+      gsap.set(numberEls, { ["--sm-num-opacity" as any]: 0 });
+    }
+
+    const socialTitle = panel.querySelector(
+      ".sm-socials-title"
+    ) as HTMLElement | null;
+    const socialLinks = Array.from(
+      panel.querySelectorAll(".sm-socials-link")
+    ) as HTMLElement[];
+    if (socialTitle) gsap.set(socialTitle, { opacity: 0 });
+    if (socialLinks.length) gsap.set(socialLinks, {
+      y: 25,
+      opacity: 0,
+    });
+    
+    busyRef.current = false;
   }, []);
 
-  const animateColor = useCallback(
-    (opening: boolean) => {
-      const btn = toggleBtnRef.current;
-      if (!btn) return;
-      colorTweenRef.current?.kill();
-      if (changeMenuColorOnOpen) {
-        const targetColor = opening ? openMenuButtonColor : menuButtonColor;
-        colorTweenRef.current = gsap.to(btn, {
-          color: targetColor,
-          delay: 0.18,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      } else {
-        gsap.set(btn, { color: menuButtonColor });
-      }
-    },
-    [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen]
-  );
-
-  React.useEffect(() => {
-    if (toggleBtnRef.current) {
-      if (changeMenuColorOnOpen) {
-        const targetColor = openRef.current
-          ? openMenuButtonColor
-          : menuButtonColor;
-        gsap.set(toggleBtnRef.current, { color: targetColor });
-      } else {
-        gsap.set(toggleBtnRef.current, { color: menuButtonColor });
-      }
-    }
-  }, [changeMenuColorOnOpen, menuButtonColor, openMenuButtonColor]);
-
-  const animateText = useCallback((opening: boolean) => {
-    const inner = textInnerRef.current;
-    if (!inner) return;
-    textCycleAnimRef.current?.kill();
-
-    const currentLabel = opening ? "Menu" : "Close";
-    const targetLabel = opening ? "Close" : "Menu";
-    const cycles = 3;
-
-    const seq: string[] = [currentLabel];
-    let last = currentLabel;
-    for (let i = 0; i < cycles; i++) {
-      last = last === "Menu" ? "Close" : "Menu";
-      seq.push(last);
-    }
-    if (last !== targetLabel) seq.push(targetLabel);
-    seq.push(targetLabel);
-
-    setTextLines(seq);
-
-    gsap.set(inner, { yPercent: 0 });
-    const lineCount = seq.length;
-    const finalShift = ((lineCount - 1) / lineCount) * 100;
-    textCycleAnimRef.current = gsap.to(inner, {
-      yPercent: -finalShift,
-      duration: 0.5 + lineCount * 0.07,
-      ease: "power4.out",
-    });
-  }, []);
+  // Removed old animation functions - using Framer Motion for button animations now
 
   const toggleMenu = useCallback(() => {
     const target = !openRef.current;
@@ -405,108 +344,172 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       playOpen();
     } else {
       onMenuClose?.();
+      setIsClosing(true);
       playClose();
     }
-    animateIcon(target);
-    animateColor(target);
-    animateText(target);
-  }, [playOpen, playClose, animateIcon, animateColor, animateText, onMenuOpen, onMenuClose]);
+  }, [playOpen, playClose, onMenuOpen, onMenuClose]);
 
   const closeMenu = useCallback(() => {
     if (openRef.current) {
+      setIsClosing(true);
       openRef.current = false;
       setOpen(false);
       onMenuClose?.();
       playClose();
-      animateIcon(false);
-      animateColor(false);
-      animateText(false);
     }
-  }, [playClose, animateIcon, animateColor, animateText, onMenuClose]);
+  }, [playClose, onMenuClose]);
 
+  // Reset closing state when panel opens
   React.useEffect(() => {
-    if (!closeOnClickAway || !open) return;
+    if (open) {
+      setIsClosing(false);
+    }
+  }, [open]);
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-        closeMenu();
-      }
-    };
+  // Removed click outside handler - overlay handles closing
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [closeOnClickAway, open, closeMenu]);
+  const shouldRender = open || isClosing;
 
   return (
-    <div
-      className={
-        (className ? className + " " : "") +
-        "staggered-menu-wrapper" +
-        (isFixed ? " fixed-wrapper" : "")
-      }
-      style={
-        accentColor
-          ? ({ ["--sm-accent" as any]: accentColor } as React.CSSProperties)
-          : undefined
-      }
-      data-position={position}
-      data-open={open || undefined}
-    >
-      <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
-        {(() => {
-          const raw =
-            colors && colors.length ? colors.slice(0, 4) : ["#1e1e22", "#35353c"];
-          let arr = [...raw];
-          if (arr.length >= 3) {
-            const mid = Math.floor(arr.length / 2);
-            arr.splice(mid, 1);
-          }
-          return arr.map((c, i) => (
-            <div key={i} className="sm-prelayer" style={{ background: c }} />
-          ));
-        })()}
-      </div>
-
-      <header className="staggered-menu-header" aria-label="Scholarship windows">
-        <button
+    <>
+      {/* Header button - OUTSIDE AnimatePresence so it's always accessible */}
+      <motion.header 
+        className="staggered-menu-header" 
+        aria-label="Main navigation header"
+        animate={{
+          x: open ? (position === 'left' ? sidebarWidth : -sidebarWidth) : 0,
+        }}
+        transition={{ type: 'tween', duration: 0.3, ease: 'easeInOut' }}
+        style={{
+          zIndex: 10002, // Above overlay (9999) and panel (10000)
+        } as React.CSSProperties}
+      >
+          <motion.button
           ref={toggleBtnRef}
           className="sm-toggle"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="staggered-menu-panel"
-          onClick={toggleMenu}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent overlay from catching the click
+            toggleMenu();
+          }}
           type="button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <span
-            ref={textWrapRef}
-            className="sm-toggle-textWrap"
-            aria-hidden="true"
-          >
-            <span ref={textInnerRef} className="sm-toggle-textInner">
-              {textLines.map((l, i) => (
-                <span className="sm-toggle-line" key={i}>
-                  {l}
-                </span>
-              ))}
-            </span>
-          </span>
+          <AnimatePresence mode="wait">
+            {open ? (
+              <motion.div
+                key="close"
+                initial={{ opacity: 0, rotate: -90 }}
+                animate={{ opacity: 1, rotate: 0 }}
+                exit={{ opacity: 0, rotate: 90 }}
+                transition={{ type: 'tween', duration: 0.2 }}
+              >
+                <X size={20} strokeWidth={2.5} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="menu"
+                initial={{ opacity: 0, rotate: 90 }}
+                animate={{ opacity: 1, rotate: 0 }}
+                exit={{ opacity: 0, rotate: -90 }}
+                transition={{ type: 'tween', duration: 0.2 }}
+              >
+                <Menu size={20} strokeWidth={2.5} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.button>
+      </motion.header>
 
-          <span ref={iconRef} className="sm-icon" aria-hidden="true">
-            <span ref={plusHRef} className="sm-icon-line" />
-            <span ref={plusVRef} className="sm-icon-line sm-icon-line-v" />
-          </span>
-        </button>
-      </header>
+      <AnimatePresence>
+        {shouldRender && (
+          <>
+            {/* Overlay - exactly like SkilledWorkerPanel */}
+            <motion.div
+              className="sm-overlay"
+              onClick={closeMenu}
+              aria-hidden="true"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isClosing ? 0 : 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 9999,
+                pointerEvents: 'auto',
+              } as React.CSSProperties}
+            />
 
-      <aside
-        id="staggered-menu-panel"
-        ref={panelRef}
-        className="staggered-menu-panel"
-        aria-hidden={!open}
-      >
+            {/* Panel - OUTSIDE wrapper like SkilledWorkerPanel with slide animation */}
+            <motion.aside
+              key="panel"
+              id="staggered-menu-panel"
+              ref={panelRef}
+              className="staggered-menu-panel"
+              aria-hidden={!open}
+              initial={{ x: position === 'left' ? '-100%' : '100%' }}
+              animate={{ x: isClosing ? (position === 'left' ? '-100%' : '100%') : 0 }}
+              exit={{ x: position === 'left' ? '-100%' : '100%' }}
+              transition={{ type: 'tween', duration: 0.3, ease: 'easeInOut' }}
+              onAnimationStart={() => {
+                if (open && panelRef.current) {
+                  // Update sidebar width when animation starts
+                  const width = panelRef.current.offsetWidth || 
+                    (isMobile ? window.innerWidth : Math.min(window.innerWidth * 0.5, 420));
+                  setSidebarWidth(width);
+                }
+              }}
+              onAnimationComplete={() => {
+                if (isClosing) {
+                  setIsClosing(false);
+                  setSidebarWidth(0);
+                } else if (open && panelRef.current) {
+                  // Ensure width is set after animation completes
+                  const width = panelRef.current.offsetWidth;
+                  setSidebarWidth(width);
+                }
+              }}
+              onClick={(e) => {
+                // Stop clicks inside panel from bubbling to overlay
+                e.stopPropagation();
+              }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                [position === 'left' ? 'left' : 'right']: 0,
+                bottom: 0,
+                width: isMobile ? '100%' : 'clamp(260px, 38vw, 420px)',
+                maxWidth: isMobile ? '100%' : '50%',
+                height: '100%',
+                backgroundColor: 'white',
+                zIndex: 10000,
+                overflowY: 'auto',
+                boxShadow: position === 'left' ? '4px 0 24px rgba(0, 0, 0, 0.15)' : '-4px 0 24px rgba(0, 0, 0, 0.15)',
+                pointerEvents: 'auto',
+              } as React.CSSProperties}
+            >
         <div className="sm-panel-inner">
+          {/* Header with Back Button - Only on Mobile */}
+          {isMobile && (
+            <div className="sm-panel-header">
+              <button 
+                onClick={closeMenu}
+                className="sm-panel-back-button"
+                aria-label="Close menu"
+              >
+                <ArrowLeft style={{ width: '24px', height: '24px' }} />
+              </button>
+            </div>
+          )}
+          
           <ul
             className="sm-panel-list"
             role="list"
@@ -515,21 +518,20 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
             {items && items.length ? (
               items.map((it, idx) => (
                 <li className="sm-panel-itemWrap" key={it.label + idx}>
-                  <a
+                  <Link
+                    to={it.link}
                     className="sm-panel-item"
-                    href={it.link}
                     aria-label={it.ariaLabel}
                     data-index={idx + 1}
-                    onClick={(e) => {
+                    onClick={() => {
                       if (onItemSelect) {
-                        e.preventDefault();
                         onItemSelect(it);
-                        closeMenu();
                       }
+                      closeMenu();
                     }}
                   >
                     <span className="sm-panel-itemLabel">{it.label}</span>
-                  </a>
+                  </Link>
                 </li>
               ))
             ) : (
@@ -561,8 +563,41 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
             </div>
           )}
         </div>
-      </aside>
-    </div>
+      </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      <div
+        className={
+          (className ? className + " " : "") +
+          "staggered-menu-wrapper" +
+          (isFixed ? " fixed-wrapper" : "")
+        }
+        style={
+          accentColor
+            ? ({ ["--sm-accent" as any]: accentColor } as React.CSSProperties)
+            : undefined
+        }
+        data-position={position}
+        data-open={open || undefined}
+      >
+        <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
+          {(() => {
+            const raw =
+              colors && colors.length ? colors.slice(0, 4) : ["#1e1e22", "#35353c"];
+            let arr = [...raw];
+            if (arr.length >= 3) {
+              const mid = Math.floor(arr.length / 2);
+              arr.splice(mid, 1);
+            }
+            return arr.map((c, i) => (
+              <div key={i} className="sm-prelayer" style={{ background: c }} />
+            ));
+          })()}
+        </div>
+      </div>
+    </>
   );
 };
 

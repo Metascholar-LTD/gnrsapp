@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AIAssistant } from "@/components/AIAssistant";
+import { PageLoader } from "@/components/PageLoader";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PastQuestions from "./pages/PastQuestions";
@@ -54,6 +56,13 @@ import SkilledWorkersBrowse from "./pages/SkilledWorkersBrowse";
 import SkilledWorkersJoin from "./pages/SkilledWorkersJoin";
 import { SkilledWorkerProfile } from "./pages/SkilledWorkerProfile";
 import { SkilledWorkersList } from "./pages/SkilledWorkersList";
+import Directories from "./pages/Directories";
+import Hotels from "./pages/directories/Hotels";
+import HotelView from "./pages/directories/HotelView";
+import Universities from "./pages/directories/Universities";
+import UniversityView from "./pages/directories/UniversityView";
+import SeniorHighSchools from "./pages/directories/SeniorHighSchools";
+import SeniorHighSchoolView from "./pages/directories/SeniorHighSchoolView";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -70,6 +79,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter future={routerFutureFlags}>
+        <PageLoader />
+        <AIAssistant />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/education/past-questions" element={<PastQuestions />} />
@@ -114,6 +125,14 @@ const App = () => (
           <Route path="/skilled-workers/join" element={<SkilledWorkersJoin />} />
           <Route path="/skilled-workers/category/:category" element={<SkilledWorkersList />} />
           <Route path="/skilled-workers/profile/:id" element={<SkilledWorkerProfile />} />
+          {/* Directories Routes */}
+          <Route path="/directories" element={<Directories />} />
+          <Route path="/directories/hotels" element={<Hotels />} />
+          <Route path="/directories/hotels/:id" element={<HotelView />} />
+          <Route path="/directories/universities" element={<Universities />} />
+          <Route path="/directories/universities/:id" element={<UniversityView />} />
+          <Route path="/directories/shs" element={<SeniorHighSchools />} />
+          <Route path="/directories/shs/:id" element={<SeniorHighSchoolView />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}
