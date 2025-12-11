@@ -32,6 +32,10 @@ const isolatedStyles = `
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  #sw-content-wrapper {
+    min-height: calc(100vh - 80px);
+  }
   
   #sw-hero-section {
     position: relative;
@@ -1310,6 +1314,34 @@ const isolatedStyles = `
       font-size: 0.9375rem;
     }
   }
+
+  /* Mobile: 0px - 767px */
+  @media (max-width: 767px) {
+    #sw-content-wrapper {
+      padding-top: 60px;
+    }
+  }
+
+  /* Tablet: 768px - 1199px */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    #sw-content-wrapper {
+      padding-top: 70px;
+    }
+  }
+
+  /* Desktop: 1200px - 1599px */
+  @media (min-width: 1200px) and (max-width: 1599px) {
+    #sw-content-wrapper {
+      padding-top: 120px;
+    }
+  }
+
+  /* Large Desktop: 1600px+ */
+  @media (min-width: 1600px) {
+    #sw-content-wrapper {
+      padding-top: 120px;
+    }
+  }
 `;
 
 // Category definitions
@@ -1426,8 +1458,9 @@ const SkilledWorkers = () => {
       <Spinner />
       <Navigation />
       
-      {/* Hero Section */}
-      <div id="sw-hero-section">
+      <div id="sw-content-wrapper">
+        {/* Hero Section */}
+        <div id="sw-hero-section">
         {/* Hero Main Content (Left Side) */}
         <div id="sw-hero-main">
           {/* Background Image */}
@@ -1993,6 +2026,7 @@ const SkilledWorkers = () => {
             })}
           </div>
         </div>
+      </div>
       </div>
 
       <Footer />

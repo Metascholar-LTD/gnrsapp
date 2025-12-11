@@ -37,16 +37,14 @@ const isolatedStyles = `
     min-height: 100vh;
   }
 
+  #swp-content-wrapper {
+    min-height: calc(100vh - 80px);
+  }
+
   #swp-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
-  }
-
-  @media (min-width: 1024px) {
-    #swp-container {
-      padding: 3rem 2rem;
-    }
+    padding: 2rem;
   }
 
   /* Header Section */
@@ -565,6 +563,50 @@ const isolatedStyles = `
     width: 16px;
     height: 16px;
   }
+
+  /* Mobile: 0px - 767px */
+  @media (max-width: 767px) {
+    #swp-content-wrapper {
+      padding-top: 60px;
+    }
+
+    #swp-container {
+      padding: 1rem;
+    }
+  }
+
+  /* Tablet: 768px - 1199px */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    #swp-content-wrapper {
+      padding-top: 70px;
+    }
+
+    #swp-container {
+      padding: 1.5rem;
+    }
+  }
+
+  /* Desktop: 1200px - 1599px */
+  @media (min-width: 1200px) and (max-width: 1599px) {
+    #swp-content-wrapper {
+      padding-top: 120px;
+    }
+
+    #swp-container {
+      padding: 2rem;
+    }
+  }
+
+  /* Large Desktop: 1600px+ */
+  @media (min-width: 1600px) {
+    #swp-content-wrapper {
+      padding-top: 120px;
+    }
+
+    #swp-container {
+      padding: 2rem clamp(2rem, 5vw, 4rem);
+    }
+  }
 `;
 
 // Shared worker names - same as in SkilledWorkersList
@@ -725,7 +767,8 @@ export const SkilledWorkerProfile = () => {
       <Spinner />
       <Navigation />
 
-      <div id="swp-container">
+      <div id="swp-content-wrapper">
+        <div id="swp-container">
         {/* Back Button */}
         <button onClick={() => navigate(-1)} id="swp-back-button" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           <ArrowLeft id="swp-back-icon" />
@@ -967,6 +1010,7 @@ export const SkilledWorkerProfile = () => {
               <p className="swp-stat-label">Average Response Time</p>
             </motion.div>
           </div>
+        </div>
         </div>
       </div>
 

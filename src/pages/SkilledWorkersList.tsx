@@ -29,16 +29,14 @@ const isolatedStyles = `
     min-height: 100vh;
   }
 
+  #swl-content-wrapper {
+    min-height: calc(100vh - 80px);
+  }
+
   #swl-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
-  }
-
-  @media (min-width: 1024px) {
-    #swl-container {
-      padding: 3rem 2rem;
-    }
+    padding: 2rem;
   }
 
   /* Header */
@@ -329,6 +327,50 @@ const isolatedStyles = `
     font-size: 1rem;
     margin: 0;
   }
+
+  /* Mobile: 0px - 767px */
+  @media (max-width: 767px) {
+    #swl-content-wrapper {
+      padding-top: 60px;
+    }
+
+    #swl-container {
+      padding: 1rem;
+    }
+  }
+
+  /* Tablet: 768px - 1199px */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    #swl-content-wrapper {
+      padding-top: 70px;
+    }
+
+    #swl-container {
+      padding: 1.5rem;
+    }
+  }
+
+  /* Desktop: 1200px - 1599px */
+  @media (min-width: 1200px) and (max-width: 1599px) {
+    #swl-content-wrapper {
+      padding-top: 120px;
+    }
+
+    #swl-container {
+      padding: 2rem;
+    }
+  }
+
+  /* Large Desktop: 1600px+ */
+  @media (min-width: 1600px) {
+    #swl-content-wrapper {
+      padding-top: 120px;
+    }
+
+    #swl-container {
+      padding: 2rem clamp(2rem, 5vw, 4rem);
+    }
+  }
 `;
 
 // Mock workers data - in real app, this would come from API
@@ -452,7 +494,8 @@ export const SkilledWorkersList = () => {
       <Spinner />
       <Navigation />
 
-      <div id="swl-container">
+      <div id="swl-content-wrapper">
+        <div id="swl-container">
         {/* Header */}
         <div id="swl-header">
           <Link to="/skilled-workers/browse" id="swl-back-button">
@@ -557,6 +600,7 @@ export const SkilledWorkersList = () => {
             </p>
           </div>
         )}
+        </div>
       </div>
 
       <Footer />

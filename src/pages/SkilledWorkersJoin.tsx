@@ -23,19 +23,17 @@ const isolatedStyles = `
     flex-direction: column;
   }
 
+  #swj-content-wrapper {
+    min-height: calc(100vh - 80px);
+  }
+
   #swj-main-content {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem;
+    padding: 2rem;
     min-height: calc(100vh - 200px);
-  }
-
-  @media (min-width: 640px) {
-    #swj-main-content {
-      padding: 3rem 1.5rem;
-    }
   }
 
   #swj-container {
@@ -268,6 +266,50 @@ const isolatedStyles = `
     color: #1d4ed8;
     text-decoration: underline;
   }
+
+  /* Mobile: 0px - 767px */
+  @media (max-width: 767px) {
+    #swj-content-wrapper {
+      padding-top: 60px;
+    }
+
+    #swj-main-content {
+      padding: 1rem;
+    }
+  }
+
+  /* Tablet: 768px - 1199px */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    #swj-content-wrapper {
+      padding-top: 70px;
+    }
+
+    #swj-main-content {
+      padding: 1.5rem;
+    }
+  }
+
+  /* Desktop: 1200px - 1599px */
+  @media (min-width: 1200px) and (max-width: 1599px) {
+    #swj-content-wrapper {
+      padding-top: 120px;
+    }
+
+    #swj-main-content {
+      padding: 2rem;
+    }
+  }
+
+  /* Large Desktop: 1600px+ */
+  @media (min-width: 1600px) {
+    #swj-content-wrapper {
+      padding-top: 120px;
+    }
+
+    #swj-main-content {
+      padding: 2rem clamp(2rem, 5vw, 4rem);
+    }
+  }
 `;
 
 type RoleType = 'employer' | 'worker' | null;
@@ -355,7 +397,8 @@ const SkilledWorkersJoin = () => {
       <Spinner />
       <Navigation />
 
-      <div id="swj-main-content">
+      <div id="swj-content-wrapper">
+        <div id="swj-main-content">
         <div id="swj-container">
           <AnimatedContainer className="mx-auto max-w-3xl text-center mb-8">
             <h2 className="text-3xl font-bold tracking-wide text-balance md:text-4xl lg:text-5xl xl:font-extrabold">
@@ -434,6 +477,7 @@ const SkilledWorkersJoin = () => {
           >
             Already have an account? <Link to="/join">Log In</Link>
           </motion.p>
+        </div>
         </div>
       </div>
 

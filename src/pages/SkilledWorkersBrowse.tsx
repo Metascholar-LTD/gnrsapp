@@ -18,15 +18,18 @@ const isolatedStyles = `
     min-height: 100vh;
   }
 
+  #swb-content-wrapper {
+    min-height: calc(100vh - 80px);
+  }
+
   #swb-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 2rem;
   }
 
   @media (min-width: 1024px) {
     #swb-container {
-      padding: 3rem 2rem;
       display: grid;
       grid-template-columns: 280px 1fr;
       gap: 3rem;
@@ -582,6 +585,50 @@ const isolatedStyles = `
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
   }
+
+  /* Mobile: 0px - 767px */
+  @media (max-width: 767px) {
+    #swb-content-wrapper {
+      padding-top: 60px;
+    }
+
+    #swb-container {
+      padding: 1rem;
+    }
+  }
+
+  /* Tablet: 768px - 1199px */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    #swb-content-wrapper {
+      padding-top: 70px;
+    }
+
+    #swb-container {
+      padding: 1.5rem;
+    }
+  }
+
+  /* Desktop: 1200px - 1599px */
+  @media (min-width: 1200px) and (max-width: 1599px) {
+    #swb-content-wrapper {
+      padding-top: 120px;
+    }
+
+    #swb-container {
+      padding: 2rem;
+    }
+  }
+
+  /* Large Desktop: 1600px+ */
+  @media (min-width: 1600px) {
+    #swb-content-wrapper {
+      padding-top: 120px;
+    }
+
+    #swb-container {
+      padding: 2rem clamp(2rem, 5vw, 4rem);
+    }
+  }
 `;
 
 // Comprehensive skilled worker categories organized by type
@@ -791,7 +838,8 @@ const SkilledWorkersBrowse = () => {
       <Spinner />
       <Navigation />
 
-      <div id="swb-container">
+      <div id="swb-content-wrapper">
+        <div id="swb-container">
         {/* Header */}
         <div id="swb-header">
           <h1 id="swb-title">Find the best skilled workers</h1>
@@ -924,6 +972,7 @@ const SkilledWorkersBrowse = () => {
               </li>
             ))}
           </ul>
+        </div>
         </div>
       </div>
 
