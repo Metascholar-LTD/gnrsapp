@@ -77,23 +77,6 @@ section::before {
     color: #FFE66D !important;
 }
 
-/* Navigation active state with Ghana green */
-.navbar .navbar-nav .nav-link.active {
-    color: #006B3F !important;
-    position: relative;
-}
-
-.navbar .navbar-nav .nav-link.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 15px;
-    right: 15px;
-    height: 3px;
-    background: linear-gradient(90deg, #FF6B6B, #FFE66D, #4ECDC4, #006B3F);
-    border-radius: 3px 3px 0 0;
-}
-
 /* Badge and highlight colors */
 .badge-ghana-red {
     background-color: var(--ghana-red);

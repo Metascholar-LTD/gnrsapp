@@ -115,52 +115,6 @@ h6,
 }
 
 
-/*** Navbar ***/
-.fixed-top {
-    transition: .5s;
-    background: #FFFFFF !important;
-}
-
-.fixed-top .navbar {
-    background: #FFFFFF !important;
-}
-
-.top-bar {
-    height: 45px;
-    border-bottom: 1px solid rgba(0, 107, 63, .1);
-    background: linear-gradient(90deg, rgba(0, 107, 63, 0.05) 0%, rgba(252, 209, 22, 0.05) 50%, rgba(255, 107, 107, 0.05) 100%) !important;
-}
-
-.top-bar small {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
-    font-weight: 500 !important;
-}
-
-.navbar {
-    background: #FFFFFF !important;
-}
-
-.navbar .dropdown-toggle::after {
-    border: none;
-    content: "\f107";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    vertical-align: middle;
-    margin-left: 8px;
-}
-
-.navbar .navbar-nav .nav-link {
-    padding: 25px 15px;
-    color: var(--tertiary);
-    font-weight: 500;
-    outline: none;
-}
-
-.navbar .navbar-nav .nav-link:hover,
-.navbar .navbar-nav .nav-link.active {
-    color: var(--primary);
-}
-
 /* Modern Tab Styling for About Section */
 #about .nav-tabs .nav-link {
     border: none !important;
@@ -182,37 +136,6 @@ h6,
     border-bottom-color: #006B3F !important;
     background-color: transparent !important;
     font-weight: 600 !important;
-}
-
-@media (max-width: 991.98px) {
-    .navbar .navbar-nav {
-        margin-top: 10px;
-        border-top: 1px solid rgba(0, 0, 0, .07);
-        background: #FFFFFF;
-    }
-
-    .navbar .navbar-nav .nav-link {
-        padding: 10px 0;
-    }
-}
-
-@media (min-width: 992px) {
-    .navbar .nav-item .dropdown-menu {
-        display: block;
-        visibility: hidden;
-        top: 100%;
-        transform: rotateX(-75deg);
-        transform-origin: 0% 0%;
-        transition: .5s;
-        opacity: 0;
-    }
-
-    .navbar .nav-item:hover .dropdown-menu {
-        transform: rotateX(0deg);
-        visibility: visible;
-        transition: .5s;
-        opacity: 1;
-    }
 }
 
 
