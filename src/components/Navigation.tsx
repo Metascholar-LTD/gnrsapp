@@ -842,11 +842,15 @@ export const Navigation = () => {
           gap: clamp(0.375rem, 0.8vw, 0.5rem);
         }
 
-        .nav-link:hover,
+        .nav-link:hover {
+          color: #555555;
+        }
+
         .nav-link-active {
           color: #2563eb;
         }
 
+        .nav-link:hover::after,
         .nav-link-active::after {
           content: '';
           position: absolute;
@@ -862,7 +866,6 @@ export const Navigation = () => {
           color: #2c2c2c;
         }
 
-        .nav-link:hover .nav-link-icon,
         .nav-link-active .nav-link-icon {
           color: #2563eb;
         }
@@ -912,7 +915,6 @@ export const Navigation = () => {
           color: #2c2c2c;
         }
 
-        .nav-link:hover .nav-dropdown-icon,
         .nav-link-active .nav-dropdown-icon,
         .nav-item-dropdown:hover .nav-dropdown-icon {
           color: #2563eb;
