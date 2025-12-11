@@ -714,14 +714,13 @@ const SeniorHighSchoolView: React.FC = () => {
     }
 
     .shs-view-content-wrapper {
-      padding-top: 80px;
       min-height: calc(100vh - 80px);
     }
 
     .shs-view-main-content {
       max-width: 1400px;
       margin: 0 auto;
-      padding: clamp(1rem, 3vw, 2rem);
+      padding: 2rem;
     }
 
     .shs-view-back-button {
@@ -1263,6 +1262,39 @@ const SeniorHighSchoolView: React.FC = () => {
 
       .shs-view-facilities-grid {
         grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .shs-view-content-wrapper {
+        padding-top: 70px;
+      }
+
+      .shs-view-main-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .shs-view-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .shs-view-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .shs-view-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .shs-view-main-content {
+        padding: 2rem clamp(2rem, 5vw, 4rem);
       }
     }
   `;

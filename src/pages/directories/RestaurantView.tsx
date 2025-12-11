@@ -272,7 +272,6 @@ const RestaurantView: React.FC = () => {
     }
 
     .restaurant-view-content-wrapper {
-      padding-top: 80px;
       min-height: calc(100vh - 80px);
     }
 
@@ -1100,17 +1099,12 @@ const RestaurantView: React.FC = () => {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    @media (max-width: 1024px) {
-      .restaurant-view-content {
-        grid-template-columns: 1fr;
+    /* Mobile: 0px - 767px */
+    @media (max-width: 767px) {
+      .restaurant-view-content-wrapper {
+        padding-top: 60px;
       }
 
-      .restaurant-view-nearby-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 768px) {
       .restaurant-view-main-content {
         padding: 1rem;
       }
@@ -1125,8 +1119,53 @@ const RestaurantView: React.FC = () => {
         overflow-x: auto;
       }
 
+      .restaurant-view-content {
+        grid-template-columns: 1fr;
+      }
+
       .restaurant-view-nearby-grid {
         grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .restaurant-view-content-wrapper {
+        padding-top: 70px;
+      }
+
+      .restaurant-view-main-content {
+        padding: 1.5rem;
+      }
+
+      .restaurant-view-content {
+        grid-template-columns: 1fr;
+      }
+
+      .restaurant-view-nearby-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .restaurant-view-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .restaurant-view-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .restaurant-view-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .restaurant-view-main-content {
+        padding: 2rem clamp(2rem, 5vw, 4rem);
       }
     }
   `;

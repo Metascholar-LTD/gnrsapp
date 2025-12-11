@@ -82,7 +82,6 @@ const HotelView: React.FC = () => {
     }
 
     .hotel-view-content-wrapper {
-      padding-top: 80px;
       min-height: calc(100vh - 80px);
     }
 
@@ -220,15 +219,18 @@ const HotelView: React.FC = () => {
       color: hsl(220 30% 15%);
     }
 
-    @media (max-width: 1024px) {
-      .hotel-view-grid {
-        grid-template-columns: 1fr;
+    /* Mobile: 0px - 767px */
+    @media (max-width: 767px) {
+      .hotel-view-content-wrapper {
+        padding-top: 60px;
       }
-    }
 
-    @media (max-width: 768px) {
       .hotel-view-main-content {
         padding: 1rem;
+      }
+
+      .hotel-view-grid {
+        grid-template-columns: 1fr;
       }
 
       .hotel-view-title {
@@ -241,6 +243,43 @@ const HotelView: React.FC = () => {
 
       .hotel-view-amenities-grid {
         grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .hotel-view-content-wrapper {
+        padding-top: 70px;
+      }
+
+      .hotel-view-main-content {
+        padding: 1.5rem;
+      }
+
+      .hotel-view-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .hotel-view-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .hotel-view-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .hotel-view-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .hotel-view-main-content {
+        padding: 2rem clamp(2rem, 5vw, 4rem);
       }
     }
   `;

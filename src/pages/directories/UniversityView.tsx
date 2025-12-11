@@ -460,14 +460,13 @@ const UniversityView: React.FC = () => {
     }
 
     .university-view-content-wrapper {
-      padding-top: 80px;
       min-height: calc(100vh - 80px);
     }
 
     .university-view-main-content {
       max-width: 1400px;
       margin: 0 auto;
-      padding: clamp(1rem, 4vw, 2rem);
+      padding: 2rem;
     }
 
     .university-view-back-button {
@@ -1141,9 +1140,14 @@ const UniversityView: React.FC = () => {
     }
 
     /* Tablet and below (768px and below) */
-    @media (max-width: 768px) {
+    /* Mobile: 0px - 767px */
+    @media (max-width: 767px) {
+      .university-view-content-wrapper {
+        padding-top: 60px;
+      }
+
       .university-view-main-content {
-        padding: clamp(0.75rem, 3vw, 1rem);
+        padding: 1rem;
       }
 
       .university-view-header {
@@ -1461,25 +1465,37 @@ const UniversityView: React.FC = () => {
       }
     }
 
-    /* Large screens (1024px and above) */
-    @media (min-width: 1024px) {
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .university-view-content-wrapper {
+        padding-top: 70px;
+      }
+
       .university-view-main-content {
-        padding: clamp(2rem, 4vw, 3rem);
-      }
-
-      .university-view-header {
-        padding: clamp(2rem, 4vw, 2.5rem);
-      }
-
-      .university-view-about-photos-wrapper {
-        gap: clamp(1.5rem, 3vw, 2rem);
+        padding: 1.5rem;
       }
     }
 
-    /* Extra large screens (1400px and above) */
-    @media (min-width: 1400px) {
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .university-view-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .university-view-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .university-view-content-wrapper {
+        padding-top: 120px;
+      }
+
       .university-view-main-content {
         max-width: 1600px;
+        padding: 2rem clamp(2rem, 5vw, 4rem);
       }
 
       .university-view-header-top {
@@ -1981,4 +1997,5 @@ const UniversityView: React.FC = () => {
 };
 
 export default UniversityView;
+
 

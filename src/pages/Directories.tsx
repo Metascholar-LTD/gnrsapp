@@ -33,12 +33,11 @@ const Directories: React.FC = () => {
       position: relative;
       width: 100%;
       min-height: calc(100vh - 80px);
-      padding-top: 80px;
     }
 
     .directories-main-content {
       width: 100%;
-      padding: 3rem 2rem;
+      padding: 2rem;
       max-width: 1400px;
       margin: 0 auto;
     }
@@ -87,9 +86,14 @@ const Directories: React.FC = () => {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    @media (max-width: 768px) {
+    /* Mobile: 0px - 767px */
+    @media (max-width: 767px) {
+      .directories-content-wrapper {
+        padding-top: 60px;
+      }
+
       .directories-main-content {
-        padding: 2rem 1rem;
+        padding: 1rem;
       }
 
       .directories-title {
@@ -98,6 +102,39 @@ const Directories: React.FC = () => {
 
       .directories-subtitle {
         font-size: 1.125rem;
+      }
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .directories-content-wrapper {
+        padding-top: 70px;
+      }
+
+      .directories-main-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .directories-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .directories-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .directories-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .directories-main-content {
+        padding: 2rem clamp(2rem, 5vw, 4rem);
       }
     }
   `;

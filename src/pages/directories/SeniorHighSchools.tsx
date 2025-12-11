@@ -374,14 +374,29 @@ const SeniorHighSchools: React.FC = () => {
     }
 
     .shs-content-wrapper {
-      padding-top: 80px;
       min-height: calc(100vh - 80px);
     }
 
     .shs-main-content {
       max-width: 1600px;
       margin: 0 auto;
-      padding: 3rem 2rem;
+      padding: 2rem;
+    }
+
+    .shs-breadcrumbs {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 1rem;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .shs-breadcrumbs a {
+      color: #006B3F;
+      text-decoration: none;
+    }
+
+    .shs-breadcrumbs a:hover {
+      text-decoration: underline;
     }
 
     .shs-header {
@@ -742,9 +757,14 @@ const SeniorHighSchools: React.FC = () => {
       flex-shrink: 0;
     }
 
-    @media (max-width: 768px) {
+    /* Mobile: 0px - 767px */
+    @media (max-width: 767px) {
+      .shs-content-wrapper {
+        padding-top: 60px;
+      }
+
       .shs-main-content {
-        padding: 2rem 1rem;
+        padding: 1rem;
       }
 
       .shs-table-header {
@@ -811,6 +831,39 @@ const SeniorHighSchools: React.FC = () => {
       }
     }
 
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .shs-content-wrapper {
+        padding-top: 70px;
+      }
+
+      .shs-main-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .shs-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .shs-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .shs-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .shs-main-content {
+        padding: 2rem clamp(2rem, 5vw, 4rem);
+      }
+    }
+
     @media (max-width: 480px) {
       .shs-pagination-wrapper {
         padding: 0.625rem 0.75rem;
@@ -854,6 +907,9 @@ const SeniorHighSchools: React.FC = () => {
       
       <div className="shs-content-wrapper">
         <div className="shs-main-content">
+          <div className="shs-breadcrumbs">
+            <Link to="/directories">&gt;&gt; Directory</Link>
+          </div>
           <div className="shs-header">
             <h1 className="shs-title">Senior High Schools in Ghana</h1>
             <p className="shs-subtitle">

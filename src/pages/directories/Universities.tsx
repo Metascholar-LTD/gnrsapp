@@ -359,14 +359,29 @@ const Universities: React.FC = () => {
     }
 
     .universities-content-wrapper {
-      padding-top: 80px;
       min-height: calc(100vh - 80px);
     }
 
     .universities-main-content {
       max-width: 1600px;
       margin: 0 auto;
-      padding: 3rem 2rem;
+      padding: 2rem;
+    }
+
+    .universities-breadcrumbs {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 1rem;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .universities-breadcrumbs a {
+      color: #006B3F;
+      text-decoration: none;
+    }
+
+    .universities-breadcrumbs a:hover {
+      text-decoration: underline;
     }
 
     .universities-header {
@@ -831,9 +846,14 @@ const Universities: React.FC = () => {
       }
     }
 
-    @media (max-width: 768px) {
+    /* Mobile: 0px - 767px */
+    @media (max-width: 767px) {
+      .universities-content-wrapper {
+        padding-top: 60px;
+      }
+
       .universities-main-content {
-        padding: 2rem 1rem;
+        padding: 1rem;
       }
 
       .universities-title {
@@ -912,6 +932,39 @@ const Universities: React.FC = () => {
       }
     }
 
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .universities-content-wrapper {
+        padding-top: 70px;
+      }
+
+      .universities-main-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .universities-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .universities-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .universities-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .universities-main-content {
+        padding: 2rem clamp(2rem, 5vw, 4rem);
+      }
+    }
+
     @media (max-width: 480px) {
       .universities-pagination-wrapper {
         padding: 0.625rem 0.75rem;
@@ -964,6 +1017,9 @@ const Universities: React.FC = () => {
       
       <div className="universities-content-wrapper">
         <div className="universities-main-content">
+          <div className="universities-breadcrumbs">
+            <Link to="/directories">&gt;&gt; Directory</Link>
+          </div>
           <div className="universities-header">
             <h1 className="universities-title">Universities in Ghana</h1>
             <p className="universities-subtitle">

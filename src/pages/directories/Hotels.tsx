@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { HotelCard } from '@/components/ui/hotel-card';
@@ -106,14 +107,29 @@ const Hotels: React.FC = () => {
     }
 
     .hotels-content-wrapper {
-      padding-top: 80px;
       min-height: calc(100vh - 80px);
     }
 
     .hotels-main-content {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 3rem 2rem;
+      padding: 2rem;
+    }
+
+    .hotels-breadcrumbs {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 1rem;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .hotels-breadcrumbs a {
+      color: #006B3F;
+      text-decoration: none;
+    }
+
+    .hotels-breadcrumbs a:hover {
+      text-decoration: underline;
     }
 
     .hotels-header {
@@ -198,9 +214,14 @@ const Hotels: React.FC = () => {
       }
     }
 
-    @media (max-width: 768px) {
+    /* Mobile: 0px - 767px */
+    @media (max-width: 767px) {
+      .hotels-content-wrapper {
+        padding-top: 60px;
+      }
+
       .hotels-main-content {
-        padding: 2rem 1rem;
+        padding: 1rem;
       }
 
       .hotels-title {
@@ -209,6 +230,39 @@ const Hotels: React.FC = () => {
 
       .hotels-subtitle {
         font-size: 1.125rem;
+      }
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .hotels-content-wrapper {
+        padding-top: 70px;
+      }
+
+      .hotels-main-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .hotels-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .hotels-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .hotels-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .hotels-main-content {
+        padding: 2rem clamp(2rem, 5vw, 4rem);
       }
     }
   `;
@@ -220,6 +274,9 @@ const Hotels: React.FC = () => {
       
       <div className="hotels-content-wrapper">
         <div className="hotels-main-content">
+          <div className="hotels-breadcrumbs">
+            <Link to="/directories">&gt;&gt; Directory</Link>
+          </div>
           <div className="hotels-header">
             <h1 className="hotels-title">Hotels in Ghana</h1>
             <p className="hotels-subtitle">

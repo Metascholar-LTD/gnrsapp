@@ -162,7 +162,6 @@ All colors MUST be HSL.
   }
 
   section {
-    padding-block: clamp(2rem, 5vw, 4.5rem);
     position: relative;
   }
 
