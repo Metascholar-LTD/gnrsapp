@@ -748,13 +748,8 @@ const Restaurants: React.FC = () => {
                       </span>
                     </div>
                     <div className="restaurant-details">
-                      {restaurant.cuisine} · {restaurant.priceRange} ·{' '}
+                      {restaurant.cuisine} ·{' '}
                       <span className="restaurant-status">{restaurant.status}</span>
-                      {restaurant.menu && (
-                        <button className="restaurant-menu-link" onClick={(e) => e.stopPropagation()}>
-                          Menu
-                        </button>
-                      )}
                     </div>
                     <div className="restaurant-reviews">
                       {restaurant.reviewSnippets.map((snippet, idx) => (
