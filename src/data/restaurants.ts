@@ -119,7 +119,7 @@ export const restaurantsData: Record<string, Restaurant> = {
     address: '99A Fourth Norla St, Labone, Accra, Ghana',
     phone: '+233 55 845 0253',
     website: 'https://vine-restaurant.com',
-    about: 'Vine Restaurant is a hub for the global community in Accra, offering Ghanaian culinary delights and beverages in a sophisticated, high-end dining experience with an open-air, rooftop soiree ambiance.',
+    about: 'Vine Restaurant is a hub for the global community in Accra, offering Ghanaian culinary delights and beverages in a sophisticated, high-end dining experience with an open-air, rooftop soiree ambiance. Our restaurant has been serving the finest Ghanaian cuisine since 2015, combining traditional recipes with modern culinary techniques. We source our ingredients locally whenever possible, supporting local farmers and ensuring the freshest flavors. Our talented chefs bring years of experience from around the world, creating dishes that celebrate Ghana\'s rich culinary heritage while adding contemporary twists. The rooftop setting provides breathtaking views of Accra, making it the perfect spot for romantic dinners, business meetings, or celebrations with friends and family. We pride ourselves on exceptional service, with our staff trained to provide attentive, personalized care to every guest. Whether you\'re looking for a casual brunch, an elegant dinner, or a late-night drink with friends, Vine Restaurant offers an unforgettable dining experience that captures the vibrant spirit of Accra.',
     features: {
       vegetarian: true,
       creditCards: ['Visa'],
@@ -141,7 +141,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 10, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 66
     },
-    location: { lat: 5.6037, lng: -0.1870, parking: 'Street Parking' },
+    location: { lat: 5.6037, lng: -0.1870, parking: 'Street Parking' }, // Labone area - correct
     reviews: {
       overall: { excellent: 83, good: 9, average: 1, poor: 0, terrible: 4 },
       categories: { service: 4.9, food: 4.9, value: 4.8, atmosphere: 4.9 },
@@ -201,7 +201,10 @@ export const restaurantsData: Record<string, Restaurant> = {
         { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
         { id: 'nearby-2', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6030, lng: -0.1875 },
         { id: 'nearby-3', name: 'The Venue', rating: 4.6, reviews: 250, cuisine: 'Bar', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 },
-        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 }
+        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 },
+        { id: 'nearby-5', name: 'Buka Restaurant', rating: 4.5, reviews: 523, cuisine: 'Ghanaian', priceRange: '$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6015, lng: -0.1890 },
+        { id: 'nearby-6', name: 'Chez Clarisse', rating: 4.7, reviews: 289, cuisine: 'French', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6055, lng: -0.1850 },
+        { id: 'nearby-7', name: 'Skybar 25', rating: 4.6, reviews: 456, cuisine: 'Bar', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6060, lng: -0.1845 }
       ],
       hotels: [
         { id: 'hotel-1', name: 'The Alima Suites', rating: 4.7, reviews: 3, distance: '0.28 miles', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80', lat: 5.6050, lng: -0.1855 },
@@ -223,7 +226,7 @@ export const restaurantsData: Record<string, Restaurant> = {
     priceRange: '$$$$',
     status: 'Open now',
     openUntil: '11:00 PM',
-    address: 'Ring Road Central, Osu, Accra, Ghana',
+    address: '45 Kofi Annan Street, Airport Residential, Accra, Ghana',
     phone: '+233 24 456 7890',
     website: 'https://tunnellounge.com',
     about: 'Tunnel Lounge offers an exceptional dining experience with premium steaks and fresh seafood in an elegant, modern setting. Known for its sophisticated ambiance and impeccable service.',
@@ -248,7 +251,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 15, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 57
     },
-    location: { lat: 5.5500, lng: -0.1700, parking: 'Valet Parking' },
+    location: { lat: 5.6150, lng: -0.1800, parking: 'Valet Parking' }, // 45 Kofi Annan Street, Airport Residential
     reviews: {
       overall: { excellent: 48, good: 5, average: 1, poor: 0, terrible: 0 },
       categories: { service: 4.9, food: 4.8, value: 4.7, atmosphere: 4.9 },
@@ -273,8 +276,13 @@ export const restaurantsData: Record<string, Restaurant> = {
     },
     nearby: {
       restaurants: [
-        { id: 'nearby-1', name: 'Vine', rating: 4.7, reviews: 97, cuisine: 'Seafood, Grill', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6037, lng: -0.1870 },
-        { id: 'nearby-2', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 }
+        { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
+        { id: 'nearby-2', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6030, lng: -0.1875 },
+        { id: 'nearby-3', name: 'The Venue', rating: 4.6, reviews: 250, cuisine: 'Bar', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 },
+        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 },
+        { id: 'nearby-5', name: 'Buka Restaurant', rating: 4.5, reviews: 523, cuisine: 'Ghanaian', priceRange: '$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6015, lng: -0.1890 },
+        { id: 'nearby-6', name: 'Chez Clarisse', rating: 4.7, reviews: 289, cuisine: 'French', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6055, lng: -0.1850 },
+        { id: 'nearby-7', name: 'Skybar 25', rating: 4.6, reviews: 456, cuisine: 'Bar', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6060, lng: -0.1845 }
       ],
       hotels: [
         { id: 'hotel-1', name: 'Labadi Beach Hotel', rating: 4.5, reviews: 234, distance: '0.5 miles', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80', lat: 5.5450, lng: -0.1650 }
@@ -318,7 +326,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 12, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 55
     },
-    location: { lat: 5.5600, lng: -0.2000, parking: 'Street Parking' },
+    location: { lat: 5.5600, lng: -0.2000, parking: 'Street Parking' }, // Ring Road East, Adabraka - correct
     reviews: {
       overall: { excellent: 250, good: 80, average: 25, poor: 10, terrible: 5 },
       categories: { service: 4.0, food: 4.2, value: 4.1, atmosphere: 3.8 },
@@ -387,7 +395,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 25, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 63
     },
-    location: { lat: 5.5550, lng: -0.1750, parking: 'Street Parking' },
+    location: { lat: 5.5550, lng: -0.1750, parking: 'Street Parking' }, // Oxford Street, Osu - correct
     reviews: {
       overall: { excellent: 150, good: 40, average: 12, poor: 2, terrible: 2 },
       categories: { service: 4.2, food: 4.1, value: 4.0, atmosphere: 4.5 },
@@ -412,7 +420,13 @@ export const restaurantsData: Record<string, Restaurant> = {
     },
     nearby: {
       restaurants: [
-        { id: 'nearby-1', name: 'Tunnel Lounge', rating: 4.8, reviews: 54, cuisine: 'Steakhouse, Seafood', priceRange: '$$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.5500, lng: -0.1700 }
+        { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
+        { id: 'nearby-2', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6030, lng: -0.1875 },
+        { id: 'nearby-3', name: 'The Venue', rating: 4.6, reviews: 250, cuisine: 'Bar', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 },
+        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 },
+        { id: 'nearby-5', name: 'Buka Restaurant', rating: 4.5, reviews: 523, cuisine: 'Ghanaian', priceRange: '$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6015, lng: -0.1890 },
+        { id: 'nearby-6', name: 'Chez Clarisse', rating: 4.7, reviews: 289, cuisine: 'French', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6055, lng: -0.1850 },
+        { id: 'nearby-7', name: 'Skybar 25', rating: 4.6, reviews: 456, cuisine: 'Bar', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6060, lng: -0.1845 }
       ],
       hotels: [
         { id: 'hotel-1', name: 'Osu Beach Hotel', rating: 4.0, reviews: 123, distance: '0.2 miles', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80', lat: 5.5520, lng: -0.1720 }
@@ -456,7 +470,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 8, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 63
     },
-    location: { lat: 5.6040, lng: -0.1865, parking: 'Street Parking' },
+    location: { lat: 5.6040, lng: -0.1865, parking: 'Street Parking' }, // Labone Road, Labone - correct
     reviews: {
       overall: { excellent: 280, good: 70, average: 15, poor: 1, terrible: 1 },
       categories: { service: 4.6, food: 4.5, value: 4.4, atmosphere: 4.3 },
@@ -481,8 +495,13 @@ export const restaurantsData: Record<string, Restaurant> = {
     },
     nearby: {
       restaurants: [
-        { id: 'nearby-1', name: 'Vine', rating: 4.7, reviews: 97, cuisine: 'Seafood, Grill', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6037, lng: -0.1870 },
-        { id: 'nearby-2', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 }
+        { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
+        { id: 'nearby-2', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6030, lng: -0.1875 },
+        { id: 'nearby-3', name: 'The Venue', rating: 4.6, reviews: 250, cuisine: 'Bar', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 },
+        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 },
+        { id: 'nearby-5', name: 'Buka Restaurant', rating: 4.5, reviews: 523, cuisine: 'Ghanaian', priceRange: '$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6015, lng: -0.1890 },
+        { id: 'nearby-6', name: 'Chez Clarisse', rating: 4.7, reviews: 289, cuisine: 'French', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6055, lng: -0.1850 },
+        { id: 'nearby-7', name: 'Skybar 25', rating: 4.6, reviews: 456, cuisine: 'Bar', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6060, lng: -0.1845 }
       ],
       hotels: [
         { id: 'hotel-1', name: 'The Alima Suites', rating: 4.7, reviews: 3, distance: '0.28 miles', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80', lat: 5.6050, lng: -0.1855 }
@@ -526,7 +545,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 10, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 73
     },
-    location: { lat: 5.6045, lng: -0.1860, parking: 'Valet Parking' },
+    location: { lat: 5.6045, lng: -0.1860, parking: 'Valet Parking' }, // Cantonments Road, Cantonments - correct
     reviews: {
       overall: { excellent: 400, good: 85, average: 18, poor: 1, terrible: 1 },
       categories: { service: 4.7, food: 4.6, value: 4.5, atmosphere: 4.4 },
@@ -551,8 +570,13 @@ export const restaurantsData: Record<string, Restaurant> = {
     },
     nearby: {
       restaurants: [
-        { id: 'nearby-1', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
-        { id: 'nearby-2', name: 'Vine', rating: 4.7, reviews: 97, cuisine: 'Seafood, Grill', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6037, lng: -0.1870 }
+        { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
+        { id: 'nearby-2', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6030, lng: -0.1875 },
+        { id: 'nearby-3', name: 'The Venue', rating: 4.6, reviews: 250, cuisine: 'Bar', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 },
+        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 },
+        { id: 'nearby-5', name: 'Buka Restaurant', rating: 4.5, reviews: 523, cuisine: 'Ghanaian', priceRange: '$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6015, lng: -0.1890 },
+        { id: 'nearby-6', name: 'Chez Clarisse', rating: 4.7, reviews: 289, cuisine: 'French', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6055, lng: -0.1850 },
+        { id: 'nearby-7', name: 'Skybar 25', rating: 4.6, reviews: 456, cuisine: 'Bar', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6060, lng: -0.1845 }
       ],
       hotels: [
         { id: 'hotel-1', name: 'Kempinski Hotel Gold Coast City', rating: 4.8, reviews: 567, distance: '0.4 miles', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80', lat: 5.6000, lng: -0.1900 }
@@ -596,7 +620,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 12, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 58
     },
-    location: { lat: 5.6100, lng: -0.1950, parking: 'Valet Parking' },
+    location: { lat: 5.6100, lng: -0.1950, parking: 'Valet Parking' }, // Ridge Road, North Ridge - correct
     reviews: {
       overall: { excellent: 140, good: 40, average: 8, poor: 1, terrible: 0 },
       categories: { service: 4.6, food: 4.5, value: 4.3, atmosphere: 4.7 },
@@ -665,7 +689,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 9, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 48
     },
-    location: { lat: 5.6050, lng: -0.1920, parking: 'Street Parking' },
+    location: { lat: 5.6050, lng: -0.1920, parking: 'Street Parking' }, // Ringway Estates - correct
     reviews: {
       overall: { excellent: 100, good: 35, average: 6, poor: 1, terrible: 0 },
       categories: { service: 4.2, food: 4.1, value: 4.0, atmosphere: 4.3 },
@@ -690,7 +714,13 @@ export const restaurantsData: Record<string, Restaurant> = {
     },
     nearby: {
       restaurants: [
-        { id: 'nearby-1', name: 'Papillon Restaurant', rating: 4.5, reviews: 189, cuisine: 'International', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6100, lng: -0.1950 }
+        { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
+        { id: 'nearby-2', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6030, lng: -0.1875 },
+        { id: 'nearby-3', name: 'The Venue', rating: 4.6, reviews: 250, cuisine: 'Bar', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 },
+        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 },
+        { id: 'nearby-5', name: 'Buka Restaurant', rating: 4.5, reviews: 523, cuisine: 'Ghanaian', priceRange: '$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6015, lng: -0.1890 },
+        { id: 'nearby-6', name: 'Chez Clarisse', rating: 4.7, reviews: 289, cuisine: 'French', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6055, lng: -0.1850 },
+        { id: 'nearby-7', name: 'Skybar 25', rating: 4.6, reviews: 456, cuisine: 'Bar', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6060, lng: -0.1845 }
       ],
       hotels: [
         { id: 'hotel-1', name: 'Labadi Beach Hotel', rating: 4.5, reviews: 234, distance: '0.6 miles', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80', lat: 5.5450, lng: -0.1650 }
@@ -734,7 +764,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 7, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 39
     },
-    location: { lat: 5.6150, lng: -0.1800, parking: 'Street Parking' },
+    location: { lat: 5.6150, lng: -0.1800, parking: 'Street Parking' }, // Airport Residential Area - correct
     reviews: {
       overall: { excellent: 70, good: 22, average: 5, poor: 1, terrible: 0 },
       categories: { service: 4.2, food: 4.1, value: 4.0, atmosphere: 4.0 },
@@ -759,7 +789,13 @@ export const restaurantsData: Record<string, Restaurant> = {
     },
     nearby: {
       restaurants: [
-        { id: 'nearby-1', name: 'Papillon Restaurant', rating: 4.5, reviews: 189, cuisine: 'International', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6100, lng: -0.1950 }
+        { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
+        { id: 'nearby-2', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6030, lng: -0.1875 },
+        { id: 'nearby-3', name: 'The Venue', rating: 4.6, reviews: 250, cuisine: 'Bar', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 },
+        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 },
+        { id: 'nearby-5', name: 'Buka Restaurant', rating: 4.5, reviews: 523, cuisine: 'Ghanaian', priceRange: '$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6015, lng: -0.1890 },
+        { id: 'nearby-6', name: 'Chez Clarisse', rating: 4.7, reviews: 289, cuisine: 'French', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6055, lng: -0.1850 },
+        { id: 'nearby-7', name: 'Skybar 25', rating: 4.6, reviews: 456, cuisine: 'Bar', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6060, lng: -0.1845 }
       ],
       hotels: [
         { id: 'hotel-1', name: 'Kempinski Hotel Gold Coast City', rating: 4.8, reviews: 567, distance: '0.2 miles', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80', lat: 5.6000, lng: -0.1900 }
@@ -803,7 +839,7 @@ export const restaurantsData: Record<string, Restaurant> = {
       drinks: { count: 15, thumbnail: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=400&q=80' },
       total: 43
     },
-    location: { lat: 5.6080, lng: -0.1880, parking: 'Street Parking' },
+    location: { lat: 5.6080, lng: -0.1880, parking: 'Street Parking' }, // Cantonments - correct
     reviews: {
       overall: { excellent: 45, good: 30, average: 10, poor: 2, terrible: 0 },
       categories: { service: 3.6, food: 3.5, value: 3.7, atmosphere: 3.8 },
@@ -828,7 +864,13 @@ export const restaurantsData: Record<string, Restaurant> = {
     },
     nearby: {
       restaurants: [
-        { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 }
+        { id: 'nearby-1', name: 'Heritage Indian Restaurant', rating: 4.6, reviews: 505, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6040, lng: -0.1865 },
+        { id: 'nearby-2', name: 'Tandoor Indian Restaurant', rating: 4.5, reviews: 367, cuisine: 'Indian', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6030, lng: -0.1875 },
+        { id: 'nearby-3', name: 'The Venue', rating: 4.6, reviews: 250, cuisine: 'Bar', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6045, lng: -0.1860 },
+        { id: 'nearby-4', name: 'Simret - The Taste of Ethiopia', rating: 4.7, reviews: 186, cuisine: 'African', priceRange: '$$-$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', lat: 5.6025, lng: -0.1880 },
+        { id: 'nearby-5', name: 'Buka Restaurant', rating: 4.5, reviews: 523, cuisine: 'Ghanaian', priceRange: '$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80', lat: 5.6015, lng: -0.1890 },
+        { id: 'nearby-6', name: 'Chez Clarisse', rating: 4.7, reviews: 289, cuisine: 'French', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80', lat: 5.6055, lng: -0.1850 },
+        { id: 'nearby-7', name: 'Skybar 25', rating: 4.6, reviews: 456, cuisine: 'Bar', priceRange: '$$$', status: 'Open now', image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80', lat: 5.6060, lng: -0.1845 }
       ],
       hotels: [
         { id: 'hotel-1', name: 'Kempinski Hotel Gold Coast City', rating: 4.8, reviews: 567, distance: '0.25 miles', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80', lat: 5.6000, lng: -0.1900 }

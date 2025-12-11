@@ -65,6 +65,7 @@ import SeniorHighSchools from "./pages/directories/SeniorHighSchools";
 import SeniorHighSchoolView from "./pages/directories/SeniorHighSchoolView";
 import Restaurants from "./pages/directories/Restaurants";
 import RestaurantView from "./pages/directories/RestaurantView";
+import WriteReview from "./pages/directories/WriteReview";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -137,6 +138,7 @@ const App = () => (
           <Route path="/directories/shs/:id" element={<SeniorHighSchoolView />} />
           <Route path="/directories/restaurants" element={<Restaurants />} />
           <Route path="/directories/restaurants/:id" element={<RestaurantView />} />
+          <Route path="/directories/restaurants/:id/write-review" element={<WriteReview />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}

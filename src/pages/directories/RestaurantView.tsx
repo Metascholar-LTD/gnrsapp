@@ -1,23 +1,127 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { RestaurantMap } from '@/components/RestaurantMap';
 import { restaurantsData, getAllRestaurants } from '@/data/restaurants';
-import { Share2, Heart, MapPin, Clock, Globe, Phone, ChevronDown, ChevronRight, Filter, Search, ThumbsUp, MoreVertical, Lightbulb, Pencil, ArrowLeft, ArrowRight, Leaf, CreditCard, Info } from 'lucide-react';
+import { Share2, Heart, MapPin, Clock, Globe, Phone, ChevronDown, ChevronUp, ChevronRight, Filter, Search, ThumbsUp, MoreVertical, Lightbulb, Pencil, ArrowLeft, ArrowRight, Leaf, CreditCard, Info, X } from 'lucide-react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const RestaurantView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'photos' | 'overview' | 'hours' | 'location' | 'reviews'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'location'>('overview');
   const [isSaved, setIsSaved] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllAbout, setShowAllAbout] = useState(false);
   const [sortBy, setSortBy] = useState('most-recent');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showMapModal, setShowMapModal] = useState(false);
+  const previewMapRef = useRef<mapboxgl.Map | null>(null);
+  const previewMapContainerRef = useRef<HTMLDivElement>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const nearbyCarouselRef = useRef<HTMLDivElement>(null);
+
+  // Map restaurant IDs from Restaurants page format (accra-1, accra-2, etc.) to restaurantsData format (1, 2, etc.)
+  const getRestaurantId = (urlId: string | undefined): string => {
+    if (!urlId) return '1';
+    
+    // If it's already a numeric ID, use it directly
+    if (/^\d+$/.test(urlId)) {
+      return urlId;
+    }
+    
+    // If it's in format like 'accra-1', extract the number
+    const match = urlId.match(/(\d+)$/);
+    if (match) {
+      return match[1];
+    }
+    
+    // Fallback to '1' if no match
+    return '1';
+  };
 
   // Get restaurant data from imported data
-  const restaurant = restaurantsData[id || '1'] || restaurantsData['1'];
+  const restaurantId = getRestaurantId(id);
+  const restaurant = restaurantsData[restaurantId] || restaurantsData['1'];
+
+  // Initialize small preview map
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    if (openDropdownId !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openDropdownId]);
+
+  useEffect(() => {
+    const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+    if (!previewMapContainerRef.current || !MAPBOX_TOKEN || !restaurant) return;
+
+    // Clean up existing map if it exists
+    if (previewMapRef.current) {
+      previewMapRef.current.remove();
+      previewMapRef.current = null;
+    }
+
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+
+    const lat = restaurant.location.lat;
+    const lng = restaurant.location.lng;
+
+    const map = new mapboxgl.Map({
+      container: previewMapContainerRef.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [lng, lat],
+      zoom: 15,
+      interactive: false,
+      attributionControl: false,
+    });
+
+    previewMapRef.current = map;
+
+    map.on('load', () => {
+      // Create yellow locator pin marker (classic map pin shape)
+      const markerEl = document.createElement('div');
+      markerEl.style.cssText = `
+        width: 32px;
+        height: 40px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='40' viewBox='0 0 32 40'%3E%3Cpath d='M16 0C10.48 0 6 4.48 6 10c0 6 10 16 10 16s10-10 10-16c0-5.52-4.48-10-10-10z' fill='%23FFD700' stroke='%23000' stroke-width='1'/%3E%3Ccircle cx='16' cy='10' r='4' fill='%23000'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center bottom;
+        cursor: pointer;
+      `;
+
+      const marker = new mapboxgl.Marker({
+        element: markerEl,
+        anchor: 'bottom'
+      })
+        .setLngLat([lng, lat])
+        .addTo(map);
+
+      // Ensure marker is at correct position
+      map.setCenter([lng, lat]);
+    });
+
+    return () => {
+      if (previewMapRef.current) {
+        previewMapRef.current.remove();
+        previewMapRef.current = null;
+      }
+    };
+  }, [restaurant?.location?.lat, restaurant?.location?.lng, restaurant?.id]);
   
   // Legacy code below - keeping for reference but using imported data above
   const restaurants_legacy: Record<string, any> = {
@@ -134,6 +238,19 @@ const RestaurantView: React.FC = () => {
             text: 'Fantastic flavors Staff was friendly and food delicious Nice outdoor atmosphere and exceptional food in Accra. I had the pork belly which was unique and had great flavors and textures.',
             writtenDate: 'January 29, 2025',
             likes: 0
+          },
+          {
+            id: 4,
+            author: 'Sarah M',
+            location: 'Kumasi, Ghana',
+            contributions: 12,
+            rating: 5,
+            title: 'Amazing dining experience!',
+            date: 'Feb 2025',
+            group: 'Family',
+            text: 'We had an incredible dinner here with our family. The service was outstanding and the food was absolutely delicious. The atmosphere was perfect for a family gathering. Highly recommend the grilled seafood platter!',
+            writtenDate: 'February 10, 2025',
+            likes: 2
           }
         ]
       },
@@ -186,6 +303,42 @@ const RestaurantView: React.FC = () => {
             image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80',
             lat: 5.6025,
             lng: -0.1880
+          },
+          {
+            id: 'nearby-5',
+            name: 'Buka Restaurant',
+            rating: 4.5,
+            reviews: 523,
+            cuisine: 'Ghanaian',
+            priceRange: '$$',
+            status: 'Open now',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80',
+            lat: 5.6015,
+            lng: -0.1890
+          },
+          {
+            id: 'nearby-6',
+            name: 'Chez Clarisse',
+            rating: 4.7,
+            reviews: 289,
+            cuisine: 'French',
+            priceRange: '$$$',
+            status: 'Open now',
+            image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80',
+            lat: 5.6055,
+            lng: -0.1850
+          },
+          {
+            id: 'nearby-7',
+            name: 'Skybar 25',
+            rating: 4.6,
+            reviews: 456,
+            cuisine: 'Bar',
+            priceRange: '$$$',
+            status: 'Open now',
+            image: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=300&q=80',
+            lat: 5.6060,
+            lng: -0.1845
           }
         ],
         hotels: [
@@ -276,7 +429,7 @@ const RestaurantView: React.FC = () => {
     }
 
     .restaurant-view-main-content {
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
     }
@@ -306,12 +459,6 @@ const RestaurantView: React.FC = () => {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    .restaurant-view-claimed {
-      font-size: 0.875rem;
-      color: #666;
-      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-    }
-
     .restaurant-view-header-actions {
       display: flex;
       gap: 0.75rem;
@@ -331,6 +478,16 @@ const RestaurantView: React.FC = () => {
       font-weight: 500;
       cursor: pointer;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      text-decoration: none;
+    }
+
+    .restaurant-view-action-button:hover {
+      text-decoration: none;
+      color: #006B3F;
+    }
+
+    .restaurant-view-action-button:visited {
+      color: #006B3F;
     }
 
     .restaurant-view-action-button.save {
@@ -365,18 +522,6 @@ const RestaurantView: React.FC = () => {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    .restaurant-view-rank {
-      font-size: 0.875rem;
-      color: #666;
-      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-    }
-
-    .restaurant-view-cuisine-price {
-      font-size: 0.875rem;
-      color: #666;
-      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-    }
-
     .restaurant-view-tabs {
       display: flex;
       gap: 2rem;
@@ -394,7 +539,7 @@ const RestaurantView: React.FC = () => {
       border-bottom: 2px solid transparent;
       margin-bottom: -2px;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .restaurant-view-tab.active {
@@ -411,6 +556,9 @@ const RestaurantView: React.FC = () => {
 
     .restaurant-view-main {
       background: white;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     .restaurant-view-sidebar {
@@ -439,7 +587,7 @@ const RestaurantView: React.FC = () => {
       font-size: 0.875rem;
       color: #006B3F;
       text-decoration: none;
-      font-weight: 400;
+      font-weight: 600;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
@@ -463,7 +611,7 @@ const RestaurantView: React.FC = () => {
 
     .restaurant-view-glance-item.open {
       color: #006B3F;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .restaurant-view-about {
@@ -482,6 +630,7 @@ const RestaurantView: React.FC = () => {
       align-items: center;
       gap: 0.25rem;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      font-weight: 600;
     }
 
     .restaurant-view-features {
@@ -572,6 +721,10 @@ const RestaurantView: React.FC = () => {
 
     .restaurant-view-sidebar-section {
       margin-bottom: 2rem;
+      border: 1px solid #e5e5e5;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      background: #fafafa;
     }
 
     .restaurant-view-save-button {
@@ -628,14 +781,54 @@ const RestaurantView: React.FC = () => {
       border: none !important;
     }
 
+    .restaurant-view-location-map-container {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+
+    .restaurant-view-preview-map {
+      width: 400px;
+      height: 250px;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid #e5e5e5;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .restaurant-view-preview-map .mapboxgl-ctrl {
+      display: none !important;
+    }
+
+    .restaurant-view-preview-map .mapboxgl-ctrl-attrib {
+      display: none !important;
+    }
+
+    .restaurant-view-location-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
     .restaurant-view-location-address {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       font-size: 0.875rem;
       color: #333;
-      margin-bottom: 0.5rem;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s, text-decoration 0.2s;
+    }
+
+    .restaurant-view-location-address:hover {
+      color: #006B3F;
+      text-decoration: underline !important;
     }
 
     .restaurant-view-parking {
@@ -645,6 +838,100 @@ const RestaurantView: React.FC = () => {
       font-size: 0.875rem;
       color: #666;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .restaurant-view-map-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow: auto;
+    }
+
+    .restaurant-view-map-modal-content {
+      width: 100%;
+      max-width: 1400px;
+      height: 90vh;
+      max-height: 90vh;
+      background: white;
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .restaurant-view-map-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e5e5e5;
+      flex-shrink: 0;
+      background: white;
+    }
+
+    .restaurant-view-map-modal-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #006B3F;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .restaurant-view-map-modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      border-radius: 0.25rem;
+    }
+
+    .restaurant-view-map-modal-close:hover {
+      background: #f5f5f5;
+    }
+
+    .restaurant-view-map-modal-map {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+      height: calc(90vh - 73px);
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .restaurant-view-map-modal-map > div {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .restaurant-view-map-modal-map .restaurant-map-container {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 0 !important;
+      border: none !important;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .restaurant-view-map-modal-map .mapboxgl-map {
+      width: 100% !important;
+      height: 100% !important;
     }
 
     .restaurant-view-question-box {
@@ -681,6 +968,8 @@ const RestaurantView: React.FC = () => {
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .restaurant-view-reviews-title {
@@ -695,6 +984,7 @@ const RestaurantView: React.FC = () => {
       display: flex;
       gap: 1rem;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .restaurant-view-reviews-link {
@@ -714,13 +1004,25 @@ const RestaurantView: React.FC = () => {
       gap: 0.5rem;
       padding: 0.5rem 1rem;
       background: #006B3F;
-      color: white;
+      color: white !important;
       border: none;
       border-radius: 0.375rem;
       font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      text-decoration: none !important;
+      transition: background-color 0.2s;
+    }
+
+    .restaurant-view-reviews-button:hover {
+      background: #005a33;
+      color: white !important;
+      text-decoration: none !important;
+    }
+
+    .restaurant-view-reviews-button:visited {
+      color: white !important;
     }
 
     .restaurant-view-rating-overview {
@@ -891,19 +1193,19 @@ const RestaurantView: React.FC = () => {
     }
 
     .restaurant-view-review-card {
-      border-bottom: 1px solid #e5e5e5;
-      padding-bottom: 1.5rem;
+      border: 1px solid #e5e5e5;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
       margin-bottom: 1.5rem;
-    }
-
-    .restaurant-view-review-card:last-child {
-      border-bottom: none;
+      background: white;
+      position: relative;
     }
 
     .restaurant-view-review-header {
       display: flex;
       gap: 1rem;
       margin-bottom: 0.75rem;
+      position: relative;
     }
 
     .restaurant-view-review-avatar {
@@ -972,8 +1274,10 @@ const RestaurantView: React.FC = () => {
     .restaurant-view-review-actions {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-top: 0.75rem;
+      gap: 0.75rem;
+      position: absolute;
+      top: 0;
+      right: 0;
     }
 
     .restaurant-view-review-like {
@@ -982,11 +1286,76 @@ const RestaurantView: React.FC = () => {
       gap: 0.25rem;
       color: #666;
       cursor: pointer;
+      font-size: 0.875rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      transition: background-color 0.2s;
+    }
+
+    .restaurant-view-review-like:hover {
+      background-color: #f5f5f5;
     }
 
     .restaurant-view-review-more {
       color: #666;
       cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+      position: relative;
+    }
+
+    .restaurant-view-review-more:hover {
+      background-color: #f5f5f5;
+    }
+
+    .restaurant-view-review-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      min-width: 180px;
+      overflow: hidden;
+      animation: dropdownFadeIn 0.2s ease-out;
+    }
+
+    @keyframes dropdownFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .restaurant-view-review-dropdown-item {
+      padding: 0.75rem 1rem;
+      color: #333;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .restaurant-view-review-dropdown-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .restaurant-view-review-dropdown-item:active {
+      background-color: #e5e5e5;
     }
 
     .restaurant-view-disclaimer {
@@ -1029,6 +1398,7 @@ const RestaurantView: React.FC = () => {
       color: #006B3F;
       text-decoration: none;
       font-size: 0.875rem;
+      font-weight: 600;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
@@ -1036,16 +1406,62 @@ const RestaurantView: React.FC = () => {
       text-decoration: underline;
     }
 
-    .restaurant-view-nearby-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+    .restaurant-view-nearby-carousel-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .restaurant-view-nearby-carousel {
+      display: flex;
       gap: 1rem;
-      margin-bottom: 2rem;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      flex: 1;
+      padding: 0.5rem 0;
+    }
+
+    .restaurant-view-nearby-carousel::-webkit-scrollbar {
+      display: none;
     }
 
     .restaurant-view-nearby-item {
       position: relative;
       cursor: pointer;
+      flex-shrink: 0;
+      width: 200px;
+    }
+
+    .restaurant-view-nearby-nav-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #006B3F;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color 0.2s, color 0.2s;
+      z-index: 10;
+    }
+
+    .restaurant-view-nearby-nav-button:hover {
+      background: #006B3F;
+      color: white;
+    }
+
+    .restaurant-view-nearby-nav-button svg {
+      color: #006B3F;
+      transition: color 0.2s;
+    }
+
+    .restaurant-view-nearby-nav-button:hover svg {
+      color: white;
     }
 
     .restaurant-view-nearby-image {
@@ -1123,8 +1539,22 @@ const RestaurantView: React.FC = () => {
         grid-template-columns: 1fr;
       }
 
-      .restaurant-view-nearby-grid {
-        grid-template-columns: 1fr;
+      .restaurant-view-location-map-container {
+        flex-direction: column;
+      }
+
+      .restaurant-view-preview-map {
+        width: 100%;
+        height: 200px;
+      }
+
+      .restaurant-view-map-modal-content {
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .restaurant-view-map-modal-overlay {
+        padding: 0;
       }
     }
 
@@ -1142,8 +1572,26 @@ const RestaurantView: React.FC = () => {
         grid-template-columns: 1fr;
       }
 
-      .restaurant-view-nearby-grid {
-        grid-template-columns: repeat(2, 1fr);
+      .restaurant-view-nearby-carousel-wrapper {
+        gap: 0.5rem;
+      }
+
+      .restaurant-view-nearby-nav-button {
+        width: 36px;
+        height: 36px;
+      }
+
+      .restaurant-view-nearby-item {
+        width: 180px;
+      }
+
+      .restaurant-view-location-map-container {
+        flex-direction: column;
+      }
+
+      .restaurant-view-preview-map {
+        width: 100%;
+        height: 250px;
       }
     }
 
@@ -1181,17 +1629,22 @@ const RestaurantView: React.FC = () => {
             <div className="restaurant-view-header-top">
               <div className="restaurant-view-name-section">
                 <h1 className="restaurant-view-name">{restaurant.name}</h1>
-                {restaurant.claimed && <span className="restaurant-view-claimed">Claimed</span>}
               </div>
               <div className="restaurant-view-header-actions">
                 <button className="restaurant-view-action-button">
                   <Share2 size={16} />
                   Share
                 </button>
-                <button className="restaurant-view-action-button">
+                <a 
+                  href={`/directories/restaurants/${id}/write-review`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="restaurant-view-action-button"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
                   <Pencil size={16} />
                   Review
-                </button>
+                </a>
                 <button 
                   className={`restaurant-view-action-button save ${isSaved ? 'saved' : ''}`}
                   onClick={() => setIsSaved(!isSaved)}
@@ -1207,22 +1660,34 @@ const RestaurantView: React.FC = () => {
                 {renderStars(restaurant.rating)}
                 <span className="restaurant-view-rating-text">({restaurant.reviewCount} reviews)</span>
               </div>
-              <span className="restaurant-view-rank">
-                #{restaurant.rank} of {restaurant.totalRestaurants} Restaurants in Accra
-              </span>
-              <span className="restaurant-view-cuisine-price">
-                {restaurant.cuisine} · {restaurant.priceRange}
-              </span>
+            </div>
+          </div>
+
+          <div className="restaurant-view-image-gallery" style={{ marginBottom: '2rem' }}>
+            <div style={{ position: 'relative' }}>
+              <img src={restaurant.images.main} alt={restaurant.name} className="restaurant-view-main-image" />
+              <div className="restaurant-view-image-nav" onClick={() => setCurrentImageIndex((prev) => (prev + 1) % 3)}>
+                <ChevronRight size={20} />
+              </div>
+              <div className="restaurant-view-image-count">{restaurant.images.total}</div>
+            </div>
+            <div className="restaurant-view-thumbnails">
+              <div className="restaurant-view-thumbnail">
+                <img src={restaurant.images.interior.thumbnail} alt="Interior" className="restaurant-view-thumbnail-image" />
+                <div className="restaurant-view-thumbnail-label">Interior ({restaurant.images.interior.count})</div>
+              </div>
+              <div className="restaurant-view-thumbnail">
+                <img src={restaurant.images.food.thumbnail} alt="Food" className="restaurant-view-thumbnail-image" />
+                <div className="restaurant-view-thumbnail-label">Food ({restaurant.images.food.count})</div>
+              </div>
+              <div className="restaurant-view-thumbnail">
+                <img src={restaurant.images.drinks.thumbnail} alt="Drinks" className="restaurant-view-thumbnail-image" />
+                <div className="restaurant-view-thumbnail-label">Drinks ({restaurant.images.drinks.count})</div>
+              </div>
             </div>
           </div>
 
           <div className="restaurant-view-tabs">
-            <button 
-              className={`restaurant-view-tab ${activeTab === 'photos' ? 'active' : ''}`}
-              onClick={() => setActiveTab('photos')}
-            >
-              Photos
-            </button>
             <button 
               className={`restaurant-view-tab ${activeTab === 'overview' ? 'active' : ''}`}
               onClick={() => setActiveTab('overview')}
@@ -1230,109 +1695,69 @@ const RestaurantView: React.FC = () => {
               Overview
             </button>
             <button 
-              className={`restaurant-view-tab ${activeTab === 'hours' ? 'active' : ''}`}
-              onClick={() => setActiveTab('hours')}
-            >
-              Hours
-            </button>
-            <button 
               className={`restaurant-view-tab ${activeTab === 'location' ? 'active' : ''}`}
-              onClick={() => setActiveTab('location')}
+              onClick={() => {
+                setActiveTab('overview');
+                setTimeout(() => {
+                  const locationSection = document.getElementById('location-section');
+                  if (locationSection) {
+                    locationSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }}
             >
               Location
             </button>
             <button 
-              className={`restaurant-view-tab ${activeTab === 'reviews' ? 'active' : ''}`}
-              onClick={() => setActiveTab('reviews')}
+              className="restaurant-view-tab"
+              onClick={() => {
+                setActiveTab('overview');
+                setTimeout(() => {
+                  const reviewsSection = document.getElementById('reviews-section');
+                  if (reviewsSection) {
+                    reviewsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }}
             >
               Reviews
             </button>
           </div>
 
-          {activeTab === 'photos' && (
-            <div className="restaurant-view-main">
-              <div className="restaurant-view-image-gallery">
-                <div style={{ position: 'relative' }}>
-                  <img src={restaurant.images.main} alt={restaurant.name} className="restaurant-view-main-image" />
-                  <div className="restaurant-view-image-nav" onClick={() => setCurrentImageIndex((prev) => (prev + 1) % 3)}>
-                    <ChevronRight size={20} />
-                  </div>
-                  <div className="restaurant-view-image-count">{restaurant.images.total}</div>
-                </div>
-                <div className="restaurant-view-thumbnails">
-                  <div className="restaurant-view-thumbnail">
-                    <img src={restaurant.images.interior.thumbnail} alt="Interior" className="restaurant-view-thumbnail-image" />
-                    <div className="restaurant-view-thumbnail-label">Interior ({restaurant.images.interior.count})</div>
-                  </div>
-                  <div className="restaurant-view-thumbnail">
-                    <img src={restaurant.images.food.thumbnail} alt="Food" className="restaurant-view-thumbnail-image" />
-                    <div className="restaurant-view-thumbnail-label">Food ({restaurant.images.food.count})</div>
-                  </div>
-                  <div className="restaurant-view-thumbnail">
-                    <img src={restaurant.images.drinks.thumbnail} alt="Drinks" className="restaurant-view-thumbnail-image" />
-                    <div className="restaurant-view-thumbnail-label">Drinks ({restaurant.images.drinks.count})</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {activeTab === 'overview' && (
             <div className="restaurant-view-content">
               <div className="restaurant-view-main">
-                <div className="restaurant-view-image-gallery">
-                  <div style={{ position: 'relative' }}>
-                    <img src={restaurant.images.main} alt={restaurant.name} className="restaurant-view-main-image" />
-                    <div className="restaurant-view-image-nav" onClick={() => setCurrentImageIndex((prev) => (prev + 1) % 3)}>
-                      <ChevronRight size={20} />
-                    </div>
-                    <div className="restaurant-view-image-count">{restaurant.images.total}</div>
-                  </div>
-                  <div className="restaurant-view-thumbnails">
-                    <div className="restaurant-view-thumbnail">
-                      <img src={restaurant.images.interior.thumbnail} alt="Interior" className="restaurant-view-thumbnail-image" />
-                      <div className="restaurant-view-thumbnail-label">Interior ({restaurant.images.interior.count})</div>
-                    </div>
-                    <div className="restaurant-view-thumbnail">
-                      <img src={restaurant.images.food.thumbnail} alt="Food" className="restaurant-view-thumbnail-image" />
-                      <div className="restaurant-view-thumbnail-label">Food ({restaurant.images.food.count})</div>
-                    </div>
-                    <div className="restaurant-view-thumbnail">
-                      <img src={restaurant.images.drinks.thumbnail} alt="Drinks" className="restaurant-view-thumbnail-image" />
-                      <div className="restaurant-view-thumbnail-label">Drinks ({restaurant.images.drinks.count})</div>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="restaurant-view-section restaurant-view-at-glance">
                   <div className="restaurant-view-glance-item open">
                     <Clock size={16} />
                     Open until {restaurant.openUntil}
-                    <a href="#" className="restaurant-view-section-link" style={{ marginLeft: '0.5rem' }}>See all hours</a>
                   </div>
                   <div className="restaurant-view-glance-item">
                     <MapPin size={16} />
                     {restaurant.address}
                   </div>
-                  <div className="restaurant-view-glance-item">
-                    <Globe size={16} />
-                    <a href={restaurant.website} className="restaurant-view-section-link">Website</a>
+                  <div className="restaurant-view-glance-item" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Globe size={16} />
+                      <a href={restaurant.website} className="restaurant-view-section-link">Website</a>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+                      <Phone size={16} />
+                      {restaurant.phone}
+                    </div>
                   </div>
-                  <div className="restaurant-view-glance-item">
-                    <Phone size={16} />
-                    {restaurant.phone}
-                  </div>
-                  <a href="#" className="restaurant-view-section-link" style={{ marginTop: '0.5rem', display: 'inline-block' }}>Improve this listing</a>
                 </div>
 
                 <div className="restaurant-view-section">
                   <h2 className="restaurant-view-section-title">About</h2>
                   <p className="restaurant-view-about">
-                    {restaurant.about}
+                    {showAllAbout || restaurant.about.length <= 200 ? restaurant.about : `${restaurant.about.substring(0, 200)}...`}
                   </p>
-                  <a href="#" className="restaurant-view-read-more" onClick={(e) => { e.preventDefault(); setShowAllAbout(!showAllAbout); }}>
-                    Read more <ChevronDown size={16} />
-                  </a>
+                  {restaurant.about.length > 200 && (
+                    <a href="#" className="restaurant-view-read-more" onClick={(e) => { e.preventDefault(); setShowAllAbout(!showAllAbout); }}>
+                      {showAllAbout ? 'Read less' : 'Read more'} {showAllAbout ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </a>
+                  )}
                 </div>
 
                 <div className="restaurant-view-section">
@@ -1359,132 +1784,188 @@ const RestaurantView: React.FC = () => {
                   </div>
                 </div>
 
+                <div className="restaurant-view-section" id="location-section">
+                  <h2 className="restaurant-view-section-title">Location</h2>
+                  <div className="restaurant-view-location-map-container">
+                    <div 
+                      ref={previewMapContainerRef} 
+                      className="restaurant-view-preview-map"
+                      onClick={() => setShowMapModal(true)}
+                    />
+                    <div className="restaurant-view-location-info">
+                      <a 
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="restaurant-view-location-address"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {restaurant.address}
+                        <ChevronRight size={16} />
+                      </a>
+                      <div className="restaurant-view-parking">
+                        <MapPin size={16} />
+                        {restaurant.location.parking}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="restaurant-view-section" id="reviews-section">
+                  <div className="restaurant-view-section">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                      <h2 className="restaurant-view-reviews-title">All reviews ({restaurant.reviews.allReviews})</h2>
+                      <a 
+                        href={`/directories/restaurants/${id}/write-review`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="restaurant-view-reviews-button"
+                      >
+                        <Pencil size={16} />
+                        Write a review
+                      </a>
+                    </div>
+                    <p className="restaurant-view-disclaimer" style={{ marginBottom: '1rem' }}>
+                      This review is the subjective opinion of a Ghana National Resource System member and not of Ghana National Resource System. Ghana National Resource System performs checks on reviews as part of our industry-leading trust & safety standards.
+                    </p>
+                  </div>
+
+                  <div className="restaurant-view-reviews-filters">
+                    <button className="restaurant-view-filter-button">
+                      <Filter size={16} />
+                      Filters (1)
+                    </button>
+                    <select 
+                      className="restaurant-view-sort-select"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                    >
+                      <option value="most-recent">Sort by: Most recent</option>
+                      <option value="highest-rated">Sort by: Highest rated</option>
+                      <option value="lowest-rated">Sort by: Lowest rated</option>
+                    </select>
+                    <Info size={16} style={{ color: '#666' }} />
+                    <input
+                      type="text"
+                      className="restaurant-view-search-input"
+                      placeholder="Search reviews"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="restaurant-view-popular-mentions">
+                    {restaurant.reviews.popularMentions.map((mention, idx) => (
+                      <span key={idx} className="restaurant-view-mention-tag">{mention}</span>
+                    ))}
+                  </div>
+
+                  {restaurant.reviews.list.map((review: any) => (
+                    <div key={review.id} className="restaurant-view-review-card">
+                      <div className="restaurant-view-review-header">
+                        <div className="restaurant-view-review-avatar"></div>
+                        <div className="restaurant-view-review-info">
+                          <div className="restaurant-view-review-author">{review.author}</div>
+                          {review.location && (
+                            <div className="restaurant-view-review-location">
+                              {review.location}{review.contributions ? ` • ${review.contributions} contributions` : ''}
+                            </div>
+                          )}
+                          {renderStars(review.rating)}
+                        </div>
+                        <div className="restaurant-view-review-actions">
+                          <div className="restaurant-view-review-like">
+                            <ThumbsUp size={16} />
+                            {review.likes}
+                          </div>
+                          <div style={{ position: 'relative' }} ref={openDropdownId === review.id ? dropdownRef : null}>
+                            <div 
+                              className="restaurant-view-review-more"
+                              onClick={() => setOpenDropdownId(openDropdownId === review.id ? null : review.id)}
+                            >
+                              <MoreVertical size={16} />
+                            </div>
+                            {openDropdownId === review.id && (
+                              <div className="restaurant-view-review-dropdown">
+                                <div 
+                                  className="restaurant-view-review-dropdown-item"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    alert('Report review functionality would be implemented here');
+                                    setOpenDropdownId(null);
+                                  }}
+                                >
+                                  Report review
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <h3 className="restaurant-view-review-title">{review.title}</h3>
+                      <div className="restaurant-view-review-date">{review.date} • {review.group}</div>
+                      <p className="restaurant-view-review-text">{review.text}</p>
+                      {review.images && review.images.length > 0 && (
+                        <div className="restaurant-view-review-images">
+                          {review.images.map((img: string, idx: number) => (
+                            <img key={idx} src={img} alt={`Review ${idx + 1}`} className="restaurant-view-review-image" />
+                          ))}
+                        </div>
+                      )}
+                      <div className="restaurant-view-review-date">Written {review.writtenDate}</div>
+                      <p className="restaurant-view-disclaimer" style={{ marginTop: '0.5rem' }}>
+                        This review is the subjective opinion of a Ghana National Resource System member and not of Ghana National Resource System. Ghana National Resource System performs checks on reviews as part of our industry-leading trust & safety standards.
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="restaurant-view-nearby-section">
                   <div className="restaurant-view-nearby-header">
-                    <h2 className="restaurant-view-nearby-title">Best moderately priced restaurants</h2>
-                    <a href="#" className="restaurant-view-nearby-link">See all</a>
+                    <h2 className="restaurant-view-nearby-title">Other nearby restaurants</h2>
+                    <Link to="/directories/restaurants" className="restaurant-view-nearby-link">See all</Link>
                   </div>
-                  <div className="restaurant-view-nearby-grid">
-                    {restaurant.nearby.restaurants.map((item: any) => (
-                      <div key={item.id} className="restaurant-view-nearby-item">
-                        <div style={{ position: 'relative' }}>
-                          <img src={item.image} alt={item.name} className="restaurant-view-nearby-image" />
-                          <div className="restaurant-view-nearby-heart">
-                            <Heart size={16} color="#666" />
+                  <div className="restaurant-view-nearby-carousel-wrapper">
+                    <button 
+                      className="restaurant-view-nearby-nav-button restaurant-view-nearby-nav-prev"
+                      onClick={() => {
+                        if (nearbyCarouselRef.current) {
+                          nearbyCarouselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+                        }
+                      }}
+                    >
+                      <ArrowLeft size={20} />
+                    </button>
+                    <div className="restaurant-view-nearby-carousel" ref={nearbyCarouselRef}>
+                      {restaurant.nearby.restaurants.map((item: any) => (
+                        <div key={item.id} className="restaurant-view-nearby-item">
+                          <div style={{ position: 'relative' }}>
+                            <img src={item.image} alt={item.name} className="restaurant-view-nearby-image" />
+                            <div className="restaurant-view-nearby-heart">
+                              <Heart size={16} color="#666" />
+                            </div>
+                          </div>
+                          <div className="restaurant-view-nearby-info">
+                            <div className="restaurant-view-nearby-name">{item.name}</div>
                           </div>
                         </div>
-                        <div className="restaurant-view-nearby-info">
-                          <div className="restaurant-view-nearby-name">{item.name}</div>
-                          <div className="restaurant-view-nearby-details">
-                            {renderStars(item.rating)} {item.rating} ({item.reviews} reviews)
-                          </div>
-                          <div className="restaurant-view-nearby-details">{item.cuisine} · {item.priceRange} · {item.status}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="restaurant-view-nearby-header" style={{ marginTop: '3rem' }}>
-                    <h2 className="restaurant-view-nearby-title">Best nearby</h2>
-                  </div>
-                  <RestaurantMap
-                    lat={restaurant.location.lat}
-                    lng={restaurant.location.lng}
-                    restaurantName={restaurant.name}
-                    address={restaurant.address}
-                    restaurantId={restaurant.id}
-                    allRestaurants={getAllRestaurants().map(r => ({
-                      id: r.id,
-                      name: r.name,
-                      lat: r.lat,
-                      lng: r.lng,
-                      rating: r.rating,
-                      cuisine: r.cuisine,
-                      reviewCount: restaurantsData[r.id]?.reviewCount,
-                    }))}
-                    nearbyPlaces={[
-                      ...restaurant.nearby.restaurants.map((r: any) => ({
-                        id: r.id,
-                        name: r.name,
-                        lat: r.lat,
-                        lng: r.lng,
-                        type: 'restaurant' as const,
-                      })),
-                      ...restaurant.nearby.hotels.map((h: any) => ({
-                        id: h.id,
-                        name: h.name,
-                        lat: h.lat,
-                        lng: h.lng,
-                        type: 'hotel' as const,
-                      })),
-                    ]}
-                    height="400px"
-                    showControls={true}
-                    showRouting={false}
-                    showAllRestaurants={true}
-                    onRestaurantClick={(restaurantId) => {
-                      navigate(`/directories/restaurants/${restaurantId}`);
-                    }}
-                  />
-
-                  <div className="restaurant-view-nearby-header" style={{ marginTop: '2rem' }}>
-                    <h2 className="restaurant-view-nearby-title">Best nearby hotels</h2>
-                    <a href="#" className="restaurant-view-nearby-link">See all</a>
-                  </div>
-                  <div className="restaurant-view-nearby-grid">
-                    {restaurant.nearby.hotels.map((item: any) => (
-                      <div key={item.id} className="restaurant-view-nearby-item">
-                        <div style={{ position: 'relative' }}>
-                          <img src={item.image} alt={item.name} className="restaurant-view-nearby-image" />
-                          <div className="restaurant-view-nearby-heart">
-                            <Heart size={16} color="#666" />
-                          </div>
-                        </div>
-                        <div className="restaurant-view-nearby-info">
-                          <div className="restaurant-view-nearby-name">{item.name}</div>
-                          <div className="restaurant-view-nearby-details">
-                            {item.rating > 0 ? `${renderStars(item.rating)} ${item.rating} (${item.reviews} reviews)` : 'No reviews'} · {item.distance}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="restaurant-view-nearby-header" style={{ marginTop: '2rem' }}>
-                    <h2 className="restaurant-view-nearby-title">Best nearby restaurants</h2>
-                    <a href="#" className="restaurant-view-nearby-link">See all</a>
-                  </div>
-                  <div className="restaurant-view-nearby-grid">
-                    {restaurant.nearby.restaurants.slice(0, 2).map((item: any) => (
-                      <div key={item.id} className="restaurant-view-nearby-item">
-                        <div style={{ position: 'relative' }}>
-                          <img src={item.image} alt={item.name} className="restaurant-view-nearby-image" />
-                          <div className="restaurant-view-nearby-heart">
-                            <Heart size={16} color="#666" />
-                          </div>
-                        </div>
-                        <div className="restaurant-view-nearby-info">
-                          <div className="restaurant-view-nearby-name">{item.name}</div>
-                          <div className="restaurant-view-nearby-details">
-                            {renderStars(item.rating)} {item.rating} ({item.reviews} reviews)
-                          </div>
-                          {item.distance && <div className="restaurant-view-nearby-details">{item.distance}</div>}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <button 
+                      className="restaurant-view-nearby-nav-button restaurant-view-nearby-nav-next"
+                      onClick={() => {
+                        if (nearbyCarouselRef.current) {
+                          nearbyCarouselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+                        }
+                      }}
+                    >
+                      <ArrowRight size={20} />
+                    </button>
                   </div>
                 </div>
               </div>
 
               <div className="restaurant-view-sidebar">
-                <div className="restaurant-view-sidebar-section">
-                  <h2 className="restaurant-view-section-title">Save this restaurant</h2>
-                  <button className="restaurant-view-save-button" onClick={() => setIsSaved(!isSaved)}>
-                    <Heart size={20} fill={isSaved ? '#006B3F' : 'none'} color="#006B3F" />
-                    Save
-                  </button>
-                </div>
-
                 <div className="restaurant-view-sidebar-section">
                   <h2 className="restaurant-view-section-title">
                     Hours
@@ -1528,9 +2009,27 @@ const RestaurantView: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'location' && (
-            <div className="restaurant-view-main">
-              <h2 className="restaurant-view-section-title">Location</h2>
+
+
+        </div>
+      </div>
+
+      {showMapModal && (
+        <div className="restaurant-view-map-modal-overlay" onClick={() => setShowMapModal(false)}>
+          <div className="restaurant-view-map-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="restaurant-view-map-modal-header">
+              <div className="restaurant-view-map-modal-title">
+                <MapPin size={20} color="#006B3F" />
+                <span>{restaurant.name}</span>
+              </div>
+              <button 
+                className="restaurant-view-map-modal-close"
+                onClick={() => setShowMapModal(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="restaurant-view-map-modal-map">
               <RestaurantMap
                 lat={restaurant.location.lat}
                 lng={restaurant.location.lng}
@@ -1547,14 +2046,14 @@ const RestaurantView: React.FC = () => {
                   reviewCount: restaurantsData[r.id]?.reviewCount,
                 }))}
                 nearbyPlaces={[
-                  ...restaurant.nearby.restaurants.slice(0, 2).map((r: any) => ({
+                  ...restaurant.nearby.restaurants.map((r: any) => ({
                     id: r.id,
                     name: r.name,
                     lat: r.lat,
                     lng: r.lng,
                     type: 'restaurant' as const,
                   })),
-                  ...restaurant.nearby.hotels.slice(0, 2).map((h: any) => ({
+                  ...restaurant.nearby.hotels.map((h: any) => ({
                     id: h.id,
                     name: h.name,
                     lat: h.lat,
@@ -1562,280 +2061,19 @@ const RestaurantView: React.FC = () => {
                     type: 'hotel' as const,
                   })),
                 ]}
-                height="500px"
+                height="100%"
                 showControls={true}
                 showRouting={true}
                 showAllRestaurants={true}
                 onRestaurantClick={(restaurantId) => {
                   navigate(`/directories/restaurants/${restaurantId}`);
+                  setShowMapModal(false);
                 }}
               />
-              <div className="restaurant-view-location-address">
-                {restaurant.address}
-                <ChevronRight size={16} />
-              </div>
-              <div className="restaurant-view-parking">
-                <MapPin size={16} />
-                {restaurant.location.parking}
-              </div>
-              <div className="restaurant-view-question-box">
-                <div className="restaurant-view-question">
-                  Can a gluten free person get a good meal at this restaurant?
-                </div>
-                <div className="restaurant-view-checkboxes">
-                  <label className="restaurant-view-checkbox-item">
-                    <input type="checkbox" />
-                    Yes
-                  </label>
-                  <label className="restaurant-view-checkbox-item">
-                    <input type="checkbox" />
-                    No
-                  </label>
-                  <label className="restaurant-view-checkbox-item">
-                    <input type="checkbox" />
-                    Unsure
-                  </label>
-                </div>
-              </div>
             </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <div className="restaurant-view-main">
-              <div className="restaurant-view-reviews-header">
-                <h2 className="restaurant-view-reviews-title">Reviews</h2>
-                <div className="restaurant-view-reviews-actions">
-                  <a href="#" className="restaurant-view-reviews-link">Insider tips/Q&A (2)</a>
-                  <a href="#" className="restaurant-view-reviews-link">All reviews ({restaurant.reviews.allReviews})</a>
-                  <button className="restaurant-view-reviews-button">
-                    <Lightbulb size={16} />
-                    Share an insider tip
-                  </button>
-                  <button className="restaurant-view-reviews-button">
-                    <Pencil size={16} />
-                    Write a review
-                  </button>
-                </div>
-              </div>
-
-              <div className="restaurant-view-rating-overview">
-                <div className="restaurant-view-rating-main">
-                  <span className="restaurant-view-rating-large">{restaurant.rating}</span>
-                  <div>
-                    <div className="restaurant-view-rating-label">{getRatingText(restaurant.rating)}</div>
-                    {renderStars(restaurant.rating)}
-                    <div className="restaurant-view-rating-text">({restaurant.reviewCount})</div>
-                  </div>
-                </div>
-                <div className="restaurant-view-rating-breakdown">
-                  <div className="restaurant-view-rating-bar">
-                    <span>Excellent</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.overall.excellent / restaurant.reviewCount) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.overall.excellent}</span>
-                  </div>
-                  <div className="restaurant-view-rating-bar">
-                    <span>Good</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.overall.good / restaurant.reviewCount) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.overall.good}</span>
-                  </div>
-                  <div className="restaurant-view-rating-bar">
-                    <span>Average</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.overall.average / restaurant.reviewCount) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.overall.average}</span>
-                  </div>
-                  <div className="restaurant-view-rating-bar">
-                    <span>Poor</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.overall.poor / restaurant.reviewCount) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.overall.poor}</span>
-                  </div>
-                  <div className="restaurant-view-rating-bar">
-                    <span>Terrible</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.overall.terrible / restaurant.reviewCount) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.overall.terrible}</span>
-                  </div>
-                </div>
-                <div className="restaurant-view-rating-breakdown">
-                  <div className="restaurant-view-rating-bar">
-                    <span>Service</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.categories.service / 5) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.categories.service}</span>
-                  </div>
-                  <div className="restaurant-view-rating-bar">
-                    <span>Food</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.categories.food / 5) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.categories.food}</span>
-                  </div>
-                  <div className="restaurant-view-rating-bar">
-                    <span>Value</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.categories.value / 5) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.categories.value}</span>
-                  </div>
-                  <div className="restaurant-view-rating-bar">
-                    <span>Atmosphere</span>
-                    <div className="restaurant-view-rating-bar-fill">
-                      <div className="restaurant-view-rating-bar-progress" style={{ width: `${(restaurant.reviews.categories.atmosphere / 5) * 100}%` }}></div>
-                    </div>
-                    <span>{restaurant.reviews.categories.atmosphere}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="restaurant-view-traveler-photos">
-                <div className="restaurant-view-photos-header">
-                  <h3 className="restaurant-view-photos-title">Traveler photos ({restaurant.reviews.travelerPhotos})</h3>
-                  <button className="restaurant-view-photos-button">Add photos</button>
-                </div>
-                <div className="restaurant-view-photos-carousel">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <img 
-                      key={i} 
-                      src={`https://images.unsplash.com/photo-${1555939594 + i}?auto=format&fit=crop&w=200&q=80`} 
-                      alt={`Photo ${i}`}
-                      className="restaurant-view-photo-item"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="restaurant-view-section">
-                <h2 className="restaurant-view-reviews-title">All reviews ({restaurant.reviews.allReviews})</h2>
-                <p className="restaurant-view-disclaimer" style={{ marginBottom: '1rem' }}>
-                  This review is the subjective opinion of a Tripadvisor member and not of Tripadvisor LLC. Tripadvisor performs checks on reviews as part of our industry-leading trust & safety standards. <a href="#" className="restaurant-view-disclaimer-link">Read our transparency report</a> to learn more.
-                </p>
-              </div>
-
-              <div className="restaurant-view-reviews-filters">
-                <button className="restaurant-view-filter-button">
-                  <Filter size={16} />
-                  Filters (1)
-                </button>
-                <select 
-                  className="restaurant-view-sort-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="most-recent">Sort by: Most recent</option>
-                  <option value="highest-rated">Sort by: Highest rated</option>
-                  <option value="lowest-rated">Sort by: Lowest rated</option>
-                </select>
-                <Info size={16} style={{ color: '#666' }} />
-                <input
-                  type="text"
-                  className="restaurant-view-search-input"
-                  placeholder="Search reviews"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
-              <div className="restaurant-view-popular-mentions">
-                {restaurant.reviews.popularMentions.map((mention, idx) => (
-                  <span key={idx} className="restaurant-view-mention-tag">{mention}</span>
-                ))}
-              </div>
-
-              {restaurant.reviews.list.map((review: any) => (
-                <div key={review.id} className="restaurant-view-review-card">
-                  <div className="restaurant-view-review-header">
-                    <div className="restaurant-view-review-avatar"></div>
-                    <div className="restaurant-view-review-info">
-                      <div className="restaurant-view-review-author">{review.author}</div>
-                      {review.location && (
-                        <div className="restaurant-view-review-location">
-                          {review.location}{review.contributions ? ` • ${review.contributions} contributions` : ''}
-                        </div>
-                      )}
-                      {renderStars(review.rating)}
-                    </div>
-                  </div>
-                  <h3 className="restaurant-view-review-title">{review.title}</h3>
-                  <div className="restaurant-view-review-date">{review.date} • {review.group}</div>
-                  <p className="restaurant-view-review-text">{review.text}</p>
-                  {review.images && review.images.length > 0 && (
-                    <div className="restaurant-view-review-images">
-                      {review.images.map((img: string, idx: number) => (
-                        <img key={idx} src={img} alt={`Review ${idx + 1}`} className="restaurant-view-review-image" />
-                      ))}
-                    </div>
-                  )}
-                  <div className="restaurant-view-review-date">Written {review.writtenDate}</div>
-                  <p className="restaurant-view-disclaimer" style={{ marginTop: '0.5rem' }}>
-                    This review is the subjective opinion of a Tripadvisor member and not of Tripadvisor LLC. Tripadvisor performs checks on reviews as part of our industry-leading trust & safety standards. <a href="#" className="restaurant-view-disclaimer-link">Read our transparency report</a> to learn more.
-                  </p>
-                  <div className="restaurant-view-review-actions">
-                    <div className="restaurant-view-review-like">
-                      <ThumbsUp size={16} />
-                      {review.likes}
-                    </div>
-                    <div className="restaurant-view-review-more">
-                      <MoreVertical size={16} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === 'hours' && (
-            <div className="restaurant-view-main">
-              <h2 className="restaurant-view-section-title">
-                Hours
-                <a href="#" className="restaurant-view-section-link">Suggest an edit</a>
-              </h2>
-              <div className="restaurant-view-glance-item open" style={{ marginBottom: '1rem' }}>
-                Open until {restaurant.openUntil}
-              </div>
-              <ul className="restaurant-view-hours-list">
-                <li className="restaurant-view-hours-item">
-                  <span>Sunday</span>
-                  <span>{restaurant.hours.sunday.open} - {restaurant.hours.sunday.close}</span>
-                </li>
-                <li className="restaurant-view-hours-item">
-                  <span>Monday</span>
-                  <span>{restaurant.hours.monday.open} - {restaurant.hours.monday.close}</span>
-                </li>
-                <li className="restaurant-view-hours-item">
-                  <span>Tuesday</span>
-                  <span>{restaurant.hours.tuesday.open} - {restaurant.hours.tuesday.close}</span>
-                </li>
-                <li className="restaurant-view-hours-item">
-                  <span>Wednesday</span>
-                  <span>{restaurant.hours.wednesday.open} - {restaurant.hours.wednesday.close}</span>
-                </li>
-                <li className="restaurant-view-hours-item">
-                  <span>Thursday</span>
-                  <span>{restaurant.hours.thursday.open} - {restaurant.hours.thursday.close}</span>
-                </li>
-                <li className="restaurant-view-hours-item">
-                  <span>Friday</span>
-                  <span>{restaurant.hours.friday.open} - {restaurant.hours.friday.close}</span>
-                </li>
-                <li className="restaurant-view-hours-item">
-                  <span>Saturday</span>
-                  <span>{restaurant.hours.saturday.open} - {restaurant.hours.saturday.close}</span>
-                </li>
-              </ul>
-            </div>
-          )}
-
+          </div>
         </div>
-      </div>
+      )}
 
       <Footer />
     </div>

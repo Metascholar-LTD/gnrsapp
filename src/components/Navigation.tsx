@@ -633,42 +633,109 @@ export const Navigation = () => {
         .nav-top-bar {
           background: linear-gradient(90deg, rgba(37, 99, 235, 0.05) 0%, rgba(147, 197, 253, 0.05) 50%, rgba(96, 165, 250, 0.05) 100%);
           border-bottom: 1px solid rgba(37, 99, 235, 0.1);
-          height: 45px;
+          height: 35px;
           display: none;
         }
 
-        /* Tablet: 768px - 1199px */
-        @media (min-width: 768px) {
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
           .nav-top-bar {
             display: block;
+            height: 36px;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-top-bar {
+            display: block;
+            height: 45px;
           }
         }
 
         .nav-top-bar-content {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 1.25rem;
+          max-width: none;
+          margin: 0;
+          padding: 0 0.875rem;
           height: 100%;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          width: 100%;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-top-bar-content {
+            padding: 0 1rem;
+          }
+        }
+
+        /* Large screens: 1600px+ - Remove centering, span edge-to-edge */
+        @media (min-width: 1600px) {
+          .nav-top-bar-content {
+            padding: 0 2rem;
+            max-width: none;
+            margin: 0;
+            width: 100%;
+          }
+        }
+
+        /* Very large screens: 1920px+ - Edge-to-edge with minimal padding */
+        @media (min-width: 1920px) {
+          .nav-top-bar-content {
+            padding: 0 2.5rem;
+          }
         }
 
         .nav-top-bar-left,
         .nav-top-bar-right {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: 0.5rem;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-top-bar-left,
+          .nav-top-bar-right {
+            gap: 0.625rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-top-bar-left,
+          .nav-top-bar-right {
+            gap: 1rem;
+          }
         }
 
         .nav-top-bar-left small,
         .nav-top-bar-right small {
-          font-size: 0.875rem;
+          font-size: 0.75rem;
           color: #2c2c2c;
           font-weight: 500;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.375rem;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-top-bar-left small,
+          .nav-top-bar-right small {
+            font-size: 0.78125rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-top-bar-left small,
+          .nav-top-bar-right small {
+            font-size: 0.875rem;
+            gap: 0.5rem;
+          }
         }
 
         .nav-top-icon {
@@ -683,8 +750,8 @@ export const Navigation = () => {
         }
 
         .nav-top-social-icon {
-          width: 32px;
-          height: 32px;
+          width: 24px;
+          height: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -694,7 +761,25 @@ export const Navigation = () => {
           color: #000000;
           text-decoration: none;
           transition: all 0.3s ease;
-          font-size: 0.875rem;
+          font-size: 0.6875rem;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-top-social-icon {
+            width: 26px;
+            height: 26px;
+            font-size: 0.71875rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-top-social-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 0.875rem;
+          }
         }
 
         .nav-top-social-icon:hover {
@@ -708,7 +793,7 @@ export const Navigation = () => {
          #nav-main {
            position: relative;
            width: 100%;
-           height: clamp(70px, 10vw, 80px);
+           height: 60px;
            display: flex;
            align-items: center;
            justify-content: space-between;
@@ -716,15 +801,15 @@ export const Navigation = () => {
            isolation: isolate;
          }
 
-         /* Tablet: 768px - 1199px */
-         @media (min-width: 768px) {
+         /* Small Desktop: 1024px - 1599px */
+         @media (min-width: 1024px) and (max-width: 1599px) {
            #nav-main {
-             height: clamp(75px, 9vw, 80px);
+             height: 65px;
            }
          }
 
-         /* Desktop: 1200px+ */
-         @media (min-width: 1200px) {
+         /* Large screens: 1600px+ */
+         @media (min-width: 1600px) {
            #nav-main {
              height: 80px;
            }
@@ -738,51 +823,46 @@ export const Navigation = () => {
            display: flex;
            align-items: center;
            text-decoration: none;
-           padding-left: 0.75rem;
+           padding-left: 0.625rem;
            flex-shrink: 0;
            z-index: 10;
          }
 
-         /* Tablet: 768px - 1199px */
-         @media (min-width: 768px) {
+         /* Small Desktop: 1024px - 1599px */
+         @media (min-width: 1024px) and (max-width: 1599px) {
            .nav-brand {
-             padding-left: clamp(1rem, 2vw, 1.25rem);
-           }
-         }
-
-         /* Desktop: 1200px - 1599px */
-         @media (min-width: 1200px) {
-           .nav-brand {
-             padding-left: clamp(1.25rem, 3vw, 1.5rem);
+             padding-left: 0.875rem;
            }
          }
 
          /* Large screens: 1600px+ */
          @media (min-width: 1600px) {
            .nav-brand {
-             padding-left: clamp(1.5rem, 4vw, 2rem);
+             padding-left: 1.5rem;
            }
          }
 
         .nav-brand-img {
-          height: clamp(50px, 8vw, 65px);
+          height: 40px;
           width: auto;
           border: 1px solid rgba(240, 240, 240, 0.6);
           border-radius: 4px;
-          padding: 4px;
+          padding: 3px;
         }
 
-        /* Tablet: 768px - 1199px */
-        @media (min-width: 768px) {
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
           .nav-brand-img {
-            height: clamp(55px, 7vw, 65px);
+            height: 42px;
+            padding: 3px;
           }
         }
 
-        /* Desktop: 1200px+ */
-        @media (min-width: 1200px) {
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
           .nav-brand-img {
             height: 65px;
+            padding: 4px;
           }
         }
 
@@ -796,8 +876,8 @@ export const Navigation = () => {
            isolation: isolate;
          }
 
-         /* Desktop: 1200px+ */
-         @media (min-width: 1200px) {
+         /* Small Desktop: 1024px+ */
+         @media (min-width: 1024px) {
            .nav-desktop {
              display: block;
            }
@@ -807,51 +887,79 @@ export const Navigation = () => {
            display: flex;
            align-items: center;
            height: 100%;
-           padding-right: 0.75rem;
+           padding-right: 0.625rem;
          }
 
-         /* Tablet: 768px - 1199px */
-         @media (min-width: 768px) {
+         /* Small Desktop: 1024px - 1599px */
+         @media (min-width: 1024px) and (max-width: 1599px) {
            .nav-links-container {
-             padding-right: clamp(1rem, 2vw, 1.25rem);
-           }
-         }
-
-         /* Desktop: 1200px - 1599px */
-         @media (min-width: 1200px) {
-           .nav-links-container {
-             padding-right: clamp(1.25rem, 3vw, 1.5rem);
+             padding-right: 0.875rem;
            }
          }
 
          /* Large screens: 1600px+ */
          @media (min-width: 1600px) {
            .nav-links-container {
-             padding-right: clamp(1.5rem, 4vw, 2rem);
+             padding-right: 1.5rem;
            }
          }
 
          .nav-links {
            display: flex;
            align-items: center;
-           gap: 0.5rem;
+           gap: 0.125rem;
+         }
+
+         /* Small Desktop: 1024px - 1599px */
+         @media (min-width: 1024px) and (max-width: 1599px) {
+           .nav-links {
+             gap: 0.1875rem;
+           }
+         }
+
+         /* Large screens: 1600px+ */
+         @media (min-width: 1600px) {
+           .nav-links {
+             gap: 0.625rem;
+           }
          }
 
         .nav-link {
-          padding: clamp(1rem, 2vw, 1.5625rem) clamp(0.75rem, 1.5vw, 0.9375rem);
-          color: #555555;
+          padding: 0.5rem 0.5rem;
+          color: #2c2c2c;
           text-decoration: none;
           font-weight: 500;
-          font-size: clamp(0.875rem, 1.2vw, 0.95rem);
+          font-size: 0.75rem;
           transition: all 0.2s ease;
           position: relative;
           display: flex;
           align-items: center;
-          gap: clamp(0.375rem, 0.8vw, 0.5rem);
+          gap: 0.25rem;
+          white-space: nowrap;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-link,
+          .nav-link-dropdown {
+            padding: 0.625rem 0.5625rem !important;
+            font-size: 0.78125rem !important;
+            gap: 0.3125rem !important;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-link,
+          .nav-link-dropdown {
+            padding: 1.25rem 1rem !important;
+            font-size: 0.95rem !important;
+            gap: 0.5rem !important;
+          }
         }
 
         .nav-link:hover {
-          color: #555555;
+          color: #2c2c2c;
         }
 
         .nav-link-active {
@@ -863,10 +971,30 @@ export const Navigation = () => {
           content: '';
           position: absolute;
           bottom: 0;
-          left: 0.9375rem;
-          right: 0.9375rem;
-          height: 3px;
+          left: 0.5rem;
+          right: 0.5rem;
+          height: 2px;
           background: #2563eb;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-link:hover::after,
+          .nav-link-active::after {
+            left: 0.5625rem;
+            right: 0.5625rem;
+            height: 2px;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-link:hover::after,
+          .nav-link-active::after {
+            left: 0.875rem;
+            right: 0.875rem;
+            height: 3px;
+          }
         }
 
         .nav-link-icon {
@@ -888,7 +1016,7 @@ export const Navigation = () => {
 
         .nav-mega-menu .nav-mega-content {
           position: fixed !important;
-          top: clamp(70px, 10vw, 80px) !important;
+          top: 60px !important;
           left: 0 !important;
           right: 0 !important;
           width: 100vw !important;
@@ -898,15 +1026,15 @@ export const Navigation = () => {
           padding-right: 0 !important;
         }
 
-        /* Tablet: 768px - 1199px */
-        @media (min-width: 768px) {
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
           .nav-mega-menu .nav-mega-content {
-            top: clamp(75px, 9vw, 80px) !important;
+            top: 101px !important;
           }
         }
 
-        /* Desktop: 1200px+ */
-        @media (min-width: 1200px) {
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
           .nav-mega-menu .nav-mega-content {
             top: 125px !important;
           }
@@ -916,11 +1044,62 @@ export const Navigation = () => {
           position: relative;
         }
 
-        .nav-dropdown-icon {
-          margin-left: 0.5rem;
+        /* Ensure dropdown parent links (buttons) inherit all nav-link styles */
+        button.nav-link-dropdown,
+        .nav-link-dropdown {
+          padding: 0.5rem 0.5rem;
           font-size: 0.75rem;
+          gap: 0.25rem;
+          color: #2c2c2c;
+          text-decoration: none;
+          font-weight: 600;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          white-space: nowrap;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          button.nav-link-dropdown,
+          .nav-link-dropdown {
+            padding: 0.625rem 0.5625rem !important;
+            font-size: 0.78125rem !important;
+            gap: 0.3125rem !important;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          button.nav-link-dropdown,
+          .nav-link-dropdown {
+            padding: 1.25rem 1rem !important;
+            font-size: 0.95rem !important;
+            gap: 0.5rem !important;
+          }
+        }
+
+        .nav-dropdown-icon {
+          margin-left: 0.25rem;
+          font-size: 0.625rem;
           transition: transform 0.2s ease, color 0.2s ease;
           color: #2c2c2c;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-dropdown-icon {
+            margin-left: 0.3125rem;
+            font-size: 0.65625rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-dropdown-icon {
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+          }
         }
 
         .nav-link-active .nav-dropdown-icon,
@@ -1000,7 +1179,21 @@ export const Navigation = () => {
         }
 
         .nav-join-wrapper {
-          margin-left: 0.75rem;
+          margin-left: 0.375rem;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-join-wrapper {
+            margin-left: 0.5rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-join-wrapper {
+            margin-left: 0.75rem;
+          }
         }
 
          .nav-toggle {
@@ -1021,15 +1214,8 @@ export const Navigation = () => {
            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
          }
 
-         /* Tablet: 768px - 1199px */
-         @media (min-width: 768px) {
-           .nav-toggle {
-             margin-right: clamp(1rem, 2vw, 1.25rem);
-           }
-         }
-
-         /* Desktop: 1200px+ */
-         @media (min-width: 1200px) {
+         /* Small Desktop: 1024px+ */
+         @media (min-width: 1024px) {
            .nav-toggle {
              display: none;
            }
@@ -1073,7 +1259,7 @@ export const Navigation = () => {
 
         .nav-mega-content {
           position: fixed !important;
-          top: clamp(70px, 10vw, 80px) !important;
+          top: 60px !important;
           left: 0 !important;
           right: 0 !important;
           width: 100vw !important;
@@ -1092,15 +1278,15 @@ export const Navigation = () => {
           transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
-        /* Tablet: 768px - 1199px */
-        @media (min-width: 768px) {
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
           .nav-mega-content {
-            top: clamp(75px, 9vw, 80px) !important;
+            top: 101px !important;
           }
         }
 
-        /* Desktop: 1200px+ */
-        @media (min-width: 1200px) {
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
           .nav-mega-content {
             top: 125px !important;
           }
@@ -1113,58 +1299,81 @@ export const Navigation = () => {
 
         .nav-mega-wrapper {
           display: flex;
-          min-height: 320px;
+          min-height: 280px;
           width: 100% !important;
           max-width: none !important;
           margin: 0 !important;
-          padding: 2rem clamp(2rem, 5vw, 4.5rem) !important;
+          padding: 1.25rem 1.5rem !important;
           box-sizing: border-box;
-          gap: clamp(1.5rem, 2vw, 2.75rem);
+          gap: 1.25rem;
         }
 
-        /* Tablet: 768px - 1199px */
-        @media (min-width: 768px) and (max-width: 1199px) {
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
           .nav-mega-wrapper {
-            padding: clamp(1.5rem, 3vw, 2rem) clamp(1.75rem, 4vw, 2.5rem);
-            gap: clamp(1.25rem, 2vw, 1.75rem);
-          }
-        }
-
-        /* Desktop: 1200px - 1599px */
-        @media (min-width: 1200px) and (max-width: 1599px) {
-          .nav-mega-wrapper {
-            padding: clamp(2rem, 4vw, 3rem) clamp(2.5rem, 5vw, 4rem);
-            gap: clamp(1.75rem, 3vw, 2.5rem);
+            padding: 1.5rem 2rem !important;
+            gap: 1.5rem;
+            min-height: 300px;
           }
         }
 
         /* Large screens: 1600px+ */
         @media (min-width: 1600px) {
           .nav-mega-wrapper {
-            padding-left: clamp(4rem, 8vw, 6.5rem);
-            padding-right: clamp(4rem, 8vw, 6.5rem);
-            gap: clamp(2rem, 3vw, 3.5rem);
+            padding: 2.5rem 4.5rem !important;
+            gap: 2.75rem;
+            min-height: 320px;
           }
         }
 
         .nav-mega-sidebar {
-          width: clamp(220px, 18vw, 320px);
+          width: 180px;
           background: #f8f9fa;
           padding: 0;
           border-right: 2px solid rgba(37, 99, 235, 0.1);
           flex-shrink: 0;
         }
 
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-mega-sidebar {
+            width: 200px;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-mega-sidebar {
+            width: 320px;
+          }
+        }
+
         .nav-mega-sidebar-item {
           display: flex;
           align-items: center;
-          padding: 1rem 1.5rem;
+          padding: 0.625rem 1rem;
           color: #2c2c2c;
           cursor: pointer;
           transition: all 0.2s ease;
           font-weight: 500;
-          font-size: 0.95rem;
+          font-size: 0.8125rem;
           border-left: 3px solid transparent;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-mega-sidebar-item {
+            padding: 0.75rem 1.125rem;
+            font-size: 0.84375rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-mega-sidebar-item {
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+          }
         }
 
         .nav-mega-sidebar-item:hover {
@@ -1180,10 +1389,29 @@ export const Navigation = () => {
         }
 
         .nav-mega-icon {
-          width: 20px;
+          width: 16px;
           text-align: center;
-          margin-right: 0.75rem;
+          margin-right: 0.625rem;
           color: #2c2c2c;
+          font-size: 0.875rem;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-mega-icon {
+            width: 18px;
+            margin-right: 0.6875rem;
+            font-size: 0.9375rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-mega-icon {
+            width: 20px;
+            margin-right: 0.75rem;
+            font-size: 1rem;
+          }
         }
 
         .nav-mega-sidebar-item:hover .nav-mega-icon,
@@ -1199,8 +1427,22 @@ export const Navigation = () => {
 
         .nav-mega-content-area {
           flex: 1;
-          padding: 0 2rem;
+          padding: 0 1.25rem;
           position: relative;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-mega-content-area {
+            padding: 0 1.5rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-mega-content-area {
+            padding: 0 2rem;
+          }
         }
 
         .nav-mega-section {
@@ -1271,23 +1513,56 @@ export const Navigation = () => {
           }
         }
 
-        /* Tablet: 768px - 1199px */
-        @media (min-width: 768px) and (max-width: 1199px) {
+        /* Small Desktop: 1024px - 1199px */
+        @media (min-width: 1024px) and (max-width: 1199px) {
           .nav-mega-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: clamp(1.5rem, 3vw, 2rem);
+            gap: 1.5rem;
+          }
+        }
+
+        /* Desktop: 1200px - 1599px */
+        @media (min-width: 1200px) and (max-width: 1599px) {
+          .nav-mega-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-mega-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
           }
         }
 
         .nav-mega-section-title {
           color: #2563eb;
           font-weight: 600;
-          font-size: 0.85rem;
-          margin-bottom: 1rem;
-          padding-bottom: 0.5rem;
+          font-size: 0.75rem;
+          margin-bottom: 0.75rem;
+          padding-bottom: 0.375rem;
           border-bottom: 2px solid rgba(37, 99, 235, 0.1);
           text-transform: uppercase;
           letter-spacing: 0.5px;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-mega-section-title {
+            font-size: 0.78125rem;
+            margin-bottom: 0.8125rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-mega-section-title {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+          }
         }
 
         .nav-mega-list {
@@ -1303,14 +1578,32 @@ export const Navigation = () => {
         .nav-mega-item {
           display: flex;
           align-items: center;
-          padding: 0.625rem 0.75rem;
+          padding: 0.5rem 0.625rem;
           color: #2c2c2c;
           text-decoration: none;
           border-radius: 6px;
           transition: all 0.2s ease;
-          font-size: 0.9rem;
+          font-size: 0.78125rem;
           font-weight: 500;
-          gap: 0.5rem;
+          gap: 0.4375rem;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-mega-item {
+            padding: 0.53125rem 0.65625rem;
+            font-size: 0.8125rem;
+            gap: 0.5rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-mega-item {
+            padding: 0.625rem 0.75rem;
+            font-size: 0.9rem;
+            gap: 0.5rem;
+          }
         }
 
         .nav-mega-item:hover {
@@ -1321,8 +1614,25 @@ export const Navigation = () => {
 
         .nav-mega-item-icon {
           color: #2c2c2c;
-          width: 18px;
+          width: 14px;
           text-align: center;
+          font-size: 0.8125rem;
+        }
+
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          .nav-mega-item-icon {
+            width: 16px;
+            font-size: 0.875rem;
+          }
+        }
+
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          .nav-mega-item-icon {
+            width: 18px;
+            font-size: 0.9375rem;
+          }
         }
 
         .nav-mega-item:hover .nav-mega-item-icon {
@@ -1390,8 +1700,8 @@ export const Navigation = () => {
           display: none;
         }
 
-        /* Mobile: 0px - 767px */
-        @media (max-width: 767px) {
+        /* Mobile: 0px - 1023px */
+        @media (max-width: 1023px) {
           .nav-mobile-overlay {
             display: block;
           }
@@ -1413,18 +1723,10 @@ export const Navigation = () => {
           flex-direction: column;
         }
 
-        /* Mobile: 0px - 767px */
-        @media (max-width: 767px) {
+        /* Mobile: 0px - 1023px */
+        @media (max-width: 1023px) {
           .nav-mobile-sidebar {
             display: flex;
-          }
-        }
-
-        /* Tablet: 768px - 1199px */
-        @media (min-width: 768px) and (max-width: 1199px) {
-          .nav-mobile-sidebar {
-            display: flex;
-            width: clamp(320px, 40vw, 400px);
           }
         }
 
