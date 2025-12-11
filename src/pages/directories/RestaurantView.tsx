@@ -2,11 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
-import { RestaurantMap } from '@/components/RestaurantMap';
-import { restaurantsData, getAllRestaurants } from '@/data/restaurants';
+import { restaurantsData } from '@/data/restaurants';
 import { Share2, Heart, MapPin, Clock, Globe, Phone, ChevronDown, ChevronUp, ChevronRight, Filter, Search, ThumbsUp, MoreVertical, Lightbulb, Pencil, ArrowLeft, ArrowRight, Leaf, CreditCard, Info, X } from 'lucide-react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 
 const RestaurantView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +15,6 @@ const RestaurantView: React.FC = () => {
   const [sortBy, setSortBy] = useState('most-recent');
   const [searchQuery, setSearchQuery] = useState('');
   const [showMapModal, setShowMapModal] = useState(false);
-  const previewMapRef = useRef<mapboxgl.Map | null>(null);
   const previewMapContainerRef = useRef<HTMLDivElement>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -65,63 +61,6 @@ const RestaurantView: React.FC = () => {
     };
   }, [openDropdownId]);
 
-  useEffect(() => {
-    const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-    if (!previewMapContainerRef.current || !MAPBOX_TOKEN || !restaurant) return;
-
-    // Clean up existing map if it exists
-    if (previewMapRef.current) {
-      previewMapRef.current.remove();
-      previewMapRef.current = null;
-    }
-
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-
-    const lat = restaurant.location.lat;
-    const lng = restaurant.location.lng;
-
-    const map = new mapboxgl.Map({
-      container: previewMapContainerRef.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [lng, lat],
-      zoom: 15,
-      interactive: false,
-      attributionControl: false,
-    });
-
-    previewMapRef.current = map;
-
-    map.on('load', () => {
-      // Create yellow locator pin marker (classic map pin shape)
-      const markerEl = document.createElement('div');
-      markerEl.style.cssText = `
-        width: 32px;
-        height: 40px;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='40' viewBox='0 0 32 40'%3E%3Cpath d='M16 0C10.48 0 6 4.48 6 10c0 6 10 16 10 16s10-10 10-16c0-5.52-4.48-10-10-10z' fill='%23FFD700' stroke='%23000' stroke-width='1'/%3E%3Ccircle cx='16' cy='10' r='4' fill='%23000'/%3E%3C/svg%3E");
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center bottom;
-        cursor: pointer;
-      `;
-
-      const marker = new mapboxgl.Marker({
-        element: markerEl,
-        anchor: 'bottom'
-      })
-        .setLngLat([lng, lat])
-        .addTo(map);
-
-      // Ensure marker is at correct position
-      map.setCenter([lng, lat]);
-    });
-
-    return () => {
-      if (previewMapRef.current) {
-        previewMapRef.current.remove();
-        previewMapRef.current = null;
-      }
-    };
-  }, [restaurant?.location?.lat, restaurant?.location?.lng, restaurant?.id]);
   
   // Legacy code below - keeping for reference but using imported data above
   const restaurants_legacy: Record<string, any> = {
@@ -763,23 +702,7 @@ const RestaurantView: React.FC = () => {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    .restaurant-view-map {
-      width: 100%;
-      height: 400px;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
-    }
 
-    .restaurant-map-container {
-      width: 100%;
-      height: 100%;
-    }
-
-    .custom-restaurant-marker,
-    .custom-place-marker {
-      background: transparent !important;
-      border: none !important;
-    }
 
     .restaurant-view-location-map-container {
       display: flex;
@@ -799,13 +722,6 @@ const RestaurantView: React.FC = () => {
       position: relative;
     }
 
-    .restaurant-view-preview-map .mapboxgl-ctrl {
-      display: none !important;
-    }
-
-    .restaurant-view-preview-map .mapboxgl-ctrl-attrib {
-      display: none !important;
-    }
 
     .restaurant-view-location-info {
       flex: 1;
@@ -913,26 +829,7 @@ const RestaurantView: React.FC = () => {
       overflow: hidden;
     }
 
-    .restaurant-view-map-modal-map > div {
-      width: 100% !important;
-      height: 100% !important;
-      display: flex;
-      flex-direction: column;
-    }
 
-    .restaurant-view-map-modal-map .restaurant-map-container {
-      width: 100% !important;
-      height: 100% !important;
-      border-radius: 0 !important;
-      border: none !important;
-      flex: 1;
-      min-height: 0;
-    }
-
-    .restaurant-view-map-modal-map .mapboxgl-map {
-      width: 100% !important;
-      height: 100% !important;
-    }
 
     .restaurant-view-question-box {
       background: white;
@@ -1791,7 +1688,19 @@ const RestaurantView: React.FC = () => {
                       ref={previewMapContainerRef} 
                       className="restaurant-view-preview-map"
                       onClick={() => setShowMapModal(true)}
-                    />
+                      style={{
+                        background: '#f5f5f5',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#666',
+                        fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                        fontSize: '14px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Map placeholder
+                    </div>
                     <div className="restaurant-view-location-info">
                       <a 
                         href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.address)}`}
@@ -2030,46 +1939,19 @@ const RestaurantView: React.FC = () => {
               </button>
             </div>
             <div className="restaurant-view-map-modal-map">
-              <RestaurantMap
-                lat={restaurant.location.lat}
-                lng={restaurant.location.lng}
-                restaurantName={restaurant.name}
-                address={restaurant.address}
-                restaurantId={restaurant.id}
-                allRestaurants={getAllRestaurants().map(r => ({
-                  id: r.id,
-                  name: r.name,
-                  lat: r.lat,
-                  lng: r.lng,
-                  rating: r.rating,
-                  cuisine: r.cuisine,
-                  reviewCount: restaurantsData[r.id]?.reviewCount,
-                }))}
-                nearbyPlaces={[
-                  ...restaurant.nearby.restaurants.map((r: any) => ({
-                    id: r.id,
-                    name: r.name,
-                    lat: r.lat,
-                    lng: r.lng,
-                    type: 'restaurant' as const,
-                  })),
-                  ...restaurant.nearby.hotels.map((h: any) => ({
-                    id: h.id,
-                    name: h.name,
-                    lat: h.lat,
-                    lng: h.lng,
-                    type: 'hotel' as const,
-                  })),
-                ]}
-                height="100%"
-                showControls={true}
-                showRouting={true}
-                showAllRestaurants={true}
-                onRestaurantClick={(restaurantId) => {
-                  navigate(`/directories/restaurants/${restaurantId}`);
-                  setShowMapModal(false);
-                }}
-              />
+              <div style={{
+                width: '100%',
+                height: '100%',
+                background: '#f5f5f5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#666',
+                fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                fontSize: '16px'
+              }}>
+                Map placeholder
+              </div>
             </div>
           </div>
         </div>
