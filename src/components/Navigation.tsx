@@ -269,10 +269,14 @@ export const Navigation = () => {
     
     return (
       <div className="nav-item-dropdown nav-mega-menu">
-        <Link to={path} className={`nav-link nav-link-dropdown ${isActive(path) ? 'nav-link-active' : ''}`}>
+        <button 
+          type="button"
+          className={`nav-link nav-link-dropdown ${isActive(path) ? 'nav-link-active' : ''}`}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', color: 'inherit' }}
+        >
           {label}
           <i className="fa fa-chevron-down nav-dropdown-icon"></i>
-        </Link>
+        </button>
         <div className="nav-dropdown-menu nav-mega-content">
           <div className="nav-mega-wrapper">
             <div className="nav-mega-sidebar">
@@ -405,10 +409,14 @@ export const Navigation = () => {
                   <MegaMenu menuKey="news" label="News & Info" path="/news" />
                   {isLoggedIn && (
                     <div className="nav-item-dropdown">
-                      <Link to="/account" className={`nav-link nav-link-dropdown ${isActive("/account") ? "nav-link-active" : ""}`}>
+                      <button 
+                        type="button"
+                        className={`nav-link nav-link-dropdown ${isActive("/account") ? "nav-link-active" : ""}`}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', color: 'inherit' }}
+                      >
                         <i className="fa fa-user nav-link-icon"></i>Account
                         <i className="fa fa-chevron-down nav-dropdown-icon"></i>
-                      </Link>
+                      </button>
                       <div className="nav-dropdown-menu nav-dropdown-menu-right">
                         <Link to="/account/profile" className="nav-dropdown-item" onClick={closeMobileMenu}>
                           <i className="fa fa-user-circle nav-dropdown-icon"></i>My Profile
