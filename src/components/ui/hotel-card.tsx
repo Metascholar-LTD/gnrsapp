@@ -4,7 +4,10 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-interface HotelCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface HotelCardProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd' | 'onAnimationIteration'
+> {
   hotelId: string;
   name: string;
   location: string;
