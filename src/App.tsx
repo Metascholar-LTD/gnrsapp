@@ -70,6 +70,7 @@ import Hospitals from "./pages/directories/Hospitals";
 import HospitalView from "./pages/directories/HospitalView";
 import HospitalCategories from "./pages/directories/HospitalCategories";
 import ListFacility from "./pages/directories/ListFacility";
+import AllHospitals from "./pages/directories/AllHospitals";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -144,6 +145,7 @@ const App = () => (
           <Route path="/directories/restaurants/:id" element={<RestaurantView />} />
           <Route path="/directories/restaurants/:id/write-review" element={<WriteReview />} />
           <Route path="/directories/hospitals" element={<Hospitals />} />
+          <Route path="/directories/hospitals/all" element={<AllHospitals />} />
           <Route path="/directories/hospitals/:id" element={<HospitalView />} />
           <Route path="/directories/hospitals/categories" element={<HospitalCategories />} />
           <Route path="/directories/hospitals/list-facility" element={<ListFacility />} />
