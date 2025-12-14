@@ -71,6 +71,7 @@ import HospitalView from "./pages/directories/HospitalView";
 import HospitalCategories from "./pages/directories/HospitalCategories";
 import ListFacility from "./pages/directories/ListFacility";
 import AllHospitals from "./pages/directories/AllHospitals";
+import Banks from "./pages/directories/Banks";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -149,6 +150,7 @@ const App = () => (
           <Route path="/directories/hospitals/:id" element={<HospitalView />} />
           <Route path="/directories/hospitals/categories" element={<HospitalCategories />} />
           <Route path="/directories/hospitals/list-facility" element={<ListFacility />} />
+          <Route path="/directories/banks" element={<Banks />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}
