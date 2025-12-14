@@ -1435,102 +1435,62 @@ const Hospitals: React.FC = () => {
                 Categories
               </Link>
               <Link 
-                to="/directories/hospitals?region=Ashanti" 
+                to="/directories/hospitals/all?region=Ashanti" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Ashanti');
-                }}
               >
                 Ashanti
               </Link>
               <Link 
-                to="/directories/hospitals?region=Brong Ahafo" 
+                to="/directories/hospitals/all?region=Bono" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Bono');
-                }}
               >
                 Brong Ahafo
               </Link>
               <Link 
-                to="/directories/hospitals?region=Central" 
+                to="/directories/hospitals/all?region=Central" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Central');
-                }}
               >
                 Central
               </Link>
               <Link 
-                to="/directories/hospitals?region=Eastern" 
+                to="/directories/hospitals/all?region=Eastern" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Eastern');
-                }}
               >
                 Eastern
               </Link>
               <Link 
-                to="/directories/hospitals?region=Greater Accra" 
+                to="/directories/hospitals/all?region=Greater Accra" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Greater Accra');
-                }}
               >
                 G. Accra
               </Link>
               <Link 
-                to="/directories/hospitals?region=Northern" 
+                to="/directories/hospitals/all?region=Northern" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Northern');
-                }}
               >
                 Northern
               </Link>
               <Link 
-                to="/directories/hospitals?region=Upper East" 
+                to="/directories/hospitals/all?region=Upper East" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Upper East');
-                }}
               >
                 Upper East
               </Link>
               <Link 
-                to="/directories/hospitals?region=Upper West" 
+                to="/directories/hospitals/all?region=Upper West" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Upper West');
-                }}
               >
                 Upper West
               </Link>
               <Link 
-                to="/directories/hospitals?region=Volta" 
+                to="/directories/hospitals/all?region=Volta" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Volta');
-                }}
               >
                 Volta
               </Link>
               <Link 
-                to="/directories/hospitals?region=Western" 
+                to="/directories/hospitals/all?region=Western" 
                 className="hospitals-region-nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedRegion('Western');
-                }}
               >
                 Western
               </Link>

@@ -3,231 +3,354 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Phone, Mail, CheckCircle2, Building2, Stethoscope, Clock } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, CheckCircle2, Building2, Stethoscope, Globe } from 'lucide-react';
+import ImageGallery from '@/components/ui/image-gallery';
 
 const HospitalView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   // Mock hospital data - replace with actual API call
+  // Data structure matches ListFacility form fields
   const hospitals: Record<string, any> = {
     '1': {
       id: '1',
-      name: 'Korle Bu Teaching Hospital',
-      location: 'Korle Bu, Accra',
-      region: 'Greater Accra',
-      address: 'Korle Bu, Accra, Ghana',
+      facilityName: 'Korle Bu Teaching Hospital',
+      about: 'Korle Bu Teaching Hospital is Ghana\'s premier tertiary healthcare facility and the largest teaching hospital in the country. Established in 1923, it serves as a referral center for complex medical cases from across Ghana and neighboring countries. The hospital offers a wide range of specialized medical services including surgery, emergency care, pediatrics, maternity services, and various diagnostic and treatment facilities.',
       facilityType: 'Tertiary Hospital',
-      ownership: 'Government',
-      services: ['General Services', 'Surgery', 'Emergency', 'Pediatrics', 'Maternity', 'Laboratory', 'Radiology', 'Cardiology', 'Neurology', 'Oncology'],
-      healthInsurance: ['NHIS', 'Medex', 'Momentum'],
-      nhisAccredited: true,
-      phone: '+233 302 665 401',
+      region: 'Greater Accra',
+      district: 'Korle Klottey',
+      telephone: '+233 302 665 401',
       email: 'info@kbth.gov.gh',
-      description: 'Ghana\'s premier tertiary healthcare facility providing comprehensive medical services.',
-      fullDescription: 'Korle Bu Teaching Hospital is Ghana\'s premier tertiary healthcare facility and the largest teaching hospital in the country. Established in 1923, it serves as a referral center for complex medical cases from across Ghana and neighboring countries. The hospital offers a wide range of specialized medical services including surgery, emergency care, pediatrics, maternity services, and various diagnostic and treatment facilities.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      address: 'Korle Bu, Accra, Ghana',
+      ownership: 'Government',
+      nhisAccredited: 'Yes',
+      healthInsurance: ['NHIS', 'Medex', 'Momentum'],
+      otherInsurance: '',
+      services: ['General services', 'Surgery', 'Pediatrics', 'Maternity', 'Lab'],
+      otherServices: '',
+      specialistFields: ['Surgeon', 'Physician specialist', 'Gynecologist', 'Pediatrics'],
+      otherSpecialist: '',
+      website: 'https://www.kbth.gov.gh',
+      operationalHours: '24/7',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: 'The hospital operates 24/7 and provides comprehensive emergency services.'
     },
     '2': {
       id: '2',
-      name: 'Komfo Anokye Teaching Hospital',
-      location: 'Kumasi',
-      region: 'Ashanti',
-      address: 'Kumasi, Ashanti Region, Ghana',
+      facilityName: 'Komfo Anokye Teaching Hospital',
+      about: 'Komfo Anokye Teaching Hospital is a major teaching hospital located in Kumasi, serving the Ashanti Region and beyond. The hospital provides comprehensive healthcare services including specialized medical care, surgical procedures, emergency services, and various diagnostic facilities.',
       facilityType: 'Tertiary Hospital',
+      region: 'Ashanti',
+      district: 'Kumasi Metropolitan',
+      telephone: '+233 322 020 225',
+      email: 'info@kath.gov.gh',
+      address: 'Kumasi, Ashanti Region, Ghana',
       ownership: 'Government',
-      services: ['General Services', 'Surgery', 'Emergency', 'Pediatrics', 'Maternity', 'Laboratory', 'Cardiology'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS', 'Medex', 'Glico Health Plan'],
-      nhisAccredited: true,
-      phone: '+233 322 020 225',
-      description: 'Major teaching hospital in the Ashanti Region providing advanced medical care.',
-      fullDescription: 'Komfo Anokye Teaching Hospital is a major teaching hospital located in Kumasi, serving the Ashanti Region and beyond. The hospital provides comprehensive healthcare services including specialized medical care, surgical procedures, emergency services, and various diagnostic facilities.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Surgery', 'Pediatrics', 'Maternity', 'Lab'],
+      otherServices: '',
+      specialistFields: ['Surgeon', 'Physician specialist'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: '24/7',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '3': {
       id: '3',
-      name: '37 Military Hospital',
-      location: '37, Accra',
-      region: 'Greater Accra',
-      address: '37 Military Hospital, Accra, Ghana',
+      facilityName: '37 Military Hospital',
+      about: '37 Military Hospital is a government-owned military hospital that provides healthcare services to military personnel, their families, and civilians. The hospital offers comprehensive medical services including emergency care, surgery, pediatrics, and maternity services.',
       facilityType: 'Tertiary Hospital',
+      region: 'Greater Accra',
+      district: 'Korle Klottey',
+      telephone: '+233 302 775 441',
+      address: '37 Military Hospital, Accra, Ghana',
       ownership: 'Government',
-      services: ['General Services', 'Surgery', 'Emergency', 'Pediatrics', 'Maternity', 'Laboratory'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS', 'Medex'],
-      nhisAccredited: true,
-      phone: '+233 302 775 441',
-      description: 'Military hospital providing quality healthcare services to military personnel and civilians.',
-      fullDescription: '37 Military Hospital is a government-owned military hospital that provides healthcare services to military personnel, their families, and civilians. The hospital offers comprehensive medical services including emergency care, surgery, pediatrics, and maternity services.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Surgery', 'Pediatrics', 'Maternity', 'Lab'],
+      otherServices: '',
+      specialistFields: ['Surgeon', 'Physician specialist'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: '24/7',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '4': {
       id: '4',
-      name: 'Nyaho Medical Centre',
-      location: 'East Legon, Accra',
-      region: 'Greater Accra',
-      address: 'East Legon, Accra, Ghana',
+      facilityName: 'Nyaho Medical Centre',
+      about: 'Nyaho Medical Centre is a private medical facility located in East Legon, Accra. The hospital is known for its modern facilities and comprehensive healthcare services. It offers a wide range of medical services including emergency care, pediatrics, maternity services, laboratory services, radiology, and various diagnostic procedures.',
       facilityType: 'Secondary Hospital',
-      ownership: 'Private',
-      services: ['General Services', 'Emergency', 'Pediatrics', 'Maternity', 'Laboratory', 'Radiology', 'Scan', 'ECG'],
-      healthInsurance: ['NHIS', 'Medex', 'Momentum', 'Glico Health Plan', 'Nationwide'],
-      nhisAccredited: true,
-      phone: '+233 302 544 000',
+      region: 'Greater Accra',
+      district: 'La Nkwantanang Madina',
+      telephone: '+233 302 544 000',
       email: 'info@nyahomedical.com',
-      description: 'Private medical facility offering comprehensive healthcare services with modern equipment.',
-      fullDescription: 'Nyaho Medical Centre is a private medical facility located in East Legon, Accra. The hospital is known for its modern facilities and comprehensive healthcare services. It offers a wide range of medical services including emergency care, pediatrics, maternity services, laboratory services, radiology, and various diagnostic procedures.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      address: 'East Legon, Accra, Ghana',
+      ownership: 'Private',
+      nhisAccredited: 'Yes',
+      healthInsurance: ['NHIS', 'Medex', 'Momentum', 'Glico Health Plan', 'Nationwide'],
+      otherInsurance: '',
+      services: ['General services', 'Pediatrics', 'Maternity', 'Lab', 'Scan', 'ECG'],
+      otherServices: '',
+      specialistFields: ['Dentist', 'Eye specialist', 'Pediatrics'],
+      otherSpecialist: '',
+      website: 'https://www.nyahomedical.com',
+      operationalHours: 'Mon-Fri: 8:00 AM - 5:00 PM, Sat: 9:00 AM - 2:00 PM',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: 'Modern facilities with state-of-the-art equipment.'
     },
     '5': {
       id: '5',
-      name: 'Lister Hospital',
-      location: 'Accra',
-      region: 'Greater Accra',
-      address: 'Accra, Ghana',
+      facilityName: 'Lister Hospital',
+      about: 'Lister Hospital is a well-established private hospital in Accra providing quality healthcare services. The hospital offers general medical services, surgery, emergency care, maternity services, and laboratory facilities.',
       facilityType: 'Secondary Hospital',
+      region: 'Greater Accra',
+      district: 'Korle Klottey',
+      telephone: '+233 302 780 000',
+      address: 'Accra, Ghana',
       ownership: 'Private',
-      services: ['General Services', 'Surgery', 'Emergency', 'Maternity', 'Laboratory'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS', 'Medex', 'Momentum'],
-      nhisAccredited: true,
-      phone: '+233 302 780 000',
-      description: 'Well-established private hospital providing quality healthcare services.',
-      fullDescription: 'Lister Hospital is a well-established private hospital in Accra providing quality healthcare services. The hospital offers general medical services, surgery, emergency care, maternity services, and laboratory facilities.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Surgery', 'Maternity', 'Lab'],
+      otherServices: '',
+      specialistFields: ['Surgeon'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '6': {
       id: '6',
-      name: 'Tamale Teaching Hospital',
-      location: 'Tamale',
-      region: 'Northern',
-      address: 'Tamale, Northern Region, Ghana',
+      facilityName: 'Tamale Teaching Hospital',
+      about: 'Tamale Teaching Hospital is a major healthcare facility serving the Northern Region and surrounding areas. The hospital provides comprehensive medical services including surgery, emergency care, pediatrics, maternity services, and laboratory facilities.',
       facilityType: 'Tertiary Hospital',
+      region: 'Northern',
+      district: 'Tamale Metropolitan',
+      telephone: '+233 372 022 200',
+      address: 'Tamale, Northern Region, Ghana',
       ownership: 'Government',
-      services: ['General Services', 'Surgery', 'Emergency', 'Pediatrics', 'Maternity', 'Laboratory'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS', 'Medex'],
-      nhisAccredited: true,
-      phone: '+233 372 022 200',
-      description: 'Major healthcare facility serving the Northern Region and beyond.',
-      fullDescription: 'Tamale Teaching Hospital is a major healthcare facility serving the Northern Region and surrounding areas. The hospital provides comprehensive medical services including surgery, emergency care, pediatrics, maternity services, and laboratory facilities.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Surgery', 'Pediatrics', 'Maternity', 'Lab'],
+      otherServices: '',
+      specialistFields: ['Surgeon', 'Physician specialist'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: '24/7',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '7': {
       id: '7',
-      name: 'Cape Coast Teaching Hospital',
-      location: 'Cape Coast',
-      region: 'Central',
-      address: 'Cape Coast, Central Region, Ghana',
+      facilityName: 'Cape Coast Teaching Hospital',
+      about: 'Cape Coast Teaching Hospital is a teaching hospital providing healthcare services to the Central Region. The hospital offers general medical services, surgery, emergency care, pediatrics, and maternity services.',
       facilityType: 'Tertiary Hospital',
+      region: 'Central',
+      district: 'Cape Coast Metropolitan',
+      telephone: '+233 332 132 000',
+      address: 'Cape Coast, Central Region, Ghana',
       ownership: 'Government',
-      services: ['General Services', 'Surgery', 'Emergency', 'Pediatrics', 'Maternity'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS'],
-      nhisAccredited: true,
-      phone: '+233 332 132 000',
-      description: 'Teaching hospital providing healthcare services to the Central Region.',
-      fullDescription: 'Cape Coast Teaching Hospital is a teaching hospital providing healthcare services to the Central Region. The hospital offers general medical services, surgery, emergency care, pediatrics, and maternity services.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Surgery', 'Pediatrics', 'Maternity'],
+      otherServices: '',
+      specialistFields: ['Surgeon'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: '24/7',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '8': {
       id: '8',
-      name: 'Ridge Hospital',
-      location: 'Ridge, Accra',
-      region: 'Greater Accra',
-      address: 'Ridge, Accra, Ghana',
+      facilityName: 'Ridge Hospital',
+      about: 'Ridge Hospital is a government hospital providing essential healthcare services to the Accra community. The hospital offers general medical services, emergency care, maternity services, pediatrics, and laboratory facilities.',
       facilityType: 'Secondary Hospital',
+      region: 'Greater Accra',
+      district: 'Korle Klottey',
+      telephone: '+233 302 664 698',
+      address: 'Ridge, Accra, Ghana',
       ownership: 'Government',
-      services: ['General Services', 'Emergency', 'Maternity', 'Pediatrics', 'Laboratory'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS', 'Medex'],
-      nhisAccredited: true,
-      phone: '+233 302 664 698',
-      description: 'Government hospital providing essential healthcare services.',
-      fullDescription: 'Ridge Hospital is a government hospital providing essential healthcare services to the Accra community. The hospital offers general medical services, emergency care, maternity services, pediatrics, and laboratory facilities.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Maternity', 'Pediatrics', 'Lab'],
+      otherServices: '',
+      specialistFields: ['Pediatrics'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: '24/7',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '9': {
       id: '9',
-      name: 'Trust Hospital',
-      location: 'Osu, Accra',
-      region: 'Greater Accra',
-      address: 'Osu, Accra, Ghana',
+      facilityName: 'Trust Hospital',
+      about: 'Trust Hospital is a private hospital located in Osu, Accra, known for quality healthcare and modern facilities. The hospital offers general medical services, emergency care, maternity services, laboratory services, and various diagnostic procedures including scans and ECG.',
       facilityType: 'Secondary Hospital',
+      region: 'Greater Accra',
+      district: 'Korle Klottey',
+      telephone: '+233 302 776 000',
+      address: 'Osu, Accra, Ghana',
       ownership: 'Private',
-      services: ['General Services', 'Emergency', 'Maternity', 'Laboratory', 'Scan', 'ECG'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS', 'Medex', 'Momentum', 'Glico Health Plan'],
-      nhisAccredited: true,
-      phone: '+233 302 776 000',
-      description: 'Private hospital known for quality healthcare and modern facilities.',
-      fullDescription: 'Trust Hospital is a private hospital located in Osu, Accra, known for quality healthcare and modern facilities. The hospital offers general medical services, emergency care, maternity services, laboratory services, and various diagnostic procedures including scans and ECG.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Maternity', 'Lab', 'Scan', 'ECG'],
+      otherServices: '',
+      specialistFields: ['Eye specialist', 'Dentist'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: 'Mon-Fri: 8:00 AM - 5:00 PM, Sat: 9:00 AM - 1:00 PM',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '10': {
       id: '10',
-      name: 'Ho Teaching Hospital',
-      location: 'Ho',
-      region: 'Volta',
-      address: 'Ho, Volta Region, Ghana',
+      facilityName: 'Ho Teaching Hospital',
+      about: 'Ho Teaching Hospital is a teaching hospital serving the Volta Region. The hospital provides comprehensive medical services including surgery, emergency care, pediatrics, and maternity services.',
       facilityType: 'Tertiary Hospital',
+      region: 'Volta',
+      district: 'Ho Municipal',
+      telephone: '+233 362 026 000',
+      address: 'Ho, Volta Region, Ghana',
       ownership: 'Government',
-      services: ['General Services', 'Surgery', 'Emergency', 'Pediatrics', 'Maternity'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS'],
-      nhisAccredited: true,
-      phone: '+233 362 026 000',
-      description: 'Teaching hospital serving the Volta Region.',
-      fullDescription: 'Ho Teaching Hospital is a teaching hospital serving the Volta Region. The hospital provides comprehensive medical services including surgery, emergency care, pediatrics, and maternity services.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Surgery', 'Pediatrics', 'Maternity'],
+      otherServices: '',
+      specialistFields: ['Surgeon', 'Physician specialist'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: '24/7',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '11': {
       id: '11',
-      name: 'Sunyani Regional Hospital',
-      location: 'Sunyani',
-      region: 'Bono',
-      address: 'Sunyani, Bono Region, Ghana',
+      facilityName: 'Sunyani Regional Hospital',
+      about: 'Sunyani Regional Hospital is a regional hospital providing healthcare services to the Bono Region. The hospital offers general medical services, emergency care, maternity services, pediatrics, and laboratory facilities.',
       facilityType: 'Secondary Hospital',
+      region: 'Bono',
+      district: 'Sunyani Municipal',
+      telephone: '+233 352 027 000',
+      address: 'Sunyani, Bono Region, Ghana',
       ownership: 'Government',
-      services: ['General Services', 'Emergency', 'Maternity', 'Pediatrics', 'Laboratory'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS', 'Medex'],
-      nhisAccredited: true,
-      phone: '+233 352 027 000',
-      description: 'Regional hospital providing healthcare services to the Bono Region.',
-      fullDescription: 'Sunyani Regional Hospital is a regional hospital providing healthcare services to the Bono Region. The hospital offers general medical services, emergency care, maternity services, pediatrics, and laboratory facilities.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: '24/7',
-      emergencyServices: true
+      otherInsurance: '',
+      services: ['General services', 'Maternity', 'Pediatrics', 'Lab'],
+      otherServices: '',
+      specialistFields: ['Pediatrics'],
+      otherSpecialist: '',
+      website: '',
+      operationalHours: '24/7',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: ''
     },
     '12': {
       id: '12',
-      name: 'FOCOS Orthopedic Hospital',
-      location: 'Pantang, Accra',
+      facilityName: 'FOCOS Orthopedic Hospital',
+      about: 'FOCOS Orthopedic Hospital is a specialized orthopedic hospital providing advanced bone and joint care. The hospital focuses on orthopedic surgery and related medical services, offering specialized care for bone and joint conditions.',
+      facilityType: 'Hospital',
       region: 'Greater Accra',
+      district: 'Ga East',
+      telephone: '+233 302 501 000',
       address: 'Pantang, Accra, Ghana',
-      facilityType: 'Specialist Hospital',
       ownership: 'Private',
-      services: ['Surgery', 'General Services', 'Laboratory', 'Radiology'],
+      nhisAccredited: 'Yes',
       healthInsurance: ['NHIS', 'Medex', 'Momentum'],
-      nhisAccredited: true,
-      phone: '+233 302 501 000',
-      description: 'Specialized orthopedic hospital providing advanced bone and joint care.',
-      fullDescription: 'FOCOS Orthopedic Hospital is a specialized orthopedic hospital providing advanced bone and joint care. The hospital focuses on orthopedic surgery and related medical services, offering specialized care for bone and joint conditions.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80',
-      operatingHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
-      emergencyServices: false
+      otherInsurance: '',
+      services: ['Surgery', 'General services', 'Lab'],
+      otherServices: '',
+      specialistFields: ['Surgeon'],
+      otherSpecialist: '',
+      website: 'https://www.focoshospital.org',
+      operationalHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
+      images: [
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545939/person-with-chronic-disability-waiting-room-health-center-facility-wheelchair-user-waiting-attend-checkup-appointment-man-with-physcal-impairment-doing-consultation-medical-clinic_dghczc.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546351/portrait-happy-african-american-woman-surgeon-standing-operating-room-ready-work-patient-female-medical-worker-surgical-uniform-operation-theater_50_ptzzde.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546154/nurse-measuring-patient-blood-pressure_50_lfzvtp.jpg',
+        'https://res.cloudinary.com/dsypclqxk/image/upload/v1765546620/interior-view-operating-room_50_vv6we3.jpg'
+      ],
+      additionalInfo: 'Specialized in orthopedic surgery and bone care.'
     }
   };
 
@@ -311,14 +434,6 @@ const HospitalView: React.FC = () => {
       background: #0891b2;
       color: white;
       border-color: #0891b2;
-    }
-
-    .hospital-view-hero-image {
-      width: 100%;
-      height: 500px;
-      object-fit: cover;
-      border-radius: 1rem;
-      margin-bottom: 2rem;
     }
 
     .hospital-view-grid {
@@ -436,10 +551,6 @@ const HospitalView: React.FC = () => {
         font-size: 2rem;
       }
 
-      .hospital-view-hero-image {
-        height: 300px;
-      }
-
       .hospital-view-services-grid {
         grid-template-columns: 1fr;
       }
@@ -502,10 +613,10 @@ const HospitalView: React.FC = () => {
           </div>
 
           <div className="hospital-view-header">
-            <h1 className="hospital-view-title">{hospital.name}</h1>
+            <h1 className="hospital-view-title">{hospital.facilityName}</h1>
             <div className="hospital-view-location">
               <MapPin size={18} />
-              <span>{hospital.location}, {hospital.region}</span>
+              <span>{hospital.district}, {hospital.region}</span>
             </div>
             <div className="hospital-view-badges">
               <div className="hospital-view-badge">
@@ -515,7 +626,7 @@ const HospitalView: React.FC = () => {
               <div className="hospital-view-badge">
                 {hospital.ownership}
               </div>
-              {hospital.nhisAccredited && (
+              {hospital.nhisAccredited === 'Yes' && (
                 <div className="hospital-view-badge nhis">
                   <CheckCircle2 size={16} />
                   NHIS Accredited
@@ -524,11 +635,11 @@ const HospitalView: React.FC = () => {
             </div>
           </div>
 
-          <img
-            src={hospital.imageUrl}
-            alt={hospital.name}
-            className="hospital-view-hero-image"
-          />
+          {hospital.images && hospital.images.length > 0 && (
+            <ImageGallery
+              images={hospital.images}
+            />
+          )}
 
           <div className="hospital-view-grid">
             <div>
@@ -538,7 +649,7 @@ const HospitalView: React.FC = () => {
                   About
                 </h2>
                 <p className="hospital-view-description">
-                  {hospital.fullDescription || hospital.description}
+                  {hospital.about}
                 </p>
               </div>
 
@@ -548,24 +659,53 @@ const HospitalView: React.FC = () => {
                   Services Offered
                 </h2>
                 <div className="hospital-view-services-grid">
-                  {hospital.services.map((service: string, index: number) => (
+                  {hospital.services && hospital.services.map((service: string, index: number) => (
                     <div key={index} className="hospital-view-service">
                       <CheckCircle2 size={16} className="text-[#0891b2]" />
                       {service}
                     </div>
                   ))}
+                  {hospital.otherServices && (
+                    <div className="hospital-view-service">
+                      <CheckCircle2 size={16} className="text-[#0891b2]" />
+                      {hospital.otherServices}
+                    </div>
+                  )}
                 </div>
               </div>
+
+              {hospital.specialistFields && hospital.specialistFields.length > 0 && (
+                <div className="hospital-view-section" style={{ marginTop: '2rem' }}>
+                  <h2 className="hospital-view-section-title">
+                    <Stethoscope size={20} />
+                    Specialist Fields
+                  </h2>
+                  <div className="hospital-view-services-grid">
+                    {hospital.specialistFields.map((specialist: string, index: number) => (
+                      <div key={index} className="hospital-view-service">
+                        <CheckCircle2 size={16} className="text-[#0891b2]" />
+                        {specialist}
+                      </div>
+                    ))}
+                    {hospital.otherSpecialist && (
+                      <div className="hospital-view-service">
+                        <CheckCircle2 size={16} className="text-[#0891b2]" />
+                        {hospital.otherSpecialist}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
               <div className="hospital-view-section">
                 <h2 className="hospital-view-section-title">Contact Information</h2>
-                {hospital.phone && (
+                {hospital.telephone && (
                   <div className="hospital-view-contact-item">
                     <Phone size={18} />
-                    <a href={`tel:${hospital.phone}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                      {hospital.phone}
+                    <a href={`tel:${hospital.telephone}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                      {hospital.telephone}
                     </a>
                   </div>
                 )}
@@ -577,6 +717,14 @@ const HospitalView: React.FC = () => {
                     </a>
                   </div>
                 )}
+                {hospital.website && (
+                  <div className="hospital-view-contact-item">
+                    <Globe size={18} />
+                    <a href={hospital.website} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
+                      {hospital.website}
+                    </a>
+                  </div>
+                )}
                 <div className="hospital-view-contact-item">
                   <MapPin size={18} />
                   <span>{hospital.address}</span>
@@ -584,7 +732,7 @@ const HospitalView: React.FC = () => {
               </div>
 
               <div className="hospital-view-section" style={{ marginTop: '2rem' }}>
-                <h2 className="hospital-view-section-title">Hospital Information</h2>
+                <h2 className="hospital-view-section-title">Facility Information</h2>
                 <div className="hospital-view-info-box">
                   <div className="hospital-view-info-item">
                     <span className="hospital-view-info-label">Facility Type</span>
@@ -595,13 +743,23 @@ const HospitalView: React.FC = () => {
                     <span>{hospital.ownership}</span>
                   </div>
                   <div className="hospital-view-info-item">
-                    <span className="hospital-view-info-label">Operating Hours</span>
-                    <span>{hospital.operatingHours}</span>
+                    <span className="hospital-view-info-label">Region</span>
+                    <span>{hospital.region}</span>
                   </div>
                   <div className="hospital-view-info-item">
-                    <span className="hospital-view-info-label">Emergency Services</span>
-                    <span>{hospital.emergencyServices ? 'Available' : 'Not Available'}</span>
+                    <span className="hospital-view-info-label">District</span>
+                    <span>{hospital.district}</span>
                   </div>
+                  <div className="hospital-view-info-item">
+                    <span className="hospital-view-info-label">NHIS Accredited</span>
+                    <span>{hospital.nhisAccredited}</span>
+                  </div>
+                  {hospital.operationalHours && (
+                    <div className="hospital-view-info-item">
+                      <span className="hospital-view-info-label">Operational Hours</span>
+                      <span>{hospital.operationalHours}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -614,7 +772,21 @@ const HospitalView: React.FC = () => {
                         {insurance}
                       </span>
                     ))}
+                    {hospital.otherInsurance && (
+                      <span className="hospital-view-insurance-badge">
+                        {hospital.otherInsurance}
+                      </span>
+                    )}
                   </div>
+                </div>
+              )}
+
+              {hospital.additionalInfo && (
+                <div className="hospital-view-section" style={{ marginTop: '2rem' }}>
+                  <h2 className="hospital-view-section-title">Additional Information</h2>
+                  <p className="hospital-view-description">
+                    {hospital.additionalInfo}
+                  </p>
                 </div>
               )}
             </div>
@@ -628,4 +800,5 @@ const HospitalView: React.FC = () => {
 };
 
 export default HospitalView;
+
 

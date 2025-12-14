@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Search } from 'lucide-react';
@@ -23,6 +23,7 @@ interface Hospital {
 
 const AllHospitals: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
@@ -30,6 +31,16 @@ const AllHospitals: React.FC = () => {
   const [selectedOwnership, setSelectedOwnership] = useState<string>('all');
   const [selectedServices, setSelectedServices] = useState<string>('all');
   const [selectedHealthInsurance, setSelectedHealthInsurance] = useState<string>('all');
+
+  // Read region from URL params on mount and when params change
+  useEffect(() => {
+    const regionParam = searchParams.get('region');
+    if (regionParam) {
+      setSelectedRegion(regionParam);
+      // Reset district when region changes from URL
+      setSelectedDistrict('all');
+    }
+  }, [searchParams]);
 
   // Ghana regions
   const regions = [
@@ -119,7 +130,7 @@ const AllHospitals: React.FC = () => {
       phone: '+233 302 665 401',
       email: 'info@kbth.gov.gh',
       description: 'Ghana\'s premier tertiary healthcare facility providing comprehensive medical services.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '2',
@@ -134,7 +145,7 @@ const AllHospitals: React.FC = () => {
       nhisAccredited: true,
       phone: '+233 322 020 225',
       description: 'Major teaching hospital in the Ashanti Region providing advanced medical care.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '3',
@@ -149,7 +160,7 @@ const AllHospitals: React.FC = () => {
       nhisAccredited: true,
       phone: '+233 302 664 698',
       description: 'Government hospital providing essential healthcare services.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '4',
@@ -164,7 +175,7 @@ const AllHospitals: React.FC = () => {
       nhisAccredited: true,
       phone: '+233 302 776 000',
       description: 'Private hospital known for quality healthcare and modern facilities.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '5',
@@ -179,7 +190,7 @@ const AllHospitals: React.FC = () => {
       nhisAccredited: true,
       phone: '+233 362 026 000',
       description: 'Teaching hospital serving the Volta Region.',
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '6',
@@ -192,7 +203,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Emergency', 'Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '7',
@@ -205,7 +216,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '8',
@@ -218,7 +229,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '9',
@@ -231,7 +242,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services'],
       healthInsurance: ['NHIS'],
       nhisAccredited: false,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '10',
@@ -244,7 +255,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services'],
       healthInsurance: ['NHIS', 'Medex'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '11',
@@ -257,7 +268,7 @@ const AllHospitals: React.FC = () => {
       services: ['Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '12',
@@ -270,7 +281,7 @@ const AllHospitals: React.FC = () => {
       services: ['Pharmacy'],
       healthInsurance: ['NHIS'],
       nhisAccredited: false,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '13',
@@ -283,7 +294,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Emergency'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '14',
@@ -296,7 +307,7 @@ const AllHospitals: React.FC = () => {
       services: ['Pharmacy'],
       healthInsurance: ['NHIS'],
       nhisAccredited: false,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '15',
@@ -309,7 +320,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Emergency', 'Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '16',
@@ -322,7 +333,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Emergency', 'Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '17',
@@ -335,7 +346,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Emergency', 'Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '18',
@@ -348,7 +359,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Emergency', 'Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '19',
@@ -361,7 +372,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Emergency', 'Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     },
     {
       id: '20',
@@ -374,7 +385,7 @@ const AllHospitals: React.FC = () => {
       services: ['General Services', 'Emergency', 'Maternity'],
       healthInsurance: ['NHIS'],
       nhisAccredited: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+      imageUrl: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1765545946/african-american-therapist-doctor-listening-patient-lungs-using-stethoscope-discussing-medical-expertise-with-therapist-sick-young-woman-resting-bed-recovering-after-surgery-hospital-ward_qutl9o.jpg'
     }
   ];
 
@@ -458,13 +469,28 @@ const AllHospitals: React.FC = () => {
     .all-hospitals-container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 2rem 1rem;
+      padding: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 640px) {
+      .all-hospitals-container {
+        padding: 1.5rem;
+      }
     }
 
     @media (min-width: 1024px) {
       .all-hospitals-container {
         display: grid;
-        grid-template-columns: 250px 1fr 280px;
+        grid-template-columns: 250px 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .all-hospitals-container {
         gap: 2rem;
         padding: 2rem;
       }
@@ -498,37 +524,256 @@ const AllHospitals: React.FC = () => {
       margin: 0;
     }
 
-    /* Search Bar */
-    .all-hospitals-search-container {
-      position: relative;
+    /* Unified Search & Filter Bar */
+    .all-hospitals-unified-search-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
       margin-bottom: 2rem;
       grid-column: 1 / -1;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .all-hospitals-unified-search-bar:focus-within {
+      border-color: #0891b2;
+      box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (min-width: 768px) {
+      .all-hospitals-unified-search-bar {
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+        padding: 0.5rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .all-hospitals-unified-search-bar {
+        padding: 0.5rem;
+      }
+    }
+
+    /* Search Input Section */
+    .all-hospitals-search-section {
+      position: relative;
+      flex: 0 0 auto;
+      width: 100%;
+      min-width: 0;
+    }
+
+    @media (min-width: 768px) {
+      .all-hospitals-search-section {
+        width: auto;
+        min-width: 200px;
+        max-width: 300px;
+        flex: 0 1 auto;
+        border-right: 1px solid #e5e7eb;
+        padding-right: 0.75rem;
+        margin-right: 0.75rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .all-hospitals-search-section {
+        min-width: 240px;
+        max-width: 350px;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .all-hospitals-search-section {
+        min-width: 280px;
+        max-width: 400px;
+      }
     }
 
     .all-hospitals-search-input {
       width: 100%;
-      padding: 0.875rem 1rem 0.875rem 3rem;
-      border: 2px solid #e5e7eb;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      border: none;
       border-radius: 0.5rem;
-      font-size: 1rem;
+      font-size: 0.875rem;
       transition: all 0.2s;
       font-family: 'DM Sans', system-ui, sans-serif;
+      background-color: transparent;
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 768px) {
+      .all-hospitals-search-input {
+        font-size: 0.875rem;
+        padding: 0.625rem 0.875rem 0.625rem 2.5rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .all-hospitals-search-input {
+        font-size: 0.9375rem;
+        padding: 0.75rem 1rem 0.75rem 2.75rem;
+      }
+    }
+
+    .all-hospitals-search-input::placeholder {
+      color: #9ca3af;
     }
 
     .all-hospitals-search-input:focus {
       outline: none;
-      border-color: #0891b2;
-      box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+      background-color: #f9fafb;
     }
 
     .all-hospitals-search-icon {
       position: absolute;
-      left: 1rem;
+      left: 0.875rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #9ca3af;
-      width: 20px;
-      height: 20px;
+      color: #6b7280;
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
+    /* Filters Section */
+    .all-hospitals-filters-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+    }
+
+    @media (min-width: 768px) {
+      .all-hospitals-filters-section {
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .all-hospitals-filters-section {
+        gap: 0.625rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .all-hospitals-filters-section {
+        gap: 0.75rem;
+      }
+    }
+
+    .all-hospitals-filter-select {
+      flex: 1 1 auto;
+      min-width: 120px;
+      max-width: 100%;
+      padding: 0.625rem 2rem 0.625rem 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      font-size: 0.8125rem;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background-color: white;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.625rem center;
+      box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (min-width: 768px) {
+      .all-hospitals-filter-select {
+        min-width: 100px;
+        max-width: 140px;
+        flex: 0 1 auto;
+        font-size: 0.8125rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .all-hospitals-filter-select {
+        min-width: 110px;
+        max-width: 150px;
+        font-size: 0.875rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .all-hospitals-filter-select {
+        min-width: 120px;
+        max-width: 160px;
+      }
+    }
+
+    .all-hospitals-filter-select:focus {
+      outline: none;
+      border-color: #0891b2;
+      background-color: #f0fdfa;
+      box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.1);
+    }
+
+    .all-hospitals-filter-select:hover {
+      border-color: #d1d5db;
+      background-color: #f9fafb;
+    }
+
+    /* Search Button */
+    .all-hospitals-search-button {
+      flex: 0 0 auto;
+      padding: 0.625rem 1rem;
+      background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(8, 145, 178, 0.2);
+      min-height: 40px;
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 768px) {
+      .all-hospitals-search-button {
+        margin-left: auto;
+        padding: 0.625rem 1.25rem;
+        font-size: 0.8125rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .all-hospitals-search-button {
+        padding: 0.625rem 1.5rem;
+        font-size: 0.875rem;
+      }
+    }
+
+    .all-hospitals-search-button:hover {
+      background: linear-gradient(135deg, #0e7490 0%, #155e75 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(8, 145, 178, 0.3);
+    }
+
+    .all-hospitals-search-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(8, 145, 178, 0.2);
     }
 
     /* Left Sidebar - Regions/Districts */
@@ -558,16 +803,14 @@ const AllHospitals: React.FC = () => {
     .all-hospitals-sidebar-title {
       font-size: 1.125rem;
       font-weight: 600;
-      color: #111827;
-      margin: 0 0 1rem 0;
-      font-family: 'Playfair Display', serif;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid #0891b2;
-      background-color: #0891b2;
       color: white;
+      margin: 0 0 1rem 0;
+      font-family: 'DM Sans', system-ui, sans-serif;
       padding: 0.75rem 1rem;
       margin: -1.5rem -1.5rem 1rem -1.5rem;
       border-radius: 0.75rem 0.75rem 0 0;
+      background-color: #0891b2;
+      text-align: left;
     }
 
     .all-hospitals-filter-group {
@@ -715,142 +958,6 @@ const AllHospitals: React.FC = () => {
       text-decoration: underline;
     }
 
-    /* Right Sidebar - Category Search */
-    .all-hospitals-right-sidebar {
-      margin-bottom: 2rem;
-      display: none;
-    }
-
-    @media (min-width: 1024px) {
-      .all-hospitals-right-sidebar {
-        display: block;
-        padding: 0;
-        background-color: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.75rem;
-        height: fit-content;
-        align-self: flex-start;
-        overflow: hidden;
-      }
-    }
-
-    @media (min-width: 1200px) {
-      .all-hospitals-right-sidebar {
-        min-width: 300px;
-      }
-    }
-
-    .all-hospitals-category-title {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: white;
-      margin: 0;
-      font-family: 'DM Sans', system-ui, sans-serif;
-      padding: 0.75rem 1rem;
-      background-color: #0891b2;
-      text-align: left;
-    }
-
-    .all-hospitals-category-form {
-      padding: 1rem;
-    }
-
-    @media (min-width: 1200px) {
-      .all-hospitals-category-form {
-        padding: 1.5rem;
-      }
-    }
-
-    .all-hospitals-form-row {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 1rem;
-      gap: 0.5rem;
-    }
-
-    .all-hospitals-form-row:last-of-type {
-      margin-bottom: 0;
-    }
-
-    @media (min-width: 1200px) {
-      .all-hospitals-form-row {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
-    }
-
-    .all-hospitals-form-label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    @media (min-width: 1200px) {
-      .all-hospitals-form-label {
-        min-width: 120px;
-      }
-    }
-
-    .all-hospitals-form-select {
-      width: 100%;
-      padding: 0.625rem 0.875rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      font-family: 'DM Sans', system-ui, sans-serif;
-      background-color: white;
-      color: #374151;
-      cursor: pointer;
-      transition: all 0.2s;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      padding-right: 2.5rem;
-    }
-
-    @media (min-width: 1200px) {
-      .all-hospitals-form-select {
-        flex: 1;
-        width: auto;
-      }
-    }
-
-    .all-hospitals-form-select:focus {
-      outline: none;
-      border-color: #0891b2;
-      box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
-    }
-
-    .all-hospitals-search-button {
-      width: 100%;
-      padding: 0.875rem 1.5rem;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: 'DM Sans', system-ui, sans-serif;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-top: 1.5rem;
-      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-    }
-
-    .all-hospitals-search-button:hover {
-      background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
-    }
-
-    .all-hospitals-search-button:active {
-      transform: translateY(0);
-    }
 
     .all-hospitals-no-results {
       padding: 3rem 0;
@@ -859,36 +966,6 @@ const AllHospitals: React.FC = () => {
       grid-column: 1 / -1;
     }
 
-    /* Mobile: Show filters as dropdown */
-    @media (max-width: 1023px) {
-      .all-hospitals-mobile-filters {
-        display: block;
-        margin-bottom: 1.5rem;
-      }
-
-      .all-hospitals-mobile-filter-select {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.5rem;
-        font-size: 0.9375rem;
-        font-family: 'DM Sans', system-ui, sans-serif;
-        background-color: white;
-        margin-bottom: 1rem;
-      }
-
-      .all-hospitals-mobile-filter-select:focus {
-        outline: none;
-        border-color: #0891b2;
-        box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .all-hospitals-mobile-filters {
-        display: none;
-      }
-    }
   `;
 
   return (
@@ -906,143 +983,155 @@ const AllHospitals: React.FC = () => {
             </p>
           </div>
 
-          {/* Search Bar */}
-          <div className="all-hospitals-search-container">
-            <Search className="all-hospitals-search-icon" />
-            <input
-              className="all-hospitals-search-input"
-              type="text"
-              placeholder="Search hospitals by name, location, or region..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {/* Mobile Filters */}
-          <div className="all-hospitals-mobile-filters">
-            <select
-              className="all-hospitals-mobile-filter-select"
-              value={selectedRegion}
-              onChange={(e) => {
-                setSelectedRegion(e.target.value);
-                setSelectedDistrict('all');
-              }}
-            >
-              <option value="all">All Regions</option>
-              {regions.map(region => (
-                <option key={region} value={region}>{region}</option>
-              ))}
-            </select>
-            {availableDistricts.length > 0 && (
-              <select
-                className="all-hospitals-mobile-filter-select"
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-              >
-                <option value="all">All Districts</option>
-                {availableDistricts.map(district => (
-                  <option key={district} value={district}>{district}</option>
-                ))}
-              </select>
-            )}
-            <select
-              className="all-hospitals-mobile-filter-select"
-              value={selectedFacilityType}
-              onChange={(e) => setSelectedFacilityType(e.target.value)}
-            >
-              <option value="all">All Facility Types</option>
-              {facilityTypes.filter(type => type !== 'Select').map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-            <select
-              className="all-hospitals-mobile-filter-select"
-              value={selectedOwnership}
-              onChange={(e) => setSelectedOwnership(e.target.value)}
-            >
-              <option value="all">All Ownership</option>
-              {ownershipTypes.filter(type => type !== 'Select').map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-            <select
-              className="all-hospitals-mobile-filter-select"
-              value={selectedServices}
-              onChange={(e) => setSelectedServices(e.target.value)}
-            >
-              <option value="all">All Services</option>
-              {services.filter(service => service !== 'Select').map(service => (
-                <option key={service} value={service}>{service}</option>
-              ))}
-            </select>
-            <select
-              className="all-hospitals-mobile-filter-select"
-              value={selectedHealthInsurance}
-              onChange={(e) => setSelectedHealthInsurance(e.target.value)}
-            >
-              <option value="all">All Health Insurance</option>
-              {healthInsuranceOptions.filter(insurance => insurance !== 'Select').map(insurance => (
-                <option key={insurance} value={insurance}>{insurance}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Left Sidebar - Regions/Districts */}
-          <div className="all-hospitals-left-sidebar">
-            <h2 className="all-hospitals-sidebar-title">Regions & Districts</h2>
-            
-            <div className="all-hospitals-filter-group">
-              <label className="all-hospitals-filter-label">Regions</label>
-              <ul className="all-hospitals-filter-list">
-                <li
-                  className={`all-hospitals-filter-item ${selectedRegion === 'all' ? 'selected' : ''}`}
-                  onClick={() => {
-                    setSelectedRegion('all');
-                    setSelectedDistrict('all');
-                  }}
-                >
-                  <div className="all-hospitals-radio" />
-                  <span>All Regions</span>
-                </li>
-                {regions.map(region => (
-                  <li
-                    key={region}
-                    className={`all-hospitals-filter-item ${selectedRegion === region ? 'selected' : ''}`}
-                    onClick={() => {
-                      setSelectedRegion(region);
-                      setSelectedDistrict('all');
-                    }}
-                  >
-                    <div className="all-hospitals-radio" />
-                    <span>{region}</span>
-                  </li>
-                ))}
-              </ul>
+          {/* Unified Search & Filter Bar */}
+          <div className="all-hospitals-unified-search-bar">
+            {/* Search Input */}
+            <div className="all-hospitals-search-section">
+              <Search className="all-hospitals-search-icon" />
+              <input
+                className="all-hospitals-search-input"
+                type="text"
+                placeholder="Search hospitals..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
 
-            {availableDistricts.length > 0 && (
-              <div className="all-hospitals-filter-group">
-                <label className="all-hospitals-filter-label">Districts</label>
-                <ul className="all-hospitals-filter-list">
-                  <li
-                    className={`all-hospitals-filter-item ${selectedDistrict === 'all' ? 'selected' : ''}`}
-                    onClick={() => setSelectedDistrict('all')}
-                  >
-                    <div className="all-hospitals-radio" />
-                    <span>All Districts</span>
-                  </li>
-                  {availableDistricts.map(district => (
-                    <li
-                      key={district}
-                      className={`all-hospitals-filter-item ${selectedDistrict === district ? 'selected' : ''}`}
-                      onClick={() => setSelectedDistrict(district)}
-                    >
-                      <div className="all-hospitals-radio" />
-                      <span>{district}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {/* Filters */}
+            <div className="all-hospitals-filters-section">
+              <select
+                className="all-hospitals-filter-select"
+                value={selectedRegion}
+                onChange={(e) => {
+                  setSelectedRegion(e.target.value);
+                  setSelectedDistrict('all');
+                }}
+                title="Filter by Region"
+              >
+                <option value="all">All Regions</option>
+                {regions.map(region => (
+                  <option key={region} value={region}>{region}</option>
+                ))}
+              </select>
+
+              <select
+                className="all-hospitals-filter-select"
+                value={selectedFacilityType}
+                onChange={(e) => setSelectedFacilityType(e.target.value)}
+                title="Filter by Facility Type"
+              >
+                <option value="all">All Types</option>
+                {facilityTypes.filter(type => type !== 'Select').map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+
+              <select
+                className="all-hospitals-filter-select"
+                value={selectedOwnership}
+                onChange={(e) => setSelectedOwnership(e.target.value)}
+                title="Filter by Ownership"
+              >
+                <option value="all">All Ownership</option>
+                {ownershipTypes.filter(type => type !== 'Select').map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+
+              <select
+                className="all-hospitals-filter-select"
+                value={selectedServices}
+                onChange={(e) => setSelectedServices(e.target.value)}
+                title="Filter by Services"
+              >
+                <option value="all">All Services</option>
+                {services.filter(service => service !== 'Select').map(service => (
+                  <option key={service} value={service}>{service}</option>
+                ))}
+              </select>
+
+              <select
+                className="all-hospitals-filter-select"
+                value={selectedHealthInsurance}
+                onChange={(e) => setSelectedHealthInsurance(e.target.value)}
+                title="Filter by Health Insurance"
+              >
+                <option value="all">All Insurance</option>
+                {healthInsuranceOptions.filter(insurance => insurance !== 'Select').map(insurance => (
+                  <option key={insurance} value={insurance}>{insurance}</option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                className="all-hospitals-search-button"
+                onClick={() => {
+                  // Filters are already applied via state
+                }}
+              >
+                Search
+              </button>
+            </div>
+          </div>
+
+
+          {/* Left Sidebar - Districts Only */}
+          <div className="all-hospitals-left-sidebar">
+            {selectedRegion === 'all' ? (
+              <>
+                <h2 className="all-hospitals-sidebar-title">Districts</h2>
+                <div className="all-hospitals-filter-group">
+                  <p style={{ 
+                    color: '#6b7280', 
+                    fontSize: '0.875rem', 
+                    padding: '1rem',
+                    textAlign: 'center',
+                    margin: 0 
+                  }}>
+                    Select a region to view districts
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="all-hospitals-sidebar-title">Districts In This Region</h2>
+                {availableDistricts.length > 0 ? (
+                  <div className="all-hospitals-filter-group">
+                    <label className="all-hospitals-filter-label">{selectedRegion}</label>
+                    <ul className="all-hospitals-filter-list">
+                      <li
+                        className={`all-hospitals-filter-item ${selectedDistrict === 'all' ? 'selected' : ''}`}
+                        onClick={() => setSelectedDistrict('all')}
+                      >
+                        <div className="all-hospitals-radio" />
+                        <span>All Districts</span>
+                      </li>
+                      {availableDistricts.map(district => (
+                        <li
+                          key={district}
+                          className={`all-hospitals-filter-item ${selectedDistrict === district ? 'selected' : ''}`}
+                          onClick={() => setSelectedDistrict(district)}
+                        >
+                          <div className="all-hospitals-radio" />
+                          <span>{district}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="all-hospitals-filter-group">
+                    <p style={{ 
+                      color: '#6b7280', 
+                      fontSize: '0.875rem', 
+                      padding: '1rem',
+                      textAlign: 'center',
+                      margin: 0 
+                    }}>
+                      No districts available for {selectedRegion}
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -1074,99 +1163,6 @@ const AllHospitals: React.FC = () => {
             )}
           </div>
 
-          {/* Right Sidebar - Category Search */}
-          <div className="all-hospitals-right-sidebar">
-            <h2 className="all-hospitals-category-title">Category Search</h2>
-            <div className="all-hospitals-category-form">
-              <div className="all-hospitals-form-row">
-                <label className="all-hospitals-form-label">Region:</label>
-                <select
-                  className="all-hospitals-form-select"
-                  value={selectedRegion}
-                  onChange={(e) => {
-                    setSelectedRegion(e.target.value);
-                    setSelectedDistrict('all');
-                  }}
-                >
-                  <option value="all">Select</option>
-                  {regions.map(region => (
-                    <option key={region} value={region}>{region}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="all-hospitals-form-row">
-                <label className="all-hospitals-form-label">Facility Type:</label>
-                <select
-                  className="all-hospitals-form-select"
-                  value={selectedFacilityType}
-                  onChange={(e) => setSelectedFacilityType(e.target.value)}
-                >
-                  {facilityTypes.map(type => (
-                    <option key={type} value={type === 'Select' ? 'all' : type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="all-hospitals-form-row">
-                <label className="all-hospitals-form-label">Ownership:</label>
-                <select
-                  className="all-hospitals-form-select"
-                  value={selectedOwnership}
-                  onChange={(e) => setSelectedOwnership(e.target.value)}
-                >
-                  {ownershipTypes.map(type => (
-                    <option key={type} value={type === 'Select' ? 'all' : type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="all-hospitals-form-row">
-                <label className="all-hospitals-form-label">Services:</label>
-                <select
-                  className="all-hospitals-form-select"
-                  value={selectedServices}
-                  onChange={(e) => setSelectedServices(e.target.value)}
-                >
-                  {services.map(service => (
-                    <option key={service} value={service === 'Select' ? 'all' : service}>
-                      {service}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="all-hospitals-form-row">
-                <label className="all-hospitals-form-label">Health Insurance:</label>
-                <select
-                  className="all-hospitals-form-select"
-                  value={selectedHealthInsurance}
-                  onChange={(e) => setSelectedHealthInsurance(e.target.value)}
-                >
-                  {healthInsuranceOptions.map(insurance => (
-                    <option key={insurance} value={insurance === 'Select' ? 'all' : insurance}>
-                      {insurance}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="button"
-                className="all-hospitals-search-button"
-                onClick={() => {
-                  // Filters are already applied via state, this button can trigger a search action if needed
-                  // For now, it just ensures the filters are applied
-                }}
-              >
-                Search
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1176,4 +1172,5 @@ const AllHospitals: React.FC = () => {
 };
 
 export default AllHospitals;
+
 

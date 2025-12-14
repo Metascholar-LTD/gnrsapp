@@ -19,10 +19,12 @@ const ListFacility: React.FC = () => {
 
   // Facility Details
   const [facilityName, setFacilityName] = useState('');
+  const [about, setAbout] = useState('');
   const [facilityType, setFacilityType] = useState('');
   const [region, setRegion] = useState('');
   const [district, setDistrict] = useState('');
   const [telephone, setTelephone] = useState('');
+  const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [ownership, setOwnership] = useState('');
   const [nhisAccredited, setNhisAccredited] = useState('');
@@ -41,6 +43,9 @@ const ListFacility: React.FC = () => {
 
   // Additional
   const [website, setWebsite] = useState('');
+  const [operationalHours, setOperationalHours] = useState('');
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [additionalInfo, setAdditionalInfo] = useState('');
 
   const facilityTypes = [
@@ -184,7 +189,7 @@ const ListFacility: React.FC = () => {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        return !!(facilityName && facilityType && region && district && telephone && address && ownership && nhisAccredited);
+        return !!(facilityName && about && facilityType && region && district && telephone && address && ownership && nhisAccredited);
       case 2:
         return true; // Insurance is optional
       case 3:
@@ -224,10 +229,12 @@ const ListFacility: React.FC = () => {
 
     console.log('Facility submitted', {
       facilityName,
+      about,
       facilityType,
       region,
       district,
       telephone,
+      email,
       address,
       ownership,
       nhisAccredited,
@@ -238,6 +245,8 @@ const ListFacility: React.FC = () => {
       specialistFields,
       otherSpecialist,
       website,
+      operationalHours,
+      images,
       additionalInfo
     });
 
@@ -246,10 +255,12 @@ const ListFacility: React.FC = () => {
 
   const handleClear = () => {
     setFacilityName('');
+    setAbout('');
     setFacilityType('');
     setRegion('');
     setDistrict('');
     setTelephone('');
+    setEmail('');
     setAddress('');
     setOwnership('');
     setNhisAccredited('');
@@ -260,8 +271,34 @@ const ListFacility: React.FC = () => {
     setSpecialistFields([]);
     setOtherSpecialist('');
     setWebsite('');
+    setOperationalHours('');
+    setImages([]);
+    setImagePreviews([]);
     setAdditionalInfo('');
     setCurrentStep(1);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setImages([...images, ...filesArray]);
+      
+      // Create previews
+      filesArray.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreviews([...imagePreviews, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImages(newImages);
+    setImagePreviews(newPreviews);
   };
 
   const isolatedStyles = `
@@ -610,6 +647,20 @@ const ListFacility: React.FC = () => {
               />
             </div>
 
+            <div className="list-facility-form-group">
+              <label className="list-facility-label">
+                About<span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <textarea
+                className="list-facility-textarea"
+                value={about}
+                onChange={(e) => setAbout(e.target.value)}
+                placeholder="Provide a brief description of your facility, its mission, specialties, and what makes it unique..."
+                required
+                style={{ minHeight: '120px' }}
+              />
+            </div>
+
             <div className="list-facility-form-row">
               <div className="list-facility-form-group">
                 <label className="list-facility-label">
@@ -639,6 +690,19 @@ const ListFacility: React.FC = () => {
                   value={telephone}
                   onChange={(e) => setTelephone(e.target.value)}
                   required
+                />
+              </div>
+            </div>
+
+            <div className="list-facility-form-row">
+              <div className="list-facility-form-group">
+                <label className="list-facility-label">Email (Optional)</label>
+                <input
+                  type="email"
+                  className="list-facility-input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="example@email.com"
                 />
               </div>
             </div>
@@ -859,12 +923,86 @@ const ListFacility: React.FC = () => {
             </div>
 
             <div className="list-facility-form-group">
+              <label className="list-facility-label">Operational Hours (Optional)</label>
+              <input
+                type="text"
+                className="list-facility-input"
+                value={operationalHours}
+                onChange={(e) => setOperationalHours(e.target.value)}
+                placeholder="e.g., Mon-Fri: 8:00 AM - 5:00 PM, Sat: 9:00 AM - 2:00 PM, Sun: Closed"
+              />
+            </div>
+
+            <div className="list-facility-form-group">
+              <label className="list-facility-label">Facility Images (Optional)</label>
+              <p style={{ fontSize: '0.875rem', color: 'hsl(220 20% 40%)', marginBottom: '0.75rem', fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif" }}>
+                You can upload multiple images of your facility. Maximum 10 images.
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="list-facility-input"
+                style={{ padding: '0.5rem' }}
+                disabled={images.length >= 10}
+              />
+              {images.length > 0 && (
+                <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} style={{ position: 'relative' }}>
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        style={{
+                          width: '100%',
+                          height: '150px',
+                          objectFit: 'cover',
+                          borderRadius: '0.5rem',
+                          border: '1px solid hsl(40 20% 88%)'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        style={{
+                          position: 'absolute',
+                          top: '0.5rem',
+                          right: '0.5rem',
+                          background: '#dc2626',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.875rem',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {images.length >= 10 && (
+                <p style={{ fontSize: '0.875rem', color: '#dc2626', marginTop: '0.5rem' }}>
+                  Maximum 10 images reached. Remove some images to add more.
+                </p>
+              )}
+            </div>
+
+            <div className="list-facility-form-group">
               <label className="list-facility-label">Additional Information (Optional)</label>
               <textarea
                 className="list-facility-textarea"
                 value={additionalInfo}
                 onChange={(e) => setAdditionalInfo(e.target.value)}
-                placeholder="Any additional details about your facility, operating hours, special services, etc..."
+                placeholder="Any additional details about your facility, special services, etc..."
                 style={{ minHeight: '150px' }}
               />
             </div>
