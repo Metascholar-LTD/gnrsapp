@@ -242,10 +242,12 @@ const NewsArticle = () => {
       transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
     }
 
-    .bbc-share-section:hover .bbc-share-buttons {
-      max-height: 500px;
-      opacity: 1;
-      transform: translateY(0);
+    @media (min-width: 768px) {
+      .bbc-share-section:hover .bbc-share-buttons {
+        max-height: 500px;
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .bbc-share-button-circle {
@@ -414,6 +416,38 @@ const NewsArticle = () => {
         position: relative;
         top: 0;
         align-self: flex-start;
+        width: 100%;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e5e5e5;
+      }
+
+      .bbc-share-title {
+        display: none;
+      }
+
+      .bbc-share-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 0.75rem;
+        max-height: none;
+        opacity: 1;
+        transform: none;
+        overflow: visible;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .bbc-share-button-circle {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+      }
+
+      .bbc-share-button-circle svg {
+        width: 18px;
+        height: 18px;
       }
     }
   `;
