@@ -74,6 +74,9 @@ import AllHospitals from "./pages/directories/AllHospitals";
 import Banks from "./pages/directories/Banks";
 import Datasets from "./pages/directories/Datasets";
 import DatasetCategory from "./pages/directories/DatasetCategory";
+import NewsHub from "./pages/news/NewsHub";
+import NewsArticle from "./pages/news/NewsArticle";
+import InfoHub from "./pages/info/InfoHub";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -155,6 +158,11 @@ const App = () => (
           <Route path="/directories/banks" element={<Banks />} />
           <Route path="/directories/datasets" element={<Datasets />} />
           <Route path="/directories/datasets/:category" element={<DatasetCategory />} />
+          {/* News Routes */}
+          <Route path="/news" element={<NewsHub />} />
+          <Route path="/news/:id" element={<NewsArticle />} />
+          {/* Info Routes */}
+          <Route path="/info" element={<InfoHub />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}

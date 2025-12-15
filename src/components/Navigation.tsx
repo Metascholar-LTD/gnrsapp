@@ -222,43 +222,41 @@ export const Navigation = () => {
     },
     news: {
       sections: [
+        { id: 'main', label: 'Main Pages', icon: 'fa-home' },
         { id: 'categories', label: 'News Categories', icon: 'fa-newspaper' },
-        { id: 'government', label: 'Government & Updates', icon: 'fa-building' },
-        { id: 'quick', label: 'Quick Access', icon: 'fa-clock' }
+        { id: 'info', label: 'Information Hub', icon: 'fa-info-circle' }
       ],
       content: {
+        main: [
+          { title: 'Main Pages', items: [
+            { to: '/news', label: 'News Hub', icon: 'fa-newspaper' },
+            { to: '/info', label: 'Information Hub', icon: 'fa-info-circle' }
+          ]}
+        ],
         categories: [
-          { title: 'General News', items: [
-            { to: '/news/national', label: 'National News', icon: 'fa-globe' },
-            { to: '/news/regional', label: 'Regional News', icon: 'fa-map-marker-alt' },
-            { to: '/news/politics', label: 'Politics', icon: 'fa-landmark' },
-            { to: '/news/trending', label: 'Trending News', icon: 'fa-fire' }
-          ]},
-          { title: 'Specialized News', items: [
-            { to: '/news/education', label: 'Education News', icon: 'fa-graduation-cap' },
-            { to: '/news/jobs-recruitment', label: 'Jobs & Recruitment News', icon: 'fa-briefcase' }
+          { title: 'News Categories', items: [
+            { to: '/news?category=National News', label: 'National News', icon: 'fa-globe' },
+            { to: '/news?category=Regional News', label: 'Regional News', icon: 'fa-map-marker-alt' },
+            { to: '/news?category=Politics', label: 'Politics', icon: 'fa-landmark' },
+            { to: '/news?category=Trending News', label: 'Trending News', icon: 'fa-fire' },
+            { to: '/news?category=Education News', label: 'Education News', icon: 'fa-graduation-cap' },
+            { to: '/news?category=Jobs & Recruitment News', label: 'Jobs & Recruitment News', icon: 'fa-briefcase' }
           ]}
         ],
-        government: [
-          { title: 'Official Updates', items: [
-            { to: '/news/government-updates', label: 'Official Government Updates', icon: 'fa-building' },
-            { to: '/news/notifications', label: 'Notifications & Alerts', icon: 'fa-bell' }
-          ]},
-          { title: 'My News', items: [
-            { to: '/news/saved', label: 'Saved News', icon: 'fa-bookmark' }
-          ]}
-        ],
-        quick: [
-          { title: 'Popular Content', items: [
-            { to: '/news/latest', label: 'Latest News', icon: 'fa-clock' },
-            { to: '/news/popular', label: 'Popular Stories', icon: 'fa-star' }
+        info: [
+          { title: 'Information & Help', items: [
+            { to: '/info', label: 'Information Hub', icon: 'fa-book' },
+            { to: '/info?section=getting-started', label: 'Getting Started', icon: 'fa-play-circle' },
+            { to: '/info?section=education', label: 'Education Resources', icon: 'fa-graduation-cap' },
+            { to: '/info?section=jobs', label: 'Job Portal Guide', icon: 'fa-briefcase' },
+            { to: '/info?section=directories', label: 'Directories Help', icon: 'fa-folder' }
           ]}
         ]
       },
       images: {
+        main: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop&q=80',
         categories: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop&q=80',
-        government: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=300&fit=crop&q=80',
-        quick: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop&q=80'
+        info: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop&q=80'
       }
     }
   };
