@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import feather from "feather-icons";
 import Chart from "chart.js";
 
+const ChartJS: any = Chart;
+
 const AdminDashboard = () => {
   const lineChartRef = useRef<HTMLCanvasElement>(null);
   const pieChartRef = useRef<HTMLCanvasElement>(null);
@@ -40,8 +42,7 @@ const AdminDashboard = () => {
         gradient.addColorStop(0, "rgba(215, 227, 244, 1)");
         gradient.addColorStop(1, "rgba(215, 227, 244, 0)");
 
-        new Chart(ctx, {
-          type: "line",
+        new ChartJS(ctx, {
           data: {
             labels: [
               "Jan",
@@ -117,8 +118,7 @@ const AdminDashboard = () => {
     if (pieChartRef.current) {
       const ctx = pieChartRef.current.getContext("2d");
       if (ctx) {
-        new Chart(ctx, {
-          type: "pie",
+        new ChartJS(ctx, {
           data: {
             labels: ["Chrome", "Firefox", "IE"],
             datasets: [
@@ -145,8 +145,7 @@ const AdminDashboard = () => {
     if (barChartRef.current) {
       const ctx = barChartRef.current.getContext("2d");
       if (ctx) {
-        new Chart(ctx, {
-          type: "bar",
+        new ChartJS(ctx, {
           data: {
             labels: [
               "Jan",
