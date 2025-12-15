@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 const Directories: React.FC = () => {
   const menuItems = [
+    { label: 'Datasets', ariaLabel: 'Browse datasets', link: '/directories/datasets' },
     { label: 'Hotels', ariaLabel: 'Browse hotels in Ghana', link: '/directories/hotels' },
     { label: 'Universities', ariaLabel: 'Browse tertiary universities', link: '/directories/universities' },
     { label: 'Senior High Schools', ariaLabel: 'Browse SHS schools', link: '/directories/shs' },
