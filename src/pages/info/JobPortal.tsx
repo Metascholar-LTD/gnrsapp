@@ -1,44 +1,9 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { Briefcase, Search, FileText, Send, CheckCircle2, ChevronDown, ChevronUp, ArrowRight, TrendingUp, Users, Target } from "lucide-react";
+import { Briefcase, Search, FileText, Send, CheckCircle2, ArrowRight, TrendingUp, Users, Target } from "lucide-react";
 
 const JobPortal = () => {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  const faqs = [
-    {
-      id: 1,
-      question: "How do I search for jobs?",
-      answer: "Use the search bar at the top of the Jobs page to search by keywords, location, or job type. You can also use filters to narrow down results by industry, salary range, experience level, and employment type (full-time, part-time, contract). Save your search criteria to receive notifications when new matching jobs are posted."
-    },
-    {
-      id: 2,
-      question: "How do I create a professional resume?",
-      answer: "Visit our Resume Builder tool which offers professional templates and step-by-step guidance. You can choose from various templates, add your work experience, education, skills, and achievements. The builder automatically formats your resume and allows you to download it in PDF format. You can also create multiple versions tailored for different job applications."
-    },
-    {
-      id: 3,
-      question: "Can I apply for jobs directly through the platform?",
-      answer: "Yes! Most job listings allow you to apply directly through our platform. Simply click 'Apply Now' on any job posting. You'll be able to upload your resume, write a cover letter, and submit your application. Some employers may redirect you to their own application system, but we'll guide you through the process."
-    },
-    {
-      id: 4,
-      question: "How do I get notified about new job postings?",
-      answer: "Create a free account and set up job alerts based on your preferences. You can specify job titles, locations, industries, and salary ranges. We'll send you email notifications when new jobs matching your criteria are posted. You can also follow specific companies to be notified when they post new positions."
-    },
-    {
-      id: 5,
-      question: "Is there a fee to use the job portal?",
-      answer: "No! Our job portal is completely free for job seekers. You can search for jobs, create resumes, apply for positions, and access all features at no cost. Employers may have different pricing plans for posting jobs, but as a job seeker, everything is free."
-    },
-    {
-      id: 6,
-      question: "How do I improve my chances of getting hired?",
-      answer: "Complete your profile with detailed information, upload a professional resume, and keep your skills updated. Apply to jobs that match your qualifications, customize your cover letter for each application, and follow up appropriately. Our platform also offers career tips and resources to help you stand out to employers."
-    }
-  ];
 
   const features = [
     {
@@ -373,73 +338,6 @@ const JobPortal = () => {
       transform: scale(1.05);
     }
 
-    .job-faq-section {
-      background: #f8f9fa;
-      border-radius: 1rem;
-      padding: 3rem;
-      margin-top: 4rem;
-    }
-
-    .job-faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .job-faq-item {
-      background: white;
-      border-radius: 0.75rem;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
-    }
-
-    .job-faq-item:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .job-faq-question {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 1.0625rem;
-      color: #000000;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-      transition: color 0.3s ease;
-    }
-
-    .job-faq-question:hover {
-      color: #000000;
-    }
-
-    .job-faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-      padding: 0 1.5rem;
-      color: #000000;
-      line-height: 1.7;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-    }
-
-    .job-faq-item.open .job-faq-answer {
-      max-height: 500px;
-      padding: 0 1.5rem 1.5rem;
-    }
-
-    .job-faq-icon {
-      color: #000000;
-      transition: transform 0.3s ease;
-    }
-
-    .job-faq-item.open .job-faq-icon {
-      transform: rotate(180deg);
-    }
 
     .job-cta-section {
       background: #000000;
@@ -497,9 +395,6 @@ const JobPortal = () => {
         grid-template-columns: 1fr;
       }
 
-      .job-faq-section {
-        padding: 2rem 1rem;
-      }
     }
   `;
 
@@ -566,35 +461,6 @@ const JobPortal = () => {
                   <p className="job-step-desc">{step.description}</p>
                 </div>
                 <img src={step.image} alt={step.title} className="job-step-image" />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="job-faq-section">
-          <h2 className="job-section-title">Frequently Asked Questions</h2>
-          <p className="job-section-subtitle">
-            Find answers to common questions about our job portal
-          </p>
-          
-          <div className="job-faq-list">
-            {faqs.map((faq) => (
-              <div
-                key={faq.id}
-                className={`job-faq-item ${openFaq === faq.id ? 'open' : ''}`}
-              >
-                <div
-                  className="job-faq-question"
-                  onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
-                >
-                  <span>{faq.question}</span>
-                  {openFaq === faq.id ? (
-                    <ChevronUp className="job-faq-icon" size={20} />
-                  ) : (
-                    <ChevronDown className="job-faq-icon" size={20} />
-                  )}
-                </div>
-                <div className="job-faq-answer">{faq.answer}</div>
               </div>
             ))}
           </div>

@@ -1,44 +1,9 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { BookOpen, CheckCircle2, ChevronDown, ChevronUp, Rocket, Users, Zap, Shield, ArrowRight, Sparkles } from "lucide-react";
+import { BookOpen, CheckCircle2, Rocket, Users, Zap, Shield, ArrowRight, Sparkles } from "lucide-react";
 
 const GettingStarted = () => {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  const faqs = [
-    {
-      id: 1,
-      question: "How do I create an account?",
-      answer: "Creating an account is simple! Click on the 'Join' button in the top navigation, fill in your details including your name, email address, and create a secure password. You'll receive a verification email to activate your account. Once verified, you can start exploring all our features."
-    },
-    {
-      id: 2,
-      question: "Is the platform free to use?",
-      answer: "Yes! The Ghana National Resource System is completely free to use. All core features including accessing educational resources, job searches, directory listings, and news are available at no cost. We believe in making valuable resources accessible to everyone."
-    },
-    {
-      id: 3,
-      question: "What features are available?",
-      answer: "Our platform offers comprehensive resources including: Educational tools (past questions, CGPA calculator), Job portal with resume builder, Business and institution directories, Latest news and updates, Scholarship information, and much more. Explore each section to discover all available features."
-    },
-    {
-      id: 4,
-      question: "How do I navigate the platform?",
-      answer: "Use the main navigation menu at the top to access different sections. Each section has its own dedicated page with organized content. You can also use the search functionality to quickly find what you're looking for. The platform is designed to be intuitive and user-friendly."
-    },
-    {
-      id: 5,
-      question: "Can I save content for later?",
-      answer: "Yes! Once you're logged in, you can bookmark articles, save job listings, and create personalized lists. Look for the bookmark or save icon on content items. Your saved items will be accessible from your profile dashboard."
-    },
-    {
-      id: 6,
-      question: "How do I update my profile?",
-      answer: "After logging in, click on your profile icon in the top right corner. Select 'Profile Settings' to update your personal information, preferences, and notification settings. You can also upload a profile picture and manage your account security settings."
-    }
-  ];
 
   const features = [
     {
@@ -355,73 +320,6 @@ const GettingStarted = () => {
       transform: scale(1.05);
     }
 
-    .gs-faq-section {
-      background: #f8f9fa;
-      border-radius: 1rem;
-      padding: 3rem;
-      margin-top: 4rem;
-    }
-
-    .gs-faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .gs-faq-item {
-      background: white;
-      border-radius: 0.75rem;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
-    }
-
-    .gs-faq-item:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .gs-faq-question {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 1.0625rem;
-      color: #000000;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-      transition: color 0.3s ease;
-    }
-
-    .gs-faq-question:hover {
-      color: #000000;
-    }
-
-    .gs-faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-      padding: 0 1.5rem;
-      color: #666;
-      line-height: 1.7;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-    }
-
-    .gs-faq-item.open .gs-faq-answer {
-      max-height: 500px;
-      padding: 0 1.5rem 1.5rem;
-    }
-
-    .gs-faq-icon {
-      color: #000000;
-      transition: transform 0.3s ease;
-    }
-
-    .gs-faq-item.open .gs-faq-icon {
-      transform: rotate(180deg);
-    }
 
     .gs-cta-section {
       background: #000000;
@@ -478,9 +376,6 @@ const GettingStarted = () => {
         grid-template-columns: 1fr;
       }
 
-      .gs-faq-section {
-        padding: 2rem 1rem;
-      }
     }
   `;
 
@@ -538,35 +433,6 @@ const GettingStarted = () => {
                   <p className="gs-step-desc">{step.description}</p>
                 </div>
                 <img src={step.image} alt={step.title} className="gs-step-image" />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="gs-faq-section">
-          <h2 className="gs-section-title">Frequently Asked Questions</h2>
-          <p className="gs-section-subtitle">
-            Find answers to common questions about getting started
-          </p>
-          
-          <div className="gs-faq-list">
-            {faqs.map((faq) => (
-              <div
-                key={faq.id}
-                className={`gs-faq-item ${openFaq === faq.id ? 'open' : ''}`}
-              >
-                <div
-                  className="gs-faq-question"
-                  onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
-                >
-                  <span>{faq.question}</span>
-                  {openFaq === faq.id ? (
-                    <ChevronUp className="gs-faq-icon" size={20} />
-                  ) : (
-                    <ChevronDown className="gs-faq-icon" size={20} />
-                  )}
-                </div>
-                <div className="gs-faq-answer">{faq.answer}</div>
               </div>
             ))}
           </div>

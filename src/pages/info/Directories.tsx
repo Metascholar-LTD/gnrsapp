@@ -1,44 +1,9 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { Building2, MapPin, Star, Search, ChevronDown, ChevronUp, ArrowRight, GraduationCap, Hospital, UtensilsCrossed, Banknote } from "lucide-react";
+import { Building2, MapPin, Star, Search, ArrowRight, GraduationCap, Hospital, UtensilsCrossed, Banknote } from "lucide-react";
 
 const Directories = () => {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  const faqs = [
-    {
-      id: 1,
-      question: "How do I search for businesses or institutions?",
-      answer: "Use the search bar at the top of any directory page to search by name, location, or category. You can also browse by category using the filter options. Each directory (Universities, Hospitals, Restaurants, Banks, etc.) has its own dedicated search page with advanced filtering options."
-    },
-    {
-      id: 2,
-      question: "Can I write reviews for businesses?",
-      answer: "Yes! After creating an account, you can write reviews for any business or institution listed in our directories. Simply navigate to the business page and click 'Write Review'. Your reviews help others make informed decisions and contribute to the community."
-    },
-    {
-      id: 3,
-      question: "How do I add my business to the directory?",
-      answer: "Business owners can list their establishments by clicking 'List Your Business' on the relevant directory page. You'll need to provide business information, location, contact details, and verification documents. Our team reviews submissions to ensure accuracy before publishing."
-    },
-    {
-      id: 4,
-      question: "Are the listings verified?",
-      answer: "We verify business information including contact details, location, and operating hours. However, we recommend contacting businesses directly to confirm current information, especially for operating hours and services offered. Verified businesses display a verification badge."
-    },
-    {
-      id: 5,
-      question: "Can I save favorite listings?",
-      answer: "Yes! Once logged in, you can save any listing to your favorites by clicking the bookmark icon. Your saved listings are accessible from your profile dashboard, making it easy to revisit businesses and institutions you're interested in."
-    },
-    {
-      id: 6,
-      question: "How accurate is the location information?",
-      answer: "We use verified addresses and GPS coordinates to provide accurate location information. Each listing includes a map view, directions, and contact information. If you notice any inaccuracies, please report them through the 'Report Issue' button on the listing page."
-    }
-  ];
 
   const directories = [
     {
@@ -354,73 +319,6 @@ const Directories = () => {
       font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
     }
 
-    .dir-faq-section {
-      background: #f8f9fa;
-      border-radius: 1rem;
-      padding: 3rem;
-      margin-top: 4rem;
-    }
-
-    .dir-faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .dir-faq-item {
-      background: white;
-      border-radius: 0.75rem;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
-    }
-
-    .dir-faq-item:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .dir-faq-question {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 1.0625rem;
-      color: #000000;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-      transition: color 0.3s ease;
-    }
-
-    .dir-faq-question:hover {
-      color: #0066cc;
-    }
-
-    .dir-faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-      padding: 0 1.5rem;
-      color: #000000;
-      line-height: 1.7;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-    }
-
-    .dir-faq-item.open .dir-faq-answer {
-      max-height: 500px;
-      padding: 0 1.5rem 1.5rem;
-    }
-
-    .dir-faq-icon {
-      color: #000000;
-      transition: transform 0.3s ease;
-    }
-
-    .dir-faq-item.open .dir-faq-icon {
-      transform: rotate(180deg);
-    }
 
     .dir-cta-section {
       background: #000000;
@@ -470,9 +368,6 @@ const Directories = () => {
         grid-template-columns: 1fr;
       }
 
-      .dir-faq-section {
-        padding: 2rem 1rem;
-      }
     }
   `;
 
@@ -536,35 +431,6 @@ const Directories = () => {
                   <h3 className="dir-feature-title">{feature.title}</h3>
                   <p className="dir-feature-desc">{feature.description}</p>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="dir-faq-section">
-          <h2 className="dir-section-title">Frequently Asked Questions</h2>
-          <p className="dir-section-subtitle">
-            Find answers to common questions about our directories
-          </p>
-          
-          <div className="dir-faq-list">
-            {faqs.map((faq) => (
-              <div
-                key={faq.id}
-                className={`dir-faq-item ${openFaq === faq.id ? 'open' : ''}`}
-              >
-                <div
-                  className="dir-faq-question"
-                  onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
-                >
-                  <span>{faq.question}</span>
-                  {openFaq === faq.id ? (
-                    <ChevronUp className="dir-faq-icon" size={20} />
-                  ) : (
-                    <ChevronDown className="dir-faq-icon" size={20} />
-                  )}
-                </div>
-                <div className="dir-faq-answer">{faq.answer}</div>
               </div>
             ))}
           </div>

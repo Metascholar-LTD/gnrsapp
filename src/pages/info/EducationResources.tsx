@@ -1,44 +1,9 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { BookOpen, GraduationCap, Calculator, Users, FileText, Award, ChevronDown, ChevronUp, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
+import { BookOpen, GraduationCap, Calculator, Users, FileText, Award, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 
 const EducationResources = () => {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  const faqs = [
-    {
-      id: 1,
-      question: "How do I access past examination questions?",
-      answer: "Navigate to the Education section and select 'Past Questions'. You can filter by subject, examination body (WAEC, NECO, etc.), and year. All past questions are available in PDF format and can be downloaded or viewed online. Some questions include detailed solutions and marking schemes."
-    },
-    {
-      id: 2,
-      question: "How does the CGPA calculator work?",
-      answer: "Our CGPA calculator helps you convert your grades to GPA and calculate your cumulative grade point average. Simply select your institution's grading system, enter your course credits and grades, and the calculator will automatically compute your GPA. It supports various grading systems used in Ghanaian institutions."
-    },
-    {
-      id: 3,
-      question: "Can I download study materials?",
-      answer: "Yes! Most study materials including past questions, study guides, and educational resources are available for download. Simply click on the download icon next to any resource. Some premium resources may require account registration, but most materials are freely accessible."
-    },
-    {
-      id: 4,
-      question: "Are the past questions up to date?",
-      answer: "We regularly update our database with the latest examination papers. Our collection includes questions from recent years as well as historical papers for comprehensive study. You can filter by year to find the most recent papers or browse older questions for practice."
-    },
-    {
-      id: 5,
-      question: "How can I join study groups?",
-      answer: "Visit the Community section where you can find active study groups organized by subject or institution. You can join existing groups or create your own. Study groups allow you to share notes, discuss topics, and prepare for examinations together with other students."
-    },
-    {
-      id: 6,
-      question: "Is there a mobile app for accessing resources?",
-      answer: "Currently, our platform is fully optimized for mobile browsers, providing an app-like experience. We're working on dedicated mobile apps for iOS and Android that will be available soon. Subscribe to our newsletter to be notified when the apps launch."
-    }
-  ];
 
   const resources = [
     {
@@ -331,73 +296,6 @@ const EducationResources = () => {
       font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
     }
 
-    .edu-faq-section {
-      background: #f8f9fa;
-      border-radius: 1rem;
-      padding: 3rem;
-      margin-top: 4rem;
-    }
-
-    .edu-faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .edu-faq-item {
-      background: white;
-      border-radius: 0.75rem;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
-    }
-
-    .edu-faq-item:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .edu-faq-question {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 1.0625rem;
-      color: #000000;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-      transition: color 0.3s ease;
-    }
-
-    .edu-faq-question:hover {
-      color: #000000;
-    }
-
-    .edu-faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-      padding: 0 1.5rem;
-      color: #000000;
-      line-height: 1.7;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-    }
-
-    .edu-faq-item.open .edu-faq-answer {
-      max-height: 500px;
-      padding: 0 1.5rem 1.5rem;
-    }
-
-    .edu-faq-icon {
-      color: #000000;
-      transition: transform 0.3s ease;
-    }
-
-    .edu-faq-item.open .edu-faq-icon {
-      transform: rotate(180deg);
-    }
 
     .edu-cta-section {
       background: #000000;
@@ -447,9 +345,6 @@ const EducationResources = () => {
         grid-template-columns: 1fr;
       }
 
-      .edu-faq-section {
-        padding: 2rem 1rem;
-      }
     }
   `;
 
@@ -510,35 +405,6 @@ const EducationResources = () => {
                   <h3 className="edu-benefit-title">{benefit.title}</h3>
                   <p className="edu-benefit-desc">{benefit.description}</p>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="edu-faq-section">
-          <h2 className="edu-section-title">Frequently Asked Questions</h2>
-          <p className="edu-section-subtitle">
-            Find answers to common questions about our educational resources
-          </p>
-          
-          <div className="edu-faq-list">
-            {faqs.map((faq) => (
-              <div
-                key={faq.id}
-                className={`edu-faq-item ${openFaq === faq.id ? 'open' : ''}`}
-              >
-                <div
-                  className="edu-faq-question"
-                  onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
-                >
-                  <span>{faq.question}</span>
-                  {openFaq === faq.id ? (
-                    <ChevronUp className="edu-faq-icon" size={20} />
-                  ) : (
-                    <ChevronDown className="edu-faq-icon" size={20} />
-                  )}
-                </div>
-                <div className="edu-faq-answer">{faq.answer}</div>
               </div>
             ))}
           </div>
