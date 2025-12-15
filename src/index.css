@@ -466,3 +466,8 @@ All colors MUST be HSL.
 .education-hero[data-theme] {
   /* theme attribute now only used for analytics hooks; colors remain consistent */
 }
+
+/* Responsive Spacing Utilities */
+.responsive-padding {
+  padding: clamp(1rem, 3vw, 2rem);
+}

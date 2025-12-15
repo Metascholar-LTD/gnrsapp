@@ -12,6 +12,9 @@ export default {
       'lg': '1024px',  // Large tablet
       'xl': '1200px',  // Desktop start (matches meta-consult desktop)
       '2xl': '1600px', // Large desktop (matches meta-consult large)
+      'tablet': '768px',   // Tablet (matches meta-consult)
+      'desktop': '1200px', // Desktop (matches meta-consult)
+      'large': '1600px',   // Large desktop (matches meta-consult)
     },
     container: {
       center: true,

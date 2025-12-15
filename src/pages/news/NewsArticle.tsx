@@ -1,8 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { Clock, Share2, Facebook, Twitter, Linkedin, Mail, Link2 } from "lucide-react";
-import { useState } from "react";
+import { Clock, Share2, Facebook, Twitter, Linkedin, Mail, Link2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useRef } from "react";
 
 const articles: Record<string, {
   id: string;
@@ -45,7 +45,63 @@ const articles: Record<string, {
       "The ministry has also announced partnerships with leading companies to provide internship opportunities and mentorship programs for students. These initiatives aim to bridge the gap between academic learning and real-world application.",
       "Education experts have praised the reforms, noting that they address long-standing concerns about graduate employability. The policy is expected to be fully implemented over the next three years, with pilot programs beginning in select schools this academic year.",
     ],
-    relatedArticles: ["1", "3"],
+    relatedArticles: ["1", "3", "4", "5"],
+  },
+  "3": {
+    id: "3",
+    title: "Healthcare Sector Sees Major Investment Boost",
+    summary: "Private and public partnerships drive expansion of medical facilities across Ghana, improving access to quality healthcare services.",
+    category: "Health News",
+    author: "Dr. Kofi Adjei",
+    publishedAt: "6 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1200&h=600&fit=crop",
+    content: [
+      "Ghana's healthcare sector is experiencing unprecedented growth with new investments totaling over $200 million in the past year. The expansion includes new hospitals, clinics, and specialized medical centers across the country.",
+      "The government's partnership with private investors has accelerated the development of healthcare infrastructure, particularly in underserved rural areas. This initiative aims to reduce the burden on major urban hospitals and bring quality medical care closer to communities.",
+    ],
+    relatedArticles: ["2", "4", "6"],
+  },
+  "4": {
+    id: "4",
+    title: "Tech Startups Attract Record Venture Capital Funding",
+    summary: "Ghana's tech ecosystem reaches new heights as local startups secure millions in international investment, signaling growing confidence in African innovation.",
+    category: "Technology News",
+    author: "Nana Yaw",
+    publishedAt: "8 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop",
+    content: [
+      "The technology startup scene in Ghana has reached a milestone with record-breaking venture capital investments this quarter. Several fintech and agritech companies have secured funding rounds totaling over $50 million.",
+      "International investors are increasingly recognizing the potential of Ghana's tech ecosystem, driven by a young, tech-savvy population and improving digital infrastructure.",
+    ],
+    relatedArticles: ["1", "3", "5"],
+  },
+  "5": {
+    id: "5",
+    title: "Renewable Energy Projects Transform Rural Communities",
+    summary: "Solar and wind energy initiatives bring electricity to remote villages, improving quality of life and economic opportunities for thousands.",
+    category: "Energy News",
+    author: "Ama Serwaa",
+    publishedAt: "12 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=1200&h=600&fit=crop",
+    content: [
+      "Rural communities across Ghana are experiencing a transformation through renewable energy projects. Solar panel installations and small-scale wind farms are bringing reliable electricity to areas previously without power.",
+      "These initiatives are not only improving living conditions but also creating new economic opportunities, enabling small businesses to operate after dark and children to study in the evenings.",
+    ],
+    relatedArticles: ["1", "4", "6"],
+  },
+  "6": {
+    id: "6",
+    title: "Agricultural Innovation Drives Food Security",
+    summary: "Modern farming techniques and technology adoption help farmers increase yields and ensure sustainable food production for the nation.",
+    category: "Agriculture News",
+    author: "Kwabena Osei",
+    publishedAt: "1 day ago",
+    imageUrl: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=600&fit=crop",
+    content: [
+      "Ghana's agricultural sector is embracing innovation to address food security challenges. Farmers are adopting modern techniques, precision agriculture, and climate-resilient crops to boost productivity.",
+      "Government support programs and partnerships with agricultural technology companies are helping smallholder farmers access tools and knowledge needed to improve their yields and livelihoods.",
+    ],
+    relatedArticles: ["2", "3", "5"],
   },
 };
 
@@ -53,11 +109,27 @@ const NewsArticle = () => {
   const { id } = useParams<{ id: string }>();
   const article = id ? articles[id] : null;
   const [copiedLink, setCopiedLink] = useState(false);
+  const relatedViewportRef = useRef<HTMLDivElement>(null);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleRelatedNav = (direction: "prev" | "next") => {
+    const viewport = relatedViewportRef.current;
+    if (!viewport) return;
+
+    const firstCard = viewport.querySelector(".bbc-related-card") as HTMLElement | null;
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 260;
+    const gap = 16; // matches the 1rem gap in CSS
+    const scrollAmount = cardWidth + gap;
+
+    viewport.scrollBy({
+      left: direction === "next" ? scrollAmount : -scrollAmount,
+      behavior: "smooth",
+    });
   };
 
   if (!article) {
@@ -212,23 +284,29 @@ const NewsArticle = () => {
     }
 
     .bbc-share-title {
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       font-weight: 700;
       color: #000000;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin: 0;
       font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-      background: transparent;
-      border: none;
+      background: #f8f9fa;
+      border: 1px solid #e5e5e5;
+      border-radius: 0.375rem;
       cursor: pointer;
-      padding: 0;
+      padding: 0.375rem 0.75rem;
       text-align: left;
-      transition: color 0.2s ease;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
     }
 
     .bbc-share-title:hover {
       color: #666666;
+      background: #f0f1f2;
+      border-color: #d0d0d0;
     }
 
     .bbc-share-buttons {
@@ -240,6 +318,7 @@ const NewsArticle = () => {
       opacity: 0;
       transform: translateY(-10px);
       transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+      align-items: center;
     }
 
     @media (min-width: 768px) {
@@ -323,62 +402,158 @@ const NewsArticle = () => {
     }
 
     .bbc-related-section {
-      margin-top: 4rem;
-      padding-top: 2rem;
-      border-top: 2px solid #e5e5e5;
+      margin: 3rem 0 0 0;
+      padding: 0 0 3rem 0;
+      width: 100%;
+      background: #f8f9fa;
+      color: #fff;
+    }
+
+    .bbc-related-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 3rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .bbc-related-title {
-      font-size: 1.5rem;
+      font-size: 1rem;
       font-weight: 700;
-      color: #000000;
-      margin: 0 0 2rem 0;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #000;
+      margin: 0;
       font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
     }
 
-    .bbc-related-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
+    .bbc-related-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .bbc-related-nav button {
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(0,0,0,0.15);
+      background: transparent;
+      color: #000;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .bbc-related-nav button:hover {
+      background: rgba(0,0,0,0.08);
+      border-color: rgba(0,0,0,0.4);
+    }
+
+    .bbc-related-viewport {
+      overflow-x: auto;
+      overflow-y: hidden;
+      position: relative;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-snap-type: x mandatory;
+      padding: 0 3rem;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .bbc-related-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .bbc-related-track {
+      display: flex;
+      gap: 1rem;
+      padding-bottom: 0.5rem;
     }
 
     .bbc-related-card {
+      background: #1a1a1a;
+      color: #f5f5f5;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
+      min-height: 260px;
+      min-width: 230px;
+      max-width: 280px;
+      flex: 0 0 auto;
+      scroll-snap-align: start;
       text-decoration: none;
-      color: inherit;
-      transition: opacity 0.2s ease;
-    }
-
-    .bbc-related-card:hover {
-      opacity: 0.8;
     }
 
     .bbc-related-image {
       width: 100%;
-      height: 180px;
+      height: 140px;
       object-fit: cover;
-      margin-bottom: 1rem;
-      background: #f5f5f5;
+      display: block;
+    }
+
+    .bbc-related-card-content {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
     }
 
     .bbc-related-category {
-      font-size: 0.75rem;
+      font-size: 0.6875rem;
       font-weight: 700;
       color: #bb1919;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.5rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.25rem;
       font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+      line-height: 1.2;
     }
 
     .bbc-related-title-text {
-      font-size: 1.125rem;
+      font-size: 1rem;
       font-weight: 700;
-      color: #000000;
       margin: 0;
+      color: #fff;
       line-height: 1.3;
       font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+    }
+
+    .bbc-related-summary {
+      font-size: 0.875rem;
+      color: #d9d9d9;
+      line-height: 1.5;
+      margin: 0;
+      flex: 1;
+      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+    }
+
+    .bbc-related-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #f5f5f5;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      margin-top: 0.25rem;
+      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+    }
+
+    .bbc-related-cta:hover {
+      text-decoration: underline;
     }
 
     @media (max-width: 1199px) {
@@ -403,8 +578,17 @@ const NewsArticle = () => {
         margin: 1.5rem 0;
       }
 
-      .bbc-related-grid {
-        grid-template-columns: 1fr;
+      .bbc-related-section {
+        padding: 0 0 2.5rem 0;
+        margin-top: 2rem;
+      }
+
+      .bbc-related-header {
+        padding: 0 1.25rem;
+      }
+
+      .bbc-related-viewport {
+        padding: 0 1.25rem;
       }
 
       .bbc-article-content-wrapper {
@@ -452,9 +636,16 @@ const NewsArticle = () => {
     }
   `;
 
-  const relatedArticles = article.relatedArticles
-    .map(relatedId => articles[relatedId])
-    .filter(Boolean);
+  // Get all articles except the current one, prioritize related articles
+  const allArticleIds = Object.keys(articles);
+  const relatedArticleIds = new Set(article.relatedArticles);
+  const otherArticleIds = allArticleIds.filter(id => id !== article.id && !relatedArticleIds.has(id));
+  
+  // Combine: related articles first, then others
+  const relatedArticlesList = [
+    ...article.relatedArticles.map(id => articles[id]).filter(Boolean),
+    ...otherArticleIds.slice(0, 6 - article.relatedArticles.length).map(id => articles[id]).filter(Boolean)
+  ].slice(0, 6); // Show up to 6 articles
 
   return (
     <div className="bbc-article-page">
@@ -491,7 +682,10 @@ const NewsArticle = () => {
           </div>
 
           <div className="bbc-share-section">
-            <button className="bbc-share-title">SHARE</button>
+            <button className="bbc-share-title">
+              <Share2 size={14} />
+              SHARE
+            </button>
             <div className="bbc-share-buttons">
               <a
                 href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
@@ -548,22 +742,41 @@ const NewsArticle = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {relatedArticles.length > 0 && (
-          <div className="bbc-related-section">
-            <h2 className="bbc-related-title">Related Articles</h2>
-            <div className="bbc-related-grid">
-              {relatedArticles.map((related) => (
+      {relatedArticlesList.length > 0 && (
+        <section className="bbc-related-section">
+          <div className="bbc-related-header">
+            <div className="bbc-related-title">You May Also Like</div>
+            <div className="bbc-related-nav">
+              <button aria-label="Previous" onClick={() => handleRelatedNav("prev")}>
+                <ChevronLeft size={16} />
+              </button>
+              <button aria-label="Next" onClick={() => handleRelatedNav("next")}>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+          <div className="bbc-related-viewport" ref={relatedViewportRef}>
+            <div className="bbc-related-track">
+              {relatedArticlesList.map((related) => (
                 <Link key={related.id} to={`/news/${related.id}`} className="bbc-related-card">
                   <img src={related.imageUrl} alt={related.title} className="bbc-related-image" />
-                  <div className="bbc-related-category">{related.category}</div>
-                  <h3 className="bbc-related-title-text">{related.title}</h3>
+                  <div className="bbc-related-card-content">
+                    <h4 className="bbc-related-title-text">{related.title}</h4>
+                    <p className="bbc-related-summary">{related.summary}</p>
+                    <span className="bbc-related-cta">
+                      Read article
+                      <ChevronRight size={14} />
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </section>
+      )}
+
       <Footer />
     </div>
   );

@@ -269,8 +269,7 @@ export const Navigation = React.memo(() => {
     news: {
       sections: [
         { id: 'main', label: 'Main Pages', icon: 'fa-home' },
-        { id: 'categories', label: 'News Categories', icon: 'fa-newspaper' },
-        { id: 'info', label: 'Information Hub', icon: 'fa-info-circle' }
+        { id: 'faqs', label: 'FAQs', icon: 'fa-question-circle' }
       ],
       content: {
         main: [
@@ -279,30 +278,24 @@ export const Navigation = React.memo(() => {
             { to: '/info', label: 'Information Hub', icon: 'fa-info-circle' }
           ]}
         ],
-        categories: [
-          { title: 'News Categories', items: [
-            { to: '/news?category=National News', label: 'National News', icon: 'fa-globe' },
-            { to: '/news?category=Regional News', label: 'Regional News', icon: 'fa-map-marker-alt' },
-            { to: '/news?category=Politics', label: 'Politics', icon: 'fa-landmark' },
-            { to: '/news?category=Trending News', label: 'Trending News', icon: 'fa-fire' },
-            { to: '/news?category=Education News', label: 'Education News', icon: 'fa-graduation-cap' },
-            { to: '/news?category=Jobs & Recruitment News', label: 'Jobs & Recruitment News', icon: 'fa-briefcase' }
-          ]}
-        ],
-        info: [
-          { title: 'Information & Help', items: [
-            { to: '/info', label: 'Information Hub', icon: 'fa-book' },
-            { to: '/info?section=getting-started', label: 'Getting Started', icon: 'fa-play-circle' },
-            { to: '/info?section=education', label: 'Education Resources', icon: 'fa-graduation-cap' },
-            { to: '/info?section=jobs', label: 'Job Portal Guide', icon: 'fa-briefcase' },
-            { to: '/info?section=directories', label: 'Directories Help', icon: 'fa-folder' }
+        faqs: [
+          { title: 'FAQs', items: [
+            { to: '/info/faqs', label: 'All FAQs', icon: 'fa-question-circle' },
+            { to: '/info/faqs', label: 'Getting Started FAQs', icon: 'fa-rocket' },
+            { to: '/info/faqs', label: 'Education Resources FAQs', icon: 'fa-graduation-cap' },
+            { to: '/info/faqs', label: 'Job Portal FAQs', icon: 'fa-briefcase' },
+            { to: '/info/faqs', label: 'Directories FAQs', icon: 'fa-folder' }
+          ]},
+          { title: 'Quick Help', items: [
+            { to: '/info/getting-started', label: 'How to Get Started', icon: 'fa-play-circle' },
+            { to: '/info', label: 'Platform Guide', icon: 'fa-book' },
+            { to: '/info/getting-started', label: 'Account Setup', icon: 'fa-user-plus' }
           ]}
         ]
       },
       images: {
         main: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop&q=80',
-        categories: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=300&fit=crop&q=80',
-        info: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop&q=80'
+        faqs: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=300&fit=crop&q=80'
       }
     }
   };

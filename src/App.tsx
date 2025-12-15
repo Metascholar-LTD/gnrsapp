@@ -77,6 +77,11 @@ import DatasetCategory from "./pages/directories/DatasetCategory";
 import NewsHub from "./pages/news/NewsHub";
 import NewsArticle from "./pages/news/NewsArticle";
 import InfoHub from "./pages/info/InfoHub";
+import GettingStarted from "./pages/info/GettingStarted";
+import EducationResources from "./pages/info/EducationResources";
+import JobPortal from "./pages/info/JobPortal";
+import InfoDirectories from "./pages/info/Directories";
+import FAQs from "./pages/info/FAQs";
 import "./pages/resume-builder/resume-builder.css";
 
 const queryClient = new QueryClient();
@@ -163,6 +168,11 @@ const App = () => (
           <Route path="/news/:id" element={<NewsArticle />} />
           {/* Info Routes */}
           <Route path="/info" element={<InfoHub />} />
+          <Route path="/info/getting-started" element={<GettingStarted />} />
+          <Route path="/info/education" element={<EducationResources />} />
+          <Route path="/info/jobs" element={<JobPortal />} />
+          <Route path="/info/directories" element={<InfoDirectories />} />
+          <Route path="/info/faqs" element={<FAQs />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}
