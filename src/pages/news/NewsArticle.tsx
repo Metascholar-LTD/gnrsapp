@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { Clock, Share2, Facebook, Twitter, Linkedin } from "lucide-react";
+import { Clock, Share2, Facebook, Twitter, Linkedin, Mail, Link2 } from "lucide-react";
 import { useState } from "react";
 
 const articles: Record<string, {
@@ -52,7 +52,13 @@ const articles: Record<string, {
 const NewsArticle = () => {
   const { id } = useParams<{ id: string }>();
   const article = id ? articles[id] : null;
-  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   if (!article) {
     return (
@@ -158,87 +164,159 @@ const NewsArticle = () => {
       background: #f5f5f5;
     }
 
-    .bbc-article-content {
-      max-width: 700px;
+    .bbc-article-content-wrapper {
+      display: flex;
+      gap: 3rem;
+      max-width: 1200px;
       margin: 0 auto;
+      align-items: flex-start;
+    }
+
+    .bbc-article-content {
+      flex: 1;
+      max-width: 700px;
     }
 
     .bbc-article-body {
-      font-size: 1.125rem;
-      line-height: 1.8;
-      color: #000000;
+      color: rgb(10, 10, 10);
+      font-family: 'system-ui', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 26px;
+      text-transform: none;
+      text-decoration: none;
+      letter-spacing: -0.36px;
       margin-bottom: 2rem;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
     }
 
     .bbc-article-body p {
       margin: 0 0 1.5rem 0;
+      color: rgb(10, 10, 10) !important;
+      font-family: 'system-ui', sans-serif !important;
+      font-weight: 500 !important;
+      font-size: 16px !important;
+      line-height: 26px !important;
+      text-transform: none;
+      text-decoration: none;
+      letter-spacing: -0.36px;
     }
 
-    .bbc-article-actions {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.5rem 0;
-      border-top: 1px solid #e5e5e5;
-      border-bottom: 1px solid #e5e5e5;
-      margin: 2rem 0;
-    }
-
-    .bbc-share-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: transparent;
-      border: 1px solid #e5e5e5;
-      color: #000000;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-    }
-
-    .bbc-share-button:hover {
-      background: #f5f5f5;
-      border-color: #000000;
-    }
-
-    .bbc-share-menu {
-      position: relative;
-    }
-
-    .bbc-share-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      margin-top: 0.5rem;
-      background: #ffffff;
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 0.5rem;
+    .bbc-share-section {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
-      min-width: 150px;
-      z-index: 10;
+      gap: 1rem;
+      position: sticky;
+      top: 140px;
+      align-self: flex-start;
     }
 
-    .bbc-share-item {
+    .bbc-share-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #000000;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+      transition: color 0.2s ease;
+    }
+
+    .bbc-share-title:hover {
+      color: #666666;
+    }
+
+    .bbc-share-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .bbc-share-section:hover .bbc-share-buttons {
+      max-height: 500px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bbc-share-button-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid #e5e5e5;
+      background: #ffffff;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem;
-      color: #000000;
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
-      transition: background 0.2s ease;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .bbc-share-item:hover {
-      background: #f5f5f5;
+    .bbc-share-button-circle:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .bbc-share-button-circle svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .bbc-share-facebook {
+      color: #1877f2;
+    }
+
+    .bbc-share-facebook:hover {
+      color: #1877f2;
+    }
+
+    .bbc-share-twitter {
+      color: #1da1f2;
+    }
+
+    .bbc-share-twitter:hover {
+      color: #1da1f2;
+    }
+
+    .bbc-share-linkedin {
+      color: #0077b5;
+    }
+
+    .bbc-share-linkedin:hover {
+      color: #0077b5;
+    }
+
+    .bbc-share-pinterest {
+      color: #bd081c;
+    }
+
+    .bbc-share-pinterest:hover {
+      color: #bd081c;
+    }
+
+    .bbc-share-email {
+      color: #000000;
+    }
+
+    .bbc-share-email:hover {
+      color: #000000;
+    }
+
+    .bbc-share-link {
+      color: #000000;
+    }
+
+    .bbc-share-link:hover {
+      color: #000000;
     }
 
     .bbc-related-section {
@@ -318,6 +396,17 @@ const NewsArticle = () => {
       .bbc-related-grid {
         grid-template-columns: 1fr;
       }
+
+      .bbc-article-content-wrapper {
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .bbc-share-section {
+        position: relative;
+        top: 0;
+        align-self: flex-start;
+      }
     }
   `;
 
@@ -350,54 +439,71 @@ const NewsArticle = () => {
 
         <img src={article.imageUrl} alt={article.title} className="bbc-article-image" />
 
-        <div className="bbc-article-content">
-          <div className="bbc-article-actions">
-            <div className="bbc-share-menu">
-              <button
-                className="bbc-share-button"
-                onClick={() => setShowShareMenu(!showShareMenu)}
-              >
-                <Share2 size={16} />
-                Share
-              </button>
-              {showShareMenu && (
-                <div className="bbc-share-dropdown">
-                  <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bbc-share-item"
-                  >
-                    <Facebook size={16} />
-                    Facebook
-                  </a>
-                  <a
-                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(article.title)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bbc-share-item"
-                  >
-                    <Twitter size={16} />
-                    Twitter
-                  </a>
-                  <a
-                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bbc-share-item"
-                  >
-                    <Linkedin size={16} />
-                    LinkedIn
-                  </a>
-                </div>
-              )}
+        <div className="bbc-article-content-wrapper">
+          <div className="bbc-article-content">
+            <div className="bbc-article-body">
+              {article.content.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
             </div>
           </div>
 
-          <div className="bbc-article-body">
-            {article.content.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
+          <div className="bbc-share-section">
+            <button className="bbc-share-title">SHARE</button>
+            <div className="bbc-share-buttons">
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bbc-share-button-circle bbc-share-facebook"
+                title="Share on Facebook"
+              >
+                <Facebook size={20} />
+              </a>
+              <a
+                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(article.title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bbc-share-button-circle bbc-share-twitter"
+                title="Share on X (Twitter)"
+              >
+                <Twitter size={20} />
+              </a>
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bbc-share-button-circle bbc-share-linkedin"
+                title="Share on LinkedIn"
+              >
+                <Linkedin size={20} />
+              </a>
+              <a
+                href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(window.location.href)}&description=${encodeURIComponent(article.title)}&media=${encodeURIComponent(article.imageUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bbc-share-button-circle bbc-share-pinterest"
+                title="Share on Pinterest"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.373 0 0 5.372 0 12s5.373 12 12 12c5.302 0 9.917-3.158 11.827-7.69-.163-.69-.771-3.6-.771-3.6s.193.77.193 1.54c0 1.54-.916 2.77-2.077 2.77-1.54 0-2.31-1.155-2.31-2.31 0-1.54 1.155-3.08 1.155-4.62 0-2.31-1.54-3.85-3.85-3.85-2.31 0-3.85 1.54-3.85 3.85 0 .77.193 1.54.77 2.31-.77 3.08-2.31 7.69-2.31 10.39 0 1.54.193 3.08.193 4.62 0 1.54-.193 3.08-.193 4.62h3.85c.193-1.54.193-3.08.193-4.62 0-1.54-.193-3.08-.193-4.62z"/>
+                </svg>
+              </a>
+              <a
+                href={`mailto:?subject=${encodeURIComponent(article.title)}&body=${encodeURIComponent(window.location.href)}`}
+                className="bbc-share-button-circle bbc-share-email"
+                title="Share via Email"
+              >
+                <Mail size={20} />
+              </a>
+              <button
+                onClick={handleCopyLink}
+                className="bbc-share-button-circle bbc-share-link"
+                title={copiedLink ? "Link Copied!" : "Copy Link"}
+              >
+                <Link2 size={20} />
+              </button>
+            </div>
           </div>
         </div>
 

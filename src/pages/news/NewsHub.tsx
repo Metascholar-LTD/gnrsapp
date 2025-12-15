@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { Clock, ChevronRight } from "lucide-react";
+import { Clock, ChevronRight, ChevronLeft } from "lucide-react";
 
 interface NewsArticle {
   id: string;
@@ -158,16 +158,95 @@ const newsArticles: NewsArticle[] = [
 
 const categories = ["All", "National News", "Regional News", "Politics", "Trending News", "Education News", "Jobs & Recruitment News"];
 
+const discoverItems = [
+  {
+    id: "discover-1",
+    title: "Royal Watch",
+    description: "The full story on the Royal Family, in your inbox every Thursday.",
+    imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=350&fit=crop",
+    cta: "See the latest newsletter"
+  },
+  {
+    id: "discover-2",
+    title: "Download the MetaNews app",
+    description: "Click here to download the MetaNews app for Apple and Android devices.",
+    imageUrl: "https://images.unsplash.com/photo-1523475472560-d2df97ec485c?w=600&h=350&fit=crop",
+    cta: "Download the app"
+  },
+  {
+    id: "discover-3",
+    title: "US Politics Unspun",
+    description: "No noise. No agenda. Just expert analysis of the issues that matter most.",
+    imageUrl: "https://images.unsplash.com/photo-1528756514091-dee5ecaa3278?w=600&h=350&fit=crop",
+    cta: "Read the newsletter"
+  },
+  {
+    id: "discover-4",
+    title: "Register for a MetaNews account",
+    description: "Save articles and videos for later and stay signed in across devices.",
+    imageUrl: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=600&h=350&fit=crop",
+    cta: "Create an account"
+  },
+  {
+    id: "discover-5",
+    title: "Sign up for the Best of MetaNews",
+    description: "Top stories picked by MetaNews editors, in your inbox twice a week.",
+    imageUrl: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d?w=600&h=350&fit=crop",
+    cta: "Subscribe now"
+  }
+];
+
 const NewsHub = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFromUrl = searchParams.get("category");
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || "All");
+  // Removed scrollPosition and isResetting state - now using direct DOM manipulation to prevent Navigation re-renders
+  const breakingNewsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const breakingNewsWrapperRef = useRef<HTMLDivElement | null>(null);
+  const breakingNewsItems = newsArticles.slice(0, 8);
+  const discoverViewportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (categoryFromUrl) {
       setSelectedCategory(categoryFromUrl);
     }
   }, [categoryFromUrl]);
+
+  // Step-by-step breaking news animation - OPTIMIZED to prevent Navigation re-renders
+  useEffect(() => {
+    if (!breakingNewsWrapperRef.current) return;
+    
+    // Approximate item height (including padding and border)
+    const itemHeight = 85; // Adjust based on your item height
+    const totalHeight = breakingNewsItems.length * itemHeight;
+    const wrapperElement = breakingNewsWrapperRef.current;
+    
+    let currentPosition = 0;
+    
+    breakingNewsIntervalRef.current = setInterval(() => {
+      currentPosition += itemHeight;
+      
+      // Reset when we've scrolled through one full set of items
+      if (currentPosition >= totalHeight) {
+        // Instant reset (no transition) for seamless loop
+        wrapperElement.classList.add('no-transition');
+        currentPosition = 0;
+        wrapperElement.style.transform = `translateY(-${currentPosition}px)`;
+        
+        setTimeout(() => {
+          wrapperElement.classList.remove('no-transition');
+        }, 50);
+      } else {
+        wrapperElement.style.transform = `translateY(-${currentPosition}px)`;
+      }
+    }, 3500); // Move every 3.5 seconds (1s move + 2.5s pause)
+
+    return () => {
+      if (breakingNewsIntervalRef.current) {
+        clearInterval(breakingNewsIntervalRef.current);
+      }
+    };
+  }, [breakingNewsItems.length]);
 
   const allArticles = newsArticles;
   const filteredArticles = selectedCategory === "All" 
@@ -181,6 +260,21 @@ const NewsHub = () => {
     } else {
       setSearchParams({ category });
     }
+  };
+
+  const handleDiscoverNav = (direction: "prev" | "next") => {
+    const viewport = discoverViewportRef.current;
+    if (!viewport) return;
+
+    const firstCard = viewport.querySelector(".bbc-discover-card") as HTMLElement | null;
+    const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 260;
+    const gap = 16; // matches the 1rem gap in CSS
+    const scrollAmount = cardWidth + gap;
+
+    viewport.scrollBy({
+      left: direction === "next" ? scrollAmount : -scrollAmount,
+      behavior: "smooth",
+    });
   };
 
   const bbcStyles = `
@@ -449,6 +543,294 @@ const NewsHub = () => {
       font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
     }
 
+    .bbc-breaking-news-container {
+      position: relative;
+      height: 350px;
+      overflow: hidden;
+    }
+
+    .bbc-breaking-news-wrapper {
+      display: flex;
+      flex-direction: column;
+      transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .bbc-breaking-news-wrapper.no-transition {
+      transition: none;
+    }
+
+    .bbc-breaking-news-container:hover .bbc-breaking-news-wrapper {
+      transition-duration: 0.3s;
+    }
+
+    .bbc-breaking-news-item {
+      flex-shrink: 0;
+      width: 100%;
+      padding: 0.875rem 0;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .bbc-breaking-news-item:last-child {
+      border-bottom: none;
+    }
+
+    .bbc-discover-section {
+      margin: 3rem auto 0;
+      padding: 0 3rem 3rem 3rem;
+      max-width: 1400px;
+      background: #111;
+      color: #fff;
+    }
+
+    .bbc-discover-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .bbc-discover-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .bbc-discover-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .bbc-discover-nav button {
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: transparent;
+      color: #fff;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .bbc-discover-nav button:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    .bbc-discover-viewport {
+      overflow-x: auto;
+      overflow-y: hidden;
+      position: relative;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-snap-type: x mandatory;
+    }
+
+    .bbc-discover-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .bbc-discover-track {
+      display: flex;
+      gap: 1rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .bbc-discover-card {
+      background: #1a1a1a;
+      color: #f5f5f5;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 260px;
+      min-width: 230px;
+      max-width: 280px;
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+    }
+
+    .bbc-discover-image {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .bbc-discover-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .bbc-discover-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .bbc-discover-card-text {
+      font-size: 0.875rem;
+      color: #d9d9d9;
+      line-height: 1.5;
+      margin: 0;
+      flex: 1;
+    }
+
+    .bbc-discover-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #f5f5f5;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      margin-top: 0.25rem;
+    }
+
+    .bbc-discover-cta:hover {
+      text-decoration: underline;
+    }
+
+    /* Mobile/tablet breaking news ticker */
+    .bbc-breaking-ticker {
+      display: none;
+      background: #bb1919;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      overflow: hidden;
+    }
+
+    .bbc-breaking-ticker-header {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    .bbc-breaking-ticker-header::after {
+      content: "";
+      display: block;
+      height: 1px;
+      width: 140px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.65), rgba(255,255,255,0.2));
+      border-radius: 999px;
+      margin-top: 4px;
+    }
+
+    .bbc-breaking-ticker-track {
+      display: flex;
+      gap: 2.5rem;
+      animation: ticker-rtl 32s linear infinite;
+      will-change: transform;
+    }
+
+    .bbc-breaking-ticker-track:hover {
+      animation-play-state: paused;
+    }
+
+    .bbc-breaking-ticker-item {
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 600;
+      padding-right: 1rem;
+      border-right: 1px solid rgba(255,255,255,0.35);
+      margin-right: 1rem;
+    }
+
+    .bbc-breaking-ticker-item:last-child {
+      border-right: none;
+      margin-right: 0;
+      padding-right: 0;
+    }
+
+    .bbc-breaking-ticker-time {
+      font-weight: 500;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    @keyframes ticker-rtl {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    @media (max-width: 1023px) {
+      .bbc-discover-section {
+        padding: 0 1.25rem 2.5rem 1.25rem;
+      }
+
+      .bbc-sidebar-area {
+        display: none;
+      }
+
+      .bbc-breaking-ticker {
+        display: block;
+      }
+
+      /* Reduce top padding on tablet and below */
+      .bbc-content-wrapper {
+        padding-top: 80px !important;
+      }
+    }
+
+    .bbc-breaking-news-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #bb1919;
+      margin: 0 0 1rem 0;
+      font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #bb1919;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .bbc-breaking-news-badge {
+      display: inline-block;
+      background: #bb1919;
+      color: #ffffff;
+      padding: 0.125rem 0.5rem;
+      border-radius: 2px;
+      font-size: 0.625rem;
+      font-weight: 700;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+
     @media (max-width: 1023px) {
       .bbc-content-wrapper {
         flex-direction: column;
@@ -533,10 +915,25 @@ const NewsHub = () => {
     <div className="bbc-news-page">
       <style>{bbcStyles}</style>
       <Navigation />
+      <div className="bbc-breaking-ticker">
+        <div className="bbc-breaking-ticker-header">Breaking News</div>
+        <div className="bbc-breaking-ticker-track">
+          {[...breakingNewsItems, ...breakingNewsItems].map((article, index) => (
+            <div key={`ticker-${article.id}-${index}`} className="bbc-breaking-ticker-item">
+              <span className="bbc-breaking-ticker-time">
+                <Clock size={12} />
+                {article.publishedAt}
+              </span>
+              <span>•</span>
+              <span>{article.title}</span>
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="bbc-content-wrapper" style={{ paddingTop: '120px' }}>
         <main className="bbc-main-content-area">
           <div className="bbc-header">
-            <h1 className="bbc-header-title">News</h1>
+            <h1 className="bbc-header-title">MetaNews</h1>
             <p className="bbc-header-subtitle">
               {selectedCategory === "All" 
                 ? "Latest news and updates from across Ghana" 
@@ -584,47 +981,83 @@ const NewsHub = () => {
 
         <aside className="bbc-sidebar-area">
           <div className="bbc-sidebar-section">
-            <h3 className="bbc-sidebar-title">Most Read</h3>
-            <div className="bbc-sidebar-list">
-              {newsArticles.slice(0, 5).map((article) => (
-                <Link key={article.id} to={`/news/${article.id}`} className="bbc-sidebar-item">
-                  <div className="bbc-sidebar-text">
-                    <div className="bbc-sidebar-title-text">{article.title}</div>
-                    <div className="bbc-sidebar-meta">
-                      <Clock size={12} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'middle' }} />
-                      {article.publishedAt}
+            <h3 className="bbc-breaking-news-title">
+              <span className="bbc-breaking-news-badge">LIVE</span>
+              Breaking News
+            </h3>
+            <div className="bbc-breaking-news-container">
+              <div 
+                className="bbc-breaking-news-wrapper"
+                ref={breakingNewsWrapperRef}
+              >
+                {/* First set of items */}
+                {newsArticles.slice(0, 8).map((article, index) => (
+                  <Link 
+                    key={`breaking-1-${article.id}`} 
+                    to={`/news/${article.id}`} 
+                    className="bbc-breaking-news-item bbc-sidebar-item"
+                  >
+                    <div className="bbc-sidebar-text">
+                      <div className="bbc-sidebar-title-text">{article.title}</div>
+                      <div className="bbc-sidebar-meta">
+                        <Clock size={12} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'middle' }} />
+                        {article.publishedAt}
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+                {/* Duplicate set for seamless loop */}
+                {newsArticles.slice(0, 8).map((article, index) => (
+                  <Link 
+                    key={`breaking-2-${article.id}`} 
+                    to={`/news/${article.id}`} 
+                    className="bbc-breaking-news-item bbc-sidebar-item"
+                  >
+                    <div className="bbc-sidebar-text">
+                      <div className="bbc-sidebar-title-text">{article.title}</div>
+                      <div className="bbc-sidebar-meta">
+                        <Clock size={12} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'middle' }} />
+                        {article.publishedAt}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="bbc-sidebar-section">
-            <h3 className="bbc-sidebar-title">Categories</h3>
-            <div className="bbc-sidebar-list">
-              {categories.slice(1).map((category) => (
-                <Link
-                  key={category}
-                  to={`/news?category=${encodeURIComponent(category)}`}
-                  className="bbc-sidebar-item"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleCategoryChange(category);
-                  }}
-                >
-                  <div className="bbc-sidebar-text">
-                    <div className="bbc-sidebar-title-text" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      {category}
-                      <ChevronRight size={14} />
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
         </aside>
       </div>
+      <section className="bbc-discover-section">
+        <div className="bbc-discover-header">
+          <div className="bbc-discover-title">Discover more from MetaNews</div>
+          <div className="bbc-discover-nav">
+            <button aria-label="Previous" onClick={() => handleDiscoverNav("prev")}>
+              <ChevronLeft size={16} />
+            </button>
+            <button aria-label="Next" onClick={() => handleDiscoverNav("next")}>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+        <div className="bbc-discover-viewport" ref={discoverViewportRef}>
+          <div className="bbc-discover-track">
+            {discoverItems.map((item) => (
+              <div key={item.id} className="bbc-discover-card">
+                <img src={item.imageUrl} alt={item.title} className="bbc-discover-image" />
+                <div className="bbc-discover-body">
+                  <h4 className="bbc-discover-card-title">{item.title}</h4>
+                  <p className="bbc-discover-card-text">{item.description}</p>
+                  <span className="bbc-discover-cta">
+                    {item.cta}
+                    <ChevronRight size={14} />
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
       <Footer />
     </div>
   );

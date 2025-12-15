@@ -1,22 +1,73 @@
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { JoinUsButton } from "./JoinUsButton";
 
-export const Navigation = () => {
+export const Navigation = React.memo(() => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openMegaMenu, setOpenMegaMenu] = useState<string | null>(null);
   const [isLoggedIn] = useState(false);
-  const isResumeBuilderPage = location.pathname.startsWith("/jobs/cv-builder");
+  
+  // Memoize pathname to prevent unnecessary re-renders
+  const pathname = useMemo(() => location.pathname, [location.pathname]);
+  const isResumeBuilderPage = useMemo(() => pathname.startsWith("/jobs/cv-builder"), [pathname]);
+  const megaMenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const isActive = (path: string) => {
-    if (path === "/" && location.pathname === "/") return true;
-    if (path !== "/" && location.pathname.startsWith(path)) return true;
+  const isActive = useCallback((path: string) => {
+    if (path === "/" && pathname === "/") return true;
+    if (path !== "/" && pathname.startsWith(path)) return true;
     return false;
-  };
+  }, [pathname]);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
-  }, [location.pathname]);
+    setOpenMegaMenu(null); // Close megamenu when navigating
+  }, [pathname]);
+
+  // Close megamenu when clicking outside - BULLETPROOF VERSION
+  useEffect(() => {
+    if (!openMegaMenu) return;
+    
+    let isInternalClick = false;
+    
+    const handleMouseDown = (e: MouseEvent) => {
+      // Reset flag for each new interaction
+      isInternalClick = false;
+      
+      const target = e.target as Node;
+      const currentMenuRef = megaMenuRefs.current[openMegaMenu];
+      
+      // Check if click is inside the currently open megamenu using ref
+      if (currentMenuRef && currentMenuRef.contains(target)) {
+        isInternalClick = true;
+        return; // Click is inside, don't close
+      }
+    };
+    
+    const handleClick = (e: MouseEvent) => {
+      // Only close if it was NOT an internal click
+      if (!isInternalClick) {
+        const target = e.target as Node;
+        const currentMenuRef = megaMenuRefs.current[openMegaMenu];
+        
+        // Double-check: if click is inside, don't close
+        if (!currentMenuRef || !currentMenuRef.contains(target)) {
+          setOpenMegaMenu(null);
+        }
+      }
+      isInternalClick = false; // Reset for next interaction
+    };
+
+    // Listen to mousedown in capture phase to set flag
+    document.addEventListener('mousedown', handleMouseDown, true);
+    // Listen to click in bubble phase to close if needed
+    document.addEventListener('click', handleClick, false);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown, true);
+      document.removeEventListener('click', handleClick, false);
+    };
+  }, [openMegaMenu]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -32,26 +83,21 @@ export const Navigation = () => {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
-  useEffect(() => {
-    const handleMegaMenuNav = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const navItem = target.closest('.nav-mega-sidebar-item') as HTMLElement;
-      if (navItem) {
-        const section = navItem.getAttribute('data-section');
-        if (section) {
-          const megaMenuWrapper = navItem.closest('.nav-mega-wrapper') as HTMLElement;
-          if (megaMenuWrapper) {
-            megaMenuWrapper.querySelectorAll('.nav-mega-sidebar-item').forEach(item => item.classList.remove('nav-mega-sidebar-item-active'));
-            navItem.classList.add('nav-mega-sidebar-item-active');
-            megaMenuWrapper.querySelectorAll('.nav-mega-section').forEach(sec => sec.classList.remove('nav-mega-section-active'));
-            const targetSection = megaMenuWrapper.querySelector(`#nav-section-${section}`) as HTMLElement;
-            if (targetSection) targetSection.classList.add('nav-mega-section-active');
-          }
-        }
-      }
-    };
-    document.addEventListener('click', handleMegaMenuNav);
-    return () => document.removeEventListener('click', handleMegaMenuNav);
+  // Handle sidebar navigation inside megamenu
+  const handleSidebarItemClick = useCallback((e: React.MouseEvent, sectionId: string) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent closing the menu
+    
+    const navItem = e.currentTarget as HTMLElement;
+    const megaMenuWrapper = navItem.closest('.nav-mega-wrapper') as HTMLElement;
+    if (megaMenuWrapper) {
+      // Update active states WITHOUT causing re-render
+      megaMenuWrapper.querySelectorAll('.nav-mega-sidebar-item').forEach(item => item.classList.remove('nav-mega-sidebar-item-active'));
+      navItem.classList.add('nav-mega-sidebar-item-active');
+      megaMenuWrapper.querySelectorAll('.nav-mega-section').forEach(sec => sec.classList.remove('nav-mega-section-active'));
+      const targetSection = megaMenuWrapper.querySelector(`#nav-section-${sectionId}`) as HTMLElement;
+      if (targetSection) targetSection.classList.add('nav-mega-section-active');
+    }
   }, []);
 
   const megaMenuData = {
@@ -263,26 +309,71 @@ export const Navigation = () => {
 
   const MegaMenu = ({ menuKey, label, path }: { menuKey: keyof typeof megaMenuData, label: string, path: string }) => {
     const data = megaMenuData[menuKey];
-    const firstSection = data.sections[0].id;
+    const isOpen = openMegaMenu === menuKey;
+    
+    const handleToggle = useCallback((e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      setOpenMegaMenu(prev => prev === menuKey ? null : menuKey);
+    }, [menuKey]);
     
     return (
-      <div className="nav-item-dropdown nav-mega-menu">
+      <div 
+        ref={(el) => { megaMenuRefs.current[menuKey] = el; }}
+        className={`nav-item-dropdown nav-mega-menu ${isOpen ? 'nav-mega-menu-open' : ''}`}
+        onMouseDown={(e) => {
+          // Prevent mousedown from triggering outside click handler
+          e.stopPropagation();
+        }}
+      >
         <button 
           type="button"
-          className={`nav-link nav-link-dropdown ${isActive(path) ? 'nav-link-active' : ''}`}
+          className={`nav-link nav-link-dropdown nav-mega-menu-button ${isActive(path) ? 'nav-link-active' : ''}`}
           style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', color: 'inherit' }}
+          onClick={handleToggle}
         >
           {label}
-          <i className="fa fa-chevron-down nav-dropdown-icon"></i>
+          <i className={`fa fa-chevron-down nav-dropdown-icon ${isOpen ? 'nav-dropdown-icon-open' : ''}`}></i>
         </button>
-        <div className="nav-dropdown-menu nav-mega-content">
-          <div className="nav-mega-wrapper">
+        <div 
+          className={`nav-dropdown-menu nav-mega-content ${isOpen ? 'nav-mega-content-open' : ''}`}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            e.nativeEvent.stopImmediatePropagation();
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.nativeEvent.stopImmediatePropagation();
+          }}
+        >
+          <div 
+            className="nav-mega-wrapper"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.nativeEvent.stopImmediatePropagation();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.nativeEvent.stopImmediatePropagation();
+            }}
+          >
             <div className="nav-mega-sidebar">
               {data.sections.map((section, idx) => (
                 <div
                   key={section.id}
                   className={`nav-mega-sidebar-item ${idx === 0 ? 'nav-mega-sidebar-item-active' : ''}`}
                   data-section={section.id}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation();
+                    handleSidebarItemClick(e, section.id);
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <i className={`fa ${section.icon} nav-mega-icon`}></i>
                   <span>{section.label}</span>
@@ -304,7 +395,18 @@ export const Navigation = () => {
                         <ul className="nav-mega-list">
                           {group.items.map((item, itemIdx) => (
                             <li key={`${item.to}-${item.label}-${itemIdx}`}>
-                              <Link to={item.to} className="nav-mega-item" onClick={closeMobileMenu}>
+                              <Link 
+                                to={item.to} 
+                                className="nav-mega-item" 
+                                onMouseDown={(e) => {
+                                  e.stopPropagation(); // Prevent outside click handler
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  closeMobileMenu();
+                                  setOpenMegaMenu(null); // Close megamenu when clicking a link
+                                }}
+                              >
                                 <i className={`fa ${item.icon} nav-mega-item-icon`}></i>
                                 {item.label}
                               </Link>
@@ -392,7 +494,7 @@ export const Navigation = () => {
               <div className="nav-links">
               {isResumeBuilderPage ? (
                 <>
-                  <Link to="/jobs/cv-builder" className={`nav-link ${isActive("/jobs/cv-builder") && location.pathname === "/jobs/cv-builder" ? "nav-link-active" : ""}`}>Home</Link>
+                  <Link to="/jobs/cv-builder" className={`nav-link ${isActive("/jobs/cv-builder") && pathname === "/jobs/cv-builder" ? "nav-link-active" : ""}`}>Home</Link>
                   <Link to="/jobs/cv-builder/templates" className={`nav-link ${isActive("/jobs/cv-builder/templates") ? "nav-link-active" : ""}`}>Templates</Link>
                   <Link to="/jobs/cv-builder/about" className={`nav-link ${isActive("/jobs/cv-builder/about") ? "nav-link-active" : ""}`}>About</Link>
                 </>
@@ -477,7 +579,7 @@ export const Navigation = () => {
           <div className="nav-mobile-links">
             {isResumeBuilderPage ? (
               <>
-                <Link to="/jobs/cv-builder" className={`nav-mobile-link ${isActive("/jobs/cv-builder") && location.pathname === "/jobs/cv-builder" ? "nav-mobile-link-active" : ""}`} onClick={closeMobileMenu}>
+                <Link to="/jobs/cv-builder" className={`nav-mobile-link ${isActive("/jobs/cv-builder") && pathname === "/jobs/cv-builder" ? "nav-mobile-link-active" : ""}`} onClick={closeMobileMenu}>
                   <span>Home</span>
                 </Link>
                 <Link to="/jobs/cv-builder/templates" className={`nav-mobile-link ${isActive("/jobs/cv-builder/templates") ? "nav-mobile-link-active" : ""}`} onClick={closeMobileMenu}>
@@ -1011,6 +1113,27 @@ export const Navigation = () => {
         .nav-mega-menu {
           position: static;
         }
+        
+        /* COMPLETELY DISABLE hover for megamenu - only click works */
+        .nav-mega-menu:hover .nav-mega-content {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+        
+        /* Only show when explicitly opened via click */
+        .nav-mega-menu-open .nav-mega-content {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+        }
+        
+        /* Prevent any hover-based showing - override all other rules */
+        .nav-mega-menu:not(.nav-mega-menu-open):hover .nav-mega-content,
+        .nav-mega-menu:not(.nav-mega-menu-open) .nav-mega-content {
+          opacity: 0 !important;
+          visibility: hidden !important;
+        }
 
         .nav-mega-menu .nav-mega-content {
           position: fixed !important;
@@ -1101,11 +1224,24 @@ export const Navigation = () => {
         }
 
         .nav-link-active .nav-dropdown-icon,
-        .nav-item-dropdown:hover .nav-dropdown-icon {
+        .nav-item-dropdown:not(.nav-mega-menu):hover .nav-dropdown-icon,
+        .nav-mega-menu-open .nav-dropdown-icon {
           color: #2563eb;
         }
 
-        .nav-item-dropdown:hover .nav-dropdown-icon {
+        .nav-item-dropdown:not(.nav-mega-menu):hover .nav-dropdown-icon,
+        .nav-dropdown-icon-open {
+          transform: rotate(180deg);
+        }
+        
+        /* Prevent hover effects on megamenu button */
+        .nav-mega-menu:hover .nav-mega-menu-button .nav-dropdown-icon {
+          color: #2c2c2c;
+          transform: none;
+        }
+        
+        .nav-mega-menu-open .nav-mega-menu-button .nav-dropdown-icon {
+          color: #2563eb;
           transform: rotate(180deg);
         }
 
@@ -1126,10 +1262,19 @@ export const Navigation = () => {
           z-index: 1001;
         }
 
-        .nav-item-dropdown:hover .nav-dropdown-menu {
+        /* Regular dropdown hover - EXCLUDE megamenu */
+        .nav-item-dropdown:not(.nav-mega-menu):hover .nav-dropdown-menu:not(.nav-mega-content) {
           opacity: 1;
           visibility: visible;
           transform: translateY(0);
+        }
+        
+        /* Megamenu content should NEVER show on hover - override any other rule */
+        .nav-mega-menu:hover .nav-mega-content,
+        .nav-item-dropdown.nav-mega-menu:hover .nav-dropdown-menu.nav-mega-content {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
         }
 
         .nav-dropdown-menu-right {
@@ -1273,7 +1418,13 @@ export const Navigation = () => {
           z-index: 1001;
           opacity: 0;
           visibility: hidden;
-          transition: opacity 0.3s ease, visibility 0.3s ease;
+          pointer-events: none;
+        }
+        
+        .nav-mega-menu-open .nav-mega-content {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto;
         }
 
         /* Small Desktop: 1024px - 1599px */
@@ -1290,9 +1441,11 @@ export const Navigation = () => {
           }
         }
 
-        .nav-item-dropdown:hover .nav-mega-content {
+        /* Keep hover for regular dropdown (Account menu) */
+        .nav-item-dropdown:not(.nav-mega-menu):hover .nav-dropdown-menu {
           opacity: 1;
           visibility: visible;
+          transform: translateY(0);
         }
 
         .nav-mega-wrapper {
@@ -1990,8 +2143,27 @@ export const Navigation = () => {
         .nav-mobile-contact-icon {
           color: #2c2c2c;
         }
-      `}</style>
-    </>
-  );
-};
+        
+        /* FINAL OVERRIDE: Completely disable hover for megamenu - MUST be at the end */
+        .nav-item-dropdown.nav-mega-menu:hover .nav-dropdown-menu.nav-mega-content,
+        .nav-mega-menu:hover .nav-mega-content,
+        .nav-item-dropdown.nav-mega-menu:hover .nav-mega-content {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: none !important;
+        }
+        
+        /* Only show megamenu when explicitly opened via click */
+        .nav-item-dropdown.nav-mega-menu.nav-mega-menu-open .nav-dropdown-menu.nav-mega-content,
+        .nav-mega-menu.nav-mega-menu-open .nav-mega-content,
+        .nav-item-dropdown.nav-mega-menu.nav-mega-menu-open .nav-mega-content {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+        }
+       `}</style>
+     </>
+   );
+ });
 
