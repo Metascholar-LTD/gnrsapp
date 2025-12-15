@@ -5,7 +5,7 @@ export const initializeSidebar = () => {
   if (typeof window === 'undefined') return;
 
   const initializeSimplebar = () => {
-    const simplebarElement = document.querySelector(".js-simplebar") as HTMLElement;
+    const simplebarElement = document.querySelector("#admin-scope .js-simplebar") as HTMLElement;
 
     if (simplebarElement) {
       // Check if SimpleBar is already initialized
@@ -21,13 +21,14 @@ export const initializeSidebar = () => {
         const simplebarInstance = new SimpleBar(simplebarElement, {
           autoHide: false,
           scrollbarMinSize: 50,
+          forceVisible: false,
         });
 
         // Store instance for later use
         (simplebarElement as any).simpleBar = simplebarInstance;
 
         /* Recalculate simplebar on sidebar dropdown toggle */
-        const sidebarDropdowns = document.querySelectorAll(".js-sidebar [data-bs-parent]");
+        const sidebarDropdowns = document.querySelectorAll("#admin-scope .js-sidebar [data-bs-parent]");
         
         sidebarDropdowns.forEach(link => {
           link.addEventListener("shown.bs.collapse", () => {
@@ -44,8 +45,8 @@ export const initializeSidebar = () => {
   };
 
   const initializeSidebarCollapse = () => {
-    const sidebarElement = document.querySelector(".js-sidebar") as HTMLElement;
-    const sidebarToggleElements = document.querySelectorAll(".js-sidebar-toggle");
+    const sidebarElement = document.querySelector("#admin-scope .js-sidebar") as HTMLElement;
+    const sidebarToggleElements = document.querySelectorAll("#admin-scope .js-sidebar-toggle");
 
     if (!sidebarElement) return;
 
@@ -56,7 +57,7 @@ export const initializeSidebar = () => {
       sidebarElement.classList.toggle("collapsed");
 
       // Update main content margin
-      const mainElement = document.querySelector(".wrapper .main") as HTMLElement;
+      const mainElement = document.querySelector("#admin-scope .wrapper .main") as HTMLElement;
       if (mainElement) {
         if (sidebarElement.classList.contains("collapsed")) {
           mainElement.style.marginLeft = "0";
@@ -70,7 +71,7 @@ export const initializeSidebar = () => {
       sidebarElement.addEventListener("transitionend", () => {
         window.dispatchEvent(new Event("resize"));
         // Recalculate SimpleBar after collapse
-        const simplebarElement = document.querySelector(".js-simplebar") as HTMLElement;
+        const simplebarElement = document.querySelector("#admin-scope .js-simplebar") as HTMLElement;
         if (simplebarElement && (simplebarElement as any).simpleBar) {
           try {
             (simplebarElement as any).simpleBar.recalculate();

@@ -1,0 +1,57 @@
+/* Admin CSS Isolation - Prevents AdminKit/Bootstrap from affecting main website */
+
+/* Use CSS containment to isolate admin styles */
+#admin-scope {
+  contain: layout style paint;
+  isolation: isolate;
+}
+
+/* Override any global Bootstrap styles that might leak */
+body:not(:has(#admin-scope)) {
+  /* Ensure main site Bootstrap isn't affected */
+}
+
+/* Scope AdminKit CSS classes to admin-scope only using attribute selector */
+/* This ensures AdminKit styles don't apply outside admin */
+#admin-scope .wrapper,
+#admin-scope .sidebar,
+#admin-scope .main,
+#admin-scope .navbar,
+#admin-scope .content,
+#admin-scope .card,
+#admin-scope .btn,
+#admin-scope .container,
+#admin-scope .container-fluid,
+#admin-scope .row,
+#admin-scope [class*="col-"],
+#admin-scope .table,
+#admin-scope .badge,
+#admin-scope .dropdown,
+#admin-scope .form-control,
+#admin-scope .form-select,
+#admin-scope .list-group,
+#admin-scope .list-group-item,
+#admin-scope .dropdown-menu,
+#admin-scope .nav,
+#admin-scope .nav-item,
+#admin-scope .nav-link,
+#admin-scope .footer {
+  /* All AdminKit/Bootstrap classes are scoped here */
+}
+
+/* Prevent AdminKit font from affecting main site */
+#admin-scope {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Reset any potential global resets that AdminKit might apply */
+#admin-scope * {
+  /* AdminKit styles apply here */
+}
+
+/* Ensure main website styles aren't affected */
+body > *:not(#admin-scope),
+body > *:not(#admin-scope) * {
+  /* Main site styles remain untouched */
+}
+

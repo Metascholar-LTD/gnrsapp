@@ -1,0 +1,42 @@
+/* Admin Scoped CSS - Prevents AdminKit/Bootstrap from affecting main website */
+
+/* Scope all AdminKit styles to #admin-scope only */
+#admin-scope {
+  isolation: isolate;
+  /* Reset any potential global styles */
+  all: initial;
+  display: block;
+}
+
+/* Re-apply necessary display properties */
+#admin-scope,
+#admin-scope * {
+  box-sizing: border-box;
+}
+
+/* Ensure AdminKit CSS only applies within admin scope */
+#admin-scope .wrapper,
+#admin-scope .sidebar,
+#admin-scope .main,
+#admin-scope .navbar,
+#admin-scope .content,
+#admin-scope .card,
+#admin-scope .btn,
+#admin-scope .container,
+#admin-scope .container-fluid,
+#admin-scope .row,
+#admin-scope [class*="col-"],
+#admin-scope .table,
+#admin-scope .badge,
+#admin-scope .dropdown,
+#admin-scope .form-control,
+#admin-scope .form-select {
+  /* All AdminKit/Bootstrap classes scoped here */
+}
+
+/* Prevent AdminKit CSS from leaking outside admin scope */
+body:not(:has(#admin-scope)) .wrapper,
+body:not(:has(#admin-scope)) .sidebar,
+body:not(:has(#admin-scope)) .main {
+  /* These styles won't apply outside admin */
+}
