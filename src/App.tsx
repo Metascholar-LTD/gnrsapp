@@ -83,6 +83,9 @@ import JobPortal from "./pages/info/JobPortal";
 import InfoDirectories from "./pages/info/Directories";
 import FAQs from "./pages/info/FAQs";
 import "./pages/resume-builder/resume-builder.css";
+import AdminLayout from "./pages/admin/components/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminHomePage from "./pages/admin/AdminHomePage";
 
 const queryClient = new QueryClient();
 
@@ -182,6 +185,28 @@ const App = () => (
           <Route path="/jobs/cv-builder/about" element={<ResumeBuilderAbout />} />
           <Route path="/jobs/cv-builder/login" element={<ResumeBuilderLogin />} />
           <Route path="/jobs/cv-builder/signup" element={<ResumeBuilderSignup />} />
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="home" element={<AdminHomePage />} />
+            <Route path="profile" element={<AdminDashboard />} />
+            <Route path="sign-in" element={<AdminDashboard />} />
+            <Route path="sign-up" element={<AdminDashboard />} />
+            <Route path="blank" element={<AdminDashboard />} />
+            <Route path="news" element={<AdminDashboard />} />
+            <Route path="jobs" element={<AdminDashboard />} />
+            <Route path="education" element={<AdminDashboard />} />
+            <Route path="directories" element={<AdminDashboard />} />
+            <Route path="skilled-workers" element={<AdminDashboard />} />
+            <Route path="scholarships" element={<AdminDashboard />} />
+            <Route path="ui-buttons" element={<AdminDashboard />} />
+            <Route path="ui-forms" element={<AdminDashboard />} />
+            <Route path="ui-cards" element={<AdminDashboard />} />
+            <Route path="ui-typography" element={<AdminDashboard />} />
+            <Route path="icons" element={<AdminDashboard />} />
+            <Route path="charts" element={<AdminDashboard />} />
+            <Route path="maps" element={<AdminDashboard />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
