@@ -32,7 +32,6 @@ const AdminDashboard = () => {
         });
       }
     }, 200);
-    return () => clearTimeout(timer);
 
     // Initialize line chart
     if (lineChartRef.current) {
@@ -43,6 +42,7 @@ const AdminDashboard = () => {
         gradient.addColorStop(1, "rgba(215, 227, 244, 0)");
 
         new ChartJS(ctx, {
+          type: 'line',
           data: {
             labels: [
               "Jan",
@@ -119,6 +119,7 @@ const AdminDashboard = () => {
       const ctx = pieChartRef.current.getContext("2d");
       if (ctx) {
         new ChartJS(ctx, {
+          type: 'doughnut',
           data: {
             labels: ["Chrome", "Firefox", "IE"],
             datasets: [
@@ -146,6 +147,7 @@ const AdminDashboard = () => {
       const ctx = barChartRef.current.getContext("2d");
       if (ctx) {
         new ChartJS(ctx, {
+          type: 'bar',
           data: {
             labels: [
               "Jan",
@@ -204,6 +206,7 @@ const AdminDashboard = () => {
     }
 
     // Initialize world map
+    let resizeHandler: (() => void) | null = null;
     if (worldMapRef.current && (window as any).jsVectorMap) {
       const markers = [
         { coords: [31.230391, 121.473701], name: "Shanghai" },
@@ -239,11 +242,12 @@ const AdminDashboard = () => {
           zoomOnScroll: false,
         });
 
-        window.addEventListener("resize", () => {
+        resizeHandler = () => {
           if (map && typeof map.updateSize === 'function') {
             map.updateSize();
           }
-        });
+        };
+        window.addEventListener("resize", resizeHandler);
       } catch (error) {
         console.warn("Failed to initialize world map:", error);
       }
@@ -266,6 +270,14 @@ const AdminDashboard = () => {
         defaultDate: defaultDate,
       });
     }
+
+    // Cleanup function
+    return () => {
+      clearTimeout(timer);
+      if (resizeHandler) {
+        window.removeEventListener("resize", resizeHandler);
+      }
+    };
   }, []);
 
   return (
