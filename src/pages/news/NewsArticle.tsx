@@ -85,6 +85,7 @@ const NewsArticle = () => {
       max-width: 1000px;
       margin: 0 auto;
       padding: 0 1rem;
+      padding-top: 120px;
     }
 
     .bbc-article-header {
@@ -178,7 +179,7 @@ const NewsArticle = () => {
     }
 
     .bbc-article-body {
-      color: rgb(10, 10, 10);
+      color: #333333; 
       font-family: 'system-ui', sans-serif;
       font-weight: 500;
       font-size: 16px;
@@ -191,7 +192,7 @@ const NewsArticle = () => {
 
     .bbc-article-body p {
       margin: 0 0 1.5rem 0;
-      color: rgb(10, 10, 10) !important;
+      color: #333333 !important;
       font-family: 'system-ui', sans-serif !important;
       font-weight: 500 !important;
       font-size: 16px !important;
@@ -378,9 +379,16 @@ const NewsArticle = () => {
       font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
     }
 
+    @media (max-width: 1199px) {
+      .bbc-article-wrapper {
+        padding-top: 50px;
+      }
+    }
+
     @media (max-width: 767px) {
       .bbc-article-wrapper {
         padding: 0 1rem;
+        padding-top: 50px;
       }
 
       .bbc-article-meta {
@@ -418,7 +426,7 @@ const NewsArticle = () => {
     <div className="bbc-article-page">
       <style>{bbcStyles}</style>
       <Navigation />
-      <div className="bbc-article-wrapper" style={{ paddingTop: '120px' }}>
+      <div className="bbc-article-wrapper">
         <div className="bbc-article-header">
           <div className="bbc-article-breadcrumb">
             <Link to="/">Home</Link> / <Link to="/news">News</Link> / {article.category}
