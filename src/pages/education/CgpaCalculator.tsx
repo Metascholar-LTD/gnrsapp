@@ -1,7 +1,6 @@
 import { ReactNode, useState } from "react";
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
-import { HeroButton } from "@/components/education/HeroButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

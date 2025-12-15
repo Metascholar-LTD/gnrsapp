@@ -2,6 +2,7 @@ import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
 import { HeroButton } from "@/components/education/HeroButton";
+import { Button } from "@/components/ui/button";
 import {
   BookmarkCheck,
   GraduationCap,
