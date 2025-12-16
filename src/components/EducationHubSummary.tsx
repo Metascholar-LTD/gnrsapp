@@ -1,9 +1,75 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, GraduationCap, Calculator, Users, FileText, Sparkles, Brain, Library, Target, MessageSquare, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { QuantumTimeline } from "@/components/ui/premium-process-timeline";
+import { supabase } from "@/integrations/supabase/client";
+
+interface EducationHubImage {
+  step_id: string;
+  image_url: string | null;
+}
 
 export const EducationHubSummary = () => {
+  const [images, setImages] = useState<EducationHubImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Default images fallback
+  const defaultImages: Record<string, string> = {
+    '01': 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=600&fit=crop&q=80&auto=format',
+    '02': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1756304758/finance_fgi2jq.jpg',
+    '03': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=600&fit=crop&q=80&auto=format',
+    '04': 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=300&h=600&fit=crop&q=80&auto=format',
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+  const fetchImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('education_hub_images' as any)
+        .select('step_id, image_url')
+        .order('step_id', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching education hub images:', error);
+        // Use default images if fetch fails
+        setImages(Object.entries(defaultImages).map(([step_id, image_url]) => ({
+          step_id,
+          image_url,
+        })));
+      } else if (data && data.length > 0) {
+        // Map fetched images, using defaults for missing steps
+        const fetchedImages = (data as any[]).map((img: any) => ({
+          step_id: img.step_id,
+          image_url: img.image_url || defaultImages[img.step_id] || '',
+        }));
+        setImages(fetchedImages);
+      } else {
+        // Use default images if no data
+        setImages(Object.entries(defaultImages).map(([step_id, image_url]) => ({
+          step_id,
+          image_url,
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching education hub images:', error);
+      setImages(Object.entries(defaultImages).map(([step_id, image_url]) => ({
+        step_id,
+        image_url,
+      })));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getImageForStep = (stepId: string) => {
+    const image = images.find(img => img.step_id === stepId);
+    return image?.image_url || defaultImages[stepId] || '';
+  };
+
   const timelineSteps = [
     {
       id: "01",
@@ -17,7 +83,7 @@ export const EducationHubSummary = () => {
         "Ebooks & Textbooks"
       ],
       duration: "Available 24/7",
-      image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=600&fit=crop&q=80&auto=format",
+      image: getImageForStep("01"),
     },
     {
       id: "02",
@@ -31,7 +97,7 @@ export const EducationHubSummary = () => {
         "Personalized Learning Paths"
       ],
       duration: "Instant Access",
-      image: "https://res.cloudinary.com/dsypclqxk/image/upload/v1756304758/finance_fgi2jq.jpg",
+      image: getImageForStep("02"),
     },
     {
       id: "03",
@@ -45,7 +111,7 @@ export const EducationHubSummary = () => {
         "Alumni Network"
       ],
       duration: "Always Active",
-      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=600&fit=crop&q=80&auto=format",
+      image: getImageForStep("03"),
     },
     {
       id: "04",
@@ -59,7 +125,7 @@ export const EducationHubSummary = () => {
         "Research Tools"
       ],
       duration: "Career-Ready",
-      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=300&h=600&fit=crop&q=80&auto=format",
+      image: getImageForStep("04"),
     },
   ];
 

@@ -5,6 +5,7 @@ import CarouselManager from "./components/CarouselManager";
 import AboutManager from "./components/AboutManager";
 import ServicesManager from "./components/ServicesManager";
 import WhyChooseUsManager from "./components/WhyChooseUsManager";
+import EducationHubManager from "./components/EducationHubManager";
 
 const AdminHomePage = () => {
   const [activeTab, setActiveTab] = useState("carousel");
@@ -38,8 +39,7 @@ const AdminHomePage = () => {
     { id: "about", label: "About Section", icon: "info" },
     { id: "services", label: "Services", icon: "briefcase" },
     { id: "why-choose-us", label: "Why Choose Us", icon: "star" },
-    { id: "gallery", label: "Image Gallery", icon: "image" },
-    { id: "projects", label: "Projects", icon: "folder" },
+    { id: "education-hub", label: "Education Hub", icon: "book" },
   ];
 
   const isolatedStyles = `
@@ -291,24 +291,10 @@ const AdminHomePage = () => {
           <WhyChooseUsManager />
         </div>
       ),
-      gallery: (
+      "education-hub": (
         <div className="ahp-section-card">
-          <h3 className="ahp-section-title">Image Gallery</h3>
-          <div className="ahp-placeholder">
-            Image gallery management will be implemented here.
-            <br />
-            Upload, organize, and manage images displayed in the gallery.
-          </div>
-        </div>
-      ),
-      projects: (
-        <div className="ahp-section-card">
-          <h3 className="ahp-section-title">Projects</h3>
-          <div className="ahp-placeholder">
-            Projects management will be implemented here.
-            <br />
-            Add, edit, and manage projects displayed on the homepage.
-          </div>
+          <h3 className="ahp-section-title">Education Hub</h3>
+          <EducationHubManager />
         </div>
       ),
     };
