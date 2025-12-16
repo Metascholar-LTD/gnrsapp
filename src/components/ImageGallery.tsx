@@ -298,7 +298,7 @@ export const ImageGallery = () => {
                 color: 'rgba(44, 44, 44, 0.85)'
               }}
             >
-              Discover the latest news, updates, and stories from across Ghana. Stay informed with our comprehensive news coverage. Drag to rotate and click any image to learn more.
+              Discover the latest news, updates, and stories from across Ghana. Stay informed with our comprehensive news coverage.
             </p>
 
             {/* Feature Icons */}
