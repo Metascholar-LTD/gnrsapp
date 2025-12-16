@@ -1,4 +1,89 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface AboutContent {
+  id: string;
+  video_url: string | null;
+  badge_text: string | null;
+  title: string | null;
+  description: string | null;
+  story_content: string | null;
+  mission_content: string | null;
+  vision_content: string | null;
+}
+
+const formatContent = (content: string | null): JSX.Element[] => {
+  if (!content) return [];
+  
+  // Split by double line breaks to create paragraphs
+  const paragraphs = content.split('\n\n').filter(p => p.trim());
+  
+  return paragraphs.map((paragraph, index) => (
+    <p 
+      key={index}
+      style={{ 
+        fontSize: '1rem', 
+        lineHeight: '1.8', 
+        color: '#555555', 
+        marginBottom: index < paragraphs.length - 1 ? '16px' : 0 
+      }}
+    >
+      {paragraph.trim()}
+    </p>
+  ));
+};
+
 export const About = () => {
+  const [content, setContent] = useState<AboutContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAboutContent();
+  }, []);
+
+  const fetchAboutContent = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('about_section')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching about section:', error);
+      } else if (data) {
+        setContent(data as AboutContent);
+      }
+    } catch (error) {
+      console.error('Error fetching about section:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div id="about" className="container-fluid py-5" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"' }}>
+        <div className="container" style={{ maxWidth: '100%', paddingLeft: 'clamp(15px, 5vw, 80px)', paddingRight: 'clamp(15px, 5vw, 80px)' }}>
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback to default values if no content
+  const videoUrl = content?.video_url || 'https://res.cloudinary.com/dsypclqxk/video/upload/v1763129131/5400711_Coll_wavebreak_People_3840x2160_ufldaq.mp4';
+  const badgeText = content?.badge_text || 'About Us';
+  const title = content?.title || 'Empowering Ghana Through Accessible National Resources';
+  const description = content?.description || 'The Ghana National Resource System (GNRS) is a comprehensive platform designed to connect Ghanaians with essential resources including education opportunities, job listings, news updates, and national information. Our mission is to make vital resources easily accessible to all citizens, fostering national development and individual growth.';
+  const storyContent = content?.story_content || '';
+  const missionContent = content?.mission_content || '';
+  const visionContent = content?.vision_content || '';
+
   return (
     <>
       <div id="about" className="container-fluid py-5" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"' }}>
@@ -8,7 +93,7 @@ export const About = () => {
               <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
                 <video 
                   className="img-fluid w-100" 
-                  src="https://res.cloudinary.com/dsypclqxk/video/upload/v1763129131/5400711_Coll_wavebreak_People_3840x2160_ufldaq.mp4" 
+                  src={videoUrl}
                   autoPlay
                   loop
                   muted
@@ -35,23 +120,25 @@ export const About = () => {
               </div>
             </div>
             <div className="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
-              <div style={{ 
-                display: 'inline-block',
-                padding: '8px 20px',
-                backgroundColor: 'rgba(0, 107, 63, 0.08)',
-                borderRadius: '30px',
-                marginBottom: '20px',
-                border: '1px solid rgba(0, 107, 63, 0.15)'
-              }}>
-                <p style={{ 
-                  margin: 0, 
-                  color: '#006B3F', 
-                  fontWeight: 600, 
-                  fontSize: '0.875rem',
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase'
-                }}>About Us</p>
-              </div>
+              {badgeText && (
+                <div style={{ 
+                  display: 'inline-block',
+                  padding: '8px 20px',
+                  backgroundColor: 'rgba(0, 107, 63, 0.08)',
+                  borderRadius: '30px',
+                  marginBottom: '20px',
+                  border: '1px solid rgba(0, 107, 63, 0.15)'
+                }}>
+                  <p style={{ 
+                    margin: 0, 
+                    color: '#006B3F', 
+                    fontWeight: 600, 
+                    fontSize: '0.875rem',
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase'
+                  }}>{badgeText}</p>
+                </div>
+              )}
               <div style={{ 
                 width: '100%', 
                 height: '1px', 
@@ -59,20 +146,24 @@ export const About = () => {
                 marginBottom: '24px',
                 maxWidth: '200px'
               }}></div>
-              <h1 style={{ 
-                fontSize: '2.75rem',
-                fontWeight: 700,
-                lineHeight: '1.2',
-                marginBottom: '24px',
-                color: '#2C2C2C',
-                letterSpacing: '-0.5px'
-              }}>Empowering Ghana Through Accessible National Resources</h1>
-              <p style={{ 
-                fontSize: '1.125rem',
-                lineHeight: '1.8',
-                color: '#555555',
-                marginBottom: '32px'
-              }}>The Ghana National Resource System (GNRS) is a comprehensive platform designed to connect Ghanaians with essential resources including education opportunities, job listings, news updates, and national information. Our mission is to make vital resources easily accessible to all citizens, fostering national development and individual growth.</p>
+              {title && (
+                <h1 style={{ 
+                  fontSize: '2.75rem',
+                  fontWeight: 700,
+                  lineHeight: '1.2',
+                  marginBottom: '24px',
+                  color: '#2C2C2C',
+                  letterSpacing: '-0.5px'
+                }}>{title}</h1>
+              )}
+              {description && (
+                <p style={{ 
+                  fontSize: '1.125rem',
+                  lineHeight: '1.8',
+                  color: '#555555',
+                  marginBottom: '32px'
+                }}>{description}</p>
+              )}
               
               <div style={{ 
                 backgroundColor: '#FFFFFF',
@@ -141,16 +232,19 @@ export const About = () => {
                 </nav>
                 <div className="tab-content" id="nav-tabContent">
                   <div className="tab-pane fade show active" id="nav-story" role="tabpanel" aria-labelledby="nav-story-tab">
-                    <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: '16px' }}>The Ghana National Resource System was established to bridge the gap between Ghanaians and essential national resources. Recognizing the need for a centralized platform that provides easy access to education, employment opportunities, and national information, GNRS was created to serve as a one-stop portal for all resource needs.</p>
-                    <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: 0 }}>Through continuous innovation and collaboration with educational institutions, employers, and government agencies, we strive to create a more connected and informed Ghana where every citizen has access to the resources they need to succeed.</p>
+                    {storyContent ? formatContent(storyContent) : (
+                      <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: 0 }}>Content coming soon...</p>
+                    )}
                   </div>
                   <div className="tab-pane fade" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
-                    <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: '16px' }}>Our mission is to provide a comprehensive, user-friendly platform that connects all Ghanaians with essential national resources including education opportunities, job listings, news updates, and government services.</p>
-                    <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: 0 }}>We are committed to promoting transparency, accessibility, and efficiency in resource distribution, ensuring that every Ghanaian can access the information and opportunities they need to thrive in today's society.</p>
+                    {missionContent ? formatContent(missionContent) : (
+                      <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: 0 }}>Content coming soon...</p>
+                    )}
                   </div>
                   <div className="tab-pane fade" id="nav-vision" role="tabpanel" aria-labelledby="nav-vision-tab">
-                    <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: '16px' }}>Our vision is to become the leading national resource platform in Ghana, recognized for excellence in connecting citizens with opportunities and information that drive personal and national development.</p>
-                    <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: 0 }}>We envision a future where every Ghanaian, regardless of location or background, can easily access education, employment, and information resources through our integrated platform, contributing to a more prosperous and informed nation.</p>
+                    {visionContent ? formatContent(visionContent) : (
+                      <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#555555', marginBottom: 0 }}>Content coming soon...</p>
+                    )}
                   </div>
                 </div>
               </div>

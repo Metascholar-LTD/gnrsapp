@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import feather from "feather-icons";
 import { BREAKPOINTS, MEDIA_QUERIES } from "@/lib/breakpoints";
 import CarouselManager from "./components/CarouselManager";
+import AboutManager from "./components/AboutManager";
+import ServicesManager from "./components/ServicesManager";
 
 const AdminHomePage = () => {
   const [activeTab, setActiveTab] = useState("carousel");
@@ -33,7 +35,6 @@ const AdminHomePage = () => {
   const tabs = [
     { id: "carousel", label: "Carousel", icon: "image" },
     { id: "about", label: "About Section", icon: "info" },
-    { id: "statistics", label: "Statistics", icon: "bar-chart-2" },
     { id: "services", label: "Services", icon: "briefcase" },
     { id: "why-choose-us", label: "Why Choose Us", icon: "star" },
     { id: "gallery", label: "Image Gallery", icon: "image" },
@@ -275,31 +276,13 @@ const AdminHomePage = () => {
       about: (
         <div className="ahp-section-card">
           <h3 className="ahp-section-title">About Section</h3>
-          <div className="ahp-placeholder">
-            About section content management will be implemented here.
-            <br />
-            Edit the main about section content displayed on the homepage.
-          </div>
-        </div>
-      ),
-      statistics: (
-        <div className="ahp-section-card">
-          <h3 className="ahp-section-title">Statistics</h3>
-          <div className="ahp-placeholder">
-            Statistics management will be implemented here.
-            <br />
-            Add and edit statistics displayed on the homepage.
-          </div>
+          <AboutManager />
         </div>
       ),
       services: (
         <div className="ahp-section-card">
-          <h3 className="ahp-section-title">Services</h3>
-          <div className="ahp-placeholder">
-            Services management will be implemented here.
-            <br />
-            Manage the services section displayed on the homepage.
-          </div>
+          <h3 className="ahp-section-title">Services Section</h3>
+          <ServicesManager />
         </div>
       ),
       "why-choose-us": (

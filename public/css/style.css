@@ -123,12 +123,26 @@ h6,
     padding: 12px 20px !important;
     transition: all 0.3s ease !important;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+    text-decoration: none !important;
+    position: relative !important;
+}
+
+#about .nav-tabs .nav-link::after {
+    display: none !important;
+    content: none !important;
+}
+
+#about .nav-tabs .nav-link:hover::after {
+    display: none !important;
+    content: none !important;
 }
 
 #about .nav-tabs .nav-link:hover {
     color: #006B3F !important;
     border-bottom-color: rgba(0, 107, 63, 0.3) !important;
     background-color: rgba(0, 107, 63, 0.05) !important;
+    text-decoration: none !important;
+    border-bottom: 3px solid rgba(0, 107, 63, 0.3) !important;
 }
 
 #about .nav-tabs .nav-link.active {
@@ -227,6 +241,23 @@ h6,
 /*** Service ***/
 .service .nav .nav-link {
     transition: .5s;
+    text-decoration: none !important;
+    position: relative !important;
+}
+
+.service .nav .nav-link::after {
+    display: none !important;
+    content: none !important;
+}
+
+.service .nav .nav-link:hover::after {
+    display: none !important;
+    content: none !important;
+}
+
+.service .nav .nav-link:hover {
+    text-decoration: none !important;
+    border-bottom: none !important;
 }
 
 .service .nav .nav-link.active {

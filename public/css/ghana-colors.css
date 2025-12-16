@@ -39,18 +39,27 @@ section::before {
 
 /* Service tabs with Ghana colors */
 .service .nav .nav-link.active {
-    background: linear-gradient(135deg, #006B3F 0%, #4ECDC4 100%) !important;
-    border-color: #006B3F !important;
+    background: linear-gradient(135deg, #F5F5F5 0%, #E0E0E0 100%) !important;
+    border-color: #BDBDBD !important;
 }
 
 .service .nav .nav-link:hover:not(.active) {
-    border-color: #FCD116 !important;
-    background: rgba(252, 209, 22, 0.1) !important;
+    border-color: #BDBDBD !important;
+    background: rgba(245, 245, 245, 0.8) !important;
+    text-decoration: none !important;
+    border-bottom: none !important;
 }
 
-.service .nav .nav-link.active h5,
+.service .nav .nav-link.active h5 {
+    color: #000000 !important;
+}
+
 .service .nav .nav-link.active h5 i {
-    color: #FFFFFF !important;
+    color: #000000 !important;
+}
+
+.service .nav .nav-link:not(.active) h5 i {
+    color: #000000 !important;
 }
 
 /* Project hover effects with Ghana colors */
