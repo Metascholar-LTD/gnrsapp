@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, BookOpen, Briefcase, Newspaper, Database, Clock, GraduationCap, UserCheck } from 'lucide-react';
 
@@ -67,9 +67,119 @@ const newsArticles: NewsArticle[] = [
     publishedAt: "12 hours ago",
     imageUrl: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800&h=450&fit=crop",
   },
+  {
+    id: "7",
+    title: "Universities Partner with Industry for Skills Development",
+    summary: "Higher education institutions sign agreements with major companies to provide practical training.",
+    category: "Education News",
+    author: "Nana Yaa",
+    publishedAt: "1 day ago",
+    imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=450&fit=crop",
+  },
+  {
+    id: "8",
+    title: "Government Announces New Employment Initiatives",
+    summary: "Ministry of Employment launches programs to create opportunities for youth and reduce unemployment.",
+    category: "Jobs & Recruitment News",
+    author: "Kwabena Osei",
+    publishedAt: "1 day ago",
+    imageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=450&fit=crop",
+  },
+  {
+    id: "9",
+    title: "Central Region Hosts National Cultural Festival",
+    summary: "Annual celebration brings together artists, musicians, and cultural enthusiasts from across Ghana.",
+    category: "Regional News",
+    author: "Akosua Boateng",
+    publishedAt: "1 day ago",
+    imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=450&fit=crop",
+  },
+  {
+    id: "10",
+    title: "Opposition Party Proposes Alternative Budget Plan",
+    summary: "Main opposition party presents comprehensive economic proposal as alternative to government's fiscal policy.",
+    category: "Politics",
+    author: "Kojo Mensah",
+    publishedAt: "2 days ago",
+    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
+  },
+  {
+    id: "11",
+    title: "Tech Innovation Hub Opens in Accra",
+    summary: "New state-of-the-art facility aims to support startups and tech entrepreneurs with resources and funding.",
+    category: "National News",
+    author: "Patience Adjei",
+    publishedAt: "2 days ago",
+    imageUrl: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=450&fit=crop",
+  },
+  {
+    id: "12",
+    title: "Students Protest Over Tuition Fee Increases",
+    summary: "University students across the country organize demonstrations calling for review of recent tuition fee adjustments.",
+    category: "Education News",
+    author: "Emmanuel Asante",
+    publishedAt: "2 days ago",
+    imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=450&fit=crop",
+  },
+  {
+    id: "13",
+    title: "Recruitment Drive Targets 10,000 Healthcare Workers",
+    summary: "Ministry of Health launches nationwide campaign to recruit healthcare professionals to address staffing shortages.",
+    category: "Jobs & Recruitment News",
+    author: "Dr. Sarah Owusu",
+    publishedAt: "3 days ago",
+    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=450&fit=crop",
+  },
+  {
+    id: "14",
+    title: "Northern Region Receives Development Funding",
+    summary: "International development partners commit millions in funding for infrastructure and economic development projects.",
+    category: "Regional News",
+    author: "Ibrahim Mohammed",
+    publishedAt: "3 days ago",
+    imageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=450&fit=crop",
+  },
+  {
+    id: "15",
+    title: "Social Media Influencers Drive Tourism Campaign",
+    summary: "Popular content creators collaborate with tourism board to showcase Ghana's attractions, generating millions of views.",
+    category: "Trending News",
+    author: "Maame Adwoa",
+    publishedAt: "3 days ago",
+    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=450&fit=crop",
+  },
 ];
 
 export const ImageGallery = () => {
+  const [displayedArticles, setDisplayedArticles] = useState<NewsArticle[]>([]);
+  const [startIndex, setStartIndex] = useState(0);
+
+  // Initialize with first 6 articles
+  useEffect(() => {
+    setDisplayedArticles(newsArticles.slice(0, 6));
+  }, []);
+
+  // Rotate articles every 2 minutes (120000 milliseconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStartIndex((prevIndex) => {
+        const newIndex = (prevIndex + 6) % newsArticles.length;
+        const newArticles = [];
+        
+        // Get 6 articles starting from newIndex, wrapping around if needed
+        for (let i = 0; i < 6; i++) {
+          const index = (newIndex + i) % newsArticles.length;
+          newArticles.push(newsArticles[index]);
+        }
+        
+        setDisplayedArticles(newArticles);
+        return newIndex;
+      });
+    }, 120000); // 2 minutes = 120000 milliseconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div 
       id="gallery" 
@@ -472,7 +582,7 @@ export const ImageGallery = () => {
           {/* Right Side - News Cards */}
           <div className="col-lg-7 wow fadeInUp" data-wow-delay="0.3s">
             <div className="news-cards-grid">
-              {newsArticles.slice(0, 6).map((article) => (
+              {displayedArticles.map((article) => (
                 <Link key={article.id} to={`/news/${article.id}`} className="news-card-small">
                   <div className="news-card-image-wrapper">
                     <img 
