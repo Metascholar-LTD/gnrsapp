@@ -1,48 +1,56 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+type FAQCategory = 'getting-started' | 'education' | 'jobs' | 'directories' | 'hands-skills';
 
 interface FAQ {
-  id: number;
+  id: string;
+  category: FAQCategory;
   question: string;
   answer: string;
 }
 
 export const HomeFAQs = () => {
-  const faqs: FAQ[] = [
-    {
-      id: 1,
-      question: "How do I access datasets on the platform?",
-      answer: "Navigate to the Datasets section from the main menu. You can browse datasets by category (Government, Finance, Health, Education) or use the search function to find specific datasets. All datasets are available for download in various formats including CSV, JSON, and Excel."
-    },
-    {
-      id: 2,
-      question: "Are the datasets free to download?",
-      answer: "Yes! All datasets on our platform are completely free to download. We believe in making data accessible to everyone for research, analysis, and educational purposes. Simply browse to any dataset and click the download button."
-    },
-    {
-      id: 3,
-      question: "How often are datasets updated?",
-      answer: "We regularly update our datasets to ensure accuracy and relevance. Most datasets are updated monthly or quarterly, depending on the data source. Each dataset page shows the last update date so you can verify the freshness of the data."
-    },
-    {
-      id: 4,
-      question: "Can I request specific datasets?",
-      answer: "Yes! We welcome dataset requests from our users. If you need a specific dataset that's not currently available, you can submit a request through our contact form. We'll do our best to source and add requested datasets to our collection."
-    },
-    {
-      id: 5,
-      question: "What formats are available for download?",
-      answer: "Most datasets are available in multiple formats including CSV (for spreadsheet applications), JSON (for developers), and Excel files. Some datasets also include GeoJSON for location-based data. You can choose your preferred format when downloading."
-    },
-    {
-      id: 6,
-      question: "How do I find directories for businesses and institutions?",
-      answer: "Use the Directories section from the main navigation. You can browse by category (Hotels, Universities, Restaurants, Hospitals, Banks) or use the search function. Each directory includes detailed information, contact details, locations, and user reviews."
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchHomeFAQs();
+  }, []);
+
+  const fetchHomeFAQs = async () => {
+    try {
+      const categories: FAQCategory[] = ['getting-started', 'education', 'jobs', 'directories', 'hands-skills'];
+      const allFAQs: FAQ[] = [];
+
+      // Fetch 2 FAQs from each category
+      for (const category of categories) {
+        const { data, error } = await supabase
+          .from('faqs' as any)
+          .select('*')
+          .eq('category', category)
+          .order('created_at', { ascending: true })
+          .limit(2);
+
+        if (!error && data) {
+          allFAQs.push(...(data as any) as FAQ[]);
+        }
+      }
+
+      setFaqs(allFAQs);
+    } catch (error) {
+      console.error('Error fetching home FAQs:', error);
+      // Fallback to empty array if fetch fails
+      setFaqs([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
 
@@ -130,33 +138,43 @@ export const HomeFAQs = () => {
 
             {/* Right Column - FAQs */}
             <div className="desktop:col-span-7">
-              <div className="space-y-4">
-                {faqs.map((f) => (
-                  <Card key={f.id} className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
-                    <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value={f.id.toString()} className="border-none">
-                        <AccordionTrigger 
-                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
-                          style={{ 
-                            fontSize: '1.13rem', 
-                            fontWeight: 600, 
-                            color: '#0066cc', 
-                            fontFamily: fontFamily 
-                          }}
-                        >
-                          {f.question}
-                        </AccordionTrigger>
-                        <AccordionContent 
-                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
-                          style={{ fontFamily: fontFamily }}
-                        >
-                          {f.answer}
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </Card>
-                ))}
-              </div>
+              {loading ? (
+                <div className="text-center py-5" style={{ fontFamily: fontFamily, color: '#6b7280' }}>
+                  Loading FAQs...
+                </div>
+              ) : faqs.length === 0 ? (
+                <div className="text-center py-5" style={{ fontFamily: fontFamily, color: '#6b7280' }}>
+                  No FAQs available at the moment.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {faqs.map((f) => (
+                    <Card key={f.id} className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                      <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value={f.id} className="border-none">
+                          <AccordionTrigger 
+                            className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                            style={{ 
+                              fontSize: '1.13rem', 
+                              fontWeight: 600, 
+                              color: '#0066cc', 
+                              fontFamily: fontFamily 
+                            }}
+                          >
+                            {f.question}
+                          </AccordionTrigger>
+                          <AccordionContent 
+                            className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                            style={{ fontFamily: fontFamily }}
+                          >
+                            {f.answer}
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
