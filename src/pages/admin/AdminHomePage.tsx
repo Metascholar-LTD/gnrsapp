@@ -4,6 +4,7 @@ import { BREAKPOINTS, MEDIA_QUERIES } from "@/lib/breakpoints";
 import CarouselManager from "./components/CarouselManager";
 import AboutManager from "./components/AboutManager";
 import ServicesManager from "./components/ServicesManager";
+import WhyChooseUsManager from "./components/WhyChooseUsManager";
 
 const AdminHomePage = () => {
   const [activeTab, setActiveTab] = useState("carousel");
@@ -288,11 +289,7 @@ const AdminHomePage = () => {
       "why-choose-us": (
         <div className="ahp-section-card">
           <h3 className="ahp-section-title">Why Choose Us</h3>
-          <div className="ahp-placeholder">
-            Why Choose Us section management will be implemented here.
-            <br />
-            Edit the reasons and features highlighted on the homepage.
-          </div>
+          <WhyChooseUsManager />
         </div>
       ),
       gallery: (

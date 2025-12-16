@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import React from "react";
 import feather from "feather-icons";
 import { getValidIconName } from "../utils/iconMap";
 import { initializeSidebar } from "../modules/sidebar";
@@ -131,10 +132,9 @@ const AdminSidebar = () => {
       ],
     },
     {
-      header: "Settings",
+      header: "",
       items: [
-        { icon: "user", label: "Profile", path: "/admin/profile" },
-        { icon: "settings", label: "Settings", path: "/admin/settings" },
+        { icon: "log-out", label: "Log Out", path: "/admin/logout" },
       ],
     },
   ];
@@ -160,17 +160,27 @@ const AdminSidebar = () => {
               {section.header && (
                 <li className="sidebar-header">{section.header}</li>
               )}
-              {section.items.map((item, itemIndex) => (
-                <li
-                  key={itemIndex}
-                  className={`sidebar-item ${isActive(item.path) ? "active" : ""}`}
-                >
-                  <Link className="sidebar-link" to={item.path}>
-                    <i className="align-middle" data-feather={getValidIconName(item.icon)}></i>
-                    <span className="align-middle">{item.label}</span>
-                  </Link>
-                </li>
-              ))}
+              {section.items.map((item, itemIndex) => {
+                // Add separator before Log Out
+                const isLogOut = item.label === "Log Out";
+                return (
+                  <React.Fragment key={itemIndex}>
+                    {isLogOut && (
+                      <li className="sidebar-separator">
+                        <div className="sidebar-separator-line"></div>
+                      </li>
+                    )}
+                    <li
+                      className={`sidebar-item ${isActive(item.path) ? "active" : ""}`}
+                    >
+                      <Link className="sidebar-link" to={item.path}>
+                        <i className="align-middle" data-feather={getValidIconName(item.icon)}></i>
+                        <span className="align-middle">{item.label}</span>
+                      </Link>
+                    </li>
+                  </React.Fragment>
+                );
+              })}
             </div>
           ))}
         </ul>

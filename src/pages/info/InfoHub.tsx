@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { BookOpen, FileText, HelpCircle, Info, ChevronRight } from "lucide-react";
+import { BookOpen, FileText, HelpCircle, Info, ChevronRight, Zap, Shield } from "lucide-react";
 
 interface InfoSection {
   id: string;
@@ -133,6 +133,20 @@ const infoSections: InfoSection[] = [
 
 const InfoHub = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    // Handle hash scrolling when component mounts or hash changes
+    if (location.hash) {
+      const hash = location.hash.substring(1); // Remove the # symbol
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
 
   const bbcStyles = `
     .bbc-info-page {
@@ -464,6 +478,53 @@ const InfoHub = () => {
               </div>
             </Link>
           ))}
+        </div>
+
+        <div id="platform-features" className="bbc-features-section" style={{ marginTop: '4rem', paddingTop: '3rem', borderTop: '2px solid #e5e5e5', scrollMarginTop: '80px' }}>
+          <h2 className="bbc-articles-title" style={{ marginBottom: '2rem' }}>Platform Features</h2>
+          <div className="bbc-info-grid">
+            <Link to="/info/fast-executions" className="bbc-info-card">
+              <div className="bbc-info-card-icon">
+                <Zap size={24} />
+              </div>
+              <div className="bbc-info-card-category">Performance</div>
+              <h2 className="bbc-info-card-title">Fast Executions</h2>
+              <p className="bbc-info-card-description">
+                Our platform delivers quick and efficient access to resources. Whether you're searching for educational opportunities, job listings, or national information, we ensure rapid response times and streamlined processes that save you valuable time.
+              </p>
+              <div className="bbc-info-card-link">
+                Read More <ChevronRight size={16} />
+              </div>
+            </Link>
+
+            <Link to="/info/guide-support" className="bbc-info-card">
+              <div className="bbc-info-card-icon">
+                <HelpCircle size={24} />
+              </div>
+              <div className="bbc-info-card-category">Support</div>
+              <h2 className="bbc-info-card-title">Guide & Support</h2>
+              <p className="bbc-info-card-description">
+                Our dedicated support team is always ready to assist you. From navigating the platform to finding specific resources, we provide comprehensive guidance and support to ensure you have the best experience accessing national resources.
+              </p>
+              <div className="bbc-info-card-link">
+                Read More <ChevronRight size={16} />
+              </div>
+            </Link>
+
+            <Link to="/info/financial-secure" className="bbc-info-card">
+              <div className="bbc-info-card-icon">
+                <Shield size={24} />
+              </div>
+              <div className="bbc-info-card-category">Security</div>
+              <h2 className="bbc-info-card-title">Financial Secure</h2>
+              <p className="bbc-info-card-description">
+                All our services are completely free and secure. We ensure the highest standards of data protection and privacy, giving you peace of mind while accessing valuable national resources without any financial concerns.
+              </p>
+              <div className="bbc-info-card-link">
+                Read More <ChevronRight size={16} />
+              </div>
+            </Link>
+          </div>
         </div>
 
         <div className="bbc-articles-section">

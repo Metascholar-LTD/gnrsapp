@@ -82,6 +82,9 @@ import EducationResources from "./pages/info/EducationResources";
 import JobPortal from "./pages/info/JobPortal";
 import InfoDirectories from "./pages/info/Directories";
 import FAQs from "./pages/info/FAQs";
+import FastExecutions from "./pages/info/FastExecutions";
+import GuideSupport from "./pages/info/GuideSupport";
+import FinancialSecure from "./pages/info/FinancialSecure";
 import "./pages/resume-builder/resume-builder.css";
 import AdminLayout from "./pages/admin/components/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -176,6 +179,9 @@ const App = () => (
           <Route path="/info/jobs" element={<JobPortal />} />
           <Route path="/info/directories" element={<InfoDirectories />} />
           <Route path="/info/faqs" element={<FAQs />} />
+          <Route path="/info/fast-executions" element={<FastExecutions />} />
+          <Route path="/info/guide-support" element={<GuideSupport />} />
+          <Route path="/info/financial-secure" element={<FinancialSecure />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
           {/* Resume Builder Routes */}

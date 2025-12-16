@@ -174,6 +174,19 @@
   opacity: 0.7 !important;
 }
 
+#admin-scope .sidebar-separator {
+  list-style: none !important;
+  margin: 1rem 0 !important;
+  padding: 0 !important;
+}
+
+#admin-scope .sidebar-separator-line {
+  height: 1px !important;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.1), transparent) !important;
+  margin: 0 1rem !important;
+  border-radius: 1px !important;
+}
+
 #admin-scope .sidebar-link {
   font-size: 0.8125rem !important; /* ~13px - reduced from base 0.875rem */
   font-weight: 400 !important;
