@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import feather from "feather-icons";
 import { BREAKPOINTS, MEDIA_QUERIES } from "@/lib/breakpoints";
+import CarouselManager from "./components/CarouselManager";
 
 const AdminHomePage = () => {
   const [activeTab, setActiveTab] = useState("carousel");
@@ -268,11 +269,7 @@ const AdminHomePage = () => {
       carousel: (
         <div className="ahp-section-card">
           <h3 className="ahp-section-title">Carousel Management</h3>
-          <div className="ahp-placeholder">
-            Carousel content management will be implemented here.
-            <br />
-            You can add, edit, and reorder carousel slides.
-          </div>
+          <CarouselManager />
         </div>
       ),
       about: (
