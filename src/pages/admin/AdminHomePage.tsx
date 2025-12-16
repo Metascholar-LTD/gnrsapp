@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import feather from "feather-icons";
+import { BREAKPOINTS, MEDIA_QUERIES } from "@/lib/breakpoints";
 
 const AdminHomePage = () => {
   const [activeTab, setActiveTab] = useState("carousel");
@@ -151,7 +152,8 @@ const AdminHomePage = () => {
       border: 2px dashed #d1d5db;
     }
 
-    @media (max-width: 768px) {
+    /* Mobile: 0px - 767px */
+    @media ${MEDIA_QUERIES.MOBILE} {
       #ahp-header {
         padding: 1rem;
       }
@@ -171,6 +173,92 @@ const AdminHomePage = () => {
 
       #ahp-content {
         padding: 1rem;
+      }
+
+      .ahp-section-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .ahp-section-title {
+        font-size: 1rem;
+      }
+
+      .ahp-placeholder {
+        padding: 1.5rem;
+        font-size: 0.8125rem;
+      }
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media ${MEDIA_QUERIES.TABLET} {
+      #ahp-header {
+        padding: 1.25rem 1.5rem;
+      }
+
+      #ahp-title {
+        font-size: 1.375rem;
+      }
+
+      #ahp-tabs-container {
+        padding: 0 1.5rem;
+      }
+
+      .ahp-tab {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.84375rem;
+      }
+
+      #ahp-content {
+        padding: 1.5rem;
+      }
+
+      .ahp-section-card {
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media ${MEDIA_QUERIES.DESKTOP} {
+      #ahp-header {
+        padding: 1.5rem 1.5rem;
+      }
+
+      #ahp-title {
+        font-size: 1.5rem;
+      }
+
+      #ahp-tabs-container {
+        padding: 0 1.5rem;
+      }
+
+      .ahp-tab {
+        padding: 1rem 1.25rem;
+        font-size: 0.875rem;
+      }
+
+      #ahp-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media ${MEDIA_QUERIES.LARGE_DESKTOP} {
+      #ahp-header {
+        padding: 1.5rem clamp(2rem, 4vw, 3rem);
+      }
+
+      #ahp-tabs-container {
+        padding: 0 clamp(2rem, 4vw, 3rem);
+      }
+
+      #ahp-content {
+        padding: clamp(2rem, 4vw, 3rem);
+      }
+
+      .ahp-section-card {
+        padding: 1.5rem;
       }
     }
   `;

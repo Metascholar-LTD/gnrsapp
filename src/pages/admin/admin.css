@@ -134,6 +134,7 @@
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior: contain !important;
   position: relative !important;
+  padding: 20px !important;
 }
 
 /* When sidebar is collapsed, adjust main content */

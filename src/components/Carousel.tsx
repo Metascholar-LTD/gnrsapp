@@ -2,8 +2,48 @@ import { HomepageButton } from "@/components/ui/HomepageButton";
 
 export const Carousel = () => {
   return (
-    <div className="container-fluid p-0 mb-5 wow fadeIn" data-wow-delay="0.1s">
-      <div id="header-carousel" className="carousel slide carousel-fade" data-bs-ride="carousel">
+    <>
+      <style>{`
+        /* Carousel subtitle responsive sizing */
+        .carousel-subtitle {
+          font-size: 0.875rem;
+          line-height: 1.5;
+        }
+        
+        /* Tablet: 768px - 1023px */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .carousel-subtitle {
+            font-size: 1rem;
+            line-height: 1.5;
+          }
+        }
+        
+        /* Small Desktop: 1024px - 1599px */
+        @media (min-width: 1024px) and (max-width: 1599px) {
+          #header-carousel .carousel-caption > .container {
+            padding-top: 6.5rem;
+          }
+          
+          .carousel-subtitle {
+            font-size: 1.125rem;
+            line-height: 1.6;
+          }
+        }
+        
+        /* Large screens: 1600px+ */
+        @media (min-width: 1600px) {
+          #header-carousel .carousel-caption > .container {
+            padding-top: 12rem;
+          }
+          
+          .carousel-subtitle {
+            font-size: 1.25rem;
+            line-height: 1.6;
+          }
+        }
+      `}</style>
+      <div className="container-fluid p-0 mb-5 wow fadeIn" data-wow-delay="0.1s">
+        <div id="header-carousel" className="carousel slide carousel-fade" data-bs-ride="carousel">
         <div className="carousel-inner">
           <div className="carousel-item active" style={{ position: 'relative' }}>
             <div className="carousel-overlay"></div>
@@ -78,10 +118,9 @@ export const Carousel = () => {
                       fontWeight: '700',
                       lineHeight: '1.2'
                     }}>Connecting Every Region, Empowering Every Citizen</h1>
-                    <p className="lead mb-4 animated slideInDown" style={{
+                    <p className="lead mb-4 animated slideInDown carousel-subtitle" style={{
                       color: '#FFFFFF',
                       textShadow: '2px 2px 8px rgba(0, 0, 0, 0.8)',
-                      fontSize: '1.3rem',
                       fontWeight: '400'
                     }}>From Accra to Tamale, from Cape Coast to Bolgatanga — Your opportunities await across all 16 regions</p>
                     <div className="animated slideInDown">
@@ -114,9 +153,8 @@ export const Carousel = () => {
                       fontWeight: '700',
                       lineHeight: '1.2'
                     }}>Transforming Dreams Into Reality</h1>
-                    <p className="lead mb-4 animated slideInDown" style={{
+                    <p className="lead mb-4 animated slideInDown carousel-subtitle" style={{
                       color: '#555555',
-                      fontSize: '1.3rem',
                       fontWeight: '400'
                     }}>Access world-class education, unlock career opportunities, and shape the future of Ghana</p>
                     <div className="animated slideInDown">
@@ -139,7 +177,8 @@ export const Carousel = () => {
           <span className="visually-hidden">Next</span>
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
