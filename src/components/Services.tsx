@@ -69,7 +69,7 @@ export const Services = () => {
     const listItem3 = tabData?.list_item_3 || '';
 
     return (
-      <div className={`tab-pane fade ${index === 0 ? 'show active' : ''}`} id={`tab-pane-${index + 1}`}>
+      <div key={`tab-content-${index}`} className={`tab-pane fade ${index === 0 ? 'show active' : ''}`} id={`tab-pane-${index + 1}`}>
         <div className="row g-4">
           <div className="col-md-6" style={{ minHeight: '350px' }}>
             <div className="position-relative h-100">

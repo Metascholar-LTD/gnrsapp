@@ -102,16 +102,16 @@ export const Statistics = () => {
           display: none;
         }
       `}</style>
-      <div 
-        ref={sectionRef}
-        className="container-fluid py-5 wow fadeIn" 
-        data-wow-delay="0.1s"
-        style={{
+    <div 
+      ref={sectionRef}
+      className="container-fluid py-5 wow fadeIn" 
+      data-wow-delay="0.1s"
+      style={{
           background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       {/* Geometric Pattern Background */}
       <div
         style={{
@@ -351,7 +351,7 @@ export const Statistics = () => {
                    alt="Skilled Professionals" 
                    style={{ width: '64px', height: '64px', filter: 'brightness(0) invert(1)' }}
                  />
-               </div>
+              </div>
               <h1 
                 className="display-4 mb-2" 
                 style={{ 

@@ -1,94 +1,73 @@
 import React from 'react';
-import SphereImageGrid, { ImageData } from '@/components/ui/img-sphere';
-import { Sparkles, Users, BookOpen, Briefcase, Newspaper, Database } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Sparkles, BookOpen, Briefcase, Newspaper, Database, Clock, GraduationCap, UserCheck } from 'lucide-react';
 
-// Ghana-related images from Unsplash - diverse, high-quality images
-const BASE_IMAGES: Omit<ImageData, 'id'>[] = [
-  {
-    src: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Ghana Education",
-    title: "Education Excellence",
-    description: "Access world-class educational resources and opportunities across Ghana."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Professional Development",
-    title: "Career Growth",
-    description: "Discover career opportunities and professional development programs."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Ghana Culture",
-    title: "Cultural Heritage",
-    description: "Explore the rich cultural heritage and traditions of Ghana."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Team Collaboration",
-    title: "Community Building",
-    description: "Join a community of learners, professionals, and innovators."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Business Growth",
-    title: "Economic Development",
-    description: "Supporting business growth and economic development initiatives."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Modern Infrastructure",
-    title: "Modern Infrastructure",
-    description: "Accessing resources through modern digital infrastructure."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Technology Innovation",
-    title: "Tech Innovation",
-    description: "Embracing technology and innovation for national progress."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Networking",
-    title: "Professional Network",
-    description: "Connect with professionals and expand your network."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Learning",
-    title: "Continuous Learning",
-    description: "Access educational resources for lifelong learning."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1556761175-4b46a572b786?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Success",
-    title: "Achievement",
-    description: "Celebrating success stories and achievements across Ghana."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Digital Resources",
-    title: "Digital Access",
-    description: "Digital resources accessible to all Ghanaians."
-  },
-  {
-    src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=800",
-    alt: "Empowerment",
-    title: "Empowerment",
-    description: "Empowering citizens through accessible resources."
-  }
-];
-
-// Generate more images by repeating the base set for better sphere coverage
-const IMAGES: ImageData[] = [];
-for (let i = 0; i < 50; i++) {
-  const baseIndex = i % BASE_IMAGES.length;
-  const baseImage = BASE_IMAGES[baseIndex];
-  IMAGES.push({
-    id: `img-${i + 1}`,
-    ...baseImage,
-    alt: `${baseImage.alt} (${Math.floor(i / BASE_IMAGES.length) + 1})`
-  });
+interface NewsArticle {
+  id: string;
+  title: string;
+  summary: string;
+  category: string;
+  author: string;
+  publishedAt: string;
+  imageUrl: string;
 }
+
+const newsArticles: NewsArticle[] = [
+  {
+    id: "1",
+    title: "Ghana's Digital Transformation Initiative Gains Momentum",
+    summary: "The government announces new investments in digital infrastructure to boost economic growth.",
+    category: "National News",
+    author: "Kwame Asante",
+    publishedAt: "2 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=450&fit=crop",
+  },
+  {
+    id: "2",
+    title: "New Education Policy Aims to Bridge Skills Gap",
+    summary: "Ministry of Education introduces comprehensive reforms to align curriculum with industry needs.",
+    category: "Education News",
+    author: "Ama Mensah",
+    publishedAt: "4 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=450&fit=crop",
+  },
+  {
+    id: "3",
+    title: "Ashanti Region Launches New Development Projects",
+    summary: "Regional government announces major infrastructure investments to improve transportation.",
+    category: "Regional News",
+    author: "Dr. Kofi Owusu",
+    publishedAt: "6 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=450&fit=crop",
+  },
+  {
+    id: "4",
+    title: "Parliament Debates New Economic Policy Bill",
+    summary: "Legislators engage in heated discussions over proposed economic reforms aimed at stimulating growth.",
+    category: "Politics",
+    author: "Yaa Bonsu",
+    publishedAt: "8 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
+  },
+  {
+    id: "5",
+    title: "Viral Social Media Campaign Promotes Local Tourism",
+    summary: "Ghanaian tourism experiences surge in interest following viral social media campaign.",
+    category: "Trending News",
+    author: "Michael Adjei",
+    publishedAt: "10 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=450&fit=crop",
+  },
+  {
+    id: "6",
+    title: "Major Companies Announce 5,000 New Job Openings",
+    summary: "Leading employers announce massive recruitment drive to fill thousands of positions.",
+    category: "Jobs & Recruitment News",
+    author: "Efua Tetteh",
+    publishedAt: "12 hours ago",
+    imageUrl: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800&h=450&fit=crop",
+  },
+];
 
 export const ImageGallery = () => {
   return (
@@ -137,6 +116,132 @@ export const ImageGallery = () => {
           0%, 100% { opacity: 0.6; }
           50% { opacity: 1; }
         }
+
+        .news-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.75rem;
+          width: 100%;
+        }
+
+        .news-card-small {
+          display: flex;
+          flex-direction: column;
+          text-decoration: none;
+          color: inherit;
+          padding: 0.875rem;
+          border: 1px solid #e5e5e5;
+          background: #ffffff;
+          transition: all 0.15s ease;
+          border-radius: 4px;
+        }
+
+        .news-card-small:hover {
+          background: #fafafa;
+          border-color: #d1d5db;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .news-card-image-wrapper {
+          width: 100%;
+          margin-bottom: 0.625rem;
+          position: relative;
+          overflow: hidden;
+          background: #f5f5f5;
+          padding-bottom: 56.25%;
+          height: 0;
+          border-radius: 2px;
+        }
+
+        .news-card-image {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.3s ease;
+          background: #f5f5f5;
+        }
+
+        .news-card-small:hover .news-card-image {
+          transform: scale(1.02);
+        }
+
+        .news-card-category {
+          font-size: 0.625rem;
+          font-weight: 700;
+          color: #bb1919;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin-bottom: 0.375rem;
+          font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+          line-height: 1.2;
+        }
+
+        .news-card-title {
+          font-size: 0.8125rem;
+          font-weight: 700;
+          color: #000000;
+          margin: 0 0 0.5rem 0;
+          line-height: 1.35;
+          font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          min-height: 2.2rem;
+        }
+
+        .news-card-summary {
+          font-size: 0.75rem;
+          color: #4a4a4a;
+          line-height: 1.5;
+          margin: 0 0 0.5rem 0;
+          font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          min-height: 2.25rem;
+        }
+
+        .news-card-meta {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          margin-top: auto;
+          padding-top: 0.5rem;
+          border-top: 1px solid #f0f0f0;
+        }
+
+        .news-card-meta-icon {
+          color: #6b7280;
+          flex-shrink: 0;
+        }
+
+        .news-card-meta-text {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          font-size: 0.6875rem;
+          color: #6b7280;
+          font-family: 'ReithSans', 'Helvetica', 'Arial', sans-serif;
+        }
+
+        @media (max-width: 991px) {
+          .news-cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 767px) {
+          .news-cards-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       <div className="container position-relative" style={{ 
@@ -163,7 +268,7 @@ export const ImageGallery = () => {
                 }}
               >
                 <Sparkles className="me-2" size={16} style={{ color: '#2C2C2C' }} />
-                Interactive Gallery
+                News Hub
               </span>
             </div>
             <div style={{ 
@@ -182,7 +287,7 @@ export const ImageGallery = () => {
                 letterSpacing: '-0.5px'
               }}
             >
-              Explore Our Resources in 3D
+              Explore Latest News in Ghana
             </h1>
             
             <p 
@@ -193,7 +298,7 @@ export const ImageGallery = () => {
                 color: 'rgba(44, 44, 44, 0.85)'
               }}
             >
-              Discover the diverse range of resources, opportunities, and services available through the Ghana National Resource System. Drag to rotate and click any image to learn more.
+              Discover the latest news, updates, and stories from across Ghana. Stay informed with our comprehensive news coverage. Drag to rotate and click any image to learn more.
             </p>
 
             {/* Feature Icons */}
@@ -206,18 +311,18 @@ export const ImageGallery = () => {
                       width: '40px',
                       height: '40px',
                       borderRadius: '10px',
-                      backgroundColor: 'rgba(255, 107, 107, 0.12)',
+                      backgroundColor: '#f5f5f5',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '1px solid rgba(255, 107, 107, 0.2)'
+                      border: '1px solid rgba(0, 0, 0, 0.1)'
                     }}
                   >
-                    <BookOpen className="text-danger" size={20} />
+                    <BookOpen size={20} style={{ color: '#000000' }} />
                   </div>
                   <div>
-                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>Education</h6>
-                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Learning Resources</p>
+                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>National News</h6>
+                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Latest National Updates</p>
                   </div>
                 </div>
               </div>
@@ -229,18 +334,18 @@ export const ImageGallery = () => {
                       width: '40px',
                       height: '40px',
                       borderRadius: '10px',
-                      backgroundColor: 'rgba(78, 205, 196, 0.15)',
+                      backgroundColor: '#f5f5f5',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '1px solid rgba(78, 205, 196, 0.25)'
+                      border: '1px solid rgba(0, 0, 0, 0.1)'
                     }}
                   >
-                    <Briefcase className="text-info" size={20} />
+                    <Briefcase size={20} style={{ color: '#000000' }} />
                   </div>
                   <div>
-                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>Jobs</h6>
-                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Career Opportunities</p>
+                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>Regional News</h6>
+                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Regional Updates</p>
                   </div>
                 </div>
               </div>
@@ -252,18 +357,18 @@ export const ImageGallery = () => {
                       width: '40px',
                       height: '40px',
                       borderRadius: '10px',
-                      backgroundColor: 'rgba(252, 209, 22, 0.15)',
+                      backgroundColor: '#f5f5f5',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '1px solid rgba(252, 209, 22, 0.25)'
+                      border: '1px solid rgba(0, 0, 0, 0.1)'
                     }}
                   >
-                    <Newspaper className="text-warning" size={20} />
+                    <Newspaper size={20} style={{ color: '#000000' }} />
                   </div>
                   <div>
-                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>News</h6>
-                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Latest Updates</p>
+                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>Politics</h6>
+                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Political News</p>
                   </div>
                 </div>
               </div>
@@ -275,100 +380,119 @@ export const ImageGallery = () => {
                       width: '40px',
                       height: '40px',
                       borderRadius: '10px',
-                      backgroundColor: 'rgba(139, 69, 19, 0.15)',
+                      backgroundColor: '#f5f5f5',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '1px solid rgba(139, 69, 19, 0.25)'
+                      border: '1px solid rgba(0, 0, 0, 0.1)'
                     }}
                   >
-                    <Database className="text-warning" size={20} style={{ color: '#8B4513' }} />
+                    <Database size={20} style={{ color: '#000000' }} />
                   </div>
                   <div>
-                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>Resources</h6>
-                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>National Data</p>
+                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>Trending News</h6>
+                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Trending Stories</p>
+                  </div>
+                </div>
+              </div>
+              <div className="col-6">
+                <div className="d-flex align-items-start">
+                  <div 
+                    className="flex-shrink-0 me-3"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      backgroundColor: '#f5f5f5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid rgba(0, 0, 0, 0.1)'
+                    }}
+                  >
+                    <GraduationCap size={20} style={{ color: '#000000' }} />
+                  </div>
+                  <div>
+                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>Education News</h6>
+                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Education Updates</p>
+                  </div>
+                </div>
+              </div>
+              <div className="col-6">
+                <div className="d-flex align-items-start">
+                  <div 
+                    className="flex-shrink-0 me-3"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      backgroundColor: '#f5f5f5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid rgba(0, 0, 0, 0.1)'
+                    }}
+                  >
+                    <UserCheck size={20} style={{ color: '#000000' }} />
+                  </div>
+                  <div>
+                    <h6 style={{ color: '#2C2C2C', marginBottom: '4px', fontSize: '0.9rem' }}>Jobs & Recruitment</h6>
+                    <p style={{ color: 'rgba(44, 44, 44, 0.7)', fontSize: '0.8rem', margin: 0 }}>Job Opportunities</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div 
-              className="d-inline-flex align-items-center px-4 py-3 rounded"
+            <Link 
+              to="/news"
+              className="d-inline-flex align-items-center px-4 py-3 rounded text-decoration-none"
               style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
                 border: '1px solid rgba(0, 0, 0, 0.08)',
-                backdropFilter: 'blur(10px)'
+                backdropFilter: 'blur(10px)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                marginTop: '2rem'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.06)';
+                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.12)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
               }}
             >
-              <Users className="me-2" size={20} style={{ color: '#FCD116' }} />
               <span style={{ color: '#2C2C2C', fontSize: '0.95rem' }}>
-                <strong style={{ color: '#2C2C2C' }}>50+</strong> Resource Categories
+                <strong style={{ color: '#2C2C2C' }}>Read more</strong>
               </span>
-            </div>
+            </Link>
           </div>
 
-          {/* Right Side - 3D Sphere */}
+          {/* Right Side - News Cards */}
           <div className="col-lg-7 wow fadeInUp" data-wow-delay="0.3s">
-            <div className="d-flex justify-content-center align-items-center position-relative">
-              {/* Decorative circles */}
-              <div 
-                className="position-absolute"
-                style={{
-                  width: '700px',
-                  height: '700px',
-                  borderRadius: '50%',
-                  border: '2px solid rgba(252, 209, 22, 0.15)',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 0,
-                  animation: 'pulse-glow 3s ease-in-out infinite'
-                }}
-              />
-              <div 
-                className="position-absolute"
-                style={{
-                  width: '650px',
-                  height: '650px',
-                  borderRadius: '50%',
-                  border: '1px solid rgba(255, 107, 107, 0.12)',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 0
-                }}
-              />
-              
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <SphereImageGrid
-                  images={IMAGES}
-                  containerSize={600}
-                  sphereRadius={220}
-                  dragSensitivity={0.8}
-                  momentumDecay={0.96}
-                  maxRotationSpeed={6}
-                  baseImageScale={0.14}
-                  hoverScale={1.3}
-                  perspective={1200}
-                  autoRotate={true}
-                  autoRotateSpeed={0.2}
-                  className="mx-auto"
-                />
-              </div>
-            </div>
-
-            {/* Instructions */}
-            <div className="text-center mt-4">
-              <p 
-                className="mb-0"
-                style={{
-                  color: 'rgba(44, 44, 44, 0.65)',
-                  fontSize: '0.875rem',
-                  fontStyle: 'italic'
-                }}
-              >
-                💡 Drag to rotate • Click to view details
-              </p>
+            <div className="news-cards-grid">
+              {newsArticles.slice(0, 6).map((article) => (
+                <Link key={article.id} to={`/news/${article.id}`} className="news-card-small">
+                  <div className="news-card-image-wrapper">
+                    <img 
+                      src={article.imageUrl} 
+                      alt={article.title} 
+                      className="news-card-image"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="news-card-category">{article.category}</div>
+                  <h3 className="news-card-title">{article.title}</h3>
+                  <p className="news-card-summary">{article.summary}</p>
+                  <div className="news-card-meta">
+                    <Clock size={12} className="news-card-meta-icon" />
+                    <div className="news-card-meta-text">
+                      <span>{article.publishedAt}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
