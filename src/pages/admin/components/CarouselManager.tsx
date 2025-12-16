@@ -20,6 +20,11 @@ interface CarouselSettings {
   id: string;
   display_type: 'carousel' | 'video';
   video_url: string | null;
+  badge_text: string | null;
+  title: string | null;
+  subtitle: string | null;
+  button_text: string | null;
+  button_link: string | null;
 }
 
 const CarouselManager = () => {
@@ -29,6 +34,8 @@ const CarouselManager = () => {
   const [saving, setSaving] = useState(false);
   const [editingSlide, setEditingSlide] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<CarouselSlide>>({});
+  const [editingVideo, setEditingVideo] = useState(false);
+  const [videoForm, setVideoForm] = useState<Partial<CarouselSettings>>({});
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +54,13 @@ const CarouselManager = () => {
 
       if (settingsData) {
         setSettings(settingsData as CarouselSettings);
+        setVideoForm({
+          badge_text: settingsData.badge_text || null,
+          title: settingsData.title || null,
+          subtitle: settingsData.subtitle || null,
+          button_text: settingsData.button_text || null,
+          button_link: settingsData.button_link || null,
+        });
       }
 
       const { data: slidesData } = await supabase
@@ -323,6 +337,8 @@ const CarouselManager = () => {
         .cm-move-btns { display: flex; flex-direction: column; gap: 2px; }
         .cm-move-btn { padding: 2px 4px; background: #f3f4f6; border: 1px solid #e5e7eb; cursor: pointer; font-size: 10px; line-height: 1; }
         .cm-move-btn:hover { background: #e5e7eb; }
+        .cm-video-editor { margin-top: 1rem; }
+        .cm-video-editor-form { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
       `}</style>
 
       {/* Display Type Toggle */}
@@ -349,7 +365,7 @@ const CarouselManager = () => {
         </div>
 
         {settings?.display_type === 'video' && (
-          <div className="cm-video-preview">
+          <div className="cm-video-editor">
             <input
               ref={videoInputRef}
               type="file"
@@ -357,15 +373,156 @@ const CarouselManager = () => {
               onChange={handleVideoUpload}
               style={{ display: 'none' }}
             />
-            <button
-              className="cm-upload-btn"
-              onClick={() => videoInputRef.current?.click()}
-              disabled={uploading}
-            >
-              <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Video'}
-            </button>
-            {settings.video_url && (
-              <video src={settings.video_url} controls style={{ marginTop: '0.5rem' }} />
+            <div style={{ marginBottom: '1rem' }}>
+              <button
+                className="cm-upload-btn"
+                onClick={() => videoInputRef.current?.click()}
+                disabled={uploading}
+              >
+                <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Video'}
+              </button>
+              {settings.video_url && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <video src={settings.video_url} controls style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }} />
+                </div>
+              )}
+            </div>
+
+            {!editingVideo ? (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h4 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#111827' }}>Video Content</h4>
+                  <button
+                    className="cm-icon-btn"
+                    onClick={() => {
+                      setEditingVideo(true);
+                      setVideoForm({
+                        badge_text: settings?.badge_text || null,
+                        title: settings?.title || null,
+                        subtitle: settings?.subtitle || null,
+                        button_text: settings?.button_text || null,
+                        button_link: settings?.button_link || null,
+                      });
+                    }}
+                    title="Edit Video Content"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                </div>
+                {(settings?.badge_text || settings?.title || settings?.subtitle || settings?.button_text) && (
+                  <div style={{ padding: '1rem', background: '#f9fafb', borderRadius: '6px', fontSize: '0.875rem' }}>
+                    {settings?.badge_text && (
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <strong>Badge:</strong> {settings.badge_text}
+                      </div>
+                    )}
+                    {settings?.title && (
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <strong>Title:</strong> {settings.title}
+                      </div>
+                    )}
+                    {settings?.subtitle && (
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <strong>Subtitle:</strong> {settings.subtitle}
+                      </div>
+                    )}
+                    {settings?.button_text && (
+                      <div>
+                        <strong>Button:</strong> {settings.button_text} {settings?.button_link && `(${settings.button_link})`}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="cm-video-editor-form">
+                <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', fontWeight: 600, color: '#111827' }}>Edit Video Content</h4>
+                <div className="cm-form-grid">
+                  <div className="cm-form-group">
+                    <label>Badge Text</label>
+                    <input
+                      type="text"
+                      value={videoForm.badge_text || ''}
+                      onChange={(e) => setVideoForm({ ...videoForm, badge_text: e.target.value })}
+                      placeholder="e.g., Welcome to GNRS"
+                    />
+                  </div>
+                  <div className="cm-form-group">
+                    <label>Title</label>
+                    <input
+                      type="text"
+                      value={videoForm.title || ''}
+                      onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })}
+                      placeholder="Main headline"
+                    />
+                  </div>
+                  <div className="cm-form-group">
+                    <label>Subtitle</label>
+                    <textarea
+                      value={videoForm.subtitle || ''}
+                      onChange={(e) => setVideoForm({ ...videoForm, subtitle: e.target.value })}
+                      placeholder="Optional description text"
+                    />
+                  </div>
+                  <div className="cm-form-row">
+                    <div className="cm-form-group">
+                      <label>Button Text</label>
+                      <input
+                        type="text"
+                        value={videoForm.button_text || ''}
+                        onChange={(e) => setVideoForm({ ...videoForm, button_text: e.target.value })}
+                        placeholder="e.g., Learn More"
+                      />
+                    </div>
+                    <div className="cm-form-group">
+                      <label>Button Link</label>
+                      <input
+                        type="text"
+                        value={videoForm.button_link || ''}
+                        onChange={(e) => setVideoForm({ ...videoForm, button_link: e.target.value })}
+                        placeholder="e.g., #about or /page"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="cm-form-actions">
+                  <button className="cm-btn cm-btn-secondary" onClick={() => {
+                    setEditingVideo(false);
+                    setVideoForm({});
+                  }}>
+                    <X size={14} /> Cancel
+                  </button>
+                  <button
+                    className="cm-btn cm-btn-primary"
+                    onClick={async () => {
+                      if (!settings) return;
+                      setSaving(true);
+                      const { error } = await supabase
+                        .from('carousel_settings')
+                        .update({
+                          badge_text: videoForm.badge_text,
+                          title: videoForm.title,
+                          subtitle: videoForm.subtitle,
+                          button_text: videoForm.button_text,
+                          button_link: videoForm.button_link,
+                        })
+                        .eq('id', settings.id);
+
+                      if (error) {
+                        toast.error('Failed to save video content');
+                      } else {
+                        setSettings({ ...settings, ...videoForm });
+                        setEditingVideo(false);
+                        toast.success('Video content saved');
+                      }
+                      setSaving(false);
+                    }}
+                    disabled={saving}
+                  >
+                    <Save size={14} /> {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         )}

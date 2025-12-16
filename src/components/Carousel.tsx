@@ -16,10 +16,23 @@ interface CarouselSlide {
 interface CarouselSettings {
   display_type: 'carousel' | 'video';
   video_url: string | null;
+  badge_text: string | null;
+  title: string | null;
+  subtitle: string | null;
+  button_text: string | null;
+  button_link: string | null;
 }
 
 export const Carousel = () => {
-  const [settings, setSettings] = useState<CarouselSettings>({ display_type: 'carousel', video_url: null });
+  const [settings, setSettings] = useState<CarouselSettings>({ 
+    display_type: 'carousel', 
+    video_url: null,
+    badge_text: null,
+    title: null,
+    subtitle: null,
+    button_text: null,
+    button_link: null
+  });
   const [slides, setSlides] = useState<CarouselSlide[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +52,12 @@ export const Carousel = () => {
       if (settingsData) {
         setSettings({
           display_type: settingsData.display_type as 'carousel' | 'video',
-          video_url: settingsData.video_url
+          video_url: settingsData.video_url || null,
+          badge_text: (settingsData as any).badge_text || null,
+          title: (settingsData as any).title || null,
+          subtitle: (settingsData as any).subtitle || null,
+          button_text: (settingsData as any).button_text || null,
+          button_link: (settingsData as any).button_link || null
         });
       }
 
@@ -199,6 +217,11 @@ export const Carousel = () => {
             min-height: 100vh;
             overflow: hidden;
           }
+          @media (min-width: 1600px) {
+            .video-hero-container {
+              margin-top: 80px;
+            }
+          }
           .video-hero-container video {
             position: absolute;
             top: 0;
@@ -233,43 +256,41 @@ export const Carousel = () => {
           <div className="video-overlay"></div>
           <div className="video-content">
             <div className="container text-center">
-              {slides.length > 0 && (
-                <>
-                  {slides[0].badge_text && (
-                    <p className="d-inline-block border fw-semi-bold py-2 px-4 animated slideInDown mb-4" style={{
-                      color: '#2C2C2C',
-                      borderColor: 'rgba(252, 209, 22, 0.3)',
-                      backgroundColor: 'rgba(255, 250, 230, 0.95)',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                      letterSpacing: '0.5px',
-                      borderRadius: '12px'
-                    }}>
-                      {slides[0].badge_text}
-                    </p>
-                  )}
-                  <h1 className="display-1 mb-4 animated slideInDown" style={{
-                    color: '#FFFFFF',
-                    textShadow: '3px 3px 10px rgba(0, 0, 0, 0.9)',
-                    fontWeight: '700'
-                  }}>
-                    {slides[0].title}
-                  </h1>
-                  {slides[0].subtitle && (
-                    <p className="lead mb-4 animated slideInDown" style={{
-                      color: '#FFFFFF',
-                      textShadow: '2px 2px 8px rgba(0, 0, 0, 0.8)',
-                      maxWidth: '800px',
-                      margin: '0 auto'
-                    }}>
-                      {slides[0].subtitle}
-                    </p>
-                  )}
-                  {slides[0].button_text && slides[0].button_link && (
-                    <div className="animated slideInDown">
-                      <HomepageButton href={slides[0].button_link}>{slides[0].button_text}</HomepageButton>
-                    </div>
-                  )}
-                </>
+              {settings.badge_text && (
+                <p className="d-inline-block border fw-semi-bold py-2 px-4 animated slideInDown mb-4" style={{
+                  color: '#2C2C2C',
+                  borderColor: 'rgba(252, 209, 22, 0.3)',
+                  backgroundColor: 'rgba(255, 250, 230, 0.95)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  letterSpacing: '0.5px',
+                  borderRadius: '12px'
+                }}>
+                  {settings.badge_text}
+                </p>
+              )}
+              {settings.title && (
+                <h1 className="display-1 mb-4 animated slideInDown" style={{
+                  color: '#FFFFFF',
+                  textShadow: '3px 3px 10px rgba(0, 0, 0, 0.9)',
+                  fontWeight: '700'
+                }}>
+                  {settings.title}
+                </h1>
+              )}
+              {settings.subtitle && (
+                <p className="lead mb-4 animated slideInDown" style={{
+                  color: '#FFFFFF',
+                  textShadow: '2px 2px 8px rgba(0, 0, 0, 0.8)',
+                  maxWidth: '800px',
+                  margin: '0 auto'
+                }}>
+                  {settings.subtitle}
+                </p>
+              )}
+              {settings.button_text && settings.button_link && (
+                <div className="animated slideInDown">
+                  <HomepageButton href={settings.button_link}>{settings.button_text}</HomepageButton>
+                </div>
               )}
             </div>
           </div>
@@ -302,6 +323,9 @@ export const Carousel = () => {
           }
         }
         @media (min-width: 1600px) {
+          .carousel-container-wrapper {
+            margin-top: 80px;
+          }
           #header-carousel .carousel-caption > .container {
             padding-top: 12rem;
           }
@@ -311,7 +335,7 @@ export const Carousel = () => {
           }
         }
       `}</style>
-      <div className="container-fluid p-0 mb-5 wow fadeIn" data-wow-delay="0.1s">
+      <div className="container-fluid p-0 mb-5 wow fadeIn carousel-container-wrapper" data-wow-delay="0.1s">
         <div id="header-carousel" className="carousel slide carousel-fade" data-bs-ride="carousel">
           <div className="carousel-inner">
             {slides.map((slide, index) => renderSlide(slide, index))}
