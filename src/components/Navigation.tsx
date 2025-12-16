@@ -280,11 +280,7 @@ export const Navigation = React.memo(() => {
         ],
         faqs: [
           { title: 'FAQs', items: [
-            { to: '/info/faqs', label: 'All FAQs', icon: 'fa-question-circle' },
-            { to: '/info/faqs', label: 'Getting Started FAQs', icon: 'fa-rocket' },
-            { to: '/info/faqs', label: 'Education Resources FAQs', icon: 'fa-graduation-cap' },
-            { to: '/info/faqs', label: 'Job Portal FAQs', icon: 'fa-briefcase' },
-            { to: '/info/faqs', label: 'Directories FAQs', icon: 'fa-folder' }
+            { to: '/info/faqs', label: 'All FAQs', icon: 'fa-question-circle' }
           ]},
           { title: 'Quick Help', items: [
             { to: '/info/getting-started', label: 'How to Get Started', icon: 'fa-play-circle' },

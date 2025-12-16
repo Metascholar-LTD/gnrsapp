@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Trash2, Plus, GripVertical, Upload, Video, Image, Save, Edit2, X, Check } from "lucide-react";
+import { ConfirmationModal } from "@/components/admin";
 
 interface CarouselSlide {
   id: string;
@@ -37,6 +38,8 @@ const CarouselManager = () => {
   const [editingVideo, setEditingVideo] = useState(false);
   const [videoForm, setVideoForm] = useState<Partial<CarouselSettings>>({});
   const [uploading, setUploading] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [slideToDelete, setSlideToDelete] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -198,19 +201,25 @@ const CarouselManager = () => {
   };
 
   const deleteSlide = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this slide?')) return;
+    setSlideToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!slideToDelete) return;
 
     const { error } = await supabase
       .from('carousel_slides')
       .delete()
-      .eq('id', id);
+      .eq('id', slideToDelete);
 
     if (error) {
       toast.error('Failed to delete slide');
     } else {
-      setSlides(slides.filter(s => s.id !== id));
+      setSlides(slides.filter(s => s.id !== slideToDelete));
       toast.success('Slide deleted');
     }
+    setSlideToDelete(null);
   };
 
   const toggleSlideActive = async (slide: CarouselSlide) => {
@@ -655,6 +664,17 @@ const CarouselManager = () => {
           </div>
         ))}
       </div>
+
+      <ConfirmationModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        title="Delete Slide"
+        description="Are you sure you want to delete this slide? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

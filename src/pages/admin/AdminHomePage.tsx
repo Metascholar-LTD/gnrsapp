@@ -5,6 +5,7 @@ import CarouselManager from "./components/CarouselManager";
 import AboutManager from "./components/AboutManager";
 import ServicesManager from "./components/ServicesManager";
 import WhyChooseUsManager from "./components/WhyChooseUsManager";
+import FAQsManager from "./adminInfo/FAQsManager";
 
 const AdminHomePage = () => {
   const [activeTab, setActiveTab] = useState("carousel");
@@ -314,12 +315,8 @@ const AdminHomePage = () => {
       ),
       faqs: (
         <div className="ahp-section-card">
-          <h3 className="ahp-section-title">FAQs</h3>
-          <div className="ahp-placeholder">
-            FAQs management will be implemented here.
-            <br />
-            Add, edit, and reorder frequently asked questions.
-          </div>
+          <h3 className="ahp-section-title">FAQs Management</h3>
+          <FAQsManager />
         </div>
       ),
     };

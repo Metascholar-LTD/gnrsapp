@@ -3,10 +3,10 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
-import { Rocket, GraduationCap, Briefcase, FolderOpen, HelpCircle } from "lucide-react";
+import { Rocket, GraduationCap, Briefcase, FolderOpen, HelpCircle, Wrench } from "lucide-react";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
-type FAQCategory = 'all' | 'getting-started' | 'education' | 'jobs' | 'directories';
+type FAQCategory = 'all' | 'getting-started' | 'education' | 'jobs' | 'directories' | 'hands-skills';
 
 interface FAQ {
   id: number;
@@ -166,6 +166,43 @@ const FAQs = () => {
       category: 'directories',
       question: "How accurate is the location information?",
       answer: "We use verified addresses and GPS coordinates to provide accurate location information. Each listing includes a map view, directions, and contact information. If you notice any inaccuracies, please report them through the 'Report Issue' button on the listing page."
+    },
+    // Hands & Skills FAQs
+    {
+      id: 25,
+      category: 'hands-skills',
+      question: "How do I find skilled workers for my project?",
+      answer: "Browse our Hands & Skills directory by category or use the search function to find skilled professionals. You can filter by location, skill type, ratings, and availability. Each profile includes work samples, reviews, and contact information to help you make an informed decision."
+    },
+    {
+      id: 26,
+      category: 'hands-skills',
+      question: "How do I register as a skilled worker?",
+      answer: "Click on 'Join as Skilled Worker' and create your profile. You'll need to provide your skills, experience, location, and upload work samples or portfolio images. After verification, your profile will be visible to potential clients. Keep your profile updated to attract more opportunities."
+    },
+    {
+      id: 27,
+      category: 'hands-skills',
+      question: "Are skilled workers verified?",
+      answer: "We verify skilled workers through document checks and portfolio reviews. Verified workers display a verification badge on their profiles. However, we recommend checking reviews and ratings from previous clients, and conducting your own due diligence before hiring."
+    },
+    {
+      id: 28,
+      category: 'hands-skills',
+      question: "Can I leave reviews for skilled workers?",
+      answer: "Yes! After completing a project with a skilled worker, you can leave a review and rating on their profile. Reviews help other clients make informed decisions and help skilled workers build their reputation. Only verified clients who have worked with a skilled worker can leave reviews."
+    },
+    {
+      id: 29,
+      category: 'hands-skills',
+      question: "What categories of skilled workers are available?",
+      answer: "Our platform includes various categories including electricians, plumbers, carpenters, masons, painters, mechanics, tailors, hairdressers, and many more. Browse by category to find the specific skills you need, or use the search function to find specialized professionals."
+    },
+    {
+      id: 30,
+      category: 'hands-skills',
+      question: "How do I contact a skilled worker?",
+      answer: "Once you find a skilled worker you're interested in, click on their profile to view contact information including phone number and location. You can also send a message through our platform if the worker has enabled messaging. Always discuss project details, pricing, and timelines before starting work."
     }
   ];
 
@@ -178,7 +215,8 @@ const FAQs = () => {
     { id: 'getting-started' as FAQCategory, label: 'Getting Started', icon: Rocket, count: allFAQs.filter(f => f.category === 'getting-started').length },
     { id: 'education' as FAQCategory, label: 'Education', icon: GraduationCap, count: allFAQs.filter(f => f.category === 'education').length },
     { id: 'jobs' as FAQCategory, label: 'Jobs', icon: Briefcase, count: allFAQs.filter(f => f.category === 'jobs').length },
-    { id: 'directories' as FAQCategory, label: 'Directories', icon: FolderOpen, count: allFAQs.filter(f => f.category === 'directories').length }
+    { id: 'directories' as FAQCategory, label: 'Directories', icon: FolderOpen, count: allFAQs.filter(f => f.category === 'directories').length },
+    { id: 'hands-skills' as FAQCategory, label: 'Hands & Skills', icon: Wrench, count: allFAQs.filter(f => f.category === 'hands-skills').length }
   ];
 
   const fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';

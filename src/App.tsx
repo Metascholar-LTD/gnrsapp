@@ -89,6 +89,7 @@ import "./pages/resume-builder/resume-builder.css";
 import AdminLayout from "./pages/admin/components/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminHomePage from "./pages/admin/AdminHomePage";
+import AdminFAQsPage from "./pages/admin/adminInfo/AdminFAQsPage";
 
 const queryClient = new QueryClient();
 
@@ -212,6 +213,7 @@ const App = () => (
             <Route path="icons" element={<AdminDashboard />} />
             <Route path="charts" element={<AdminDashboard />} />
             <Route path="maps" element={<AdminDashboard />} />
+            <Route path="info/faqs" element={<AdminFAQsPage />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
