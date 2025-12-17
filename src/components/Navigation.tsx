@@ -141,10 +141,6 @@ export const Navigation = React.memo(() => {
             { to: '/education/cgpa-calculator', label: 'CGPA Calculator', icon: 'fa-calculator' },
             { to: '/education/timetable-builder', label: 'Timetable Builder', icon: 'fa-calendar-alt' },
             { to: '/education/ai-tutor', label: 'AI Study Tutor', icon: 'fa-robot' }
-          ]},
-          { title: 'My Resources', items: [
-            { to: '/education/my-resources', label: 'My Saved Resources', icon: 'fa-bookmark' },
-            { to: '/education/learning-path', label: 'My Learning Path', icon: 'fa-route' }
           ]}
         ]
       },
