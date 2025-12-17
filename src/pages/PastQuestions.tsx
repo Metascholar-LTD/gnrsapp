@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -16,9 +16,16 @@ import {
   CheckCircle2,
   Building2,
   BookOpen,
-  Calendar
+  Calendar,
+  Grid3x3,
+  List,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { ExamPaperCard } from "@/components/ui/card-7";
+import { ExamPaperListItem } from "@/components/ui/exam-paper-list-item";
 import { PartneringUniversities } from "@/components/PartneringUniversities";
 import {
   Select,
@@ -27,11 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 interface ExamPaper {
   id: string;
@@ -68,11 +70,17 @@ const universityLogos: Record<string, string> = {
 
 const PastQuestions = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedUniversity, setSelectedUniversity] = useState<string | null>(null);
   const [selectedFaculty, setSelectedFaculty] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
+  const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "grouped">("grouped");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expandedUniversities, setExpandedUniversities] = useState<Record<string, boolean>>({});
+  const itemsPerPage = 24;
 
   // Mock exam papers data
   const examPapers: ExamPaper[] = [
@@ -180,309 +188,1191 @@ const PastQuestions = () => {
     },
   ];
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setCurrentPage(1); // Reset to first page on search
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Get unique values for filters
-  const universities = Array.from(new Set(examPapers.map(p => p.universityShort))).sort();
-  const faculties = Array.from(new Set(examPapers.map(p => p.faculty))).sort();
-  const years = Array.from(new Set(examPapers.map(p => p.year))).sort((a, b) => b - a);
+  const universities = useMemo(() => 
+    Array.from(new Set(examPapers.map(p => p.universityShort))).sort(),
+    []
+  );
+  const faculties = useMemo(() => 
+    Array.from(new Set(examPapers.map(p => p.faculty))).sort(),
+    []
+  );
+  const years = useMemo(() => 
+    Array.from(new Set(examPapers.map(p => p.year))).sort((a, b) => b - a),
+    []
+  );
   const semesters = ["1st", "2nd"];
 
-  // Filtering logic
-  const filteredPapers = examPapers.filter(paper => {
-    const matchesSearch = 
-      paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      paper.courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      paper.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      paper.university.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesUniversity = !selectedUniversity || paper.universityShort === selectedUniversity;
-    const matchesFaculty = !selectedFaculty || paper.faculty === selectedFaculty;
-    const matchesYear = !selectedYear || paper.year === selectedYear;
-    const matchesSemester = !selectedSemester || paper.semester === selectedSemester;
-    
-    return matchesSearch && matchesUniversity && matchesFaculty && matchesYear && matchesSemester;
-  });
+  // Memoized filtering logic
+  const filteredPapers = useMemo(() => {
+    return examPapers.filter(paper => {
+      const matchesSearch = 
+        paper.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        paper.courseCode.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        paper.courseName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        paper.university.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+      
+      const matchesUniversity = !selectedUniversity || paper.universityShort === selectedUniversity;
+      const matchesFaculty = !selectedFaculty || paper.faculty === selectedFaculty;
+      const matchesYear = !selectedYear || paper.year === selectedYear;
+      const matchesSemester = !selectedSemester || paper.semester === selectedSemester;
+      
+      return matchesSearch && matchesUniversity && matchesFaculty && matchesYear && matchesSemester;
+    });
+  }, [debouncedSearchQuery, selectedUniversity, selectedFaculty, selectedYear, selectedSemester]);
 
-  const clearAllFilters = () => {
+  // Group papers by university
+  const groupedPapers = useMemo(() => {
+    const groups: Record<string, ExamPaper[]> = {};
+    filteredPapers.forEach(paper => {
+      if (!groups[paper.universityShort]) {
+        groups[paper.universityShort] = [];
+      }
+      groups[paper.universityShort].push(paper);
+    });
+    return groups;
+  }, [filteredPapers]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPapers.length / itemsPerPage);
+  const paginatedPapers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredPapers.slice(start, end);
+  }, [filteredPapers, currentPage]);
+
+  // Toggle university expansion
+  const toggleUniversity = useCallback((uni: string) => {
+    setExpandedUniversities(prev => {
+      const newState = {
+        ...prev,
+        [uni]: prev[uni] === undefined ? false : !prev[uni]
+      };
+      return newState;
+    });
+  }, []);
+
+  // Expand all / Collapse all
+  const toggleAllUniversities = useCallback(() => {
+    const allUnis = Object.keys(groupedPapers);
+    const allExpanded = allUnis.every(uni => expandedUniversities[uni] === true);
+    
+    if (allExpanded) {
+      // Collapse all
+      const newState: Record<string, boolean> = {};
+      allUnis.forEach(uni => {
+        newState[uni] = false;
+      });
+      setExpandedUniversities(newState);
+    } else {
+      // Expand all
+      const newState: Record<string, boolean> = {};
+      allUnis.forEach(uni => {
+        newState[uni] = true;
+      });
+      setExpandedUniversities(newState);
+    }
+  }, [expandedUniversities, groupedPapers]);
+
+  const clearAllFilters = useCallback(() => {
     setSearchQuery("");
+    setDebouncedSearchQuery("");
     setSelectedUniversity(null);
     setSelectedFaculty(null);
     setSelectedYear(null);
     setSelectedSemester(null);
-  };
+    setCurrentPage(1);
+  }, []);
 
   const hasActiveFilters = selectedUniversity || selectedFaculty || selectedYear || selectedSemester;
+
+  const isolatedStyles = `
+    .past-questions-page {
+      min-height: 100vh;
+      background: white;
+    }
+
+    .past-questions-content-wrapper {
+      min-height: calc(100vh - 80px);
+      display: flex;
+      gap: 0;
+    }
+
+    .past-questions-main-content {
+      flex: 1;
+      padding: 2rem;
+      max-width: 100%;
+      margin: 0;
+      transition: margin-left 0.3s ease;
+    }
+
+    .past-questions-header {
+      margin-bottom: 3rem;
+    }
+
+    .past-questions-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: hsl(220 30% 15%);
+      margin: 0 0 1rem 0;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .past-questions-subtitle {
+      font-size: 18px;
+      color: hsl(220 20% 40%);
+      margin: 0 0 2rem 0;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    .past-questions-search-filter-wrapper {
+      margin-bottom: 2rem;
+    }
+
+    .past-questions-active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.75rem;
+      border: 1px solid hsl(40 20% 88%);
+    }
+
+    .past-questions-active-filters-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: hsl(220 20% 40%);
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .past-questions-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .past-questions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .past-questions-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .past-questions-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+      }
+    }
+
+    .past-questions-empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: hsl(220 20% 40%);
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .past-questions-list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .past-questions-grouped-view {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .past-questions-university-content {
+      overflow: hidden;
+      transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+    }
+
+    .past-questions-university-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .past-questions-university-content.expanded {
+      max-height: 5000px;
+      opacity: 1;
+    }
+
+    /* Filter Sidebar Styles */
+    .past-questions-filter-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .past-questions-filter-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .past-questions-filter-sidebar {
+      width: 320px;
+      background: white;
+      border-right: 1px solid hsl(40 20% 88%);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      max-height: calc(100vh - 80px);
+    }
+
+    .past-questions-filter-sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .past-questions-filter-sidebar.collapsed {
+      width: 60px;
+    }
+
+    .past-questions-filter-sidebar.collapsed .past-questions-filter-sidebar-content,
+    .past-questions-filter-sidebar.collapsed .past-questions-filter-actions {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .past-questions-filter-sidebar.collapsed .past-questions-filter-sidebar-header h3 span {
+      display: none;
+    }
+
+    .past-questions-filter-sidebar.collapsed .past-questions-filter-sidebar-header {
+      justify-content: center;
+      padding: 1.5rem 0.75rem;
+    }
+
+    .past-questions-filter-sidebar.collapsed .past-questions-filter-sidebar-header h3 {
+      justify-content: center;
+      margin: 0;
+    }
+
+    @media (max-width: 1023px) {
+      .past-questions-filter-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        max-width: 90vw;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+        z-index: 50;
+        transform: translateX(-100%);
+        width: 320px;
+      }
+
+      .past-questions-filter-sidebar.open {
+        transform: translateX(0);
+      }
+
+      .past-questions-main-content {
+        margin-left: 0 !important;
+      }
+    }
+
+    .past-questions-filter-sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid hsl(40 20% 88%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, hsl(220 30% 15%) 0%, hsl(220 20% 25%) 100%);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      min-height: 70px;
+    }
+
+    .past-questions-filter-sidebar-header * {
+      color: white !important;
+    }
+
+    .past-questions-filter-sidebar-header h3 {
+      color: white !important;
+    }
+
+    .past-questions-filter-sidebar-header h3 span {
+      color: white !important;
+    }
+
+    .past-questions-filter-sidebar-header svg {
+      color: white !important;
+    }
+
+    .past-questions-filter-sidebar.collapsed .past-questions-filter-sidebar-header {
+      justify-content: center;
+      padding: 1.5rem 0.75rem;
+    }
+
+    .past-questions-filter-sidebar-header h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .past-questions-filter-sidebar-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .past-questions-filter-sidebar-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .past-questions-filter-collapse-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-left: auto;
+      margin-right: 0.5rem;
+    }
+
+    .past-questions-filter-collapse-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .past-questions-filter-sidebar.collapsed .past-questions-filter-collapse-btn {
+      margin: 0;
+    }
+
+    .past-questions-filter-mobile-close {
+      display: none;
+    }
+
+    @media (max-width: 1023px) {
+      .past-questions-filter-collapse-btn {
+        display: none;
+      }
+
+      .past-questions-filter-mobile-close {
+        display: flex;
+      }
+    }
+
+    .past-questions-filter-section {
+      margin-bottom: 2rem;
+    }
+
+    .past-questions-filter-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .past-questions-filter-section-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: hsl(220 30% 15%);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .past-questions-filter-section-title::before {
+      content: '';
+      width: 3px;
+      height: 1rem;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 2px;
+    }
+
+    .past-questions-filter-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .past-questions-filter-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .past-questions-filter-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: hsl(220 20% 40%);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .past-questions-filter-actions {
+      padding: 1.5rem;
+      border-top: 1px solid hsl(40 20% 88%);
+      background: hsl(40 33% 96%);
+      display: flex;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+
+    .past-questions-filter-btn {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .past-questions-filter-btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .past-questions-filter-btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .past-questions-filter-btn-secondary {
+      background: white;
+      color: hsl(220 30% 15%);
+      border: 1px solid hsl(40 20% 88%);
+    }
+
+    .past-questions-filter-btn-secondary:hover {
+      background: hsl(40 20% 95%);
+    }
+
+    @media (min-width: 1024px) {
+      .past-questions-filter-overlay {
+        display: none;
+      }
+
+      .past-questions-content-area {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .past-questions-main-content {
+        margin-left: 0;
+      }
+
+      .past-questions-filter-sidebar.collapsed ~ .past-questions-main-content {
+        margin-left: 0;
+      }
+    }
+
+    .past-questions-view-toggle {
+      display: flex;
+      gap: 0.25rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      overflow: hidden;
+      background: white;
+    }
+
+    .past-questions-view-button {
+      padding: 0.5rem;
+      border: none;
+      background: white;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+    }
+
+    .past-questions-view-button.active {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+
+    .past-questions-view-button:hover {
+      background: #f9fafb;
+    }
+
+    /* Mobile: 0px - 767px */
+    @media (max-width: 767px) {
+      .past-questions-content-wrapper {
+        padding-top: 60px;
+      }
+
+      .past-questions-main-content {
+        padding: 1rem;
+      }
+
+      .past-questions-title {
+        font-size: 2rem;
+      }
+
+      .past-questions-subtitle {
+        font-size: 18px;
+      }
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .past-questions-content-wrapper {
+        padding-top: 70px;
+      }
+
+      .past-questions-main-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media (min-width: 1200px) and (max-width: 1599px) {
+      .past-questions-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .past-questions-main-content {
+        padding: 2rem;
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media (min-width: 1600px) {
+      .past-questions-content-wrapper {
+        padding-top: 120px;
+      }
+
+      .past-questions-main-content {
+        padding: 2rem clamp(2rem, 5vw, 4rem);
+      }
+    }
+  `;
 
   return (
     <>
       <InitScripts />
       <Spinner />
-      <Navigation />
-      
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-slate-50" style={{ 
-        paddingTop: '140px',
-        paddingBottom: '80px'
-      }}>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-5xl mx-auto">
-            <h1 className="text-center text-5xl md:text-6xl font-bold mb-6 leading-tight text-slate-900">
-              Past Questions Repository
-            </h1>
-            
-            <p className="text-center text-xl mb-12 leading-relaxed max-w-3xl mx-auto text-slate-600">
-              Access comprehensive exam materials from Ghana's leading universities. 
-              Study smarter, perform better.
-            </p>
-          </div>
-        </div>
-      </section>
+      <div className="past-questions-page">
+        <style>{isolatedStyles}</style>
+        <Navigation />
+        
+        <div className="past-questions-content-wrapper">
+          {/* Filter Overlay */}
+          <div 
+            className={`past-questions-filter-overlay ${isFilterSidebarOpen ? 'active' : ''}`}
+            onClick={() => setIsFilterSidebarOpen(false)}
+          />
 
-      {/* All Papers Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="mb-10">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <div>
-                <h2 className="text-3xl font-bold mb-2 text-slate-900">
-                  All Examination Papers
-                </h2>
-                <p className="text-lg text-slate-600">
-                  {filteredPapers.length} {filteredPapers.length === 1 ? 'paper' : 'papers'} found
-                </p>
+          {/* Filter Sidebar */}
+          <div className={`past-questions-filter-sidebar ${isFilterSidebarOpen ? 'open' : ''} ${isFilterSidebarCollapsed ? 'collapsed' : ''}`}>
+            <div className="past-questions-filter-sidebar-header">
+              <h3>
+                <Filter className="w-5 h-5" />
+                <span>Filters</span>
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button
+                  className="past-questions-filter-collapse-btn"
+                  onClick={() => setIsFilterSidebarCollapsed(!isFilterSidebarCollapsed)}
+                  type="button"
+                  title={isFilterSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                >
+                  {isFilterSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+                </button>
+                <button
+                  className="past-questions-filter-sidebar-close past-questions-filter-mobile-close"
+                  onClick={() => setIsFilterSidebarOpen(false)}
+                  type="button"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
+            </div>
 
-              {/* Search Bar */}
-              <div className="max-w-md w-full md:w-auto">
-                <div className="relative bg-white rounded-2xl shadow-md border border-slate-200/60 p-1.5 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-50">
-                      <Search className="w-4 h-4 text-slate-500" />
-                    </div>
-                    <Input
-                      type="text"
-                      placeholder="Search papers..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="flex-1 border-0 h-10 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent placeholder:text-slate-400"
-                    />
-                    <Popover open={showFilters} onOpenChange={setShowFilters}>
-                      <PopoverTrigger asChild>
-                        <Button 
-                          variant="outline"
-                          className="h-10 px-4 rounded-xl border-slate-200 hover:bg-slate-50"
-                        >
-                          <Filter className="w-4 h-4 mr-1.5" />
-                          <span className="text-sm">Filters</span>
-                        </Button>
-                      </PopoverTrigger>
-                    <PopoverContent className="w-80" align="end">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-lg">Advanced Filters</h3>
-                          {hasActiveFilters && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={clearAllFilters}
-                              className="h-8 text-xs"
-                            >
-                              Clear All
-                            </Button>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-sm font-medium text-slate-700 mb-2 block">University</label>
-                            <Select
-                              value={selectedUniversity || undefined}
-                              onValueChange={(value) => setSelectedUniversity(value || null)}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="All Universities" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {universities.map((uni) => (
-                                  <SelectItem key={uni} value={uni}>
-                                    {uni}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+            <div className="past-questions-filter-sidebar-content">
+              {hasActiveFilters && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-blue-900">Active Filters</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearAllFilters}
+                      className="h-6 text-xs text-blue-700 hover:text-blue-900"
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedUniversity && (
+                      <Badge className="px-2 py-1 text-xs bg-blue-600 text-white">
+                        {selectedUniversity}
+                        <X 
+                          className="w-3 h-3 ml-1 cursor-pointer" 
+                          onClick={() => setSelectedUniversity(null)}
+                        />
+                      </Badge>
+                    )}
+                    {selectedFaculty && (
+                      <Badge className="px-2 py-1 text-xs bg-purple-600 text-white">
+                        {selectedFaculty}
+                        <X 
+                          className="w-3 h-3 ml-1 cursor-pointer" 
+                          onClick={() => setSelectedFaculty(null)}
+                        />
+                      </Badge>
+                    )}
+                    {selectedYear && (
+                      <Badge className="px-2 py-1 text-xs bg-pink-600 text-white">
+                        {selectedYear}
+                        <X 
+                          className="w-3 h-3 ml-1 cursor-pointer" 
+                          onClick={() => setSelectedYear(null)}
+                        />
+                      </Badge>
+                    )}
+                    {selectedSemester && (
+                      <Badge className="px-2 py-1 text-xs bg-green-600 text-white">
+                        {selectedSemester}
+                        <X 
+                          className="w-3 h-3 ml-1 cursor-pointer" 
+                          onClick={() => setSelectedSemester(null)}
+                        />
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
 
-                          <div>
-                            <label className="text-sm font-medium text-slate-700 mb-2 block">Faculty</label>
-                            <Select
-                              value={selectedFaculty || undefined}
-                              onValueChange={(value) => setSelectedFaculty(value || null)}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="All Faculties" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {faculties.map((faculty) => (
-                                  <SelectItem key={faculty} value={faculty}>
-                                    {faculty}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+              <div className="past-questions-filter-section">
+                <div className="past-questions-filter-section-title">Filter Options</div>
+                
+                <div className="past-questions-filter-group">
+                  <label className="past-questions-filter-label">University</label>
+                  <Select
+                    value={selectedUniversity ?? ""}
+                    onValueChange={(value) => setSelectedUniversity(value || null)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All Universities" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {universities.map((uni) => (
+                        <SelectItem key={uni} value={uni}>
+                          {uni}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-sm font-medium text-slate-700 mb-2 block">Year</label>
-                              <Select
-                                value={selectedYear?.toString() || undefined}
-                                onValueChange={(value) => setSelectedYear(value ? parseInt(value) : null)}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="All Years" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {years.map((year) => (
-                                    <SelectItem key={year} value={year.toString()}>
-                                      {year}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                <div className="past-questions-filter-group">
+                  <label className="past-questions-filter-label">Faculty</label>
+                  <Select
+                    value={selectedFaculty ?? ""}
+                    onValueChange={(value) => setSelectedFaculty(value || null)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All Faculties" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {faculties.map((faculty) => (
+                        <SelectItem key={faculty} value={faculty}>
+                          {faculty}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                            <div>
-                              <label className="text-sm font-medium text-slate-700 mb-2 block">Semester</label>
-                              <Select
-                                value={selectedSemester || undefined}
-                                onValueChange={(value) => setSelectedSemester(value || null)}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="All Semesters" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {semesters.map((sem) => (
-                                    <SelectItem key={sem} value={sem}>
-                                      {sem}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                <div className="past-questions-filter-group">
+                  <label className="past-questions-filter-label">Year</label>
+                  <Select
+                    value={selectedYear !== null ? selectedYear.toString() : ""}
+                    onValueChange={(value) => setSelectedYear(value ? parseInt(value) : null)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All Years" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="past-questions-filter-group">
+                  <label className="past-questions-filter-label">Semester</label>
+                  <Select
+                    value={selectedSemester ?? ""}
+                    onValueChange={(value) => setSelectedSemester(value || null)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All Semesters" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {semesters.map((sem) => (
+                        <SelectItem key={sem} value={sem}>
+                          {sem}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
+
+            <div className="past-questions-filter-actions">
+              <button
+                className="past-questions-filter-btn past-questions-filter-btn-secondary"
+                onClick={clearAllFilters}
+                type="button"
+              >
+                Clear All
+              </button>
+              <button
+                className="past-questions-filter-btn past-questions-filter-btn-primary"
+                onClick={() => setIsFilterSidebarOpen(false)}
+                type="button"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+
+          <div className="past-questions-main-content">
+            <div className="past-questions-content-area">
+            <div className="past-questions-header">
+              <h1 className="past-questions-title">University Past Questions</h1>
+              <p className="past-questions-subtitle">
+                Access comprehensive exam materials from Ghana's leading universities. 
+                Study smarter, perform better with our extensive collection of past examination papers.
+              </p>
+              
+              {/* Search Bar and Filter - Keep as is */}
+              <div className="past-questions-search-filter-wrapper">
+                <div className="flex items-center justify-between gap-4 w-full">
+                  <div className="max-w-md w-full md:w-auto flex-1">
+                    <div className="relative bg-white rounded-2xl shadow-md border border-slate-200/60 p-1.5 hover:shadow-lg transition-shadow">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-50">
+                          <Search className="w-4 h-4 text-slate-500" />
+                        </div>
+                        <Input
+                          type="text"
+                          placeholder="Search papers..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="flex-1 border-0 h-10 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent placeholder:text-slate-400"
+                        />
+                    </div>
+                  </div>
+                  </div>
+
+                  {/* Results Count and View Toggle - On same line as search */}
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                    <div className="text-sm text-[hsl(220_20%_40%)] whitespace-nowrap">
+                      <span className="font-semibold text-[hsl(220_30%_15%)]">{filteredPapers.length}</span>{" "}
+                      {filteredPapers.length === 1 ? "paper" : "papers"} found
+                    </div>
+                    <div className="past-questions-view-toggle">
+                      <button
+                        className={`past-questions-view-button ${viewMode === "grouped" ? "active" : ""}`}
+                        onClick={() => setViewMode("grouped")}
+                        title="Grouped View"
+                      >
+                        <Building2 size={18} />
+                      </button>
+                      <button
+                        className={`past-questions-view-button ${viewMode === "grid" ? "active" : ""}`}
+                        onClick={() => setViewMode("grid")}
+                        title="Grid View"
+                      >
+                        <Grid3x3 size={18} />
+                      </button>
+                      <button
+                        className={`past-questions-view-button ${viewMode === "list" ? "active" : ""}`}
+                        onClick={() => setViewMode("list")}
+                        title="List View"
+                      >
+                        <List size={18} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Active Filters */}
+                {hasActiveFilters && (
+                  <div className="past-questions-active-filters">
+                    <span className="past-questions-active-filters-label">Active Filters:</span>
+                    
+                    {selectedUniversity && (
+                      <Badge className="px-3 py-1.5 flex items-center gap-2 bg-blue-600 text-white">
+                        {selectedUniversity}
+                        <X 
+                          className="w-3 h-3 cursor-pointer" 
+                          onClick={() => setSelectedUniversity(null)}
+                        />
+                      </Badge>
+                    )}
+                    
+                    {selectedFaculty && (
+                      <Badge className="px-3 py-1.5 flex items-center gap-2 bg-purple-600 text-white">
+                        {selectedFaculty}
+                        <X 
+                          className="w-3 h-3 cursor-pointer" 
+                          onClick={() => setSelectedFaculty(null)}
+                        />
+                      </Badge>
+                    )}
+                    
+                    {selectedYear && (
+                      <Badge className="px-3 py-1.5 flex items-center gap-2 bg-pink-600 text-white">
+                        {selectedYear}
+                        <X 
+                          className="w-3 h-3 cursor-pointer" 
+                          onClick={() => setSelectedYear(null)}
+                        />
+                      </Badge>
+                    )}
+                    
+                    {selectedSemester && (
+                      <Badge className="px-3 py-1.5 flex items-center gap-2 bg-green-600 text-white">
+                        {selectedSemester}
+                        <X 
+                          className="w-3 h-3 cursor-pointer" 
+                          onClick={() => setSelectedSemester(null)}
+                        />
+                      </Badge>
+                    )}
+
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={clearAllFilters}
+                      className="text-slate-600"
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Active Filters */}
-            {hasActiveFilters && (
-              <div className="flex flex-wrap gap-3 items-center mb-6">
-                <span className="text-sm font-medium text-slate-600">Active Filters:</span>
-                
-                {selectedUniversity && (
-                  <Badge className="px-3 py-1.5 flex items-center gap-2 bg-blue-600 text-white">
-                    {selectedUniversity}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
-                      onClick={() => setSelectedUniversity(null)}
-                    />
-                  </Badge>
+            {/* Content Area */}
+            {filteredPapers.length > 0 ? (
+              <>
+                {viewMode === "grouped" ? (
+                  <div className="space-y-4 mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-[hsl(220_30%_15%)]">
+                        Organized by University
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleAllUniversities}
+                        className="text-xs"
+                      >
+                        {Object.keys(groupedPapers).every(uni => expandedUniversities[uni] === true)
+                          ? "Collapse All"
+                          : "Expand All"}
+                      </Button>
+                    </div>
+                    {Object.entries(groupedPapers)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([uni, papers]) => {
+                        const isExpanded = expandedUniversities[uni] !== false; // Default to expanded if not set
+                        return (
+                          <div
+                            key={uni}
+                            className="bg-[hsl(40_33%_96%)] rounded-xl border border-[hsl(40_20%_88%)] overflow-hidden"
+                          >
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleUniversity(uni);
+                              }}
+                              className="w-full px-6 py-4 flex items-center justify-between hover:bg-[hsl(40_20%_90%)] transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                {universityLogos[uni] && (
+                                  <img
+                                    src={universityLogos[uni]}
+                                    alt={uni}
+                                    className="w-10 h-10 object-contain"
+                                  />
+                                )}
+                                <div className="text-left">
+                                  <h4 className="font-semibold text-[hsl(220_30%_15%)]">{uni}</h4>
+                                  <p className="text-sm text-[hsl(220_20%_40%)]">
+                                    {papers.length} {papers.length === 1 ? "paper" : "papers"}
+                                  </p>
+                                </div>
+                              </div>
+                              {isExpanded ? (
+                                <ChevronUp className="w-5 h-5 text-[hsl(220_20%_40%)]" />
+                              ) : (
+                                <ChevronDown className="w-5 h-5 text-[hsl(220_20%_40%)]" />
+                              )}
+                            </button>
+                            <div className={`past-questions-university-content ${isExpanded ? 'expanded' : 'collapsed'}`}>
+                              <div className="px-6 pb-6">
+                                <div className="past-questions-grid mt-4">
+                                  {papers.map((paper) => (
+                                    <ExamPaperCard
+                                      key={paper.id}
+                                      title={paper.title}
+                                      courseCode={paper.courseCode}
+                                      university={paper.university}
+                                      universityShort={paper.universityShort}
+                                      faculty={paper.faculty}
+                                      year={paper.year}
+                                      semester={paper.semester}
+                                      downloads={paper.downloads}
+                                      views={paper.views}
+                                      fileSize={paper.fileSize}
+                                      verified={paper.verified}
+                                      examType={paper.examType}
+                                      universityLogo={universityLogos[paper.universityShort]}
+                                      hideUniversityBadge={true}
+                                      onPreview={() => console.log('Preview:', paper.id)}
+                                      onDownload={() => console.log('Download:', paper.id)}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                ) : viewMode === "grid" ? (
+                  <>
+                    <div className="past-questions-grid mt-6">
+                      {paginatedPapers.map((paper) => (
+                        <ExamPaperCard
+                          key={paper.id}
+                          title={paper.title}
+                          courseCode={paper.courseCode}
+                          university={paper.university}
+                          universityShort={paper.universityShort}
+                          faculty={paper.faculty}
+                          year={paper.year}
+                          semester={paper.semester}
+                          downloads={paper.downloads}
+                          views={paper.views}
+                          fileSize={paper.fileSize}
+                          verified={paper.verified}
+                          examType={paper.examType}
+                          universityLogo={universityLogos[paper.universityShort]}
+                          onPreview={() => console.log('Preview:', paper.id)}
+                          onDownload={() => console.log('Download:', paper.id)}
+                        />
+                      ))}
+                    </div>
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 mt-8">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Previous
+                        </Button>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNum;
+                            if (totalPages <= 5) {
+                              pageNum = i + 1;
+                            } else if (currentPage <= 3) {
+                              pageNum = i + 1;
+                            } else if (currentPage >= totalPages - 2) {
+                              pageNum = totalPages - 4 + i;
+                            } else {
+                              pageNum = currentPage - 2 + i;
+                            }
+                            return (
+                              <Button
+                                key={pageNum}
+                                variant={currentPage === pageNum ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setCurrentPage(pageNum)}
+                                className="w-10"
+                              >
+                                {pageNum}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                        >
+                          Next
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                        <span className="text-sm text-[hsl(220_20%_40%)] ml-2">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2 mt-6">
+                      {paginatedPapers.map((paper) => (
+                        <ExamPaperListItem
+                          key={paper.id}
+                          title={paper.title}
+                          courseCode={paper.courseCode}
+                          universityShort={paper.universityShort}
+                          faculty={paper.faculty}
+                          year={paper.year}
+                          semester={paper.semester}
+                          downloads={paper.downloads}
+                          views={paper.views}
+                          fileSize={paper.fileSize}
+                          verified={paper.verified}
+                          universityLogo={universityLogos[paper.universityShort]}
+                          onPreview={() => console.log('Preview:', paper.id)}
+                          onDownload={() => console.log('Download:', paper.id)}
+                        />
+                      ))}
+                    </div>
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 mt-8">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Previous
+                        </Button>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNum;
+                            if (totalPages <= 5) {
+                              pageNum = i + 1;
+                            } else if (currentPage <= 3) {
+                              pageNum = i + 1;
+                            } else if (currentPage >= totalPages - 2) {
+                              pageNum = totalPages - 4 + i;
+                            } else {
+                              pageNum = currentPage - 2 + i;
+                            }
+                            return (
+                              <Button
+                                key={pageNum}
+                                variant={currentPage === pageNum ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setCurrentPage(pageNum)}
+                                className="w-10"
+                              >
+                                {pageNum}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                        >
+                          Next
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                        <span className="text-sm text-[hsl(220_20%_40%)] ml-2">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
-                
-                {selectedFaculty && (
-                  <Badge className="px-3 py-1.5 flex items-center gap-2 bg-purple-600 text-white">
-                    {selectedFaculty}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
-                      onClick={() => setSelectedFaculty(null)}
-                    />
-                  </Badge>
-                )}
-                
-                {selectedYear && (
-                  <Badge className="px-3 py-1.5 flex items-center gap-2 bg-pink-600 text-white">
-                    {selectedYear}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
-                      onClick={() => setSelectedYear(null)}
-                    />
-                  </Badge>
-                )}
-                
-                {selectedSemester && (
-                  <Badge className="px-3 py-1.5 flex items-center gap-2 bg-green-600 text-white">
-                    {selectedSemester}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
-                      onClick={() => setSelectedSemester(null)}
-                    />
-                  </Badge>
-                )}
-
+              </>
+            ) : (
+              <div className="past-questions-empty-state" style={{ gridColumn: '1 / -1' }}>
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-white" style={{ border: '1px solid hsl(40 20% 88%)' }}>
+                  <FileText className="w-12 h-12" style={{ color: 'hsl(220 20% 40%)' }} />
+                </div>
+                <h3 className="text-2xl font-bold mb-3" style={{ color: 'hsl(220 30% 15%)' }}>
+                  No papers found
+                </h3>
+                <p className="text-lg mb-6" style={{ color: 'hsl(220 20% 40%)' }}>
+                  Try adjusting your filters or search query
+                </p>
                 <Button 
-                  variant="ghost" 
-                  size="sm"
                   onClick={clearAllFilters}
-                  className="text-slate-600"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  Clear All
+                  Clear All Filters
                 </Button>
               </div>
             )}
+            </div>
           </div>
-          
-          {filteredPapers.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-slate-100">
-                <FileText className="w-12 h-12 text-slate-400" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3 text-slate-700">
-                No papers found
-              </h3>
-              <p className="text-lg mb-6 text-slate-500">
-                Try adjusting your filters or search query
-              </p>
-              <Button 
-                onClick={clearAllFilters}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Clear All Filters
-              </Button>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPapers.map((paper) => (
-                <ExamPaperCard
-                  key={paper.id}
-                  title={paper.title}
-                  courseCode={paper.courseCode}
-                  university={paper.university}
-                  universityShort={paper.universityShort}
-                  faculty={paper.faculty}
-                  year={paper.year}
-                  semester={paper.semester}
-                  downloads={paper.downloads}
-                  views={paper.views}
-                  fileSize={paper.fileSize}
-                  verified={paper.verified}
-                  examType={paper.examType}
-                  universityLogo={universityLogos[paper.universityShort]}
-                  onPreview={() => console.log('Preview:', paper.id)}
-                  onDownload={() => console.log('Download:', paper.id)}
-                />
-              ))}
-            </div>
-          )}
         </div>
-      </section>
 
-      <PartneringUniversities />
+        <PartneringUniversities />
 
-      <Footer />
+        <Footer />
+      </div>
     </>
   );
 };

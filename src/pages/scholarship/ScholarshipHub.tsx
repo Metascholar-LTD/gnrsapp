@@ -867,7 +867,7 @@ const ScholarshipHub = () => {
                           <div>
                             <label className="text-sm font-medium text-slate-700 mb-2 block">Category</label>
                             <Select
-                              value={selectedCategory || undefined}
+                              value={selectedCategory ?? ""}
                               onValueChange={(value) => setSelectedCategory(value || null)}
                             >
                               <SelectTrigger className="w-full">
@@ -886,7 +886,7 @@ const ScholarshipHub = () => {
                           <div>
                             <label className="text-sm font-medium text-slate-700 mb-2 block">Level</label>
                             <Select
-                              value={selectedLevel || undefined}
+                              value={selectedLevel ?? ""}
                               onValueChange={(value) => setSelectedLevel(value || null)}
                             >
                               <SelectTrigger className="w-full">
@@ -905,7 +905,7 @@ const ScholarshipHub = () => {
                           <div>
                             <label className="text-sm font-medium text-slate-700 mb-2 block">Location</label>
                             <Select
-                              value={selectedLocation || undefined}
+                              value={selectedLocation ?? ""}
                               onValueChange={(value) => setSelectedLocation(value || null)}
                             >
                               <SelectTrigger className="w-full">
@@ -924,7 +924,7 @@ const ScholarshipHub = () => {
                           <div>
                             <label className="text-sm font-medium text-slate-700 mb-2 block">Provider/Source</label>
                             <Select
-                              value={selectedSource || undefined}
+                              value={selectedSource ?? ""}
                               onValueChange={(value) => setSelectedSource(value || null)}
                             >
                               <SelectTrigger className="w-full">

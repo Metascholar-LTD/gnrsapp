@@ -381,7 +381,7 @@ const LectureNotes = () => {
                             <div>
                               <label className="text-sm font-medium text-slate-700 mb-2 block">University</label>
                               <Select
-                                value={selectedUniversity || undefined}
+                                value={selectedUniversity ?? ""}
                                 onValueChange={(value) => setSelectedUniversity(value || null)}
                               >
                                 <SelectTrigger className="w-full">
@@ -400,7 +400,7 @@ const LectureNotes = () => {
                             <div>
                               <label className="text-sm font-medium text-slate-700 mb-2 block">Faculty</label>
                               <Select
-                                value={selectedFaculty || undefined}
+                                value={selectedFaculty ?? ""}
                                 onValueChange={(value) => setSelectedFaculty(value || null)}
                               >
                                 <SelectTrigger className="w-full">
@@ -420,7 +420,7 @@ const LectureNotes = () => {
                               <div>
                                 <label className="text-sm font-medium text-slate-700 mb-2 block">Year</label>
                                 <Select
-                                  value={selectedYear?.toString() || undefined}
+                                  value={selectedYear !== null ? selectedYear.toString() : ""}
                                   onValueChange={(value) => setSelectedYear(value ? parseInt(value) : null)}
                                 >
                                   <SelectTrigger className="w-full">
@@ -439,7 +439,7 @@ const LectureNotes = () => {
                               <div>
                                 <label className="text-sm font-medium text-slate-700 mb-2 block">Semester</label>
                                 <Select
-                                  value={selectedSemester || undefined}
+                                  value={selectedSemester ?? ""}
                                   onValueChange={(value) => setSelectedSemester(value || null)}
                                 >
                                   <SelectTrigger className="w-full">

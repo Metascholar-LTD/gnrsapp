@@ -38,7 +38,7 @@ const newsArticles: NewsArticle[] = [
     category: "Regional News",
     author: "Dr. Kofi Owusu",
     publishedAt: "6 hours ago",
-    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=450&fit=crop",
+    imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1756304758/finance_fgi2jq.jpg",
   },
   {
     id: "4",

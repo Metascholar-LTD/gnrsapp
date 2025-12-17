@@ -614,7 +614,7 @@ const FieldBasedScholarships = () => {
                           <div>
                             <label className="text-sm font-medium text-slate-700 mb-2 block">Field of Study</label>
                             <Select
-                              value={selectedField || undefined}
+                              value={selectedField ?? ""}
                               onValueChange={(value) => setSelectedField(value || null)}
                             >
                               <SelectTrigger className="w-full">
@@ -633,7 +633,7 @@ const FieldBasedScholarships = () => {
                           <div>
                             <label className="text-sm font-medium text-slate-700 mb-2 block">Level</label>
                             <Select
-                              value={selectedLevel || undefined}
+                              value={selectedLevel ?? ""}
                               onValueChange={(value) => setSelectedLevel(value || null)}
                             >
                               <SelectTrigger className="w-full">
@@ -652,7 +652,7 @@ const FieldBasedScholarships = () => {
                           <div>
                             <label className="text-sm font-medium text-slate-700 mb-2 block">Location</label>
                             <Select
-                              value={selectedLocation || undefined}
+                              value={selectedLocation ?? ""}
                               onValueChange={(value) => setSelectedLocation(value || null)}
                             >
                               <SelectTrigger className="w-full">

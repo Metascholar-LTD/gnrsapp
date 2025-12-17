@@ -1,8 +1,8 @@
 // components/ui/card-7.tsx
 
-import React from 'react';
+import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Download, Eye, Calendar, BookOpen, CheckCircle2 } from 'lucide-react';
+import { Download, Eye, Calendar, CheckCircle2, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Define the props for the component
@@ -19,8 +19,8 @@ interface ExamPaperCardProps {
   fileSize: string;
   verified: boolean;
   examType: string;
-  imageUrl?: string;
   universityLogo?: string;
+  hideUniversityBadge?: boolean;
   className?: string;
   onPreview?: () => void;
   onDownload?: () => void;
@@ -37,162 +37,162 @@ const formatNumber = (num: number): string => {
   return num.toString();
 };
 
-export const ExamPaperCard: React.FC<ExamPaperCardProps> = ({
-  title,
-  courseCode,
-  university,
-  universityShort,
-  faculty,
-  year,
-  semester,
-  downloads,
-  views,
-  fileSize,
-  verified,
-  examType,
-  imageUrl = "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0",
-  universityLogo,
-  className,
-  onPreview,
-  onDownload,
-}) => {
-  // Animation variants for framer-motion
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: 'spring' as const,
-        stiffness: 100,
-        damping: 15,
-        staggerChildren: 0.1,
-      },
+export const ExamPaperCard = React.forwardRef<HTMLDivElement, ExamPaperCardProps>(
+  (
+    {
+      title,
+      courseCode,
+      university,
+      universityShort,
+      faculty,
+      year,
+      semester,
+      downloads,
+      views,
+      fileSize,
+      verified,
+      examType,
+      universityLogo,
+      hideUniversityBadge = false,
+      className,
+      onPreview,
+      onDownload,
+      ...props
     },
-  };
+    ref
+  ) => {
+    const [isHovered, setIsHovered] = React.useState(false);
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
-  };
-
-  return (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
-      className={cn(
-        'relative w-full max-w-md h-64 rounded-2xl overflow-hidden shadow-lg flex items-end isolate bg-white border border-gray-200',
-        className
-      )}
-    >
-      {/* Background Image & Darker Overlay */}
-      <div className="absolute inset-0 z-[-1]">
-        <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-slate-900/85" />
-      </div>
-
-      {/* University Logo - Top Right Corner */}
-      {universityLogo && (
-        <motion.div
-          variants={itemVariants}
-          className="absolute top-3 right-3 z-10 w-10 h-10 rounded-lg bg-white/95 backdrop-blur-sm p-1.5 shadow-md flex items-center justify-center"
-        >
-          <img 
-            src={universityLogo} 
-            alt={universityShort}
-            className="w-full h-full object-contain"
-          />
-        </motion.div>
-      )}
-      
-      {/* Main Content */}
-      <div className="w-full flex flex-col h-full">
-        {/* Top Section: Course Code, Verified Badge, and Title */}
-        <div className="px-6 pt-4 pb-3">
-          <motion.div variants={itemVariants} className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-blue-600 text-white shadow-sm">
-              {courseCode}
-            </span>
-            {verified && (
-              <CheckCircle2 className="w-4 h-4 text-green-400 drop-shadow-sm" />
+    return (
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20, transition: { duration: 0.3 } }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+        className={cn(
+          "relative w-full max-w-md overflow-hidden rounded-2xl border border-[hsl(40_20%_88%)] bg-white text-[hsl(220_30%_15%)] shadow-lg",
+          className
+        )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        {...props}
+      >
+        <div className="flex flex-col">
+          {/* Text Content Section */}
+          <div className="relative z-10 flex h-full flex-col p-6">
+            {/* University Logo/Badge - Top Right Corner */}
+            {!hideUniversityBadge && (
+              <div className="absolute right-6 top-6 z-10">
+                {universityLogo ? (
+                  <div className="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm p-1 shadow-md flex items-center justify-center border border-[hsl(40_20%_88%)]">
+                    <img 
+                      src={universityLogo} 
+                      alt={universityShort}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-white" />
+                  </div>
+                )}
+              </div>
             )}
-          </motion.div>
-          
-          {/* Course Title with Background */}
-          <motion.div variants={itemVariants}>
-            <div className="inline-block px-3 py-1.5 rounded-lg bg-white/95 backdrop-blur-sm shadow-md">
-              <h2 className="text-base font-bold leading-tight text-slate-900 line-clamp-2">
-                {title}
-              </h2>
-            </div>
-          </motion.div>
-        </div>
 
-        {/* Thin Separator Line */}
-        <div className="px-6">
-          <div className="h-px bg-white/20"></div>
-        </div>
-
-        {/* Bottom Section: Rest of Content */}
-        <div className="flex-1 px-6 pb-6 pt-4 grid grid-cols-3 gap-4">
-          {/* Left Section: Info */}
-          <div className="col-span-2 flex flex-col justify-end">
-            <div className="space-y-2">
-              <motion.div variants={itemVariants} className="flex items-center gap-2 text-xs text-white/90">
-                <span className="font-medium">{universityShort}</span>
-                <span className="text-white/60">•</span>
-                <span className="truncate">{faculty}</span>
-              </motion.div>
+            {/* Course Code, Verified Icon, and Stats - Top */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-1.5">
+                <span className="px-2 py-1 text-xs font-bold rounded-md bg-blue-600 text-white shadow-md">
+                  {courseCode}
+                </span>
+                {verified && (
+                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-white/95 backdrop-blur-sm shadow-md border border-[hsl(40_20%_88%)]">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                  </div>
+                )}
+              </div>
               
-              <motion.div variants={itemVariants} className="flex items-center gap-2 text-xs text-white/80">
-                <Calendar className="w-3 h-3" />
-                <span>{semester} Sem, {year}</span>
-              </motion.div>
+              {/* Thin Separator Line */}
+              <div className="h-6 w-px bg-[hsl(40_20%_88%)] mx-2"></div>
+              
+              {/* Downloads and Views */}
+              <div className="flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                <div className="flex items-center gap-1">
+                  <Download className="w-3.5 h-3.5 text-[hsl(220_30%_15%)]" />
+                  <span className="font-bold">{formatNumber(downloads)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Eye className="w-3.5 h-3.5 text-[hsl(220_30%_15%)]" />
+                  <span className="font-bold">{formatNumber(views)}</span>
+                </div>
+              </div>
             </div>
-            
-            <motion.div
-              variants={itemVariants}
-              className="mt-4 flex items-center gap-3"
-            >
+            <div className="mb-3">
+              <p className="mb-1 text-xs font-medium text-[hsl(220_15%_45%)] uppercase tracking-wide">
+                {universityShort} • {faculty}
+              </p>
+              <h3 className="mb-2 text-xl font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2 pr-12">
+                {title}
+              </h3>
+            </div>
+
+            <div className="mb-4 flex items-center gap-3 text-sm text-[hsl(220_20%_40%)]">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
+                <span>{semester} Semester, {year}</span>
+              </div>
+              <span className="text-[hsl(220_15%_60%)]">•</span>
+              <span className="text-xs">{fileSize}</span>
+            </div>
+
+            <div className="mt-auto flex items-center justify-end gap-6">
               <button
                 onClick={onPreview}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 transition-colors"
+                className="group relative inline-block text-sm font-medium text-[hsl(220_30%_15%)] transition-colors duration-300 hover:text-[hsl(220_20%_40%)]"
               >
-                <Eye className="w-4 h-4" />
-                Preview
+                <motion.span
+                  className="relative inline-block pb-1 flex items-center gap-1.5"
+                  whileHover={{ x: 2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview
+                  <span
+                    className="absolute bottom-0 left-0 h-[2px] bg-[#60a5fa] transition-all duration-300 group-hover:bg-[#3b82f6]"
+                    style={{
+                      width: 'calc(100% + 14px)',
+                      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                    }}
+                  />
+                </motion.span>
               </button>
               <button
                 onClick={onDownload}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-md"
+                className="group relative inline-block text-sm font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
               >
-                <Download className="w-4 h-4" />
-                Download
+                <motion.span
+                  className="relative inline-block pb-1 flex items-center gap-1.5"
+                  whileHover={{ x: 2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                  <span
+                    className="absolute bottom-0 left-0 h-[2px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                    style={{
+                      width: 'calc(100% + 14px)',
+                      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                    }}
+                  />
+                </motion.span>
               </button>
-            </motion.div>
+            </div>
           </div>
-          
-          {/* Right Section: Stats */}
-          <motion.div
-            variants={itemVariants}
-            className="col-span-1 flex flex-col items-end justify-end gap-2"
-          >
-            <div className="text-right">
-              <div className="text-3xl font-bold tracking-tighter text-white select-none">
-                {formatNumber(downloads)}
-              </div>
-              <div className="text-xs text-white/80">downloads</div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold tracking-tighter text-white/90 select-none">
-                {formatNumber(views)}
-              </div>
-              <div className="text-xs text-white/70">views</div>
-            </div>
-          </motion.div>
         </div>
-      </div>
-    </motion.div>
-  );
-};
+      </motion.div>
+    );
+  }
+);
+
+ExamPaperCard.displayName = "ExamPaperCard";
