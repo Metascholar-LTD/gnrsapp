@@ -82,28 +82,22 @@ export const ExamPaperCard = React.forwardRef<HTMLDivElement, ExamPaperCardProps
           {/* Text Content Section */}
           <div className="relative z-10 flex h-full flex-col p-6">
             {/* University Logo/Badge - Top Right Corner */}
-            {!hideUniversityBadge && (
+            {!hideUniversityBadge && universityLogo && (
               <div className="absolute right-6 top-6 z-10">
-                {universityLogo ? (
-                  <div className="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm p-1 shadow-md flex items-center justify-center border border-[hsl(40_20%_88%)]">
-                    <img 
-                      src={universityLogo} 
-                      alt={universityShort}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-white" />
-                  </div>
-                )}
+                <div className="w-8 h-8 rounded-lg bg-white/95 backdrop-blur-sm p-1 shadow-md flex items-center justify-center border border-[hsl(40_20%_88%)]">
+                  <img 
+                    src={universityLogo} 
+                    alt={universityShort}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               </div>
             )}
 
             {/* Course Code, Verified Icon, and Stats - Top */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-1.5">
-                <span className="px-2 py-1 text-xs font-bold rounded-md bg-blue-600 text-white shadow-md">
+                <span className="px-2 py-1 text-xs font-bold rounded-md bg-sky-100 text-slate-800 border-0">
                   {courseCode}
                 </span>
                 {verified && (

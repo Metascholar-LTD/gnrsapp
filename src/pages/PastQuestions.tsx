@@ -6,6 +6,7 @@ import { Spinner } from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, 
   Download, 
@@ -305,6 +306,7 @@ const PastQuestions = () => {
       min-height: calc(100vh - 80px);
       display: flex;
       gap: 0;
+      width: 100%;
     }
 
     .past-questions-main-content {
@@ -313,30 +315,81 @@ const PastQuestions = () => {
       max-width: 100%;
       margin: 0;
       transition: margin-left 0.3s ease;
+      min-width: 0;
+      width: 100%;
     }
 
     .past-questions-header {
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
     }
 
     .past-questions-title {
-      font-size: 3rem;
+      font-size: 2rem;
       font-weight: 700;
       color: hsl(220 30% 15%);
-      margin: 0 0 1rem 0;
+      margin: 0 0 0.75rem 0;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      line-height: 1.2;
     }
 
     .past-questions-subtitle {
-      font-size: 18px;
+      font-size: 16px;
       color: hsl(220 20% 40%);
-      margin: 0 0 2rem 0;
+      margin: 0 0 1.5rem 0;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
       line-height: 1.6;
     }
 
     .past-questions-search-filter-wrapper {
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .past-questions-search-view-toggle-wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .past-questions-search-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .past-questions-search-input-container {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .past-questions-results-count {
+      font-size: 0.875rem;
+      color: hsl(220 20% 40%);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .past-questions-results-count-mobile {
+      display: none;
+    }
+
+    .past-questions-filter-btn-mobile {
+      display: flex;
+    }
+
+    @media (min-width: 1024px) {
+      .past-questions-filter-btn-mobile {
+        display: none !important;
+      }
+
+      .past-questions-results-count-mobile {
+        display: none !important;
+      }
     }
 
     .past-questions-active-filters {
@@ -361,21 +414,21 @@ const PastQuestions = () => {
     .past-questions-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 2rem;
-      margin-top: 3rem;
+      gap: 1.5rem;
+      margin-top: 2rem;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 640px) {
       .past-questions-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 2rem;
+        gap: 1.5rem;
       }
     }
 
     @media (min-width: 1024px) {
       .past-questions-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 2rem;
+        gap: 1.5rem;
       }
     }
 
@@ -397,6 +450,7 @@ const PastQuestions = () => {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      margin-top: 2rem;
     }
 
     .past-questions-grouped-view {
@@ -440,7 +494,7 @@ const PastQuestions = () => {
     }
 
     .past-questions-filter-sidebar {
-      width: 320px;
+      width: 280px;
       background: white;
       border-right: 1px solid hsl(40 20% 88%);
       display: flex;
@@ -489,11 +543,11 @@ const PastQuestions = () => {
         top: 0;
         left: 0;
         height: 100vh;
-        max-width: 90vw;
+        max-width: 85vw;
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
         z-index: 50;
         transform: translateX(-100%);
-        width: 320px;
+        width: 280px;
       }
 
       .past-questions-filter-sidebar.open {
@@ -502,6 +556,21 @@ const PastQuestions = () => {
 
       .past-questions-main-content {
         margin-left: 0 !important;
+        width: 100%;
+      }
+
+      .past-questions-content-wrapper {
+        flex-direction: column;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .past-questions-filter-sidebar {
+        display: flex !important;
+      }
+
+      .past-questions-filter-overlay {
+        display: none !important;
       }
     }
 
@@ -743,18 +812,118 @@ const PastQuestions = () => {
     @media (max-width: 767px) {
       .past-questions-content-wrapper {
         padding-top: 60px;
+        flex-direction: column;
       }
 
       .past-questions-main-content {
         padding: 1rem;
+        width: 100%;
+      }
+
+      .past-questions-header {
+        margin-bottom: 1.5rem;
       }
 
       .past-questions-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
       }
 
       .past-questions-subtitle {
-        font-size: 18px;
+        font-size: 14px;
+        margin-bottom: 1.25rem;
+        line-height: 1.5;
+      }
+
+      .past-questions-search-filter-wrapper {
+        margin-bottom: 1rem;
+      }
+
+      .past-questions-search-view-toggle-wrapper {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+      }
+
+      .past-questions-search-wrapper {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+      }
+
+      .past-questions-search-input-container {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .past-questions-results-count {
+        display: none;
+      }
+
+      .past-questions-view-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .past-questions-results-count-mobile {
+        display: block;
+        font-size: 0.8125rem;
+        color: hsl(220 20% 40%);
+        white-space: nowrap;
+        font-weight: 500;
+      }
+
+      .past-questions-results-count-mobile span {
+        font-weight: 700;
+        color: hsl(220 30% 15%);
+      }
+
+      .past-questions-view-toggle {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .past-questions-filter-sidebar {
+        width: 100%;
+        max-width: 320px;
+      }
+
+      .past-questions-grid {
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .past-questions-list-view {
+        margin-top: 1.5rem;
+        gap: 0.5rem;
+      }
+
+      .past-questions-active-filters {
+        padding: 0.75rem;
+        margin-top: 1rem;
+        gap: 0.5rem;
+      }
+
+      .past-questions-filter-sidebar-header {
+        padding: 1rem;
+        min-height: 60px;
+      }
+
+      .past-questions-filter-sidebar-content {
+        padding: 1rem;
+      }
+
+      .past-questions-filter-actions {
+        padding: 1rem;
+        flex-direction: column;
+      }
+
+      .past-questions-filter-btn {
+        width: 100%;
       }
     }
 
@@ -767,6 +936,61 @@ const PastQuestions = () => {
       .past-questions-main-content {
         padding: 1.5rem;
       }
+
+      .past-questions-header {
+        margin-bottom: 2rem;
+      }
+
+      .past-questions-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .past-questions-subtitle {
+        font-size: 17px;
+        margin-bottom: 1.75rem;
+      }
+
+      .past-questions-search-filter-wrapper {
+        margin-bottom: 1.75rem;
+      }
+
+      .past-questions-search-view-toggle-wrapper {
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .past-questions-search-wrapper {
+        flex: 1 1 auto;
+        min-width: 300px;
+      }
+
+      .past-questions-search-input-container {
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .past-questions-results-count {
+        font-size: 0.875rem;
+      }
+
+      .past-questions-filter-sidebar {
+        width: 280px;
+      }
+
+      .past-questions-grid {
+        gap: 1.25rem;
+        margin-top: 2rem;
+      }
+
+      .past-questions-filter-sidebar-header {
+        padding: 1.25rem;
+      }
+
+      .past-questions-filter-sidebar-content {
+        padding: 1.25rem;
+      }
     }
 
     /* Desktop: 1200px - 1599px */
@@ -778,6 +1002,33 @@ const PastQuestions = () => {
       .past-questions-main-content {
         padding: 2rem;
       }
+
+      .past-questions-header {
+        margin-bottom: 2.5rem;
+      }
+
+      .past-questions-title {
+        font-size: 2.75rem;
+        margin-bottom: 0.875rem;
+      }
+
+      .past-questions-subtitle {
+        font-size: 18px;
+        margin-bottom: 2rem;
+      }
+
+      .past-questions-search-filter-wrapper {
+        margin-bottom: 2rem;
+      }
+
+      .past-questions-filter-sidebar {
+        width: 300px;
+      }
+
+      .past-questions-grid {
+        gap: 1.5rem;
+        margin-top: 2.5rem;
+      }
     }
 
     /* Large Desktop: 1600px+ */
@@ -788,6 +1039,33 @@ const PastQuestions = () => {
 
       .past-questions-main-content {
         padding: 2rem clamp(2rem, 5vw, 4rem);
+      }
+
+      .past-questions-header {
+        margin-bottom: 3rem;
+      }
+
+      .past-questions-title {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      .past-questions-subtitle {
+        font-size: 18px;
+        margin-bottom: 2rem;
+      }
+
+      .past-questions-search-filter-wrapper {
+        margin-bottom: 2rem;
+      }
+
+      .past-questions-filter-sidebar {
+        width: 320px;
+      }
+
+      .past-questions-grid {
+        gap: 1.5rem;
+        margin-top: 3rem;
       }
     }
   `;
@@ -834,60 +1112,6 @@ const PastQuestions = () => {
             </div>
 
             <div className="past-questions-filter-sidebar-content">
-              {hasActiveFilters && (
-                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-blue-900">Active Filters</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearAllFilters}
-                      className="h-6 text-xs text-blue-700 hover:text-blue-900"
-                    >
-                      Clear All
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedUniversity && (
-                      <Badge className="px-2 py-1 text-xs bg-blue-600 text-white">
-                        {selectedUniversity}
-                        <X 
-                          className="w-3 h-3 ml-1 cursor-pointer" 
-                          onClick={() => setSelectedUniversity(null)}
-                        />
-                      </Badge>
-                    )}
-                    {selectedFaculty && (
-                      <Badge className="px-2 py-1 text-xs bg-purple-600 text-white">
-                        {selectedFaculty}
-                        <X 
-                          className="w-3 h-3 ml-1 cursor-pointer" 
-                          onClick={() => setSelectedFaculty(null)}
-                        />
-                      </Badge>
-                    )}
-                    {selectedYear && (
-                      <Badge className="px-2 py-1 text-xs bg-pink-600 text-white">
-                        {selectedYear}
-                        <X 
-                          className="w-3 h-3 ml-1 cursor-pointer" 
-                          onClick={() => setSelectedYear(null)}
-                        />
-                      </Badge>
-                    )}
-                    {selectedSemester && (
-                      <Badge className="px-2 py-1 text-xs bg-green-600 text-white">
-                        {selectedSemester}
-                        <X 
-                          className="w-3 h-3 ml-1 cursor-pointer" 
-                          onClick={() => setSelectedSemester(null)}
-                        />
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-
               <div className="past-questions-filter-section">
                 <div className="past-questions-filter-section-title">Filter Options</div>
                 
@@ -996,33 +1220,85 @@ const PastQuestions = () => {
                 Study smarter, perform better with our extensive collection of past examination papers.
               </p>
               
-              {/* Search Bar and Filter - Keep as is */}
+              {/* Search Bar and View Toggle */}
               <div className="past-questions-search-filter-wrapper">
-                <div className="flex items-center justify-between gap-4 w-full">
-                  <div className="max-w-md w-full md:w-auto flex-1">
-                    <div className="relative bg-white rounded-2xl shadow-md border border-slate-200/60 p-1.5 hover:shadow-lg transition-shadow">
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-50">
-                          <Search className="w-4 h-4 text-slate-500" />
-                        </div>
-                        <Input
-                          type="text"
-                          placeholder="Search papers..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="flex-1 border-0 h-10 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent placeholder:text-slate-400"
-                        />
-                    </div>
-                  </div>
-                  </div>
+                <div className="past-questions-search-view-toggle-wrapper">
+                  <div className="past-questions-search-wrapper">
+                    <div className="past-questions-search-input-container">
+                      <motion.div
+                        layoutId="search-input-container"
+                        transition={{
+                          layout: {
+                            duration: 0.5,
+                            type: 'spring',
+                            bounce: 0.2
+                          }
+                        }}
+                        style={{
+                          borderRadius: '30px'
+                        }}
+                        className="h-full w-full flex flex-col items-center justify-start z-10 relative shadow-lg overflow-visible border bg-neutral-100"
+                      >
+                        <div className="flex items-center w-full justify-start gap-2 px-4 h-12">
+                          <motion.div layoutId="search-icon">
+                            <Search className="size-5 stroke-[1.4]" />
+                          </motion.div>
+                          <div className="flex-1 relative">
+                            {!searchQuery && (
+                              <motion.div
+                                layout
+                                className="absolute text-gray-500 flex items-center pointer-events-none z-10"
+                              >
+                                <AnimatePresence mode="popLayout">
+                                  <motion.p
+                                    layoutId={`placeholder-search`}
+                                    key={`placeholder-search`}
+                                    initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
+                                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                    exit={{ opacity: 0, y: -10, filter: 'blur(5px)' }}
+                                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                                    className="text-base"
+                                  >
+                                    Search papers...
+                                  </motion.p>
+                                </AnimatePresence>
+                              </motion.div>
+                            )}
 
-                  {/* Results Count and View Toggle - On same line as search */}
-                  <div className="flex items-center gap-4 flex-shrink-0">
-                    <div className="text-sm text-[hsl(220_20%_40%)] whitespace-nowrap">
+                            <motion.input
+                              layout="position"
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="w-full bg-transparent outline-none ring-none text-black text-base"
+                            />
+                          </div>
+                          <Button 
+                            variant="outline"
+                            className="h-8 px-3 md:px-4 rounded-xl border-slate-200 hover:bg-slate-50 relative past-questions-filter-btn-mobile flex-shrink-0"
+                            onClick={() => setIsFilterSidebarOpen(true)}
+                          >
+                            <Filter className="w-4 h-4 md:mr-1.5" />
+                            <span className="hidden md:inline text-sm">Filters</span>
+                            {hasActiveFilters && (
+                              <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
+                                {[selectedUniversity, selectedFaculty, selectedYear, selectedSemester].filter(Boolean).length}
+                              </span>
+                            )}
+                          </Button>
+                        </div>
+                      </motion.div>
+                    </div>
+                    <div className="past-questions-results-count">
                       <span className="font-semibold text-[hsl(220_30%_15%)]">{filteredPapers.length}</span>{" "}
                       {filteredPapers.length === 1 ? "paper" : "papers"} found
                     </div>
-                    <div className="past-questions-view-toggle">
+                  </div>
+                  <div className="past-questions-view-toggle">
+                    <span className="past-questions-results-count-mobile">
+                      <span>{filteredPapers.length}</span> {filteredPapers.length === 1 ? "paper" : "papers"}
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
                       <button
                         className={`past-questions-view-button ${viewMode === "grouped" ? "active" : ""}`}
                         onClick={() => setViewMode("grouped")}
@@ -1215,6 +1491,7 @@ const PastQuestions = () => {
                           verified={paper.verified}
                           examType={paper.examType}
                           universityLogo={universityLogos[paper.universityShort]}
+                          hideUniversityBadge={true}
                           onPreview={() => console.log('Preview:', paper.id)}
                           onDownload={() => console.log('Download:', paper.id)}
                         />
@@ -1273,7 +1550,7 @@ const PastQuestions = () => {
                   </>
                 ) : (
                   <>
-                    <div className="space-y-2 mt-6">
+                    <div className="past-questions-list-view">
                       {paginatedPapers.map((paper) => (
                         <ExamPaperListItem
                           key={paper.id}

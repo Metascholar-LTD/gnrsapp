@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Download, Eye, Calendar, CheckCircle2 } from 'lucide-react';
+import { Download, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ExamPaperListItemProps {
@@ -15,20 +15,11 @@ interface ExamPaperListItemProps {
   fileSize: string;
   verified: boolean;
   universityLogo?: string;
+  hideBadge?: boolean;
   className?: string;
   onPreview?: () => void;
   onDownload?: () => void;
 }
-
-const formatNumber = (num: number): string => {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-  }
-  return num.toString();
-};
 
 export const ExamPaperListItem = React.forwardRef<HTMLDivElement, ExamPaperListItemProps>(
   (
@@ -36,14 +27,8 @@ export const ExamPaperListItem = React.forwardRef<HTMLDivElement, ExamPaperListI
       title,
       courseCode,
       universityShort,
-      faculty,
-      year,
-      semester,
-      downloads,
-      views,
-      fileSize,
-      verified,
       universityLogo,
+      hideBadge = false,
       className,
       onPreview,
       onDownload,
@@ -58,76 +43,81 @@ export const ExamPaperListItem = React.forwardRef<HTMLDivElement, ExamPaperListI
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
         className={cn(
-          "group relative w-full p-4 rounded-xl border border-[hsl(40_20%_88%)] bg-white hover:border-blue-300 hover:shadow-md transition-all duration-200",
+          "group relative w-full p-4 rounded-xl border border-[hsl(40_20%_88%)] bg-white hover:border-blue-300 hover:shadow-md transition-all duration-200 flex items-center justify-between gap-4",
           className
         )}
         {...props}
       >
-        <div className="flex items-center gap-4">
-          {/* University Logo */}
-          <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center border border-[hsl(40_20%_88%)]">
-            {universityLogo ? (
-              <img 
-                src={universityLogo} 
-                alt={universityShort}
-                className="w-10 h-10 object-contain"
-              />
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {/* University Logo/Badge */}
+          {!hideBadge && (
+            universityLogo ? (
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/95 backdrop-blur-sm p-1.5 shadow-md flex items-center justify-center border border-[hsl(40_20%_88%)]">
+                <img 
+                  src={universityLogo} 
+                  alt={universityShort}
+                  className="w-full h-full object-contain"
+                />
+              </div>
             ) : (
-              <span className="text-sm font-bold text-blue-600">{universityShort}</span>
-            )}
-          </div>
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center border border-[hsl(40_20%_88%)]">
+                <span className="text-xs font-bold text-blue-600">{universityShort}</span>
+              </div>
+            )
+          )}
 
-          {/* Main Content */}
+          {/* Course Name (Course Code) */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2 py-0.5 text-xs font-bold rounded bg-blue-600 text-white">
-                    {courseCode}
-                  </span>
-                  {verified && (
-                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                  )}
-                  <span className="text-xs text-[hsl(220_20%_40%)] truncate">
-                    {universityShort} • {faculty}
-                  </span>
-                </div>
-                <h3 className="text-base font-semibold text-[hsl(220_30%_15%)] line-clamp-1 mb-1">
-                  {title}
-                </h3>
-                <div className="flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    <span>{semester} Sem, {year}</span>
-                  </div>
-                  <span>•</span>
-                  <span>{fileSize}</span>
-                  <span>•</span>
-                  <span>{formatNumber(downloads)} downloads</span>
-                  <span>•</span>
-                  <span>{formatNumber(views)} views</span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={onPreview}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[hsl(220_30%_15%)] bg-[hsl(40_20%_95%)] hover:bg-[hsl(40_20%_90%)] transition-colors"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  Preview
-                </button>
-                <button
-                  onClick={onDownload}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Download
-                </button>
-              </div>
+            <div className="text-base font-semibold text-[hsl(220_30%_15%)]">
+              {title} ({courseCode})
             </div>
           </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-6 flex-shrink-0">
+          <button
+            type="button"
+            onClick={onPreview}
+            className="group relative inline-block text-sm font-medium text-[hsl(220_30%_15%)] transition-colors duration-300 hover:text-[hsl(220_20%_40%)]"
+          >
+            <motion.span
+              className="relative inline-block pb-1 flex items-center gap-1.5"
+              whileHover={{ x: 2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Eye className="w-4 h-4" />
+              View
+              <span
+                className="absolute bottom-0 left-0 h-[2px] bg-[#60a5fa] transition-all duration-300 group-hover:bg-[#3b82f6]"
+                style={{
+                  width: 'calc(100% + 14px)',
+                  clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                }}
+              />
+            </motion.span>
+          </button>
+          <button
+            type="button"
+            onClick={onDownload}
+            className="group relative inline-block text-sm font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
+          >
+            <motion.span
+              className="relative inline-block pb-1 flex items-center gap-1.5"
+              whileHover={{ x: 2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Download className="w-4 h-4" />
+              Download
+              <span
+                className="absolute bottom-0 left-0 h-[2px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                style={{
+                  width: 'calc(100% + 14px)',
+                  clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                }}
+              />
+            </motion.span>
+          </button>
         </div>
       </motion.div>
     );
