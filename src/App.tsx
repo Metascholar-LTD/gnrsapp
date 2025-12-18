@@ -91,6 +91,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminHomePage from "./pages/admin/AdminHomePage";
 import AdminFAQsPage from "./pages/admin/adminInfo/AdminFAQsPage";
 import AdminEducationHub from "./pages/admin/AdminEducationHub";
+import AdminUniversities from "./pages/admin/AdminUniversities";
 
 const queryClient = new QueryClient();
 
@@ -205,6 +206,7 @@ const App = () => (
             <Route path="jobs" element={<AdminDashboard />} />
             <Route path="education" element={<AdminEducationHub />} />
             <Route path="directories" element={<AdminDashboard />} />
+            <Route path="directories/universities" element={<AdminUniversities />} />
             <Route path="skilled-workers" element={<AdminDashboard />} />
             <Route path="scholarships" element={<AdminDashboard />} />
             <Route path="ui-buttons" element={<AdminDashboard />} />

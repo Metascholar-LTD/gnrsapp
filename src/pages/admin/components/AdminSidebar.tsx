@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import React from "react";
 import feather from "feather-icons";
+import { Hotel } from "lucide-react";
 import { getValidIconName } from "../utils/iconMap";
 import { initializeSidebar } from "../modules/sidebar";
 
@@ -110,7 +111,7 @@ const AdminSidebar = () => {
       header: "Directories",
       items: [
         { icon: "map-pin", label: "Directories", path: "/admin/directories" },
-        { icon: "building", label: "Hotels", path: "/admin/directories/hotels" },
+        { icon: "star", label: "Hotels", path: "/admin/directories/hotels" },
         { icon: "graduation-cap", label: "Universities", path: "/admin/directories/universities" },
         { icon: "school", label: "Senior High Schools", path: "/admin/directories/shs" },
         { icon: "utensils", label: "Restaurants", path: "/admin/directories/restaurants" },
@@ -170,7 +171,11 @@ const AdminSidebar = () => {
                       className={`sidebar-item ${isActive(item.path) ? "active" : ""}`}
                     >
                       <Link className="sidebar-link" to={item.path}>
-                        <i className="align-middle" data-feather={getValidIconName(item.icon)}></i>
+                        {item.label === "Hotels" ? (
+                          <Hotel className="align-middle" size={16} />
+                        ) : (
+                          <i className="align-middle" data-feather={getValidIconName(item.icon)}></i>
+                        )}
                         <span className="align-middle">{item.label}</span>
                       </Link>
                     </li>

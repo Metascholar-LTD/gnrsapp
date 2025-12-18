@@ -31,6 +31,7 @@ export const iconMap: Record<string, string> = {
   "credit-card": "credit-card",
   "database": "database",
   "settings": "settings",
+  "key": "key",
 };
 
 // Get valid icon name or fallback
