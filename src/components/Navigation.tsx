@@ -118,9 +118,6 @@ export const Navigation = React.memo(() => {
             { to: '/education/ebooks', label: 'E-books and Training Resources', icon: 'fa-file-pdf' }
           ]},
           { title: 'Search & Discovery', items: [
-            { to: '/education/course-recommendations', label: 'Course Recommendation Engine', icon: 'fa-lightbulb' },
-            { to: '/education/departmental-resources', label: 'Departmental Resources', icon: 'fa-building' },
-            { to: '/education/research-tools', label: 'Integrated Research Tools', icon: 'fa-microscope' },
             { to: '/education/internship-guidance', label: 'Internship & Project Guidance', icon: 'fa-briefcase' }
           ]}
         ],

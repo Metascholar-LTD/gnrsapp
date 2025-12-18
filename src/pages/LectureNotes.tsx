@@ -1039,10 +1039,7 @@ const LectureNotes = () => {
           {/* Filter Sidebar */}
           <div className={`lecture-notes-filter-sidebar ${isFilterSidebarOpen ? 'open' : ''} ${isFilterSidebarCollapsed ? 'collapsed' : ''}`}>
             <div className="lecture-notes-filter-sidebar-header">
-              <h3>
-                <Filter className="w-5 h-5" />
-                <span>Filters</span>
-              </h3>
+              <h3></h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <button
                   className="lecture-notes-filter-collapse-btn"

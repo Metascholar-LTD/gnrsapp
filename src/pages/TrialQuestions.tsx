@@ -6,6 +6,7 @@ import { Spinner } from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { DIRECTORY_PADDING, MEDIA_QUERIES } from "@/lib/breakpoints";
 import { 
   Search, 
   Download, 
@@ -16,8 +17,7 @@ import {
   CheckCircle2,
   Calendar,
   File,
-  Target,
-  Zap
+  Target
 } from "lucide-react";
 import {
   Select,
@@ -284,60 +284,59 @@ const TrialQuestions = () => {
     },
   };
 
+  const isolatedStyles = `
+    .trial-questions-content-wrapper {
+      padding-top: ${DIRECTORY_PADDING.MOBILE.PADDING_TOP};
+    }
+
+    .trial-questions-content {
+      padding: ${DIRECTORY_PADDING.MOBILE.PADDING};
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media ${MEDIA_QUERIES.TABLET} {
+      .trial-questions-content-wrapper {
+        padding-top: ${DIRECTORY_PADDING.TABLET.PADDING_TOP};
+      }
+
+      .trial-questions-content {
+        padding: ${DIRECTORY_PADDING.TABLET.PADDING};
+      }
+    }
+
+    /* Desktop: 1200px - 1599px */
+    @media ${MEDIA_QUERIES.DESKTOP} {
+      .trial-questions-content-wrapper {
+        padding-top: ${DIRECTORY_PADDING.DESKTOP.PADDING_TOP};
+      }
+
+      .trial-questions-content {
+        padding: ${DIRECTORY_PADDING.DESKTOP.PADDING};
+      }
+    }
+
+    /* Large Desktop: 1600px+ */
+    @media ${MEDIA_QUERIES.LARGE_DESKTOP} {
+      .trial-questions-content-wrapper {
+        padding-top: ${DIRECTORY_PADDING.LARGE_DESKTOP.PADDING_TOP};
+      }
+
+      .trial-questions-content {
+        padding: ${DIRECTORY_PADDING.LARGE_DESKTOP.PADDING};
+      }
+    }
+  `;
+
   return (
     <>
+      <style>{isolatedStyles}</style>
       <InitScripts />
       <Spinner />
       <Navigation />
       
-      {/* Hero Section */}
-      <motion.section 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative overflow-hidden bg-slate-50" 
-        style={{ 
-          paddingTop: '140px',
-          paddingBottom: '80px'
-        }}
-      >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-slate-100 rounded-full blur-3xl opacity-30"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-slate-100 rounded-full blur-3xl opacity-30"></div>
-        </div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-5xl mx-auto text-center"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 mb-6"
-            >
-              <Zap className="w-4 h-4 text-slate-600" />
-              <span className="text-sm font-medium text-slate-700">Practice Makes Perfect</span>
-            </motion.div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-slate-900">
-              Trial Questions Repository
-            </h1>
-            
-            <p className="text-xl md:text-2xl mb-12 leading-relaxed max-w-3xl mx-auto text-slate-600">
-              Practice with comprehensive trial questions from Ghana's leading universities. 
-              Test your knowledge and prepare effectively.
-            </p>
-          </motion.div>
-        </div>
-      </motion.section>
-
       {/* All Questions Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4 max-w-7xl">
+      <section className="py-16 bg-white trial-questions-content-wrapper">
+        <div className="container mx-auto max-w-7xl trial-questions-content">
           <div className="mb-10">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <motion.div

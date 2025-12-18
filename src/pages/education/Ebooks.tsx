@@ -1,7 +1,6 @@
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
-import { HeroButton } from "@/components/education/HeroButton";
 import {
   Library,
   Globe,
@@ -58,12 +57,6 @@ const ebookShelves: InfoCardItem[] = [
   },
 ];
 
-const accessModels = [
-  { label: "Unlimited campus seats", detail: "Single sign-on with auto seat recycling every 24 hours." },
-  { label: "Offline first", detail: "Download-later queue with watermarking and recall reminders." },
-  { label: "Annotation sync", detail: "Highlighting and shared notes across cohorts with instructor moderation." },
-];
-
 const Ebooks = () => (
   <EducationPageLayout
     title="E-books & Training Resources"
@@ -79,12 +72,6 @@ const Ebooks = () => (
       { label: "Interactive workbooks", value: "78" },
       { label: "Faculty curated lists", value: "132" },
     ]}
-    heroActions={
-      <>
-        <HeroButton onClick={() => console.log("Launch library portal")}>Launch library portal</HeroButton>
-        <HeroButton onClick={() => console.log("Request institutional license")}>Request institutional license</HeroButton>
-      </>
-    }
   >
     <div className="space-y-16">
       <EducationSection
@@ -93,21 +80,6 @@ const Ebooks = () => (
         description="Clean metadata, DOI sync, and faculty-approved abstracts keep browsing frictionless."
       >
         <InfoCardGrid items={ebookShelves} />
-      </EducationSection>
-
-      <EducationSection
-        eyebrow="Access model"
-        title="Seamless reading experiences"
-        description="Responsive readers with low-bandwidth fallback ensure performance even on campus Wi-Fi."
-      >
-        <div className="grid gap-6 lg:grid-cols-3">
-          {accessModels.map((model) => (
-            <div key={model.label} className="rounded-3xl border border-slate-200/70 px-6 py-6">
-              <p className="text-xs uppercase tracking-[0.3em] text-blue-500">{model.label}</p>
-              <p className="mt-3 text-base text-slate-700">{model.detail}</p>
-            </div>
-          ))}
-        </div>
       </EducationSection>
 
       <EducationSection

@@ -69,7 +69,6 @@ const InternshipGuidance = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Book readiness assessment")}>Book readiness assessment</HeroButton>
         <HeroButton onClick={() => console.log("Refer a company")}>Refer a company</HeroButton>
       </>
     }

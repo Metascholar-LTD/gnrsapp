@@ -1088,10 +1088,7 @@ const PastQuestions = () => {
           {/* Filter Sidebar */}
           <div className={`past-questions-filter-sidebar ${isFilterSidebarOpen ? 'open' : ''} ${isFilterSidebarCollapsed ? 'collapsed' : ''}`}>
             <div className="past-questions-filter-sidebar-header">
-              <h3>
-                <Filter className="w-5 h-5" />
-                <span>Filters</span>
-              </h3>
+              <h3></h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <button
                   className="past-questions-filter-collapse-btn"
