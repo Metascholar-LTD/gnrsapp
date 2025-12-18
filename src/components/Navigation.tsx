@@ -116,21 +116,14 @@ export const Navigation = React.memo(() => {
             { to: '/education/trial-questions', label: 'Trial Questions', icon: 'fa-question-circle' },
             { to: '/education/study-guides', label: 'Study Guides and Tutorials', icon: 'fa-graduation-cap' },
             { to: '/education/ebooks', label: 'E-books and Training Resources', icon: 'fa-file-pdf' }
-          ]},
-          { title: 'Search & Discovery', items: [
-            { to: '/education/internship-guidance', label: 'Internship & Project Guidance', icon: 'fa-briefcase' }
           ]}
         ],
         engagement: [
           { title: 'Community', items: [
             { to: '/education/discussion-forums', label: 'Discussion Forums', icon: 'fa-comments' },
             { to: '/education/study-groups', label: 'Study Groups', icon: 'fa-users' },
-            { to: '/education/alumni-connect', label: 'Alumni Connect', icon: 'fa-network-wired' }
-          ]},
-          { title: 'Support & Guidance', items: [
-            { to: '/education/mentorship', label: 'Mentorship Program', icon: 'fa-user-friends' },
-            { to: '/education/campus-announcements', label: 'Campus Announcements', icon: 'fa-bullhorn' },
-            { to: '/education/academic-notifications', label: 'Academic Notifications', icon: 'fa-bell' }
+            { to: '/education/alumni-connect', label: 'Alumni Connect', icon: 'fa-network-wired' },
+            { to: '/education/mentorship', label: 'Mentorship Program', icon: 'fa-user-friends' }
           ]}
         ],
         tools: [

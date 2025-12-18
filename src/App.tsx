@@ -90,6 +90,7 @@ import AdminLayout from "./pages/admin/components/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminHomePage from "./pages/admin/AdminHomePage";
 import AdminFAQsPage from "./pages/admin/adminInfo/AdminFAQsPage";
+import AdminEducationHub from "./pages/admin/AdminEducationHub";
 
 const queryClient = new QueryClient();
 
@@ -202,7 +203,7 @@ const App = () => (
             <Route path="blank" element={<AdminDashboard />} />
             <Route path="news" element={<AdminDashboard />} />
             <Route path="jobs" element={<AdminDashboard />} />
-            <Route path="education" element={<AdminDashboard />} />
+            <Route path="education" element={<AdminEducationHub />} />
             <Route path="directories" element={<AdminDashboard />} />
             <Route path="skilled-workers" element={<AdminDashboard />} />
             <Route path="scholarships" element={<AdminDashboard />} />

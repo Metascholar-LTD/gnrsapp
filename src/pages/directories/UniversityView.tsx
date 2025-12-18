@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
@@ -57,8 +57,10 @@ interface UniversityData {
 const UniversityView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'academics' | 'financial' | 'admissions' | 'student'>('academics');
+  const [activeTab, setActiveTab] = useState<'academics' | 'financial' | 'admissions' | 'student' | 'courses'>('academics');
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [selectedCollege, setSelectedCollege] = useState<string>('');
+  const [degreeLevel, setDegreeLevel] = useState<'undergraduate' | 'postgraduate' | ''>('');
 
   // University logo mapping
   const universityLogos: Record<string, string> = {
@@ -114,6 +116,560 @@ const UniversityView: React.FC = () => {
       'Accra Institute of Technology': 'AIT',
     };
     return abbreviationMap[name];
+  };
+
+  // Helper function to generate generic courses structure from program enrollment
+  const generateCoursesFromPrograms = (programEnrollment?: { label: string; percentage: number; color: string }[]): Record<string, string[]> => {
+    if (!programEnrollment || programEnrollment.length === 0) {
+      return {
+        'General Programs': ['Various programs available'],
+      };
+    }
+    
+    const courses: Record<string, string[]> = {};
+    programEnrollment.forEach((program) => {
+      const collegeName = program.label.replace(' & ', ' and ');
+      courses[`College of ${collegeName}`] = [
+        `Bachelor's in ${program.label}`,
+        `${program.label} (General)`,
+        `${program.label} (Honors)`,
+        `${program.label} (Extended)`,
+      ];
+    });
+    
+    return courses;
+  };
+
+  // University Courses Data Mapping
+  const universityCoursesData: Record<string, Record<string, string[]>> = {};
+
+  // KNUST Courses Data by College
+  const knustCourses: Record<string, string[]> = {
+    'College of Humanities and Social Sciences': [
+      'Economics',
+      'Sociology',
+      'English',
+      'History',
+      'Linguistics',
+      'BA Political Studies',
+      'Culture and Tourism',
+      'BA Communication Studies',
+      'Akan Language and Culture',
+      'Geography and Rural Development',
+      'French and Francophone',
+      'Religious Studies',
+      'BA Economics (Parallel)',
+      'BA Geography and Rural Development (Parallel)',
+      'BA Sociology (Parallel)',
+      'BA Social Work (Parallel)',
+      'BA History (Parallel)',
+      'BA Political Studies (Parallel)',
+      'BA French (Parallel)',
+      'BA Culture and Tourism (Parallel)',
+      'BA English (Parallel)',
+      'BA Religious Studies (Parallel)',
+      'BSc Business Administration',
+      'BSc Business Administration (Parallel)',
+      'LLB (4 years for WASSCE/SSSCE/GBCE and Equivalent Holders)',
+      'LLB Part-Time (4 years for Degree Holders only)',
+      'BA Akan',
+    ],
+    'School of Business': [
+      'Business Administration (Accounting/Banking and Finance)',
+      'Business Administration (Marketing/International)',
+      'Business Administration (Hospitality and Tourism Management)',
+      'Business Administration (Logistic and Supply Chain)',
+    ],
+    'Faculty of Art': [
+      'Fashion Design',
+      'Publishing Studies',
+      'Painting & Sculpture',
+      'Communication Design (Graphic Design)',
+      'Ceramic Design and Technology',
+      'Textile Design and Technology',
+      'Integrated Rural Art and Industry',
+      'Metalsmithing and Jewelry Technology',
+    ],
+    'College of Art and Built Environment': [
+      'Architecture',
+      'Real Estate',
+      'Land Economy',
+      'Development Planning',
+      'Quantity Surveying and Construction Economics (Building Technology)',
+      'Construction Technology and Management (Building Technology)',
+      'Human Settlement Planning',
+      'BFA Painting and Sculpture',
+      'BA Communication Design (Graphic Design)',
+      'BA Industrial Art (Ceramics, Metal Work, Textiles, and Fashion Design)',
+      'BA Integrated Rural Art and Industry',
+      'BA Publishing Studies (Book Industry)',
+      'BA Integrated Rural Art and Industry (Parallel)',
+      'BA Publishing Studies (Parallel)',
+      'BA Communication Design (Parallel)',
+      'BFA Painting and Sculpture (Parallel)',
+    ],
+    'College of Science': [
+      'BSc Biochemistry',
+      'BSc Chemistry',
+      'BSc Mathematics',
+      'BSc Statistics',
+      'BSc Physics',
+      'BSc Actuarial Science',
+      'BSc Environmental Science',
+      'BSc Biological Science',
+      'BSc Food and Technology',
+      'BSc Computer Science (Parallel)',
+      'BSc Meteorology and Climate Science',
+      'Doctor of Optometry (OD), Six (6) years',
+    ],
+    'College of Health Sciences': [
+      'BSc Nursing',
+      'BSc Midwifery',
+      'BSc Herbal Medicine',
+      'BSc Midwifery (Sandwich Programmes)',
+      'BSc Emergency Nursing (Fee-Paying only)',
+      'BSc Medical Laboratory Technology',
+      'Pharm D (Doctor of Pharmacy) Six (6) Years',
+      'BSc Human Biology (Medicine): to be followed by 3-year Clinical Programme leading to MB ChB Degree',
+      'BSc Disability & Rehabilitation Studies (opened to Candidates with General Science, General Arts, Business, Visual Arts and Vocational/ Home Economics background)',
+      'DVM (Doctor of Veterinary Medicine) 6 years',
+      'BSc Dental Surgery (three year of BSc Human Biology to be followed by a year Clinical study leading to the award of BDS Degree) (fee paying only)',
+    ],
+    'College of Agriculture and Natural Resources': [
+      'Agribusiness Management',
+      'Forest Resources Technology',
+      'Aquaculture & Water Resources Management',
+      'Natural Resources Management',
+      'Post Harvest Technology',
+      'BSc Dairy and Meat Science',
+      'BSc Landscape Design and Management',
+      'BSc Agricultural Biotechnology',
+      'BSc Agriculture',
+    ],
+    'College of Engineering': [
+      'Civil Engineering',
+      'Materials Engineering',
+      'Computer Engineering',
+      'Electrical & Electronic Engineering',
+      'Mechanical Engineering',
+      'Geomatic Engineering (Geodetic Engineering)',
+      'Aerospace Engineering',
+      'Petroleum Engineering',
+      'Telecommunication Engineering',
+      'Geological Engineering',
+      'Biomedical Engineering',
+      'Petrochemical Engineering',
+      'Metallurgical Engineering',
+      'BSc Chemical Engineering',
+    ],
+    'Distance Education/Learning Undergraduate Programmes': [
+      'BA Sociology',
+      'BSc Information Technology',
+      'BSc Statistics',
+      'BSc Agriculture',
+      'BSc Actuarial Science',
+      'BSc Computer Science',
+      'BSc Quantity Surveying and Construction Economics',
+      'Construction Technology Management',
+      'Information Technology',
+      'BA Social Work',
+      'BSc Construction Technology Management',
+      'BSc Business Administration (7 Options available)',
+      'Diploma in Architectural Technology',
+      'Diploma in Business Administration',
+      'Diploma in Information Technology',
+      'Diploma in Horticulture',
+      'Diploma in Mechanical Engineering',
+      'Diploma in Computer Network Engineering',
+      'Diploma in Disability and Rehabilitation',
+    ],
+  };
+
+  // KNUST Masters/Postgraduate Courses Data by College and Department
+  const knustMastersCourses: Record<string, Record<string, string[]>> = {
+    'College of Agriculture and Natural Resources': {
+      'Department of Animal Science': [
+        'Master of Philosophy (Animal Breeding and Genetics)',
+        'Master of Philosophy (Reproductive Physiology)',
+        'Master of Philosophy (Animal Nutrition)',
+        'Master of Philosophy (Meat Science)',
+      ],
+      'Department of Crop and Soil Sciences': [
+        'Master of Philosophy (Agronomy)',
+        'Master of Philosophy (Agronomy [Crop Physiology])',
+        'Master of Philosophy (Crop Protection [Entomology])',
+        'Master of Philosophy (Crop Protection [Nematology])',
+        'Master of Philosophy (Crop Protection [Plant Pathology])',
+        'Master of Philosophy (Crop Protection [Plant Virology])',
+        'Master of Philosophy (Plant Breeding)',
+        'Master of Philosophy (Soil Science)',
+      ],
+      'Department of Horticulture': [
+        'Master of Philosophy (Postharvest Technology)',
+        'Master of Philosophy (Seed Science and Technology)',
+        'Master of Philosophy (Fruit Crops Production)',
+        'Master of Philosophy (Landscape Studies)',
+        'Master of Philosophy (Vegetable Crops Production)',
+        'Master of Philosophy (Floriculture)',
+      ],
+      'Department of Agricultural Economics, Agribusiness and Extension': [
+        'Master of Philosophy (Agribusiness Management)',
+        'Master of Philosophy (Agricultural Economics)',
+        'Master of Philosophy (Agricultural Extension and Development Communication)',
+        'Master of Philosophy (Sustainable and Integrated Rural Development in Africa)',
+        'Master of Science (Agribusiness Management)',
+        'Master of Science (Agricultural Extension and Development Communication)',
+      ],
+      'Department of Wildlife and Range Management': [
+        'Master of Philosophy (Wildlife and Range Management)',
+        'Master of Science (Geo-Information Science for Natural Resources Management)',
+      ],
+      'Department of Silviculture and Forest Management': [
+        'Master of Philosophy (Natural Resources and Environmental Governance)',
+        'Master of Philosophy (Silviculture and Forest Management)',
+      ],
+      'Department of Agroforestry': [
+        'Master of Philosophy (Agroforestry)',
+      ],
+      'Department of Wood Science and Technology Management': [
+        'Master of Science (Packaging Technology and Management)',
+        'Master of Philosophy (Wood Science and Technology)',
+      ],
+      'Department of Fisheries and Watershed Management': [
+        'Master of Philosophy (Aquaculture and Environment)',
+        'Master of Philosophy (Fisheries Management)',
+        'Master of Philosophy (Watershed Management)',
+      ],
+    },
+    'College of Humanities and Social Sciences': {
+      'Faculty of Law': [
+        'Master of Laws (LLM)',
+      ],
+      'Department of Economics': [
+        'Master of Science (Economics)',
+        'Master of Philosophy (Economics)',
+      ],
+      'Department of Modern Languages': [
+        'Master of Philosophy (French)',
+      ],
+      'Department of English': [
+        'Master of Philosophy in (English)',
+      ],
+      'Department of Geography and Rural Development': [
+        'Master of Science (Geography and Sustainable Development)',
+        'Master of Philosophy (Geography and Rural Development)',
+      ],
+      'Department of Religious Studies': [
+        'Master of Art (Religious Studies)',
+        'Master of Philosophy (Religious Studies)',
+      ],
+      'Department of Sociology and Social Work': [
+        'Master of Art (Sociology)',
+        'Master of Philosophy (Sociology)',
+      ],
+      'Department of History and Political Studies': [
+        'Master of Art (Asante History)',
+        'Master of Public Administration',
+        'Master of Art (Chieftaincy and Traditional Leadership Studies)',
+        'Master of Philosophy (Chieftaincy and Traditional Leadership Studies)',
+        'Master of Philosophy in (Historical Studies)',
+        'Master of Philosophy in (Political Science)',
+      ],
+    },
+    'School of Business': {
+      'KNUST School of Business (KSB)': [
+        'Master of Business Administration (Accounting)',
+        'Master of Business Administration (Finance)',
+        'Master of Business Administration (Marketing)',
+        'Master of Business Administration (Strategic Management and Consulting)',
+        'Master of Business Administration (Human Resource Management)',
+        'Master of Business Administration (Logistics and Supply Chain Management)',
+        'Master of Business Administration (Management and Organizational Development)',
+        'Master of Science (Marketing)',
+        'Master of Science (Logistics and Supply Chain Management)',
+        'Master of Science (Management and Human Resource Strategy)',
+        'Master of Science (Accounting and Finance)',
+        'Master of Science (Finance)',
+        'Master of Science (Procurement and Supply Chain Management)',
+        'Master of Science (Corporate Governance and Strategic Leadership)',
+        'Master of Science (Air Transportation and Aviation Management)',
+        'Master of Science (Business and Data Analytics)',
+        'Master of Philosophy (Business and Management [Accounting])',
+        'Master of Philosophy (Business and Management [Finance])',
+        'Master of Philosophy (Business and Management [Marketing])',
+        'Master of Philosophy (Business and Management [Strategic Management and Consulting])',
+        'Master of Philosophy (Business and Management [Human Resource Management])',
+        'Master of Philosophy (Business and Management [Logistics and Supply Chain Management])',
+        'Master of Philosophy (Business and Management [Management and Organizational Development])',
+        'Master of Philosophy (Logistics and Supply Chain Management)',
+        'Master of Philosophy (Procurement and Supply Chain Management)',
+        'Master of Philosophy (Management and Human Resource Management (Top-Up))',
+      ],
+    },
+    'College of Art and Built Environment': {
+      'Department of Architecture': [
+        'Master of Philosophy (Architectural Studies)',
+        'Master of Science (Architecture (Top-Up))',
+        'Master of Architecture',
+      ],
+      'Department of Construction Technology and Management': [
+        'Master of Science (Construction Management)',
+        'Master of Science (Procurement Management)',
+        'Master of Science (Project Management)',
+        'Master of Philosophy (Construction Management)',
+        'Master of Philosophy (Procurement Management)',
+        'Master of Philosophy (Project Management)',
+      ],
+      'Department of Planning': [
+        'Master of Science (Development Planning and Management)',
+        'Master of Science (Development Policy and Planning)',
+        'Master of Science (Transportation Planning)',
+        'Master of Science (Development Studies)',
+        'Master of Science (Planning)',
+        'Master of Philosophy (Development Planning and Management)',
+        'Master of Philosophy (Development Policy and Planning)',
+        'Master of Philosophy (Development Studies)',
+        'Master of Philosophy (Planning)',
+        'Master of Philosophy (Urban Management Studies)',
+      ],
+      'Department of Land Economy': [
+        'Master of Science (Land Governance and Policy)',
+        'Master of Science (Facilities Management)',
+      ],
+      'Department of Educational Innovations in Science and Technology': [
+        'Master of Philosophy Art Education',
+        'MA African Art and Culture',
+        'Master of Philosophy African Art and Culture',
+      ],
+      'Department of Teacher Education': [
+        'Master of Philosophy (Educational Planning and Administration)',
+        'Master of Philosophy (Language Education)',
+        'Master of Philosophy (Science Education)',
+        'Master of Philosophy (Mathematics Education)',
+        'Master of Philosophy (ICT Education)',
+        'Master of Education (Educational Planning and Administration) – Sandwich',
+        'Master of Education (Language Education) – Sandwich',
+        'Master of Education (Science Education) – Sandwich',
+        'Master of Education (Mathematics Education) – Sandwich',
+        'Master of Education (ICT Education) – Sandwich',
+      ],
+      'Department of Painting and Sculpture': [
+        'Master of Fine Art (Painting)',
+        'Master of Fine Art (Sculpture)',
+        'Master of Fine Art (Painting and Sculpture)',
+      ],
+      'Department of Industrial Art': [
+        'Master of Fine Art (Ceramics)',
+        'Master of Fine Art (Jewellery and Metalsmithing)',
+        'Master of Fine Art (Textiles Design)',
+        'Master of Philosophy (Integrated Art)',
+        'Master of Philosophy (Fashion Design Technology)',
+        'Master of Philosophy (Textile Design Technology)',
+      ],
+      'Department of Communication Design': [
+        'Master of Communication Design',
+        'Master of Philosophy (Communication Design)',
+      ],
+    },
+    'College of Health Sciences': {
+      'Department of Pharmaceutics': [
+        'Master of Science (Pharmaceutical Technology)',
+        'Master of Philosophy (Pharmaceutics)',
+        'Master of Philosophy (Pharmaceutical Microbiology)',
+      ],
+      'Department of Pharmacognosy': [
+        'Master of Philosophy (Pharmacognosy)',
+      ],
+      'Department of Pharmaceutical Chemistry': [
+        'Master of Philosophy (Pharmaceutical Chemistry)',
+      ],
+      'Department of Pharmacy Practice': [
+        'Master of Science (Clinical Pharmacy)',
+        'Master of Philosophy (Clinical Pharmacy)',
+      ],
+      'Department of Pharmacology': [
+        'Master of Philosophy (Pharmacology)',
+        'Master of Philosophy (Clinical Pharmacology)',
+      ],
+      'Department of Nursing': [
+        'Master of Science (Clinical Nursing)',
+        'Master of Philosophy (Nursing)',
+      ],
+      'Department of Medical Diagnostics': [
+        'Master of Philosophy (Haematology)',
+      ],
+      'Department of Molecular Medicine': [
+        'Master of Philosophy (Chemical Pathology)',
+        'Master of Philosophy (Molecular Medicine)',
+        'Master of Philosophy (Immunology)',
+      ],
+      'Department of Clinical Microbiology': [
+        'Master of Philosophy (Clinical Microbiology)',
+      ],
+      'Department of Anatomy': [
+        'Master of Philosophy (Human Anatomy and Cell Biology)',
+        'Master of Philosophy (Human Anatomy and Forensic Science)',
+        'Master of Philosophy (Human Anatomy and Cell Biology [Morphological Diagnostics])',
+        'Master of Philosophy (Mortuary Science and Management)',
+      ],
+      'Department of Physiology': [
+        'Master of Philosophy (Physiology)',
+      ],
+      'School of Public Health': [
+        'Master of Science (Health Education and Promotion)',
+        'Master of Science (Population and Reproductive Health)',
+        'Master of Science (Occupational and Environmental Health & Safety)',
+        'Master of Science (Health Services Planning and Management)',
+        'Master of Public Health (Health Education and Promotion)',
+        'Master of Public Health (Population and Reproductive Health)',
+        'Master of Public Health (Occupational and Environmental Health & Safety)',
+        'Master of Public Health Health Services Planning and Management)',
+        'Master of Philosophy (Disability, Rehabilitation and Development)',
+        'Master of Philosophy (Health Systems Research and Management)',
+        'Master of Philosophy (Field Epidemiology and Biostatistics)',
+      ],
+    },
+    'College of Science': {
+      'Department of Biochemistry and Biotechnology': [
+        'Master of Science (Biotechnology)',
+        'Master of Science (Biodata Analytics and Computational Genomics)',
+        'Master of Philosophy (Biodata Analytics and Computational Genomics)',
+        'Master of Philosophy (Human Nutrition and Dietetics)',
+        'Master of Philosophy (Biochemistry)',
+        'Master of Philosophy (Biotechnology)',
+      ],
+      'Department of Theoretical and Applied Biology': [
+        'Master of Philosophy (Environmental Science)',
+        'Master of Philosophy (Parasitology)',
+        'Master of Philosophy (Ecology)',
+        'Master of Philosophy (Entomology)',
+        'Master of Philosophy (Animal and Plant Physiology)',
+        'Master of Philosophy (Microbiology)',
+        'Master of Philosophy (Plant Pathology)',
+        'Master of Philosophy (Reproductive Biology)',
+        'Master of Philosophy (Animal and Plant Systematics)',
+        'Master of Philosophy (Molecular Biology)',
+        'Master of Philosophy (Fish and Fisheries Science)',
+      ],
+      'Department of Food Science and Technology': [
+        'Master of Science (Food Science and Technology)',
+        'Master of Philosophy (Food Science and Technology)',
+      ],
+      'Department of Chemistry': [
+        'Master of Philosophy Chemistry',
+        'Master of Philosophy Organic and Natural Products',
+        'Master of Philosophy Analytical Chemistry',
+        'Master of Philosophy Environmental Chemistry',
+        'Master of Philosophy Physical Chemistry',
+        'Master of Philosophy Inorganic Chemistry',
+        'Master of Philosophy Polymer Science and Technology',
+      ],
+      'Department of Physics': [
+        'Master of Philosophy Geophysics',
+        'Master of Philosophy/Doctor of Philosophy Materials Science',
+        'Master of Philosophy/Doctor of Philosophy in Solid State Physics',
+        'Master of Philosophy/Doctor of Philosophy Meteorology and Climate Science',
+        'Master of Philosophy/Doctor of Philosophy Environmental Physics',
+        'Master of Philosophy Nano Science and Technology',
+        'Master of Science Petroleum Geophysics',
+      ],
+      'Department of Mathematics': [
+        'Master of Philosophy Pure Mathematics',
+        'Master of Philosophy Applied Mathematics',
+      ],
+      'Department of Statistics and Actuarial Science': [
+        'Master of Philosophy Mathematical Statistics',
+        'Master of Philosophy Actuarial Science',
+      ],
+      'Department of Computer Science': [
+        'Master of Science Cyber-Security and Digital Forensics',
+        'Master of Philosophy Cyber-Security and Digital Forensics',
+        'Master of Science Computer Science',
+        'Master of Philosophy Computer Science',
+        'Master of Science Information Technology',
+        'Master of Philosophy Information Technology',
+      ],
+      'Department of Optometry and Visual Science': [
+        'Master of Philosophy Vision Science',
+      ],
+    },
+    'College of Engineering': {
+      'Department of Civil Engineering': [
+        'Master of Science Geotechnical Engineering',
+        'Master of Philosophy Geotechnical Engineering',
+        'Master of Science Road and Transportation Engineering',
+        'Master of Philosophy Road and Transportation Engineering',
+        'Master of Science Water Resources Engineering and Management',
+        'Master of Philosophy Water Resources Engineering and Management',
+        'Master of Science Water Supply and Environmental Sanitation',
+        'Master of Philosophy Water Supply and Environmental Sanitation',
+        'Master of Science Structural Engineering',
+        'Master of Philosophy Structural Engineering',
+      ],
+      'Department of Geomatic Engineering': [
+        'Master of Science/Master of Philosophy Geomatic Engineering',
+        'Master of Philosophy Geographic Information System (GIS)',
+      ],
+      'Department of Electrical/Electronic Engineering': [
+        'Master of Philosophy Telecommunications Engineering',
+        'Master of Philosophy Power Systems Engineering',
+      ],
+      'Department of Computer Engineering': [
+        'Master of Philosophy Computer Engineering',
+      ],
+      'Department of Chemical Engineering': [
+        'Master of Philosophy Chemical Engineering',
+      ],
+      'Department of Materials Engineering': [
+        'Master of Philosophy Environmental Resources Management',
+        'Master of Science Materials Engineering',
+        'Master of Philosophy Materials Engineering',
+      ],
+      'Department of Agricultural and Biosystems Engineering': [
+        'Master of Science Agricultural Machinery Engineering',
+        'Master of Science Agro-Environmental Engineering',
+        'Master of Science Bioengineering',
+        'Master of Science Food and Post-Harvest Engineering',
+        'Master of Science Soil and Water Engineering',
+        'Master of Philosophy Agricultural Machinery Engineering',
+        'Master of Philosophy Agro-Environmental Engineering',
+        'Master of Philosophy Bioengineering',
+        'Master of Philosophy Food and Post-Harvest Engineering',
+        'Master of Philosophy Soil and Water Engineering',
+        'Master of Philosophy Intellectual Property (MIP)',
+      ],
+      'Department of Mechanical Engineering': [
+        'Master of Science Mechanical Engineering',
+        'Master of Philosophy Mechanical Engineering',
+        'Master of Science Renewable Energy Technologies',
+      ],
+      'Department of Geological Engineering': [
+        'Master of Science Geophysical Engineering',
+        'Master of Philosophy Geological Engineering',
+      ],
+    },
+  };
+
+  // Store KNUST courses in the mapping
+  universityCoursesData['Kwame Nkrumah University of Science and Technology'] = knustCourses;
+
+  // University Masters Courses Data Mapping
+  const universityMastersCoursesData: Record<string, Record<string, Record<string, string[]>>> = {};
+  universityMastersCoursesData['Kwame Nkrumah University of Science and Technology'] = knustMastersCourses;
+
+  // Helper function to get courses for a university
+  const getUniversityCourses = (universityName: string, university: UniversityData): Record<string, string[]> => {
+    // If we have specific data for this university, use it
+    if (universityCoursesData[universityName]) {
+      return universityCoursesData[universityName];
+    }
+    // Otherwise, generate from program enrollment
+    return generateCoursesFromPrograms(university.programEnrollment);
+  };
+
+  // Helper function to get masters courses for a university
+  const getUniversityMastersCourses = (universityName: string): Record<string, Record<string, string[]>> | null => {
+    return universityMastersCoursesData[universityName] || null;
   };
 
   // Helper function to generate default data for universities
@@ -427,6 +983,17 @@ const UniversityView: React.FC = () => {
   ];
 
   const university = universities.find(u => u.id === id);
+
+  // Reset selected college and degree level when university changes
+  useEffect(() => {
+    setSelectedCollege('');
+    setDegreeLevel('');
+  }, [id]);
+
+  // Reset degree level when college changes
+  useEffect(() => {
+    setDegreeLevel('');
+  }, [selectedCollege]);
 
   if (!university) {
     return (
@@ -1140,6 +1707,18 @@ const UniversityView: React.FC = () => {
     }
 
     /* Tablet and below (768px and below) */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    @media (max-width: 767px) {
+      .courses-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Mobile: 0px - 767px */
     @media (max-width: 767px) {
       .university-view-content-wrapper {
@@ -1580,12 +2159,6 @@ const UniversityView: React.FC = () => {
                         <td>{university.studentPopulation}</td>
                       </tr>
                     )}
-                    {university.averageGrantAid && (
-                      <tr>
-                        <td>AVERAGE GRANT AID*</td>
-                        <td>{university.averageGrantAid}</td>
-                      </tr>
-                    )}
                     {university.acceptanceRate && (
                       <tr>
                         <td>ACCEPTANCE RATE*</td>
@@ -1687,6 +2260,12 @@ const UniversityView: React.FC = () => {
               >
                 Student Life
               </button>
+              <button
+                className={`university-view-tab ${activeTab === 'courses' ? 'active' : ''}`}
+                onClick={() => setActiveTab('courses')}
+              >
+                Courses Offered
+              </button>
             </div>
 
             <div className="university-view-tab-content">
@@ -1728,12 +2307,6 @@ const UniversityView: React.FC = () => {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {university.financialAid.averageAid && (
-                      <div className="university-view-stat-item">
-                        <div className="university-view-stat-label">AVERAGE FINANCIAL AID</div>
-                        <div className="university-view-stat-value">{university.financialAid.averageAid}</div>
-                      </div>
-                    )}
                     {university.financialAid.aidPercentage && (
                       <div className="university-view-stat-item">
                         <div className="university-view-stat-label">FINANCIAL AID PERCENTAGE</div>
@@ -1824,6 +2397,418 @@ const UniversityView: React.FC = () => {
                         <div className="university-view-stat-value">{university.studentLife.athletics}</div>
                       </div>
                     )}
+                  </motion.div>
+                )}
+
+                {activeTab === 'courses' && (
+                  <motion.div
+                    key="courses"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {(() => {
+                      const universityCourses = getUniversityCourses(university.name, university);
+                      const universityMasters = getUniversityMastersCourses(university.name);
+                      const allColleges = Array.from(new Set([
+                        ...Object.keys(universityCourses),
+                        ...(universityMasters ? Object.keys(universityMasters) : [])
+                      ]));
+
+                      return (
+                        <>
+                          <div style={{ marginBottom: '2rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                            <div style={{ flex: '1', minWidth: '250px' }}>
+                              <label
+                                htmlFor="college-select"
+                                style={{
+                                  display: 'block',
+                                  marginBottom: '0.75rem',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600,
+                                  color: 'hsl(220 30% 15%)',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.05em',
+                                }}
+                              >
+                                Select College/Faculty
+                              </label>
+                              <select
+                                id="college-select"
+                                value={selectedCollege}
+                                onChange={(e) => setSelectedCollege(e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '0.875rem 1.25rem',
+                                  paddingRight: '2.5rem',
+                                  border: '1.5px solid hsl(40 20% 88%)',
+                                  borderRadius: '0.75rem',
+                                  fontSize: '1rem',
+                                  color: 'hsl(220 30% 15%)',
+                                  background: 'white',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                  fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                  appearance: 'none',
+                                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                                  backgroundRepeat: 'no-repeat',
+                                  backgroundPosition: 'right 0.75rem center',
+                                }}
+                              >
+                                <option value="">-- Select a College/Faculty --</option>
+                                {allColleges.map((college) => (
+                                  <option key={college} value={college}>
+                                    {college}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                          <div style={{ flex: '1', minWidth: '250px' }}>
+                            <label
+                              htmlFor="degree-level-select"
+                              style={{
+                                display: 'block',
+                                marginBottom: '0.75rem',
+                                fontSize: '0.875rem',
+                                fontWeight: 600,
+                                color: 'hsl(220 30% 15%)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                              }}
+                            >
+                              Select Degree Level
+                            </label>
+                            <select
+                              id="degree-level-select"
+                              value={degreeLevel}
+                              onChange={(e) => setDegreeLevel(e.target.value as 'undergraduate' | 'postgraduate' | '')}
+                              disabled={!selectedCollege}
+                              style={{
+                                width: '100%',
+                                padding: '0.875rem 1.25rem',
+                                paddingRight: '2.5rem',
+                                border: '1.5px solid hsl(40 20% 88%)',
+                                borderRadius: '0.75rem',
+                                fontSize: '1rem',
+                                color: selectedCollege ? 'hsl(220 30% 15%)' : 'hsl(220 20% 60%)',
+                                background: selectedCollege ? 'white' : 'hsl(40 20% 96%)',
+                                cursor: selectedCollege ? 'pointer' : 'not-allowed',
+                                transition: 'all 0.2s ease',
+                                fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                appearance: 'none',
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'right 0.75rem center',
+                              }}
+                            >
+                              <option value="">-- Select Degree Level --</option>
+                              <option value="undergraduate">Undergraduate</option>
+                              {universityMasters && <option value="postgraduate">Postgraduate/Masters</option>}
+                            </select>
+                          </div>
+                        </div>
+
+                        {selectedCollege && (
+                          <>
+
+                            {degreeLevel === 'undergraduate' && universityCourses[selectedCollege] && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <div
+                                  style={{
+                                    marginBottom: '1.5rem',
+                                    paddingBottom: '1rem',
+                                    borderBottom: '2px solid hsl(40 20% 88%)',
+                                  }}
+                                >
+                                  <h3
+                                    style={{
+                                      fontSize: '1.25rem',
+                                      fontWeight: 700,
+                                      color: 'hsl(220 30% 15%)',
+                                      margin: 0,
+                                      fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                    }}
+                                  >
+                                    {selectedCollege} - Undergraduate Programs
+                                  </h3>
+                                  <p
+                                    style={{
+                                      fontSize: '0.875rem',
+                                      color: 'hsl(220 20% 40%)',
+                                      margin: '0.5rem 0 0 0',
+                                      fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                    }}
+                                  >
+                                    {universityCourses[selectedCollege].length} {universityCourses[selectedCollege].length === 1 ? 'Course' : 'Courses'} Available
+                                  </p>
+                                </div>
+                                <div
+                                  style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                                    gap: '1rem',
+                                  }}
+                                  className="courses-grid"
+                                >
+                                  {universityCourses[selectedCollege].map((course, index) => (
+                                    <motion.div
+                                      key={index}
+                                      initial={{ opacity: 0, scale: 0.95 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ duration: 0.2, delay: index * 0.02 }}
+                                      style={{
+                                        padding: '1.25rem',
+                                        background: 'white',
+                                        borderRadius: '0.75rem',
+                                        border: '1px solid hsl(40 20% 88%)',
+                                        transition: 'all 0.2s ease',
+                                        cursor: 'default',
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.borderColor = 'hsl(220 20% 40%)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.borderColor = 'hsl(40 20% 88%)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'flex-start',
+                                          gap: '0.75rem',
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            width: '6px',
+                                            height: '6px',
+                                            borderRadius: '50%',
+                                            background: 'hsl(220 20% 40%)',
+                                            marginTop: '0.5rem',
+                                            flexShrink: 0,
+                                          }}
+                                        />
+                                        <div
+                                          style={{
+                                            flex: 1,
+                                            fontSize: '0.95rem',
+                                            lineHeight: '1.6',
+                                            color: 'hsl(220 30% 15%)',
+                                            fontWeight: 500,
+                                            fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                          }}
+                                        >
+                                          {course}
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {degreeLevel === 'postgraduate' && universityMasters && universityMasters[selectedCollege] && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <div
+                                  style={{
+                                    marginBottom: '1.5rem',
+                                    paddingBottom: '1rem',
+                                    borderBottom: '2px solid hsl(40 20% 88%)',
+                                  }}
+                                >
+                                  <h3
+                                    style={{
+                                      fontSize: '1.25rem',
+                                      fontWeight: 700,
+                                      color: 'hsl(220 30% 15%)',
+                                      margin: 0,
+                                      fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                    }}
+                                  >
+                                    {selectedCollege} - Postgraduate/Masters Programs
+                                  </h3>
+                                  <p
+                                    style={{
+                                      fontSize: '0.875rem',
+                                      color: 'hsl(220 20% 40%)',
+                                      margin: '0.5rem 0 0 0',
+                                      fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                    }}
+                                  >
+                                    {Object.values(universityMasters[selectedCollege]).reduce((sum, dept) => sum + dept.length, 0)} Courses across {Object.keys(universityMasters[selectedCollege]).length} Departments
+                                  </p>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                  {Object.entries(universityMasters[selectedCollege]).map(([department, courses]) => (
+                                    <motion.div
+                                      key={department}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ duration: 0.3 }}
+                                    >
+                                      <h4
+                                        style={{
+                                          fontSize: '1.1rem',
+                                          fontWeight: 600,
+                                          color: 'hsl(220 30% 15%)',
+                                          margin: '0 0 1rem 0',
+                                          paddingBottom: '0.75rem',
+                                          borderBottom: '1px solid hsl(40 20% 88%)',
+                                          fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                        }}
+                                      >
+                                        {department}
+                                      </h4>
+                                      <div
+                                        style={{
+                                          display: 'grid',
+                                          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                                          gap: '1rem',
+                                        }}
+                                        className="courses-grid"
+                                      >
+                                        {courses.map((course, index) => (
+                                          <motion.div
+                                            key={index}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ duration: 0.2, delay: index * 0.02 }}
+                                            style={{
+                                              padding: '1.25rem',
+                                              background: 'white',
+                                              borderRadius: '0.75rem',
+                                              border: '1px solid hsl(40 20% 88%)',
+                                              transition: 'all 0.2s ease',
+                                              cursor: 'default',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                              e.currentTarget.style.borderColor = 'hsl(220 20% 40%)';
+                                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+                                              e.currentTarget.style.transform = 'translateY(-2px)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                              e.currentTarget.style.borderColor = 'hsl(40 20% 88%)';
+                                              e.currentTarget.style.boxShadow = 'none';
+                                              e.currentTarget.style.transform = 'translateY(0)';
+                                            }}
+                                          >
+                                            <div
+                                              style={{
+                                                display: 'flex',
+                                                alignItems: 'flex-start',
+                                                gap: '0.75rem',
+                                              }}
+                                            >
+                                              <div
+                                                style={{
+                                                  width: '6px',
+                                                  height: '6px',
+                                                  borderRadius: '50%',
+                                                  background: '#3b82f6',
+                                                  marginTop: '0.5rem',
+                                                  flexShrink: 0,
+                                                }}
+                                              />
+                                              <div
+                                                style={{
+                                                  flex: 1,
+                                                  fontSize: '0.95rem',
+                                                  lineHeight: '1.6',
+                                                  color: 'hsl(220 30% 15%)',
+                                                  fontWeight: 500,
+                                                  fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                                }}
+                                              >
+                                                {course}
+                                              </div>
+                                            </div>
+                                          </motion.div>
+                                        ))}
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {selectedCollege && !degreeLevel && (
+                              <div
+                                style={{
+                                  textAlign: 'center',
+                                  padding: '3rem 2rem',
+                                  color: 'hsl(220 20% 40%)',
+                                  fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                }}
+                              >
+                                <p style={{ fontSize: '1rem', margin: 0 }}>
+                                  Select a degree level above to view available courses
+                                </p>
+                              </div>
+                            )}
+
+                            {selectedCollege && degreeLevel === 'undergraduate' && !universityCourses[selectedCollege] && (
+                              <div
+                                style={{
+                                  textAlign: 'center',
+                                  padding: '3rem 2rem',
+                                  color: 'hsl(220 20% 40%)',
+                                  fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                }}
+                              >
+                                <p style={{ fontSize: '1rem', margin: 0 }}>
+                                  No undergraduate courses available for {selectedCollege}
+                                </p>
+                              </div>
+                            )}
+
+                            {selectedCollege && degreeLevel === 'postgraduate' && (!universityMasters || !universityMasters[selectedCollege]) && (
+                              <div
+                                style={{
+                                  textAlign: 'center',
+                                  padding: '3rem 2rem',
+                                  color: 'hsl(220 20% 40%)',
+                                  fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                                }}
+                              >
+                                <p style={{ fontSize: '1rem', margin: 0 }}>
+                                  No postgraduate/masters courses available for {selectedCollege}
+                                </p>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {selectedCollege === '' && (
+                          <div
+                            style={{
+                              textAlign: 'center',
+                              padding: '3rem 2rem',
+                              color: 'hsl(220 20% 40%)',
+                              fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+                            }}
+                          >
+                            <p style={{ fontSize: '1rem', margin: 0 }}>
+                              Select a college from the dropdown above to view available courses
+                            </p>
+                          </div>
+                        )}
+                      </>
+                      );
+                    })()}
                   </motion.div>
                 )}
               </AnimatePresence>

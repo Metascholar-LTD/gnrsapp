@@ -68,11 +68,7 @@ const AdminSidebar = () => {
     {
       header: "Education Hub",
       items: [
-        { icon: "book-open", label: "Education Hub", path: "/admin/education" },
-        { icon: "file-text", label: "Past Questions", path: "/admin/education/past-questions" },
-        { icon: "book", label: "Lecture Notes", path: "/admin/education/lecture-notes" },
-        { icon: "file", label: "Study Guides", path: "/admin/education/study-guides" },
-        { icon: "book-open", label: "Ebooks", path: "/admin/education/ebooks" },
+        { icon: "book-open", label: "Academic Resources", path: "/admin/education" },
         { icon: "compass", label: "Course Recommendations", path: "/admin/education/course-recommendations" },
         { icon: "users", label: "Study Groups", path: "/admin/education/study-groups" },
         { icon: "message-circle", label: "Discussion Forums", path: "/admin/education/forums" },
