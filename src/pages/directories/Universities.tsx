@@ -658,24 +658,46 @@ const Universities: React.FC = () => {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    .university-view-profile-button {
+    .university-view-profile-wrapper {
       margin-top: 1.5rem;
-      padding: 0.75rem 1.5rem;
-      background: hsl(220 30% 15%);
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .university-view-profile-link {
+      position: relative;
+      display: inline-block;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: hsl(220 30% 15%);
+      transition: color 0.3s ease;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    .university-view-profile-button:hover {
-      background: hsl(220 30% 20%);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    .university-view-profile-link:hover {
+      color: hsl(220 20% 40%);
+    }
+
+    .university-view-profile-link-inner {
+      position: relative;
+      display: inline-block;
+      padding-bottom: 0.25rem;
+    }
+
+    .university-view-profile-link-underline {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      width: calc(100% + 14px);
+      background: #60a5fa;
+      transition: background 0.3s ease;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+    }
+
+    .university-view-profile-link:hover .university-view-profile-link-underline {
+      background: #3b82f6;
     }
 
     .universities-pagination-wrapper {
@@ -1136,11 +1158,21 @@ const Universities: React.FC = () => {
                             <p className="university-description">
                               {university.description}
                             </p>
-                            <Link to={`/directories/universities/${university.id}`}>
-                              <button className="university-view-profile-button">
-                                View Profile
-                              </button>
-                            </Link>
+                            <div className="university-view-profile-wrapper">
+                              <Link 
+                                to={`/directories/universities/${university.id}`} 
+                                className="university-view-profile-link"
+                              >
+                                <motion.span
+                                  className="university-view-profile-link-inner"
+                                  whileHover={{ x: 2 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                  Read More
+                                  <span className="university-view-profile-link-underline" />
+                                </motion.span>
+                              </Link>
+                            </div>
                           </div>
 
                           <div className="university-grant-aid-display">

@@ -3,6 +3,7 @@ import { GraduationCap, Plus, Search, Edit2, Trash2, Save, X, Eye, ChevronLeft, 
 import { ConfirmationModal } from "@/components/admin";
 import { toast } from "sonner";
 import { BREAKPOINTS, MEDIA_QUERIES } from "@/lib/breakpoints";
+import UniversityDetailEditor from "./components/UniversityDetailEditor";
 
 interface University {
   id: string;
@@ -21,6 +22,13 @@ interface University {
   website?: string;
   abbreviation?: string;
   photos?: string[];
+  courses?: Record<string, string[]>;
+  mastersCourses?: Record<string, Record<string, string[]>>;
+  contact?: {
+    address?: string;
+    phone?: string;
+    email?: string;
+  };
   academics?: {
     studentFacultyRatio?: string;
     graduationRate?: string;
@@ -62,6 +70,8 @@ const AdminUniversities = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [detailEditorOpen, setDetailEditorOpen] = useState(false);
+  const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
 
   // University logo mapping from Cloudinary
   const universityLogos: Record<string, string> = {
@@ -313,9 +323,7 @@ const AdminUniversities = () => {
   }, []);
 
   const startEditing = (university: University) => {
-    setEditing(university.id);
-    setFormData(university);
-    setShowAddForm(false);
+    openDetailEditor(university);
   };
 
   const startViewing = (university: University) => {
@@ -329,6 +337,8 @@ const AdminUniversities = () => {
     setViewing(null);
     setFormData({});
     setShowAddForm(false);
+    setDetailEditorOpen(false);
+    setSelectedUniversity(null);
   };
 
   const handleInputChange = (
@@ -402,6 +412,9 @@ const AdminUniversities = () => {
           admissions: formData.admissions,
           studentLife: formData.studentLife,
           rankings: formData.rankings || [],
+          courses: formData.courses,
+          mastersCourses: formData.mastersCourses,
+          contact: formData.contact,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
@@ -418,6 +431,54 @@ const AdminUniversities = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const collapseSidebar = () => {
+    const sidebarElement = document.querySelector("#admin-scope .js-sidebar") as HTMLElement;
+    const mainElement = document.querySelector("#admin-scope .wrapper .main") as HTMLElement;
+    
+    if (sidebarElement && !sidebarElement.classList.contains("collapsed")) {
+      sidebarElement.classList.add("collapsed");
+      
+      // Update main content margin
+      if (mainElement) {
+        mainElement.style.marginLeft = "0";
+        mainElement.style.width = "100%";
+      }
+      
+      // Recalculate SimpleBar after collapse
+      setTimeout(() => {
+        const simplebarElement = document.querySelector("#admin-scope .js-simplebar") as HTMLElement;
+        if (simplebarElement && (simplebarElement as any).simpleBar) {
+          try {
+            (simplebarElement as any).simpleBar.recalculate();
+          } catch (e) {
+            // Ignore recalculate errors
+          }
+        }
+        window.dispatchEvent(new Event("resize"));
+      }, 300);
+    }
+  };
+
+  const openDetailEditor = (university: University) => {
+    setSelectedUniversity(university);
+    setDetailEditorOpen(true);
+    setEditing(null);
+    setShowAddForm(false);
+    // Collapse sidebar when modal opens
+    collapseSidebar();
+  };
+
+  const handleDetailSave = (updatedData: University) => {
+    setUniversities(prev => prev.map(uni => 
+      uni.id === updatedData.id 
+        ? { ...updatedData, updated_at: new Date().toISOString() }
+        : uni
+    ));
+    setDetailEditorOpen(false);
+    setSelectedUniversity(null);
+    toast.success("University details saved successfully");
   };
 
   const deleteUniversity = (id: string) => {
@@ -661,7 +722,7 @@ const AdminUniversities = () => {
 
     .au-table-header {
       display: grid;
-      grid-template-columns: 50px 2fr 1fr 1fr 1.3fr 1.3fr 1.2fr 120px;
+      grid-template-columns: 50px 2fr 1fr 1fr 1.3fr 1.3fr 1.2fr 160px;
       gap: 1rem;
       padding: 1rem 1.5rem;
       background: #f9fafb;
@@ -675,7 +736,7 @@ const AdminUniversities = () => {
 
     .au-table-row {
       display: grid;
-      grid-template-columns: 50px 2fr 1fr 1fr 1.3fr 1.3fr 1.2fr 120px;
+      grid-template-columns: 50px 2fr 1fr 1fr 1.3fr 1.3fr 1.2fr 160px;
       gap: 1rem;
       padding: 1rem 1.5rem;
       border-bottom: 1px solid #e5e7eb;
@@ -1278,12 +1339,10 @@ const AdminUniversities = () => {
       </div>
 
       <div id="au-content">
-        {(showAddForm || editing) && (
+        {showAddForm && (
           <div className="au-form-card">
             <div className="au-form-header">
-              <h3 className="au-form-title">
-                {editing ? "Edit University" : "Add New University"}
-              </h3>
+              <h3 className="au-form-title">Add New University</h3>
               <button className="au-action-btn" onClick={cancelEditing}>
                 <X size={16} />
               </button>
@@ -1553,7 +1612,7 @@ const AdminUniversities = () => {
                   <button
                     className="au-action-btn au-action-btn-edit"
                     onClick={() => startEditing(university)}
-                    title="Edit"
+                    title="Edit University"
                   >
                     <Edit2 size={14} />
                   </button>
@@ -1655,6 +1714,45 @@ const AdminUniversities = () => {
           </div>
         )}
       </div>
+
+      {detailEditorOpen && selectedUniversity && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "2rem",
+          overflow: "auto"
+        }}>
+          <div style={{
+            width: "100%",
+            maxWidth: "1400px",
+            maxHeight: "90vh",
+            overflow: "auto",
+            backgroundColor: "#ffffff",
+            borderRadius: "0.5rem",
+            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+          }}>
+            <UniversityDetailEditor
+              university={selectedUniversity}
+              onSave={handleDetailSave}
+              onClose={() => {
+                setDetailEditorOpen(false);
+                setSelectedUniversity(null);
+              }}
+              onView={() => {
+                window.open(`/directories/universities/${selectedUniversity.id}`, '_blank');
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <ConfirmationModal
         open={deleteModalOpen}
