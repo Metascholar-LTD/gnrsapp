@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Save, X, Plus, Trash2, Edit2, Eye, 
   GraduationCap, DollarSign, UserCheck, Users, 
   BookOpen, Image as ImageIcon, MapPin, Globe,
-  Phone, Mail, Award, TrendingUp
+  Phone, Mail, Award, TrendingUp, Upload, Link as LinkIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import { BREAKPOINTS, MEDIA_QUERIES } from "@/lib/breakpoints";
@@ -82,6 +82,9 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
   const [saving, setSaving] = useState(false);
   const [editingCourse, setEditingCourse] = useState<{ college: string; department?: string; level: 'undergraduate' | 'masters' } | null>(null);
   const [newCourseName, setNewCourseName] = useState("");
+  const [newPhotoUrl, setNewPhotoUrl] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setFormData(university);
@@ -136,11 +139,41 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
     }));
   };
 
+  // Predefined color palette
+  const availableColors = [
+    { value: "#3b82f6", name: "Blue" },
+    { value: "#ef4444", name: "Red" },
+    { value: "#10b981", name: "Green" },
+    { value: "#f59e0b", name: "Amber" },
+    { value: "#8b5cf6", name: "Purple" },
+    { value: "#ec4899", name: "Pink" },
+    { value: "#06b6d4", name: "Cyan" },
+    { value: "#f97316", name: "Orange" },
+    { value: "#84cc16", name: "Lime" },
+    { value: "#6366f1", name: "Indigo" },
+  ];
+
+  const getAvailableColorsForProgram = (currentIndex: number) => {
+    const currentProgram = formData.programEnrollment?.[currentIndex];
+    const currentColor = currentProgram?.color;
+    const usedColors = (formData.programEnrollment || [])
+      .map((p, idx) => idx !== currentIndex ? p.color : null)
+      .filter(Boolean) as string[];
+    
+    // Always include the currently selected color, even if it's used elsewhere
+    return availableColors.filter(color => 
+      !usedColors.includes(color.value) || color.value === currentColor
+    );
+  };
+
   const addProgramEnrollment = () => {
+    const usedColors = (formData.programEnrollment || []).map(p => p.color);
+    const firstAvailableColor = availableColors.find(c => !usedColors.includes(c.value)) || availableColors[0];
+    
     const newProgram = {
       label: "",
       percentage: 0,
-      color: "#3b82f6",
+      color: firstAvailableColor.value,
     };
     setFormData(prev => ({
       ...prev,
@@ -280,6 +313,69 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
         },
       },
     }));
+  };
+
+  const addPhotoUrl = () => {
+    if (!newPhotoUrl.trim()) {
+      toast.error("Please enter a valid photo URL");
+      return;
+    }
+    addArrayItem("photos", newPhotoUrl.trim());
+    setNewPhotoUrl("");
+    toast.success("Photo URL added");
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      // Convert file to base64 or upload to cloud storage
+      // For now, we'll create a local object URL as a placeholder
+      // In production, you'd upload to Cloudinary, AWS S3, etc.
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        // For now, we'll use the object URL. In production, replace with actual upload URL
+        const objectUrl = URL.createObjectURL(file);
+        addArrayItem("photos", objectUrl);
+        setUploadingPhoto(false);
+        toast.success("Photo uploaded successfully");
+      };
+      reader.onerror = () => {
+        setUploadingPhoto(false);
+        toast.error("Failed to read file");
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      setUploadingPhoto(false);
+      toast.error("Failed to upload photo");
+      console.error("Upload error:", error);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const updatePhotoUrl = (index: number, url: string) => {
+    const photos = [...(formData.photos || [])];
+    photos[index] = url;
+    setFormData(prev => ({ ...prev, photos }));
   };
 
   const tabs = [
@@ -649,6 +745,36 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
       border-bottom: 1px solid #e5e7eb;
     }
 
+    .ude-program-table-header {
+      display: grid;
+      grid-template-columns: 30px 2fr 100px 140px 40px;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+    }
+
+    .ude-program-table-row {
+      display: grid;
+      grid-template-columns: 30px 2fr 100px 140px 40px;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+      align-items: center;
+    }
+
+    .ude-photo-table-header {
+      display: grid;
+      grid-template-columns: 30px 80px 1fr 40px;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+    }
+
+    .ude-photo-table-row {
+      display: grid;
+      grid-template-columns: 30px 80px 1fr 40px;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+      align-items: center;
+    }
+
     ${MEDIA_QUERIES.MOBILE} {
       #ude-header {
         padding: 1rem;
@@ -668,6 +794,57 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
 
       .ude-form-grid {
         grid-template-columns: 1fr;
+      }
+
+      .ude-program-table-header {
+        display: none;
+      }
+
+      .ude-program-table-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb !important;
+      }
+      
+      .ude-program-table-row > div:first-child {
+        display: none;
+      }
+
+      .ude-program-table-row input,
+      .ude-program-table-row select {
+        width: 100%;
+      }
+
+      .ude-program-table-row > div:last-child {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+      }
+
+      .ude-photo-table-header {
+        display: none;
+      }
+
+      .ude-photo-table-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb !important;
+      }
+      
+      .ude-photo-table-row > div:first-child {
+        display: none;
+      }
+
+      .ude-photo-table-row input {
+        width: 100%;
+      }
+
+      .ude-photo-table-row > div:last-child {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
       }
     }
   `;
@@ -1014,66 +1191,149 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
           </div>
 
           <div style={{ marginTop: "2rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <h4 style={{ fontSize: "1rem", fontWeight: 600, color: "#111827", margin: 0 }}>Program Enrollment</h4>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <h4 style={{ fontSize: "0.875rem", fontWeight: 600, color: "#374151", margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>Program Enrollment</h4>
               <button
                 className="ude-btn ude-btn-secondary"
                 onClick={addProgramEnrollment}
-                style={{ padding: "0.5rem 1rem", fontSize: "0.75rem" }}
+                style={{ padding: "0.4rem 0.75rem", fontSize: "0.75rem" }}
               >
-                <Plus size={14} />
+                <Plus size={12} />
                 Add Program
               </button>
             </div>
-            {(formData.programEnrollment || []).map((program, index) => (
-              <div key={index} className="ude-item-card">
-                <div className="ude-item-card-header">
-                  <span className="ude-item-card-title">Program {index + 1}</span>
-                  <div className="ude-item-card-actions">
-                    <button
-                      className="ude-icon-btn ude-icon-btn-danger"
-                      onClick={() => removeProgramEnrollment(index)}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+            <div style={{ 
+              background: "#ffffff", 
+              border: "1px solid #e5e7eb", 
+              borderRadius: "0.5rem",
+              overflow: "hidden"
+            }}>
+              {(formData.programEnrollment || []).length === 0 ? (
+                <div style={{ 
+                  textAlign: "center", 
+                  padding: "1.5rem", 
+                  color: "#6b7280",
+                  fontSize: "0.875rem"
+                }}>
+                  No programs added yet. Click "Add Program" to get started.
                 </div>
-                <div className="ude-form-grid" style={{ gap: "1rem" }}>
-                  <div className="ude-form-group">
-                    <label className="ude-form-label">Program Name</label>
-                    <input
-                      type="text"
-                      value={program.label}
-                      onChange={(e) => updateProgramEnrollment(index, "label", e.target.value)}
-                      className="ude-form-input"
-                      placeholder="e.g., Business & Management"
-                    />
+              ) : (
+                <>
+                  {/* Table Header */}
+                  <div className="ude-program-table-header" style={{
+                    display: "grid",
+                    gridTemplateColumns: "30px 2fr 100px 140px 40px",
+                    gap: "0.75rem",
+                    padding: "0.625rem 0.75rem",
+                    background: "#f9fafb",
+                    borderBottom: "1px solid #e5e7eb",
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em"
+                  }}>
+                    <div>#</div>
+                    <div>Program Name</div>
+                    <div>Percentage</div>
+                    <div>Color</div>
+                    <div></div>
                   </div>
-                  <div className="ude-form-group">
-                    <label className="ude-form-label">Percentage</label>
-                    <input
-                      type="number"
-                      value={program.percentage}
-                      onChange={(e) => updateProgramEnrollment(index, "percentage", Number(e.target.value))}
-                      className="ude-form-input"
-                      placeholder="e.g., 25"
-                      min="0"
-                      max="100"
-                    />
-                  </div>
-                  <div className="ude-form-group">
-                    <label className="ude-form-label">Color</label>
-                    <input
-                      type="color"
-                      value={program.color}
-                      onChange={(e) => updateProgramEnrollment(index, "color", e.target.value)}
-                      className="ude-form-input"
-                      style={{ height: "38px", cursor: "pointer" }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+                  {/* Program Rows */}
+                  {(formData.programEnrollment || []).map((program, index) => {
+                    const availableColors = getAvailableColorsForProgram(index);
+                    return (
+                      <div 
+                        key={index}
+                        className="ude-program-table-row"
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "30px 2fr 100px 140px 40px",
+                          gap: "0.75rem",
+                          padding: "0.625rem 0.75rem",
+                          borderBottom: index < (formData.programEnrollment?.length || 0) - 1 ? "1px solid #f3f4f6" : "none",
+                          alignItems: "center",
+                          transition: "background 0.15s"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "#f9fafb"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                      >
+                        <div style={{ fontSize: "0.875rem", color: "#6b7280", fontWeight: 500 }}>
+                          {index + 1}
+                        </div>
+                        <input
+                          type="text"
+                          value={program.label}
+                          onChange={(e) => updateProgramEnrollment(index, "label", e.target.value)}
+                          className="ude-form-input"
+                          placeholder="Enter program name"
+                          style={{ 
+                            padding: "0.5rem 0.625rem",
+                            fontSize: "0.875rem",
+                            margin: 0
+                          }}
+                        />
+                        <input
+                          type="number"
+                          value={program.percentage}
+                          onChange={(e) => updateProgramEnrollment(index, "percentage", Number(e.target.value))}
+                          className="ude-form-input"
+                          placeholder="0"
+                          min="0"
+                          max="100"
+                          style={{ 
+                            padding: "0.5rem 0.625rem",
+                            fontSize: "0.875rem",
+                            margin: 0
+                          }}
+                        />
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                          <div style={{
+                            width: "24px",
+                            height: "24px",
+                            backgroundColor: program.color,
+                            borderRadius: "0.25rem",
+                            border: "1px solid #d1d5db",
+                            flexShrink: 0
+                          }} />
+                          <select
+                            value={program.color}
+                            onChange={(e) => updateProgramEnrollment(index, "color", e.target.value)}
+                            className="ude-form-select"
+                            style={{ 
+                              flex: 1,
+                              padding: "0.5rem 0.625rem",
+                              fontSize: "0.875rem",
+                              margin: 0
+                            }}
+                          >
+                            {availableColors.length === 0 ? (
+                              <option value={program.color}>
+                                {availableColors.find(c => c.value === program.color)?.name || "No colors"}
+                              </option>
+                            ) : (
+                              availableColors.map((color) => (
+                                <option key={color.value} value={color.value}>
+                                  {color.name}
+                                </option>
+                              ))
+                            )}
+                          </select>
+                        </div>
+                        <button
+                          className="ude-icon-btn ude-icon-btn-danger"
+                          onClick={() => removeProgramEnrollment(index)}
+                          style={{ width: "28px", height: "28px" }}
+                          title="Remove program"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -1517,37 +1777,156 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
         {/* Media Tab */}
         <div className={`ude-section ${activeTab === 'media' ? 'active' : ''}`}>
           <h3 className="ude-section-title">Media & Photos</h3>
-          <div className="ude-form-group au-form-group-full">
-            <label className="ude-form-label">Photo URLs</label>
-            <div className="ude-array-input-group">
-              <input
-                type="text"
-                className="ude-form-input ude-array-input"
-                placeholder="Add photo URL..."
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addArrayItem("photos", e.currentTarget.value);
-                    e.currentTarget.value = "";
-                  }
-                }}
-              />
-            </div>
-            {(formData.photos || []).length > 0 && (
-              <div className="ude-array-tags" style={{ marginTop: "1rem" }}>
-                {(formData.photos || []).map((photo, index) => (
-                  <div key={index} className="ude-array-tag" style={{ maxWidth: "300px", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{photo}</span>
-                    <span
-                      className="ude-array-tag-remove"
-                      onClick={() => removeArrayItem("photos", index)}
-                    >
-                      <X size={12} />
-                    </span>
-                  </div>
-                ))}
+          
+          <div style={{ marginTop: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <h4 style={{ fontSize: "0.875rem", fontWeight: 600, color: "#374151", margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>Photos</h4>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button
+                  className="ude-btn ude-btn-secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  style={{ padding: "0.4rem 0.75rem", fontSize: "0.75rem" }}
+                >
+                  <Upload size={12} />
+                  {uploadingPhoto ? "Uploading..." : "Upload Photo"}
+                </button>
+                <button
+                  className="ude-btn ude-btn-secondary"
+                  onClick={() => {
+                    const url = prompt("Enter photo URL:");
+                    if (url && url.trim()) {
+                      addArrayItem("photos", url.trim());
+                      toast.success("Photo URL added");
+                    }
+                  }}
+                  style={{ padding: "0.4rem 0.75rem", fontSize: "0.75rem" }}
+                >
+                  <LinkIcon size={12} />
+                  Add URL
+                </button>
               </div>
-            )}
+            </div>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              style={{ display: "none" }}
+            />
+
+            <div style={{ 
+              background: "#ffffff", 
+              border: "1px solid #e5e7eb", 
+              borderRadius: "0.5rem",
+              overflow: "hidden"
+            }}>
+              {(formData.photos || []).length === 0 ? (
+                <div style={{ 
+                  textAlign: "center", 
+                  padding: "1.5rem", 
+                  color: "#6b7280",
+                  fontSize: "0.875rem"
+                }}>
+                  No photos added yet. Click "Upload Photo" or "Add URL" to get started.
+                </div>
+              ) : (
+                <>
+                  {/* Table Header */}
+                  <div className="ude-photo-table-header" style={{
+                    display: "grid",
+                    gridTemplateColumns: "30px 80px 1fr 40px",
+                    gap: "0.75rem",
+                    padding: "0.625rem 0.75rem",
+                    background: "#f9fafb",
+                    borderBottom: "1px solid #e5e7eb",
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em"
+                  }}>
+                    <div>#</div>
+                    <div>Preview</div>
+                    <div>Photo URL</div>
+                    <div></div>
+                  </div>
+                  {/* Photo Rows */}
+                  {(formData.photos || []).map((photo, index) => (
+                    <div 
+                      key={index}
+                      className="ude-photo-table-row"
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "30px 80px 1fr 40px",
+                        gap: "0.75rem",
+                        padding: "0.625rem 0.75rem",
+                        borderBottom: index < (formData.photos?.length || 0) - 1 ? "1px solid #f3f4f6" : "none",
+                        alignItems: "center",
+                        transition: "background 0.15s"
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = "#f9fafb"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                    >
+                      <div style={{ fontSize: "0.875rem", color: "#6b7280", fontWeight: 500 }}>
+                        {index + 1}
+                      </div>
+                      <div style={{
+                        width: "60px",
+                        height: "60px",
+                        borderRadius: "0.375rem",
+                        overflow: "hidden",
+                        border: "1px solid #e5e7eb",
+                        background: "#f3f4f6",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0
+                      }}>
+                        {photo ? (
+                          <img 
+                            src={photo} 
+                            alt={`Photo ${index + 1}`}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover"
+                            }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = "none";
+                              (e.target as HTMLImageElement).parentElement!.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #9ca3af; font-size: 0.75rem;">No Image</div>';
+                            }}
+                          />
+                        ) : (
+                          <div style={{ color: "#9ca3af", fontSize: "0.75rem" }}>No Image</div>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        value={photo}
+                        onChange={(e) => updatePhotoUrl(index, e.target.value)}
+                        className="ude-form-input"
+                        placeholder="Enter photo URL"
+                        style={{ 
+                          padding: "0.5rem 0.625rem",
+                          fontSize: "0.875rem",
+                          margin: 0
+                        }}
+                      />
+                      <button
+                        className="ude-icon-btn ude-icon-btn-danger"
+                        onClick={() => removeArrayItem("photos", index)}
+                        style={{ width: "28px", height: "28px" }}
+                        title="Remove photo"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
           </div>
         </div>
 
