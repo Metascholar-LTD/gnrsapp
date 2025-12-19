@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import PastQuestionsManager from "./components/PastQuestionsManager";
 import ShsBeceQuestionsManager from "./components/ShsBeceQuestionsManager";
+import LectureNotesManager from "./components/LectureNotesManager";
 
 const AdminEducationHub = () => {
   const [activeTab, setActiveTab] = useState("university-past-questions");
@@ -592,6 +593,11 @@ const AdminEducationHub = () => {
     // Render ShsBeceQuestionsManager for SHS and BECE past questions
     if (tabId === "shs-bece-past-questions") {
       return <ShsBeceQuestionsManager />;
+    }
+
+    // Render LectureNotesManager for lecture notes and e-learning
+    if (tabId === "lecture-notes") {
+      return <LectureNotesManager />;
     }
 
     const IconComponent = tab.icon;
