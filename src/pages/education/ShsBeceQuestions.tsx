@@ -323,7 +323,7 @@ const ShsBeceQuestions = () => {
     }
 
     .bece-questions-subtitle {
-      font-size: 16px;
+      font-size: 14px;
       color: hsl(220 20% 40%);
       margin: 0 0 1.5rem 0;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
@@ -787,7 +787,7 @@ const ShsBeceQuestions = () => {
       }
 
       .bece-questions-subtitle {
-        font-size: 14px;
+        font-size: 12px;
         margin-bottom: 1.25rem;
         line-height: 1.5;
       }
@@ -907,7 +907,7 @@ const ShsBeceQuestions = () => {
       }
 
       .bece-questions-subtitle {
-        font-size: 17px;
+        font-size: 14px;
         margin-bottom: 1.75rem;
       }
 
@@ -973,7 +973,7 @@ const ShsBeceQuestions = () => {
       }
 
       .bece-questions-subtitle {
-        font-size: 18px;
+        font-size: 15px;
         margin-bottom: 2rem;
       }
 
@@ -1011,7 +1011,7 @@ const ShsBeceQuestions = () => {
       }
 
       .bece-questions-subtitle {
-        font-size: 18px;
+        font-size: 15px;
         margin-bottom: 2rem;
       }
 
