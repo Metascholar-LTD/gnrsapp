@@ -3,7 +3,8 @@ import {
   Save, X, Plus, Trash2, Edit2, Eye, 
   GraduationCap, DollarSign, UserCheck, Users, 
   BookOpen, Image as ImageIcon, MapPin, Globe,
-  Phone, Mail, Award, TrendingUp, Upload, Link as LinkIcon
+  Phone, Mail, Award, TrendingUp, Upload, Link as LinkIcon,
+  ChevronDown, ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 import { BREAKPOINTS, MEDIA_QUERIES } from "@/lib/breakpoints";
@@ -104,11 +105,14 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
   const [activeTab, setActiveTab] = useState<'basic' | 'academics' | 'financial' | 'admissions' | 'student' | 'courses' | 'media' | 'contact'>('basic');
   const [formData, setFormData] = useState<University>(university);
   const [saving, setSaving] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<{ college: string; department?: string; level: 'undergraduate' | 'masters' } | null>(null);
+  const [editingCourse, setEditingCourse] = useState<{ college?: string; department?: string; level: 'undergraduate' | 'masters' } | null>(null);
   const [newCourseName, setNewCourseName] = useState("");
   const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Collapse/expand state for courses
+  const [expandedColleges, setExpandedColleges] = useState<Set<string>>(new Set());
+  const [expandedDepartments, setExpandedDepartments] = useState<Map<string, Set<string>>>(new Map());
 
   useEffect(() => {
     setFormData(university);
@@ -240,6 +244,35 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
     }));
   };
 
+  // Toggle college expand/collapse
+  const toggleCollege = (college: string) => {
+    setExpandedColleges(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(college)) {
+        newSet.delete(college);
+      } else {
+        newSet.add(college);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle department expand/collapse
+  const toggleDepartment = (college: string, department: string) => {
+    setExpandedDepartments(prev => {
+      const newMap = new Map(prev);
+      const deptSet = newMap.get(college) || new Set<string>();
+      const newDeptSet = new Set(deptSet);
+      if (newDeptSet.has(department)) {
+        newDeptSet.delete(department);
+      } else {
+        newDeptSet.add(department);
+      }
+      newMap.set(college, newDeptSet);
+      return newMap;
+    });
+  };
+
   const addCollege = (level: 'undergraduate' | 'masters') => {
     const collegeName = prompt("Enter college/department name:");
     if (!collegeName) return;
@@ -252,6 +285,8 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
           [collegeName]: [],
         },
       }));
+      // Auto-expand newly added college
+      setExpandedColleges(prev => new Set([...prev, collegeName]));
     } else {
       setFormData(prev => ({
         ...prev,
@@ -260,6 +295,8 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
           [collegeName]: {},
         },
       }));
+      // Auto-expand newly added college
+      setExpandedColleges(prev => new Set([...prev, collegeName]));
     }
   };
 
@@ -338,6 +375,15 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
         },
       },
     }));
+    // Auto-expand the department and ensure college is expanded
+    setExpandedColleges(prev => new Set([...prev, college]));
+    setExpandedDepartments(prev => {
+      const newMap = new Map(prev);
+      const deptSet = newMap.get(college) || new Set<string>();
+      const newDeptSet = new Set([...deptSet, deptName]);
+      newMap.set(college, newDeptSet);
+      return newMap;
+    });
   };
 
   const addPhotoUrl = () => {
@@ -718,6 +764,15 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
     .ude-courses-level-tab.active {
       color: #2563eb;
       border-bottom-color: #2563eb;
+    }
+
+    /* Smooth transitions for expand/collapse */
+    .ude-course-expandable {
+      transition: all 0.2s ease-in-out;
+    }
+
+    .ude-course-expandable:hover {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .ude-college-card {
@@ -1589,13 +1644,13 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
           <div className="ude-courses-level-tabs">
             <button
               className={`ude-courses-level-tab ${!editingCourse || editingCourse.level === 'undergraduate' ? 'active' : ''}`}
-              onClick={() => setEditingCourse(null)}
+              onClick={() => setEditingCourse({ level: 'undergraduate' })}
             >
               Undergraduate
             </button>
             <button
               className={`ude-courses-level-tab ${editingCourse?.level === 'masters' ? 'active' : ''}`}
-              onClick={() => setEditingCourse(null)}
+              onClick={() => setEditingCourse({ level: 'masters' })}
             >
               Postgraduate/Masters
             </button>
@@ -1604,8 +1659,13 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
           {/* Undergraduate Courses */}
           {(!editingCourse || editingCourse.level === 'undergraduate') && (
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h4 style={{ fontSize: "1rem", fontWeight: 600, color: "#111827", margin: 0 }}>Undergraduate Courses</h4>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+                <div>
+                  <h4 style={{ fontSize: "1rem", fontWeight: 600, color: "#111827", margin: 0, marginBottom: "0.25rem" }}>Undergraduate Courses</h4>
+                  <p style={{ fontSize: "0.75rem", color: "#6b7280", margin: 0 }}>
+                    {Object.keys(formData.courses || {}).length} {Object.keys(formData.courses || {}).length === 1 ? 'college' : 'colleges'}
+                  </p>
+                </div>
                 <button
                   className="ude-btn ude-btn-secondary"
                   onClick={() => addCollege('undergraduate')}
@@ -1616,88 +1676,202 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                 </button>
               </div>
 
-              {Object.entries(formData.courses || {}).map(([college, courses]) => (
-                <div key={college} className="ude-college-card">
-                  <div className="ude-college-header">
-                    <h5 className="ude-college-title">{college}</h5>
-                    <div className="ude-item-card-actions">
-                      <button
-                        className="ude-icon-btn"
-                        onClick={() => {
-                          setEditingCourse({ college, level: 'undergraduate' });
-                          setNewCourseName("");
-                        }}
-                      >
-                        <Plus size={14} />
-                      </button>
-                      <button
-                        className="ude-icon-btn ude-icon-btn-danger"
-                        onClick={() => {
-                          const newCourses = { ...formData.courses };
-                          delete newCourses[college];
-                          setFormData(prev => ({ ...prev, courses: newCourses }));
-                        }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {editingCourse?.college === college && editingCourse.level === 'undergraduate' && (
-                    <div className="ude-array-input-group" style={{ marginBottom: "0.75rem" }}>
-                      <input
-                        type="text"
-                        className="ude-form-input ude-array-input"
-                        placeholder="Enter course name..."
-                        value={newCourseName}
-                        onChange={(e) => setNewCourseName(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addCourse(college);
-                          }
-                        }}
-                      />
-                      <button
-                        className="ude-btn ude-btn-primary"
-                        onClick={() => addCourse(college)}
-                        style={{ padding: "0.5rem 1rem" }}
-                      >
-                        Add
-                      </button>
-                      <button
-                        className="ude-btn ude-btn-secondary"
-                        onClick={() => setEditingCourse(null)}
-                        style={{ padding: "0.5rem 1rem" }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="ude-course-list">
-                    {courses.map((course, courseIndex) => (
-                      <div key={courseIndex} className="ude-course-item">
-                        <span>{course}</span>
-                        <button
-                          className="ude-icon-btn ude-icon-btn-danger"
-                          onClick={() => removeCourse(college, courseIndex)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+              {Object.keys(formData.courses || {}).length === 0 ? (
+                <div style={{ 
+                  textAlign: "center", 
+                  padding: "2rem", 
+                  color: "#9ca3af", 
+                  fontSize: "0.875rem",
+                  border: "2px dashed #e5e7eb",
+                  borderRadius: "8px"
+                }}>
+                  No undergraduate courses added yet. Click "Add College/Department" to get started.
                 </div>
-              ))}
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {Object.entries(formData.courses || {}).map(([college, courses]) => {
+                    const isExpanded = expandedColleges.has(college);
+                    const courseCount = courses.length;
+                    return (
+                      <div key={college} style={{
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        backgroundColor: "#ffffff"
+                      }}>
+                        <div 
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "0.875rem 1rem",
+                            backgroundColor: isExpanded ? "#f9fafb" : "#ffffff",
+                            cursor: "pointer",
+                            transition: "background-color 0.2s"
+                          }}
+                          onClick={() => toggleCollege(college)}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flex: 1 }}>
+                            {isExpanded ? (
+                              <ChevronDown size={18} color="#6b7280" />
+                            ) : (
+                              <ChevronRight size={18} color="#6b7280" />
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <h5 style={{ 
+                                fontSize: "0.9375rem", 
+                                fontWeight: 600, 
+                                color: "#111827", 
+                                margin: 0,
+                                marginBottom: "0.125rem"
+                              }}>
+                                {college}
+                              </h5>
+                              <p style={{ 
+                                fontSize: "0.75rem", 
+                                color: "#6b7280", 
+                                margin: 0 
+                              }}>
+                                {courseCount} {courseCount === 1 ? 'course' : 'courses'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="ude-item-card-actions" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              className="ude-icon-btn"
+                              onClick={() => {
+                                setEditingCourse({ college, level: 'undergraduate' });
+                                setNewCourseName("");
+                                if (!isExpanded) toggleCollege(college);
+                              }}
+                              title="Add course"
+                            >
+                              <Plus size={14} />
+                            </button>
+                            <button
+                              className="ude-icon-btn ude-icon-btn-danger"
+                              onClick={() => {
+                                const newCourses = { ...formData.courses };
+                                delete newCourses[college];
+                                setFormData(prev => ({ ...prev, courses: newCourses }));
+                                setExpandedColleges(prev => {
+                                  const newSet = new Set(prev);
+                                  newSet.delete(college);
+                                  return newSet;
+                                });
+                              }}
+                              title="Delete college"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {isExpanded && (
+                          <div style={{ padding: "1rem", borderTop: "1px solid #e5e7eb" }}>
+                            {editingCourse?.college === college && editingCourse.level === 'undergraduate' && (
+                              <div className="ude-array-input-group" style={{ marginBottom: "1rem" }}>
+                                <input
+                                  type="text"
+                                  className="ude-form-input ude-array-input"
+                                  placeholder="Enter course name..."
+                                  value={newCourseName}
+                                  onChange={(e) => setNewCourseName(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      addCourse(college);
+                                    }
+                                  }}
+                                  autoFocus
+                                />
+                                <button
+                                  className="ude-btn ude-btn-primary"
+                                  onClick={() => addCourse(college)}
+                                  style={{ padding: "0.5rem 1rem" }}
+                                >
+                                  Add
+                                </button>
+                                <button
+                                  className="ude-btn ude-btn-secondary"
+                                  onClick={() => setEditingCourse(null)}
+                                  style={{ padding: "0.5rem 1rem" }}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            )}
+
+                            {courseCount === 0 ? (
+                              <div style={{ 
+                                textAlign: "center", 
+                                padding: "1.5rem", 
+                                color: "#9ca3af", 
+                                fontSize: "0.875rem",
+                                backgroundColor: "#f9fafb",
+                                borderRadius: "6px"
+                              }}>
+                                No courses added yet. Click the + button to add courses.
+                              </div>
+                            ) : (
+                              <div style={{ 
+                                display: "grid", 
+                                gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", 
+                                gap: "0.5rem" 
+                              }}>
+                                {courses.map((course, courseIndex) => (
+                                  <div 
+                                    key={courseIndex} 
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-between",
+                                      padding: "0.625rem 0.75rem",
+                                      backgroundColor: "#f9fafb",
+                                      borderRadius: "6px",
+                                      border: "1px solid #e5e7eb"
+                                    }}
+                                  >
+                                    <span style={{ 
+                                      fontSize: "0.875rem", 
+                                      color: "#374151",
+                                      flex: 1,
+                                      marginRight: "0.5rem"
+                                    }}>
+                                      {course}
+                                    </span>
+                                    <button
+                                      className="ude-icon-btn ude-icon-btn-danger"
+                                      onClick={() => removeCourse(college, courseIndex)}
+                                      style={{ flexShrink: 0 }}
+                                      title="Remove course"
+                                    >
+                                      <Trash2 size={12} />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
           {/* Masters Courses */}
           {editingCourse?.level === 'masters' && (
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h4 style={{ fontSize: "1rem", fontWeight: 600, color: "#111827", margin: 0 }}>Postgraduate/Masters Courses</h4>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+                <div>
+                  <h4 style={{ fontSize: "1rem", fontWeight: 600, color: "#111827", margin: 0, marginBottom: "0.25rem" }}>Postgraduate/Masters Courses</h4>
+                  <p style={{ fontSize: "0.75rem", color: "#6b7280", margin: 0 }}>
+                    {Object.keys(formData.mastersCourses || {}).length} {Object.keys(formData.mastersCourses || {}).length === 1 ? 'college' : 'colleges'}
+                  </p>
+                </div>
                 <button
                   className="ude-btn ude-btn-secondary"
                   onClick={() => addCollege('masters')}
@@ -1708,112 +1882,307 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                 </button>
               </div>
 
-              {Object.entries(formData.mastersCourses || {}).map(([college, departments]) => (
-                <div key={college} className="ude-college-card">
-                  <div className="ude-college-header">
-                    <h5 className="ude-college-title">{college}</h5>
-                    <div className="ude-item-card-actions">
-                      <button
-                        className="ude-icon-btn"
-                        onClick={() => addDepartment(college)}
-                      >
-                        <Plus size={14} />
-                      </button>
-                      <button
-                        className="ude-icon-btn ude-icon-btn-danger"
-                        onClick={() => {
-                          const newMastersCourses = { ...formData.mastersCourses };
-                          delete newMastersCourses[college];
-                          setFormData(prev => ({ ...prev, mastersCourses: newMastersCourses }));
-                        }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {Object.entries(departments).map(([department, courses]) => (
-                    <div key={department} style={{ marginBottom: "1rem", paddingLeft: "1rem", borderLeft: "2px solid #e5e7eb" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                        <h6 style={{ fontSize: "0.875rem", fontWeight: 600, color: "#374151", margin: 0 }}>{department}</h6>
-                        <div className="ude-item-card-actions">
-                          <button
-                            className="ude-icon-btn"
-                            onClick={() => {
-                              setEditingCourse({ college, department, level: 'masters' });
-                              setNewCourseName("");
-                            }}
-                          >
-                            <Plus size={14} />
-                          </button>
-                          <button
-                            className="ude-icon-btn ude-icon-btn-danger"
-                            onClick={() => {
-                              const newDepts = { ...formData.mastersCourses?.[college] };
-                              delete newDepts[department];
-                              setFormData(prev => ({
-                                ...prev,
-                                mastersCourses: {
-                                  ...(prev.mastersCourses || {}),
-                                  [college]: newDepts,
-                                },
-                              }));
-                            }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {editingCourse?.college === college && editingCourse.department === department && (
-                        <div className="ude-array-input-group" style={{ marginBottom: "0.75rem" }}>
-                          <input
-                            type="text"
-                            className="ude-form-input ude-array-input"
-                            placeholder="Enter course name..."
-                            value={newCourseName}
-                            onChange={(e) => setNewCourseName(e.target.value)}
-                            onKeyPress={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                addCourse(college, department);
-                              }
-                            }}
-                          />
-                          <button
-                            className="ude-btn ude-btn-primary"
-                            onClick={() => addCourse(college, department)}
-                            style={{ padding: "0.5rem 1rem" }}
-                          >
-                            Add
-                          </button>
-                          <button
-                            className="ude-btn ude-btn-secondary"
-                            onClick={() => setEditingCourse(null)}
-                            style={{ padding: "0.5rem 1rem" }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      )}
-
-                      <div className="ude-course-list">
-                        {courses.map((course, courseIndex) => (
-                          <div key={courseIndex} className="ude-course-item">
-                            <span>{course}</span>
+              {Object.keys(formData.mastersCourses || {}).length === 0 ? (
+                <div style={{ 
+                  textAlign: "center", 
+                  padding: "2rem", 
+                  color: "#9ca3af", 
+                  fontSize: "0.875rem",
+                  border: "2px dashed #e5e7eb",
+                  borderRadius: "8px"
+                }}>
+                  No postgraduate/masters courses added yet. Click "Add College" to get started.
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {Object.entries(formData.mastersCourses || {}).map(([college, departments]) => {
+                    const isCollegeExpanded = expandedColleges.has(college);
+                    const deptCount = Object.keys(departments).length;
+                    const totalCourses = Object.values(departments).reduce((sum, courses) => sum + courses.length, 0);
+                    return (
+                      <div key={college} style={{
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        backgroundColor: "#ffffff"
+                      }}>
+                        <div 
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "0.875rem 1rem",
+                            backgroundColor: isCollegeExpanded ? "#f9fafb" : "#ffffff",
+                            cursor: "pointer",
+                            transition: "background-color 0.2s"
+                          }}
+                          onClick={() => toggleCollege(college)}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flex: 1 }}>
+                            {isCollegeExpanded ? (
+                              <ChevronDown size={18} color="#6b7280" />
+                            ) : (
+                              <ChevronRight size={18} color="#6b7280" />
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <h5 style={{ 
+                                fontSize: "0.9375rem", 
+                                fontWeight: 600, 
+                                color: "#111827", 
+                                margin: 0,
+                                marginBottom: "0.125rem"
+                              }}>
+                                {college}
+                              </h5>
+                              <p style={{ 
+                                fontSize: "0.75rem", 
+                                color: "#6b7280", 
+                                margin: 0 
+                              }}>
+                                {deptCount} {deptCount === 1 ? 'department' : 'departments'} • {totalCourses} {totalCourses === 1 ? 'course' : 'courses'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="ude-item-card-actions" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              className="ude-icon-btn"
+                              onClick={() => {
+                                addDepartment(college);
+                                if (!isCollegeExpanded) toggleCollege(college);
+                              }}
+                              title="Add department"
+                            >
+                              <Plus size={14} />
+                            </button>
                             <button
                               className="ude-icon-btn ude-icon-btn-danger"
-                              onClick={() => removeCourse(college, courseIndex, department)}
+                              onClick={() => {
+                                const newMastersCourses = { ...formData.mastersCourses };
+                                delete newMastersCourses[college];
+                                setFormData(prev => ({ ...prev, mastersCourses: newMastersCourses }));
+                                setExpandedColleges(prev => {
+                                  const newSet = new Set(prev);
+                                  newSet.delete(college);
+                                  return newSet;
+                                });
+                                setExpandedDepartments(prev => {
+                                  const newMap = new Map(prev);
+                                  newMap.delete(college);
+                                  return newMap;
+                                });
+                              }}
+                              title="Delete college"
                             >
                               <Trash2 size={14} />
                             </button>
                           </div>
-                        ))}
+                        </div>
+
+                        {isCollegeExpanded && (
+                          <div style={{ padding: "1rem", borderTop: "1px solid #e5e7eb" }}>
+                            {Object.entries(departments).length === 0 ? (
+                              <div style={{ 
+                                textAlign: "center", 
+                                padding: "1.5rem", 
+                                color: "#9ca3af", 
+                                fontSize: "0.875rem",
+                                backgroundColor: "#f9fafb",
+                                borderRadius: "6px"
+                              }}>
+                                No departments added yet. Click the + button to add a department.
+                              </div>
+                            ) : (
+                              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                {Object.entries(departments).map(([department, courses]) => {
+                                  const isDeptExpanded = expandedDepartments.get(college)?.has(department) || false;
+                                  const courseCount = courses.length;
+                                  return (
+                                    <div 
+                                      key={department}
+                                      style={{
+                                        border: "1px solid #e5e7eb",
+                                        borderRadius: "6px",
+                                        overflow: "hidden",
+                                        backgroundColor: "#ffffff"
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "space-between",
+                                          padding: "0.75rem 0.875rem",
+                                          backgroundColor: isDeptExpanded ? "#f9fafb" : "#ffffff",
+                                          cursor: "pointer",
+                                          transition: "background-color 0.2s",
+                                          borderLeft: "3px solid #3b82f6"
+                                        }}
+                                        onClick={() => toggleDepartment(college, department)}
+                                      >
+                                        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flex: 1 }}>
+                                          {isDeptExpanded ? (
+                                            <ChevronDown size={16} color="#6b7280" />
+                                          ) : (
+                                            <ChevronRight size={16} color="#6b7280" />
+                                          )}
+                                          <div style={{ flex: 1 }}>
+                                            <h6 style={{ 
+                                              fontSize: "0.875rem", 
+                                              fontWeight: 600, 
+                                              color: "#374151", 
+                                              margin: 0,
+                                              marginBottom: "0.125rem"
+                                            }}>
+                                              {department}
+                                            </h6>
+                                            <p style={{ 
+                                              fontSize: "0.75rem", 
+                                              color: "#6b7280", 
+                                              margin: 0 
+                                            }}>
+                                              {courseCount} {courseCount === 1 ? 'course' : 'courses'}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <div className="ude-item-card-actions" onClick={(e) => e.stopPropagation()}>
+                                          <button
+                                            className="ude-icon-btn"
+                                            onClick={() => {
+                                              setEditingCourse({ college, department, level: 'masters' });
+                                              setNewCourseName("");
+                                              if (!isDeptExpanded) toggleDepartment(college, department);
+                                            }}
+                                            title="Add course"
+                                          >
+                                            <Plus size={14} />
+                                          </button>
+                                          <button
+                                            className="ude-icon-btn ude-icon-btn-danger"
+                                            onClick={() => {
+                                              const newDepts = { ...formData.mastersCourses?.[college] };
+                                              delete newDepts[department];
+                                              setFormData(prev => ({
+                                                ...prev,
+                                                mastersCourses: {
+                                                  ...(prev.mastersCourses || {}),
+                                                  [college]: newDepts,
+                                                },
+                                              }));
+                                              setExpandedDepartments(prev => {
+                                                const newMap = new Map(prev);
+                                                const deptSet = newMap.get(college) || new Set();
+                                                const newDeptSet = new Set(deptSet);
+                                                newDeptSet.delete(department);
+                                                newMap.set(college, newDeptSet);
+                                                return newMap;
+                                              });
+                                            }}
+                                            title="Delete department"
+                                          >
+                                            <Trash2 size={14} />
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      {isDeptExpanded && (
+                                        <div style={{ padding: "0.875rem", borderTop: "1px solid #e5e7eb" }}>
+                                          {editingCourse?.college === college && editingCourse.department === department && (
+                                            <div className="ude-array-input-group" style={{ marginBottom: "1rem" }}>
+                                              <input
+                                                type="text"
+                                                className="ude-form-input ude-array-input"
+                                                placeholder="Enter course name..."
+                                                value={newCourseName}
+                                                onChange={(e) => setNewCourseName(e.target.value)}
+                                                onKeyPress={(e) => {
+                                                  if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    addCourse(college, department);
+                                                  }
+                                                }}
+                                                autoFocus
+                                              />
+                                              <button
+                                                className="ude-btn ude-btn-primary"
+                                                onClick={() => addCourse(college, department)}
+                                                style={{ padding: "0.5rem 1rem" }}
+                                              >
+                                                Add
+                                              </button>
+                                              <button
+                                                className="ude-btn ude-btn-secondary"
+                                                onClick={() => setEditingCourse(null)}
+                                                style={{ padding: "0.5rem 1rem" }}
+                                              >
+                                                Cancel
+                                              </button>
+                                            </div>
+                                          )}
+
+                                          {courseCount === 0 ? (
+                                            <div style={{ 
+                                              textAlign: "center", 
+                                              padding: "1rem", 
+                                              color: "#9ca3af", 
+                                              fontSize: "0.875rem",
+                                              backgroundColor: "#f9fafb",
+                                              borderRadius: "6px"
+                                            }}>
+                                              No courses added yet. Click the + button to add courses.
+                                            </div>
+                                          ) : (
+                                            <div style={{ 
+                                              display: "grid", 
+                                              gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", 
+                                              gap: "0.5rem" 
+                                            }}>
+                                              {courses.map((course, courseIndex) => (
+                                                <div 
+                                                  key={courseIndex} 
+                                                  style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "space-between",
+                                                    padding: "0.625rem 0.75rem",
+                                                    backgroundColor: "#f9fafb",
+                                                    borderRadius: "6px",
+                                                    border: "1px solid #e5e7eb"
+                                                  }}
+                                                >
+                                                  <span style={{ 
+                                                    fontSize: "0.875rem", 
+                                                    color: "#374151",
+                                                    flex: 1,
+                                                    marginRight: "0.5rem"
+                                                  }}>
+                                                    {course}
+                                                  </span>
+                                                  <button
+                                                    className="ude-icon-btn ude-icon-btn-danger"
+                                                    onClick={() => removeCourse(college, courseIndex, department)}
+                                                    style={{ flexShrink: 0 }}
+                                                    title="Remove course"
+                                                  >
+                                                    <Trash2 size={12} />
+                                                  </button>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
