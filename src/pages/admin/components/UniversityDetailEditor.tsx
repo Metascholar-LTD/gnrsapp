@@ -138,11 +138,12 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
   };
 
   const handleSave = () => {
-    onSave(formData);
     setSaving(true);
+    onSave(formData);
+    // The parent's onSave will handle the actual save and show toast
+    // Reset saving state after a short delay to allow parent to process
     setTimeout(() => {
       setSaving(false);
-      toast.success("University details saved successfully");
     }, 500);
   };
 
