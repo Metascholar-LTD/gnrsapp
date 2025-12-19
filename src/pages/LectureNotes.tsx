@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -22,7 +22,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Grid3x3,
-  List
+  List,
+  Bookmark
 } from "lucide-react";
 import {
   Select,
@@ -50,6 +51,7 @@ interface LectureNote {
   verified: boolean;
   pages: number;
   imageUrl?: string;
+  fileType?: string; // PDF, PPTX, PPT, etc.
 }
 
 // University logo mapping
@@ -76,6 +78,41 @@ const LectureNotes = () => {
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
   const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll navigation functions
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      const cardWidth = 380; // Approximate card width including gap
+      scrollContainerRef.current.scrollBy({
+        left: -cardWidth * 2,
+        behavior: 'smooth'
+      });
+      // Force update scroll state after a short delay
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          const scrollLeft = scrollContainerRef.current.scrollLeft;
+          const scrollWidth = scrollContainerRef.current.scrollWidth;
+          const clientWidth = scrollContainerRef.current.clientWidth;
+          setCanScrollLeft(scrollLeft > 10);
+          setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+        }
+      }, 100);
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      const cardWidth = 380; // Approximate card width including gap
+      scrollContainerRef.current.scrollBy({
+        left: cardWidth * 2,
+        behavior: 'smooth'
+      });
+    }
+  };
+
 
   // Mock lecture notes data with images
   const lectureNotes: LectureNote[] = [
@@ -231,6 +268,42 @@ const LectureNotes = () => {
       return matchesSearch && matchesUniversity && matchesCourse && matchesSemester;
     });
   }, [debouncedSearchQuery, selectedUniversity, selectedCourse, selectedSemester]);
+
+  // Check scroll position for button visibility
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      setCanScrollLeft(false);
+      setCanScrollRight(true);
+      return;
+    }
+
+    const checkScroll = () => {
+      const scrollLeft = container.scrollLeft;
+      const scrollWidth = container.scrollWidth;
+      const clientWidth = container.clientWidth;
+      
+      // More lenient check - allow scrolling if not at the very start/end
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+    };
+
+    // Initial check after render with multiple attempts
+    const timeoutId1 = setTimeout(checkScroll, 50);
+    const timeoutId2 = setTimeout(checkScroll, 200);
+    const timeoutId3 = setTimeout(checkScroll, 500);
+    
+    container.addEventListener('scroll', checkScroll, { passive: true });
+    window.addEventListener('resize', checkScroll);
+
+    return () => {
+      clearTimeout(timeoutId1);
+      clearTimeout(timeoutId2);
+      clearTimeout(timeoutId3);
+      container.removeEventListener('scroll', checkScroll);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [filteredNotes]);
 
   const clearAllFilters = useCallback(() => {
     setSearchQuery("");
@@ -443,31 +516,125 @@ const LectureNotes = () => {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    .lecture-notes-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
+    .lecture-notes-grid-container {
+      position: relative;
       margin-top: 2rem;
+      padding: 0 45px;
     }
 
-    @media (min-width: 640px) {
-      .lecture-notes-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
+    .lecture-notes-grid-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0;
+    }
+
+    .lecture-notes-grid-wrapper::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+
+    .lecture-notes-grid {
+      display: flex;
+      gap: 1rem;
+      width: max-content;
+      padding: 0.5rem 0;
+    }
+
+    .lecture-notes-card {
+      flex: 0 0 360px;
+      max-width: 360px;
+    }
+
+    .lecture-notes-scroll-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: white;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #475569;
+      pointer-events: auto;
+    }
+
+    .lecture-notes-scroll-btn:hover:not(:disabled) {
+      background: #f8fafc;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      color: #1e293b;
+    }
+
+    .lecture-notes-scroll-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .lecture-notes-scroll-btn-left {
+      left: 5px;
+    }
+
+    .lecture-notes-scroll-btn-right {
+      right: 5px;
+    }
+
+    @media (min-width: 1025px) and (max-width: 1440px) {
+      .lecture-notes-grid-container {
+        padding: 0 40px;
+      }
+
+      .lecture-notes-scroll-btn-left {
+        left: 0px;
+      }
+
+      .lecture-notes-scroll-btn-right {
+        right: 0px;
       }
     }
 
-    @media (min-width: 1024px) {
-      .lecture-notes-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
+    @media (min-width: 1441px) {
+      .lecture-notes-grid-container {
+        padding: 0 50px;
+      }
+
+      .lecture-notes-scroll-btn-left {
+        left: 10px;
+      }
+
+      .lecture-notes-scroll-btn-right {
+        right: 10px;
       }
     }
 
-    @media (min-width: 1280px) {
-      .lecture-notes-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
+    @media (max-width: 1024px) {
+      .lecture-notes-grid-container {
+        padding: 0 20px;
+      }
+
+      .lecture-notes-scroll-btn {
+        display: none;
+      }
+
+      .lecture-notes-card {
+        flex: 0 0 320px;
+        max-width: 320px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .lecture-notes-card {
+        flex: 0 0 280px;
+        max-width: 280px;
       }
     }
 
@@ -837,7 +1004,7 @@ const LectureNotes = () => {
       }
 
       .lecture-notes-grid {
-        gap: 1rem;
+        gap: 0.75rem;
         margin-top: 1.5rem;
       }
 
@@ -1376,115 +1543,164 @@ const LectureNotes = () => {
                   ))}
                 </div>
               ) : (
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="lecture-notes-grid"
-                >
-                  {filteredNotes.map((note) => (
+                <div className="lecture-notes-grid-container">
+                  <div className="lecture-notes-grid-wrapper" ref={scrollContainerRef}>
                     <motion.div
-                      key={note.id}
-                      variants={cardVariants}
-                      whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                      className="group"
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="lecture-notes-grid"
                     >
-                      <div className="relative h-full rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col">
-                        {/* Image Section with Overlay */}
-                        <div className="relative h-48 overflow-hidden">
-                          <motion.img
-                            src={note.imageUrl || "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=80"}
-                            alt={note.title}
-                            className="w-full h-full object-cover"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ duration: 0.5 }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-transparent"></div>
-                          
-                          {/* University Logo and Name - Top Right */}
-                          {universityLogos[note.universityShort] && (
-                            <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5">
-                              <div className="w-10 h-10 rounded-lg bg-slate-100/95 backdrop-blur-sm p-1.5 shadow-lg flex items-center justify-center border border-white/20">
-                                <img 
-                                  src={universityLogos[note.universityShort]} 
-                                  alt={note.universityShort}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              <span className="text-xs font-semibold text-white/95 bg-black/20 backdrop-blur-sm px-2 py-0.5 rounded-md">
-                                {note.universityShort}
-                              </span>
-                            </div>
-                          )}
-                          
-                          {/* Top Section - Course Code */}
-                          <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-                            <Badge className="px-2.5 py-1 text-xs font-bold bg-sky-100 text-slate-800 border-0 hover:bg-sky-100 hover:text-slate-800">
-                              {note.courseCode}
-                            </Badge>
-                            {note.verified && (
-                              <CheckCircle2 className="w-4 h-4 text-green-400" />
-                            )}
-                          </div>
-                          
-                          {/* Title - Bottom */}
-                          <div className="absolute bottom-0 left-0 right-0 p-4">
-                            <h3 className="text-base font-bold text-white line-clamp-2 leading-tight">
-                              {note.title}
-                            </h3>
-                          </div>
-                        </div>
-
-                        {/* Content Section */}
-                        <div className="p-4 flex flex-col flex-1" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"' }}>
-                          <div className="space-y-1.5 mb-3 flex-1">
-                            <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
-                              <User className="w-3.5 h-3.5" />
-                              <span className="truncate">{note.lecturer}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
-                              <Calendar className="w-3.5 h-3.5" />
-                              <span>{note.semester} Sem, {note.year} • {note.pages} pages</span>
-                            </div>
-                          </div>
-
-                          {/* Stats and Actions */}
-                          <div className="pt-3 border-t border-slate-100">
-                            <div className="flex items-center justify-between mb-2.5 text-xs text-slate-500 font-medium">
-                              <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-1">
-                                  <Download className="w-3 h-3" />
-                                  {formatNumber(note.downloads)}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Eye className="w-3 h-3" />
-                                  {formatNumber(note.views)}
-                                </div>
+                      {filteredNotes.map((note) => (
+                        <motion.div
+                          key={note.id}
+                          variants={cardVariants}
+                          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                          className="group lecture-notes-card"
+                        >
+                          <div className="relative h-32 rounded-lg overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row">
+                            {/* Thumbnail Image - Left Side */}
+                            <div className="relative w-36 h-full flex-shrink-0 overflow-hidden bg-slate-100">
+                              <motion.img
+                                src={note.imageUrl || "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&auto=format&fit=crop&q=80"}
+                                alt={note.title}
+                                className="w-full h-full object-cover"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                              {/* File Type Badge - Top Left */}
+                              <div className="absolute top-2 left-2">
+                                <span className="px-1.5 py-0.5 text-[10px] font-semibold uppercase bg-black/70 text-white rounded">
+                                  {note.fileType || (note.fileSize?.toLowerCase().includes('pdf') ? 'PDF' : 'PPTX')}
+                                </span>
                               </div>
                             </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="h-8 w-8 p-0 border-slate-200 hover:bg-slate-50"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button 
-                                size="sm"
-                                className="h-8 text-xs font-medium bg-slate-700 hover:bg-slate-800 text-white"
-                              >
-                                <Download className="w-3 h-3 mr-1" />
-                                Download
-                              </Button>
+
+                            {/* Content Section - Right Side */}
+                            <div className="flex-1 flex flex-col justify-between p-2.5 min-w-0">
+                              {/* Top Section: Title and Bookmark */}
+                              <div className="flex items-start justify-between gap-2 mb-1.5">
+                                <h3 className="text-xs font-semibold text-slate-900 line-clamp-2 leading-snug flex-1 group-hover:text-blue-600 transition-colors">
+                                  {note.title}
+                                </h3>
+                                <button
+                                  className="flex-shrink-0 p-1 hover:bg-slate-100 rounded transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log('Bookmark:', note.id);
+                                  }}
+                                  title="Save"
+                                >
+                                  <Bookmark className="w-3.5 h-3.5 text-slate-400 hover:text-blue-600" />
+                                </button>
+                              </div>
+
+                              {/* Middle Section: Author and Metadata */}
+                              <div className="space-y-0.5 mb-1.5">
+                                <div className="flex items-center gap-1 text-[11px] text-slate-600">
+                                  <User className="w-2.5 h-2.5 flex-shrink-0" />
+                                  <span className="truncate">{note.lecturer}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                                  <span>{note.pages} slides</span>
+                                  <span>•</span>
+                                  <span className="flex items-center gap-0.5">
+                                    <Eye className="w-2.5 h-2.5" />
+                                    {formatNumber(note.views)}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Bottom Section: Actions */}
+                              <div className="flex items-center gap-3 pt-1.5 border-t border-slate-100">
+                                <button
+                                  onClick={() => console.log('Preview:', note.id)}
+                                  className="group relative inline-block text-[11px] font-medium text-slate-700 transition-colors duration-300 hover:text-blue-600"
+                                  style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                                >
+                                  <motion.span
+                                    className="relative inline-block pb-0.5 flex items-center gap-0.5"
+                                    whileHover={{ x: 1 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                  >
+                                    <Eye className="w-3 h-3" />
+                                    Preview
+                                    <span
+                                      className="absolute bottom-0 left-0 h-[1px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                                      style={{
+                                        width: 'calc(100% + 8px)',
+                                        clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                      }}
+                                    />
+                                  </motion.span>
+                                </button>
+                                <button
+                                  onClick={() => console.log('Download:', note.id)}
+                                  className="group relative inline-block text-[11px] font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
+                                  style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                                >
+                                  <motion.span
+                                    className="relative inline-block pb-0.5 flex items-center gap-0.5"
+                                    whileHover={{ x: 1 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                  >
+                                    <Download className="w-3 h-3" />
+                                    Download
+                                    <span
+                                      className="absolute bottom-0 left-0 h-[1px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                                      style={{
+                                        width: 'calc(100% + 8px)',
+                                        clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                      }}
+                                    />
+                                  </motion.span>
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
+                        </motion.div>
+                      ))}
                     </motion.div>
-                  ))}
-                </motion.div>
+                  </div>
+                  
+                  {/* Navigation Buttons */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (canScrollLeft) {
+                        scrollLeft();
+                      }
+                    }}
+                    className={`lecture-notes-scroll-btn lecture-notes-scroll-btn-left ${!canScrollLeft ? 'opacity-30' : ''}`}
+                    aria-label="Scroll left"
+                    disabled={!canScrollLeft}
+                    style={{ 
+                      pointerEvents: canScrollLeft ? 'auto' : 'none',
+                      cursor: canScrollLeft ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (canScrollRight) {
+                        scrollRight();
+                      }
+                    }}
+                    className={`lecture-notes-scroll-btn lecture-notes-scroll-btn-right ${!canScrollRight ? 'opacity-30' : ''}`}
+                    aria-label="Scroll right"
+                    disabled={!canScrollRight}
+                    style={{ 
+                      pointerEvents: canScrollRight ? 'auto' : 'none',
+                      cursor: canScrollRight ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
               )}
             </div>
           </div>
