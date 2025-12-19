@@ -674,6 +674,46 @@ const LectureNotes = () => {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
+    .lecture-notes-quick-filters {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .lecture-notes-quick-filter-btn {
+      padding: 0.5rem 1.25rem;
+      border-radius: 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      border: 1px solid #e2e8f0;
+      background: white;
+      color: hsl(220 30% 15%);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .lecture-notes-quick-filter-btn:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .lecture-notes-quick-filter-btn.active {
+      background: #6366f1;
+      color: white;
+      border-color: #6366f1;
+      font-weight: 600;
+    }
+
+    .lecture-notes-quick-filter-btn.active:hover {
+      background: #4f46e5;
+      border-color: #4f46e5;
+    }
+
     .lecture-notes-grid-container {
       position: relative;
       margin-top: 2rem;
@@ -1124,6 +1164,10 @@ const LectureNotes = () => {
         margin-bottom: 1rem;
       }
 
+      .lecture-notes-quick-filters {
+        display: none;
+      }
+
       .lecture-notes-header {
         margin-bottom: 1.5rem;
       }
@@ -1173,16 +1217,7 @@ const LectureNotes = () => {
       }
 
       .lecture-notes-results-count-mobile {
-        display: block;
-        font-size: 0.8125rem;
-        color: hsl(220 20% 40%);
-        white-space: nowrap;
-        font-weight: 500;
-      }
-
-      .lecture-notes-results-count-mobile span {
-        font-weight: 700;
-        color: hsl(220 30% 15%);
+        display: none;
       }
 
       .lecture-notes-filter-sidebar {
@@ -1264,6 +1299,16 @@ const LectureNotes = () => {
       .lecture-notes-recommended-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
+      }
+
+      .lecture-notes-quick-filters {
+        gap: 0.625rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .lecture-notes-quick-filter-btn {
+        padding: 0.4375rem 1rem;
+        font-size: 0.8125rem;
       }
 
       .lecture-notes-header {
@@ -1644,6 +1689,19 @@ const LectureNotes = () => {
                 </div>
               ) : (
                 <div className="lecture-notes-grid-container">
+                  {/* Quick Filter Buttons */}
+                  <div className="lecture-notes-quick-filters">
+                    {["Business", "Technology", "Design", "Marketing", "Education"].map((field) => (
+                      <button
+                        key={field}
+                        onClick={() => setSelectedCourse(field === selectedCourse ? null : field)}
+                        className={`lecture-notes-quick-filter-btn ${selectedCourse === field ? 'active' : ''}`}
+                      >
+                        {field}
+                      </button>
+                    ))}
+                  </div>
+                  
                   <div className="lecture-notes-grid-wrapper" ref={scrollContainerRef}>
                     <motion.div
                       variants={containerVariants}
