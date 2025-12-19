@@ -26,6 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { Spinner } from "@/components/Spinner";
 
 interface BecePaper {
   id: string;
@@ -39,7 +41,35 @@ interface BecePaper {
   fileSize: string;
   uploadDate: string;
   verified: boolean;
+  fileUrl?: string; // For PDF download/preview
 }
+
+// Helper function to format file size from bytes to string
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+};
+
+// Transform Supabase data to BecePaper format
+const transformFromSupabase = (data: any): BecePaper => {
+  return {
+    id: data.id,
+    title: data.title || "",
+    subject: data.subject || "",
+    subjectCode: data.subject_code || "",
+    year: data.year || new Date().getFullYear(),
+    examType: data.exam_type || "BECE",
+    downloads: data.downloads || 0,
+    views: data.views || 0,
+    fileSize: formatFileSize(data.file_size || 0),
+    uploadDate: data.upload_date || data.created_at?.split('T')[0] || "",
+    verified: data.verified || false,
+    fileUrl: data.file_url || "",
+  };
+};
 
 const ShsBeceQuestions = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,102 +82,115 @@ const ShsBeceQuestions = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list" | "grouped">("grouped");
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>({});
+  const [examPapers, setExamPapers] = useState<BecePaper[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const itemsPerPage = 24;
 
-  // Mock BECE/SHS exam papers data
-  const examPapers: BecePaper[] = [
-    { 
-      id: "1", 
-      title: "Core Mathematics - Paper 2", 
-      subject: "Core Mathematics",
-      subjectCode: "MATH",
-      year: 2023, 
-      examType: "BECE",
-      downloads: 2840, 
-      views: 5620,
-      fileSize: "3.2 MB", 
-      uploadDate: "2024-01-15",
-      verified: true
-    },
-    { 
-      id: "2", 
-      title: "Integrated Science - Paper 1", 
-      subject: "Integrated Science",
-      subjectCode: "SCI",
-      year: 2023, 
-      examType: "BECE",
-      downloads: 3150, 
-      views: 6890,
-      fileSize: "4.1 MB", 
-      uploadDate: "2024-02-08",
-      verified: true
-    },
-    { 
-      id: "3", 
-      title: "English Language - Paper 2", 
-      subject: "English Language",
-      subjectCode: "ENG",
-      year: 2023, 
-      examType: "BECE",
-      downloads: 1980, 
-      views: 4230,
-      fileSize: "2.8 MB", 
-      uploadDate: "2024-01-22",
-      verified: true
-    },
-    { 
-      id: "4", 
-      title: "Social Studies - Paper 1", 
-      subject: "Social Studies",
-      subjectCode: "SOC",
-      year: 2023, 
-      examType: "BECE",
-      downloads: 2560, 
-      views: 5100,
-      fileSize: "5.3 MB", 
-      uploadDate: "2023-12-18",
-      verified: true
-    },
-    { 
-      id: "5", 
-      title: "Core Mathematics - SHS 1", 
-      subject: "Core Mathematics",
-      subjectCode: "MATH",
-      year: 2023, 
-      examType: "SHS",
-      downloads: 1670, 
-      views: 3450,
-      fileSize: "2.1 MB", 
-      uploadDate: "2024-01-30",
-      verified: true
-    },
-    { 
-      id: "6", 
-      title: "Physics - SHS 2", 
-      subject: "Physics",
-      subjectCode: "PHY",
-      year: 2023, 
-      examType: "SHS",
-      downloads: 3890, 
-      views: 7250,
-      fileSize: "3.7 MB", 
-      uploadDate: "2023-11-25",
-      verified: true
-    },
-    { 
-      id: "7", 
-      title: "Chemistry - SHS 3", 
-      subject: "Chemistry",
-      subjectCode: "CHEM",
-      year: 2023, 
-      examType: "SHS",
-      downloads: 2450, 
-      views: 4800,
-      fileSize: "4.2 MB", 
-      uploadDate: "2024-02-10",
-      verified: true
-    },
-  ];
+  // Fetch exam papers from Supabase
+  useEffect(() => {
+    fetchExamPapers();
+  }, []);
+
+  const fetchExamPapers = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('shs_bece_questions' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      console.log("Fetched SHS/BECE questions:", data?.length || 0, "items");
+      
+      if (data) {
+        const transformed = data.map(transformFromSupabase);
+        console.log("Transformed SHS/BECE questions:", transformed.length, "items");
+        setExamPapers(transformed);
+      } else {
+        setExamPapers([]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching exam papers:", error);
+      // Fallback to empty array on error
+      setExamPapers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle PDF preview
+  const handlePreview = (paper: BecePaper) => {
+    if (paper.fileUrl) {
+      setPreviewUrl(paper.fileUrl);
+      setPreviewModalOpen(true);
+      // Increment views
+      incrementViews(paper.id);
+    }
+  };
+
+  // Handle PDF download
+  const handleDownload = async (paper: BecePaper) => {
+    if (paper.fileUrl) {
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = paper.fileUrl;
+      link.download = `${paper.subjectCode}_${paper.year}_${paper.examType}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Increment downloads
+      incrementDownloads(paper.id);
+    }
+  };
+
+  // Increment views
+  const incrementViews = async (id: string) => {
+    try {
+      const paper = examPapers.find(p => p.id === id);
+      if (!paper) return;
+
+      const { error } = await supabase
+        .from('shs_bece_questions' as any)
+        .update({ views: (paper.views || 0) + 1 })
+        .eq('id', id);
+
+      if (!error) {
+        setExamPapers(prev => prev.map(p => 
+          p.id === id ? { ...p, views: (p.views || 0) + 1 } : p
+        ));
+      }
+    } catch (error) {
+      console.error("Error incrementing views:", error);
+    }
+  };
+
+  // Increment downloads
+  const incrementDownloads = async (id: string) => {
+    try {
+      const paper = examPapers.find(p => p.id === id);
+      if (!paper) return;
+
+      const { error } = await supabase
+        .from('shs_bece_questions' as any)
+        .update({ downloads: (paper.downloads || 0) + 1 })
+        .eq('id', id);
+
+      if (!error) {
+        setExamPapers(prev => prev.map(p => 
+          p.id === id ? { ...p, downloads: (p.downloads || 0) + 1 } : p
+        ));
+      }
+    } catch (error) {
+      console.error("Error incrementing downloads:", error);
+    }
+  };
 
   // Debounce search query
   useEffect(() => {
@@ -161,11 +204,11 @@ const ShsBeceQuestions = () => {
   // Get unique values for filters
   const subjects = useMemo(() => 
     Array.from(new Set(examPapers.map(p => p.subject))).sort(),
-    []
+    [examPapers]
   );
   const years = useMemo(() => 
     Array.from(new Set(examPapers.map(p => p.year))).sort((a, b) => b - a),
-    []
+    [examPapers]
   );
   const examTypes = ["BECE", "SHS"];
 
@@ -183,7 +226,7 @@ const ShsBeceQuestions = () => {
       
       return matchesSearch && matchesSubject && matchesYear && matchesExamType;
     });
-  }, [debouncedSearchQuery, selectedSubject, selectedYear, selectedExamType]);
+  }, [examPapers, debouncedSearchQuery, selectedSubject, selectedYear, selectedExamType]);
 
   // Group papers by subject
   const groupedPapers = useMemo(() => {
@@ -1008,6 +1051,11 @@ const ShsBeceQuestions = () => {
       <div className="bece-questions-page">
         <style>{isolatedStyles}</style>
         
+        {loading ? (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+            <Spinner />
+          </div>
+        ) : (
         <div className="bece-questions-content-wrapper">
           {/* Filter Overlay */}
           <div 
@@ -1352,8 +1400,8 @@ const ShsBeceQuestions = () => {
                                         verified={paper.verified}
                                         examType={paper.examType}
                                         hideUniversityBadge={true}
-                                        onPreview={() => console.log('Preview:', paper.id)}
-                                        onDownload={() => console.log('Download:', paper.id)}
+                                        onPreview={() => handlePreview(paper)}
+                                        onDownload={() => handleDownload(paper)}
                                       />
                                     ))}
                                   </div>
@@ -1381,8 +1429,8 @@ const ShsBeceQuestions = () => {
                             fileSize={paper.fileSize}
                             verified={paper.verified}
                             examType={paper.examType}
-                            onPreview={() => console.log('Preview:', paper.id)}
-                            onDownload={() => console.log('Download:', paper.id)}
+                            onPreview={() => handlePreview(paper)}
+                            onDownload={() => handleDownload(paper)}
                           />
                         ))}
                       </div>
@@ -1454,8 +1502,8 @@ const ShsBeceQuestions = () => {
                             fileSize={paper.fileSize}
                             verified={paper.verified}
                             hideBadge={true}
-                            onPreview={() => console.log('Preview:', paper.id)}
-                            onDownload={() => console.log('Download:', paper.id)}
+                            onPreview={() => handlePreview(paper)}
+                            onDownload={() => handleDownload(paper)}
                           />
                         ))}
                       </div>
@@ -1534,6 +1582,100 @@ const ShsBeceQuestions = () => {
             </div>
           </div>
         </div>
+        )}
+
+        {/* PDF Preview Modal */}
+        {previewModalOpen && previewUrl && (
+          <div 
+            className="bece-questions-preview-modal" 
+            onClick={() => setPreviewModalOpen(false)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0, 0, 0, 0.9)",
+              zIndex: 2000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "2rem"
+            }}
+          >
+            <div 
+              className="bece-questions-preview-content" 
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "100%",
+                maxWidth: "1200px",
+                height: "90vh",
+                background: "white",
+                borderRadius: "0.75rem",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column"
+              }}
+            >
+              <div 
+                className="bece-questions-preview-header"
+                style={{
+                  padding: "1rem 1.5rem",
+                  borderBottom: "1px solid #e5e7eb",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "#f9fafb"
+                }}
+              >
+                <h3 style={{ margin: 0, fontWeight: 600 }}>PDF Preview</h3>
+                <button
+                  onClick={() => setPreviewModalOpen(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "0.5rem",
+                    borderRadius: "0.375rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#6b7280"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#f3f4f6";
+                    e.currentTarget.style.color = "#111827";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#6b7280";
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div 
+                className="bece-questions-preview-body"
+                style={{
+                  flex: 1,
+                  overflow: "auto",
+                  padding: "1rem"
+                }}
+              >
+                <iframe
+                  src={previewUrl}
+                  className="bece-questions-preview-iframe"
+                  title="PDF Preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    border: "none"
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </EducationPageLayout>
   );
