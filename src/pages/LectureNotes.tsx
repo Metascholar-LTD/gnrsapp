@@ -357,7 +357,8 @@ const LectureNotes = () => {
     setSelectedCourse(null);
   }, []);
 
-  const hasActiveFilters = selectedUniversity || selectedCourse;
+  // Active filter bar removed - university will show as a button in quick filters
+  const hasActiveFilters = false;
 
   const formatNumber = (num: number): string => {
     if (num >= 1000000) {
@@ -703,21 +704,32 @@ const LectureNotes = () => {
     }
 
     .lecture-notes-quick-filter-btn.active {
-      background: #6366f1;
-      color: white;
-      border-color: #6366f1;
+      background: #dbeafe !important;
+      color: #1e40af !important;
+      border-color: #93c5fd !important;
       font-weight: 600;
     }
 
     .lecture-notes-quick-filter-btn.active:hover {
-      background: #4f46e5;
-      border-color: #4f46e5;
+      background: #bfdbfe !important;
+      border-color: #60a5fa !important;
+      color: #1e3a8a !important;
     }
 
     .lecture-notes-grid-container {
       position: relative;
       margin-top: 2rem;
       padding: 0 45px;
+    }
+
+    .lecture-notes-grid-container:has(.lecture-notes-quick-filters) {
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .lecture-notes-grid-container:has(.lecture-notes-grid-wrapper) {
+      margin-top: 0;
+      padding-top: 0;
     }
 
     .lecture-notes-grid-wrapper {
@@ -1645,16 +1657,6 @@ const LectureNotes = () => {
                         </Badge>
                       )}
                       
-                      {selectedCourse && (
-                        <Badge className="px-3 py-1.5 flex items-center gap-2 bg-purple-600 text-white">
-                          {selectedCourse}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
-                            onClick={() => setSelectedCourse(null)}
-                          />
-                        </Badge>
-                      )}
-                      
                       <Button 
                         variant="ghost" 
                         size="sm"
@@ -1669,6 +1671,30 @@ const LectureNotes = () => {
               </div>
 
               {/* Notes Grid/List */}
+              {/* Quick Filter Buttons - Always visible */}
+              <div className="lecture-notes-grid-container">
+                <div className="lecture-notes-quick-filters">
+                  {["Business", "Technology", "Design", "Marketing", "Education"].map((field) => (
+                    <button
+                      key={field}
+                      onClick={() => setSelectedCourse(field === selectedCourse ? null : field)}
+                      className={`lecture-notes-quick-filter-btn ${selectedCourse === field ? 'active' : ''}`}
+                    >
+                      {field}
+                    </button>
+                  ))}
+                  {/* University filter button - appears when university is selected */}
+                  {selectedUniversity && (
+                    <button
+                      onClick={() => setSelectedUniversity(null)}
+                      className="lecture-notes-quick-filter-btn active"
+                    >
+                      {selectedUniversity}
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {filteredNotes.length === 0 ? (
                 <div className="lecture-notes-empty-state" style={{ gridColumn: '1 / -1' }}>
                   <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-white" style={{ border: '1px solid hsl(40 20% 88%)' }}>
@@ -1689,19 +1715,6 @@ const LectureNotes = () => {
                 </div>
               ) : (
                 <div className="lecture-notes-grid-container">
-                  {/* Quick Filter Buttons */}
-                  <div className="lecture-notes-quick-filters">
-                    {["Business", "Technology", "Design", "Marketing", "Education"].map((field) => (
-                      <button
-                        key={field}
-                        onClick={() => setSelectedCourse(field === selectedCourse ? null : field)}
-                        className={`lecture-notes-quick-filter-btn ${selectedCourse === field ? 'active' : ''}`}
-                      >
-                        {field}
-                      </button>
-                    ))}
-                  </div>
-                  
                   <div className="lecture-notes-grid-wrapper" ref={scrollContainerRef}>
                     <motion.div
                       variants={containerVariants}
