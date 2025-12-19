@@ -2244,31 +2244,31 @@ const UniversityView: React.FC = () => {
                     ))}
                   </div>
                 )}
+
+                {/* Campus Locations Section */}
+                {university.campus && university.campus.length > 0 && (
+                  <div style={{ marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid hsl(40 20% 88%)" }}>
+                    <h2 className="university-view-campus-title" style={{ marginBottom: "1rem" }}>CAMPUS LOCATIONS</h2>
+                    <div className="university-view-campus-grid">
+                      {university.campus.map((campus, index) => (
+                        <div 
+                          key={index} 
+                          className="university-view-campus-item"
+                          data-main={university.mainCampus === campus}
+                        >
+                          <MapPin size={18} className="university-view-campus-icon" />
+                          <span className="university-view-campus-name">{campus}</span>
+                          {university.mainCampus === campus && (
+                            <span className="university-view-campus-badge">Main Campus</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-
-          {/* Campus Locations Section */}
-          {university.campus && university.campus.length > 0 && (
-            <div className="university-view-campus-section">
-              <h2 className="university-view-campus-title">CAMPUS LOCATIONS</h2>
-              <div className="university-view-campus-grid">
-                {university.campus.map((campus, index) => (
-                  <div 
-                    key={index} 
-                    className="university-view-campus-item"
-                    data-main={university.mainCampus === campus}
-                  >
-                    <MapPin size={18} className="university-view-campus-icon" />
-                    <span className="university-view-campus-name">{campus}</span>
-                    {university.mainCampus === campus && (
-                      <span className="university-view-campus-badge">Main Campus</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Breakdown Section */}
           <div className="university-view-breakdown-section">
