@@ -1501,6 +1501,7 @@ const ShsBeceQuestions = () => {
                             views={paper.views}
                             fileSize={paper.fileSize}
                             verified={paper.verified}
+                            examType={paper.examType}
                             hideBadge={true}
                             onPreview={() => handlePreview(paper)}
                             onDownload={() => handleDownload(paper)}

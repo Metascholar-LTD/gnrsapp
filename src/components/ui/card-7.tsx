@@ -63,6 +63,20 @@ export const ExamPaperCard = React.forwardRef<HTMLDivElement, ExamPaperCardProps
   ) => {
     const [isHovered, setIsHovered] = React.useState(false);
 
+    // Determine border color based on examType
+    const borderColor = examType === "BECE" 
+      ? "border-blue-500" 
+      : examType === "SHS" 
+      ? "border-yellow-500" 
+      : "border-[hsl(40_20%_88%)]";
+    
+    // Determine accent color for top border
+    const accentColor = examType === "BECE"
+      ? "bg-blue-500"
+      : examType === "SHS"
+      ? "bg-yellow-500"
+      : "bg-[hsl(40_20%_88%)]";
+
     return (
       <motion.div
         ref={ref}
@@ -71,13 +85,16 @@ export const ExamPaperCard = React.forwardRef<HTMLDivElement, ExamPaperCardProps
         exit={{ opacity: 0, y: 20, transition: { duration: 0.3 } }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
         className={cn(
-          "relative w-full max-w-md overflow-hidden rounded-2xl border border-[hsl(40_20%_88%)] bg-white text-[hsl(220_30%_15%)] shadow-lg",
+          "relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg",
+          borderColor,
           className
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         {...props}
       >
+        {/* Colored top accent bar */}
+        <div className={cn("h-1 w-full", accentColor)} />
         <div className="flex flex-col">
           {/* Text Content Section */}
           <div className="relative z-10 flex h-full flex-col p-6">
@@ -97,9 +114,20 @@ export const ExamPaperCard = React.forwardRef<HTMLDivElement, ExamPaperCardProps
             {/* Course Code, Verified Icon, and Stats - Top */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-1.5">
-                <span className="px-2 py-1 text-xs font-bold rounded-md bg-sky-100 text-slate-800 border-0">
+                <span className="px-2 py-1 text-xs font-bold rounded-md border-0 bg-gray-100 text-black">
                   {courseCode}
                 </span>
+                {/* Exam Type Badge */}
+                {examType && (examType === "BECE" || examType === "SHS") && (
+                  <span className={cn(
+                    "px-2 py-1 text-xs font-semibold rounded-md",
+                    examType === "BECE"
+                      ? "bg-blue-500 text-white"
+                      : "bg-yellow-500 text-yellow-900"
+                  )}>
+                    {examType}
+                  </span>
+                )}
                 {verified && (
                   <div className="flex items-center justify-center w-6 h-6 rounded-full bg-white/95 backdrop-blur-sm shadow-md border border-[hsl(40_20%_88%)]">
                     <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />

@@ -14,6 +14,7 @@ interface ExamPaperListItemProps {
   views: number;
   fileSize: string;
   verified: boolean;
+  examType?: string;
   universityLogo?: string;
   hideBadge?: boolean;
   className?: string;
@@ -29,6 +30,7 @@ export const ExamPaperListItem = React.forwardRef<HTMLDivElement, ExamPaperListI
       universityShort,
       universityLogo,
       hideBadge = false,
+      examType,
       className,
       onPreview,
       onDownload,
@@ -68,8 +70,21 @@ export const ExamPaperListItem = React.forwardRef<HTMLDivElement, ExamPaperListI
 
           {/* Course Name (Course Code) */}
           <div className="flex-1 min-w-0">
-            <div className="text-base font-semibold text-[hsl(220_30%_15%)]">
-              {title} ({courseCode})
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="text-base font-semibold text-[hsl(220_30%_15%)]">
+                {title} ({courseCode})
+              </div>
+              {/* Exam Type Badge */}
+              {examType && (examType === "BECE" || examType === "SHS") && (
+                <span className={cn(
+                  "px-2 py-0.5 text-xs font-semibold rounded-md",
+                  examType === "BECE"
+                    ? "bg-blue-500 text-white"
+                    : "bg-yellow-500 text-yellow-900"
+                )}>
+                  {examType}
+                </span>
+              )}
             </div>
           </div>
         </div>
