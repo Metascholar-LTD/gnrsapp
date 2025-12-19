@@ -21,7 +21,9 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Bookmark
+  Bookmark,
+  Upload,
+  Cloud
 } from "lucide-react";
 import {
   Select,
@@ -1016,6 +1018,182 @@ const LectureNotes = () => {
       min-width: 0;
     }
 
+    .lecture-notes-upload-section {
+      margin-top: 4rem;
+      padding: 3rem 0;
+      background: white;
+      border-radius: 1rem;
+    }
+
+    .lecture-notes-upload-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      padding: 0 2rem;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .lecture-notes-upload-left {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: left;
+    }
+
+    .lecture-notes-upload-headline {
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: hsl(220 30% 15%);
+      margin: 0;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      text-align: left;
+    }
+
+    .lecture-notes-upload-headline .highlight {
+      background: linear-gradient(120deg, #fef3c7 0%, #fde68a 100%);
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      display: inline-block;
+    }
+
+    .lecture-notes-upload-subtitle {
+      font-size: 1.125rem;
+      color: hsl(220 20% 40%);
+      margin: 0;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    .lecture-notes-upload-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .lecture-notes-upload-file-types {
+      font-size: 0.875rem;
+      color: hsl(220 20% 50%);
+      margin: 0;
+    }
+
+    .lecture-notes-upload-disclaimer {
+      font-size: 0.8125rem;
+      color: hsl(220 20% 50%);
+      margin: 0;
+    }
+
+    .lecture-notes-upload-disclaimer strong {
+      font-weight: 600;
+      color: hsl(220 30% 15%);
+    }
+
+    .lecture-notes-upload-right {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lecture-notes-upload-box {
+      width: 100%;
+      max-width: 500px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 1rem;
+      padding: 3rem 2rem;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .lecture-notes-upload-instruction {
+      font-size: 1rem;
+      color: hsl(220 20% 40%);
+      margin: 0;
+      text-align: center;
+    }
+
+    .lecture-notes-upload-button-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .lecture-notes-upload-button {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      padding: 0.625rem 1.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      white-space: nowrap;
+    }
+
+    .lecture-notes-upload-button:hover {
+      background: #6d28d9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+
+    .lecture-notes-upload-illustration {
+      flex-shrink: 0;
+    }
+
+    .lecture-notes-upload-services {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+      align-items: center;
+    }
+
+    .lecture-notes-upload-services-label {
+      font-size: 0.875rem;
+      color: hsl(220 20% 40%);
+      margin: 0;
+    }
+
+    .lecture-notes-upload-service-icons {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .lecture-notes-service-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid #e2e8f0;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .lecture-notes-service-icon:hover {
+      border-color: #7c3aed;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
     .lecture-notes-recommended-sidebar {
       width: 320px;
       flex-shrink: 0;
@@ -1428,9 +1606,69 @@ const LectureNotes = () => {
       }
     }
 
-    @media (max-width: 1024px) {
+    /* Small Laptop: 1024px - 1199px */
+    @media (min-width: 1024px) and (max-width: 1199px) {
+      .lecture-notes-upload-content {
+        grid-template-columns: 1fr;
+        gap: 2.75rem;
+        padding: 0 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .lecture-notes-upload-left {
+        text-align: left;
+        gap: 1.5rem;
+      }
+
+      .lecture-notes-upload-headline {
+        font-size: 2.25rem;
+        line-height: 1.3;
+        text-align: left;
+      }
+
+      .lecture-notes-upload-subtitle {
+        font-size: 1.125rem;
+        text-align: left;
+      }
+
+      .lecture-notes-upload-info {
+        text-align: left;
+      }
+
+      .lecture-notes-upload-box {
+        padding: 2.25rem 2rem;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+
+      .lecture-notes-upload-button-wrapper {
+        gap: 1.5rem;
+      }
+
+      .lecture-notes-upload-illustration svg {
+        width: 105px;
+        height: 105px;
+      }
+    }
+
+    @media (max-width: 1023px) {
       .lecture-notes-content-wrapper {
         flex-direction: column;
+      }
+
+      .lecture-notes-upload-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 0 1.5rem;
+      }
+
+      .lecture-notes-upload-headline {
+        font-size: 2rem;
+      }
+
+      .lecture-notes-upload-box {
+        padding: 2rem 1.5rem;
       }
 
       .lecture-notes-recommended-sidebar {
@@ -1778,6 +2016,87 @@ const LectureNotes = () => {
         margin-bottom: 1rem;
       }
 
+      .lecture-notes-upload-section {
+        margin-top: 2rem;
+        padding: 2rem 0;
+      }
+
+      .lecture-notes-upload-content {
+        padding: 0 1rem;
+        gap: 1.5rem;
+      }
+
+      .lecture-notes-upload-left {
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .lecture-notes-upload-headline {
+        font-size: 1.75rem;
+        line-height: 1.3;
+      }
+
+      .lecture-notes-upload-subtitle {
+        font-size: 0.9375rem;
+        line-height: 1.5;
+      }
+
+      .lecture-notes-upload-info {
+        gap: 0.75rem;
+      }
+
+      .lecture-notes-upload-file-types {
+        font-size: 0.8125rem;
+      }
+
+      .lecture-notes-upload-disclaimer {
+        font-size: 0.75rem;
+      }
+
+      .lecture-notes-upload-box {
+        padding: 1.5rem 1rem;
+        gap: 1.5rem;
+      }
+
+      .lecture-notes-upload-instruction {
+        font-size: 0.9375rem;
+      }
+
+      .lecture-notes-upload-button {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.8125rem;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .lecture-notes-upload-button-wrapper {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .lecture-notes-upload-illustration {
+        display: none;
+      }
+
+      .lecture-notes-upload-services {
+        gap: 0.625rem;
+      }
+
+      .lecture-notes-upload-services-label {
+        font-size: 0.8125rem;
+      }
+
+      .lecture-notes-service-icon {
+        width: 36px;
+        height: 36px;
+      }
+
+      .lecture-notes-service-icon svg {
+        width: 20px;
+        height: 20px;
+      }
+
       .lecture-notes-quick-filters {
         display: none;
       }
@@ -1905,6 +2224,54 @@ const LectureNotes = () => {
         padding: 1.5rem;
       }
 
+      .lecture-notes-upload-section {
+        margin-top: 3rem;
+        padding: 2.5rem 0;
+      }
+
+      .lecture-notes-upload-content {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+        padding: 0 1.5rem;
+        max-width: 750px;
+        margin: 0 auto;
+      }
+
+      .lecture-notes-upload-left {
+        text-align: center;
+        gap: 1.25rem;
+      }
+
+      .lecture-notes-upload-headline {
+        font-size: 2rem;
+        line-height: 1.3;
+        text-align: center;
+      }
+
+      .lecture-notes-upload-subtitle {
+        font-size: 1.0625rem;
+        text-align: center;
+      }
+
+      .lecture-notes-upload-info {
+        text-align: center;
+      }
+
+      .lecture-notes-upload-box {
+        padding: 2rem 1.5rem;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .lecture-notes-upload-button-wrapper {
+        gap: 1.25rem;
+      }
+
+      .lecture-notes-upload-illustration svg {
+        width: 100px;
+        height: 100px;
+      }
+
       .lecture-notes-recommended-sidebar {
         width: 100%;
         padding: 0 1.5rem;
@@ -1977,6 +2344,61 @@ const LectureNotes = () => {
         padding: 2rem;
       }
 
+      .lecture-notes-upload-section {
+        margin-top: 3.5rem;
+        padding: 3rem 0;
+      }
+
+      .lecture-notes-upload-content {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        padding: 0 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .lecture-notes-upload-left {
+        text-align: left;
+        gap: 1.5rem;
+        max-width: 100%;
+      }
+
+      .lecture-notes-upload-headline {
+        font-size: 2.5rem;
+        line-height: 1.2;
+        text-align: left;
+      }
+
+      .lecture-notes-upload-subtitle {
+        font-size: 1.125rem;
+        text-align: left;
+      }
+
+      .lecture-notes-upload-info {
+        text-align: left;
+      }
+
+      .lecture-notes-upload-right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .lecture-notes-upload-box {
+        padding: 2.5rem 2rem;
+        max-width: 550px;
+        margin: 0 auto;
+      }
+
+      .lecture-notes-upload-button-wrapper {
+        gap: 1.5rem;
+      }
+
+      .lecture-notes-upload-illustration svg {
+        width: 110px;
+        height: 110px;
+      }
+
       .lecture-notes-recommended-sidebar {
         width: 300px;
         padding: 2rem 1.5rem 2rem 0;
@@ -2018,6 +2440,53 @@ const LectureNotes = () => {
 
       .lecture-notes-main-content {
         padding: 2rem clamp(2rem, 5vw, 4rem);
+      }
+
+      .lecture-notes-upload-section {
+        margin-top: 4rem;
+        padding: 3.5rem 0;
+      }
+
+      .lecture-notes-upload-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        padding: 0 2rem;
+        max-width: 1400px;
+        align-items: center;
+      }
+
+      .lecture-notes-upload-left {
+        text-align: left;
+        gap: 1.75rem;
+      }
+
+      .lecture-notes-upload-headline {
+        font-size: 2.75rem;
+        line-height: 1.2;
+        text-align: left;
+      }
+
+      .lecture-notes-upload-subtitle {
+        font-size: 1.25rem;
+        text-align: left;
+      }
+
+      .lecture-notes-upload-info {
+        text-align: left;
+      }
+
+      .lecture-notes-upload-box {
+        padding: 3rem 2.5rem;
+        max-width: 520px;
+      }
+
+      .lecture-notes-upload-button-wrapper {
+        gap: 1.5rem;
+      }
+
+      .lecture-notes-upload-illustration svg {
+        width: 120px;
+        height: 120px;
       }
 
       .lecture-notes-recommended-sidebar {
@@ -2159,7 +2628,7 @@ const LectureNotes = () => {
           <div className="lecture-notes-main-content">
             <div className="lecture-notes-content-area">
               <div className="lecture-notes-header">
-                <h1 className="lecture-notes-title">Lecture Notes Repository</h1>
+                <h1 className="lecture-notes-title">MetaSlides and Lecturer Notes</h1>
                 <p className="lecture-notes-subtitle">
                   Access comprehensive lecture materials from Ghana's leading universities. 
                   Enhance your learning with quality notes.
@@ -2333,7 +2802,7 @@ const LectureNotes = () => {
                           whileHover={{ y: -4, transition: { duration: 0.2 } }}
                           className="group lecture-notes-card"
                         >
-                          <div className="relative h-32 rounded-lg overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row">
+                          <div className="relative h-36 rounded-lg overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-row">
                             {/* Thumbnail Image - Left Side */}
                             <div className="relative w-36 h-full flex-shrink-0 overflow-hidden bg-slate-100">
                               <motion.img
@@ -2355,7 +2824,7 @@ const LectureNotes = () => {
                             <div className="flex-1 flex flex-col justify-between p-2.5 min-w-0">
                               {/* Top Section: Title and Bookmark */}
                               <div className="flex items-start justify-between gap-2 mb-1.5">
-                                <h3 className="text-xs font-semibold text-slate-900 line-clamp-2 leading-snug flex-1">
+                                <h3 className="text-sm font-bold text-slate-900 line-clamp-2 leading-snug flex-1">
                                   {note.title}
                                 </h3>
                                 <button
@@ -2481,6 +2950,81 @@ const LectureNotes = () => {
                   ))}
                 </div>
               )}
+
+              {/* Upload Section */}
+              <div className="lecture-notes-upload-section">
+                <div className="lecture-notes-upload-content">
+                  {/* Left Section - Text Content */}
+                  <div className="lecture-notes-upload-left">
+                    <h2 className="lecture-notes-upload-headline">
+                      Share your <span className="highlight">knowledge</span> and inspire the next <span className="highlight">generation</span>.
+                    </h2>
+                    <p className="lecture-notes-upload-subtitle">
+                      Upload your lecture materials and help students across Ghana excel in their studies.
+                    </p>
+                    <div className="lecture-notes-upload-info">
+                      <p className="lecture-notes-upload-file-types">
+                        Supported file types: PowerPoint (PPT, PPTX, PPSX, POTX), PDF, Word (DOC, DOCX).
+                      </p>
+                      <p className="lecture-notes-upload-disclaimer">
+                        By uploading, you agree to our <strong>MetaSlides and Notes Terms of Service</strong>.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right Section - Upload Area */}
+                  <div className="lecture-notes-upload-right">
+                    <div className="lecture-notes-upload-box">
+                      <p className="lecture-notes-upload-instruction">
+                        Choose your file and add it here.
+                      </p>
+                      <div className="lecture-notes-upload-button-wrapper">
+                        <button className="lecture-notes-upload-button">
+                          <Upload className="w-4 h-4 mr-1.5" />
+                          Upload a presentation
+                        </button>
+                        <div className="lecture-notes-upload-illustration">
+                          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M60 20C40 20 20 30 20 50C20 70 40 80 60 80C80 80 100 70 100 50C100 30 80 20 60 20Z" fill="#7C3AED"/>
+                            <path d="M30 60C25 60 20 65 20 70C20 75 25 80 30 80C35 80 40 75 40 70C40 65 35 60 30 60Z" fill="#7C3AED"/>
+                            <path d="M90 60C85 60 80 65 80 70C80 75 85 80 90 80C95 80 100 75 100 70C100 65 95 60 90 60Z" fill="#7C3AED"/>
+                            <path d="M50 40L60 30L70 40L65 40L65 55L55 55L55 40L50 40Z" fill="#F97316"/>
+                            <path d="M40 50L50 40L60 50L55 50L55 65L45 65L45 50L40 50Z" fill="#F97316"/>
+                            <circle cx="70" cy="50" r="8" fill="#FCD34D"/>
+                            <path d="M70 42L70 58M62 50L78 50" stroke="#F97316" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="lecture-notes-upload-services">
+                        <p className="lecture-notes-upload-services-label">Upload from another service:</p>
+                        <div className="lecture-notes-upload-service-icons">
+                          <button className="lecture-notes-service-icon" title="Google Drive">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M7.71 2L2 12L7.71 22H16.29L22 12L16.29 2H7.71Z" fill="#4285F4"/>
+                              <path d="M7.71 2L12 12L7.71 22H2L7.71 12L2 2H7.71Z" fill="#34A853"/>
+                              <path d="M16.29 2L12 12L16.29 22H22L16.29 12L22 2H16.29Z" fill="#FBBC04"/>
+                            </svg>
+                          </button>
+                          <button className="lecture-notes-service-icon" title="Box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="24" height="24" rx="4" fill="#0061D5"/>
+                              <text x="12" y="16" fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">box</text>
+                            </svg>
+                          </button>
+                          <button className="lecture-notes-service-icon" title="Dropbox">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M6 2L12 6L18 2L12 8L6 2Z" fill="#0061FF"/>
+                              <path d="M18 2L12 8L18 14L12 8L18 2Z" fill="#0061FF"/>
+                              <path d="M6 2L12 8L6 14L12 8L6 2Z" fill="#0061FF"/>
+                              <path d="M6 14L12 20L18 14L12 8L6 14Z" fill="#0061FF"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
