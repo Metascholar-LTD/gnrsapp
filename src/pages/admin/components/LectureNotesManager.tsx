@@ -203,7 +203,6 @@ const LectureNotesManager = () => {
       unverified: lectureNotes.filter(n => !n.verified).length,
       totalDownloads: lectureNotes.reduce((sum, n) => sum + n.downloads, 0),
       totalViews: lectureNotes.reduce((sum, n) => sum + n.views, 0),
-      totalSize: lectureNotes.reduce((sum, n) => sum + n.fileSize, 0),
     };
   }, [lectureNotes]);
 
@@ -1372,13 +1371,6 @@ const LectureNotesManager = () => {
           <div className="lnm-stat-label">Total Views</div>
           <div className="lnm-stat-value">{formatNumber(stats.totalViews)}</div>
         </div>
-        <div className="lnm-stat-card">
-          <div className="lnm-stat-icon" style={{ background: '#f3e8ff', color: '#9333ea' }}>
-            <TrendingUp className="w-6 h-6" />
-          </div>
-          <div className="lnm-stat-label">Total Size</div>
-          <div className="lnm-stat-value">{formatFileSize(stats.totalSize)}</div>
-        </div>
       </div>
 
       {/* Controls */}
@@ -1835,14 +1827,15 @@ const LectureNotesManager = () => {
                     }}
                   />
                 </div>
-                <div className="lnm-form-group full-width" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="lnm-form-group full-width" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
                   <input
                     type="checkbox"
                     id="verified"
                     checked={formData.verified}
                     onChange={(e) => setFormData(prev => ({ ...prev, verified: e.target.checked }))}
+                    style={{ flexShrink: 0 }}
                   />
-                  <label htmlFor="verified" className="lnm-form-label" style={{ margin: 0, cursor: 'pointer' }}>
+                  <label htmlFor="verified" className="lnm-form-label" style={{ margin: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                     Mark as verified
                   </label>
                 </div>
