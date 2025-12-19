@@ -4,6 +4,7 @@ import { ConfirmationModal } from "@/components/admin";
 import { toast } from "sonner";
 import { BREAKPOINTS, MEDIA_QUERIES } from "@/lib/breakpoints";
 import UniversityDetailEditor from "./components/UniversityDetailEditor";
+import { supabase } from "@/integrations/supabase/client";
 
 interface University {
   id: string;
@@ -13,7 +14,6 @@ interface University {
   tuitionFee: string;
   admissionCutOff: string;
   programs: string;
-  specialization: string;
   logo?: string;
   description: string;
   campus?: string[];
@@ -28,6 +28,11 @@ interface University {
     address?: string;
     phone?: string;
     email?: string;
+    facebook?: string;
+    twitter?: string;
+    linkedin?: string;
+    youtube?: string;
+    instagram?: string;
   };
   academics?: {
     studentFacultyRatio?: string;
@@ -42,8 +47,7 @@ interface University {
   admissions?: {
     acceptanceRate?: string;
     yieldRate?: string;
-    satRange?: string;
-    actRange?: string;
+    wassceScoreRange?: string;
   };
   studentLife?: {
     campusHousing?: string;
@@ -51,9 +55,92 @@ interface University {
     athletics?: string;
   };
   rankings?: { list: string; position: string }[];
+  programEnrollment?: { label: string; percentage: number; color: string }[];
+  fullTimePercentage?: number;
+  partTimePercentage?: number;
+  malePercentage?: number;
+  femalePercentage?: number;
+  undergraduatePopulation?: string;
+  acceptanceRate?: string;
+  averageGrantAid?: string;
   created_at?: string;
   updated_at?: string;
 }
+
+// Helper function to transform Supabase data (snake_case) to app format (camelCase)
+const transformFromSupabase = (data: any): University => {
+  return {
+    id: data.id,
+    name: data.name,
+    abbreviation: data.abbreviation,
+    region: data.region,
+    type: data.type,
+    logo: data.logo,
+    description: data.description,
+    website: data.website,
+    campus: data.campus || [],
+    studentPopulation: data.student_population,
+    yearEstablished: data.year_established,
+    tuitionFee: data.tuition_fee,
+    admissionCutOff: data.admission_cut_off,
+    programs: data.programs,
+    fullTimePercentage: data.full_time_percentage,
+    partTimePercentage: data.part_time_percentage,
+    malePercentage: data.male_percentage,
+    femalePercentage: data.female_percentage,
+    undergraduatePopulation: data.undergraduate_population,
+    acceptanceRate: data.acceptance_rate,
+    averageGrantAid: data.average_grant_aid,
+    programEnrollment: data.program_enrollment || [],
+    academics: data.academics || {},
+    financialAid: data.financial_aid || {},
+    admissions: data.admissions || {},
+    studentLife: data.student_life || {},
+    rankings: data.rankings || [],
+    courses: data.courses || {},
+    mastersCourses: data.masters_courses || {},
+    photos: data.photos || [],
+    contact: data.contact || {},
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+  };
+};
+
+// Helper function to transform app format (camelCase) to Supabase format (snake_case)
+const transformToSupabase = (data: University): any => {
+  return {
+    name: data.name,
+    abbreviation: data.abbreviation,
+    region: data.region,
+    type: data.type,
+    logo: data.logo,
+    description: data.description,
+    website: data.website,
+    campus: data.campus || [],
+    student_population: data.studentPopulation,
+    year_established: data.yearEstablished,
+    tuition_fee: data.tuitionFee,
+    admission_cut_off: data.admissionCutOff,
+    programs: data.programs,
+    full_time_percentage: data.fullTimePercentage,
+    part_time_percentage: data.partTimePercentage,
+    male_percentage: data.malePercentage,
+    female_percentage: data.femalePercentage,
+    undergraduate_population: data.undergraduatePopulation,
+    acceptance_rate: data.acceptanceRate,
+    average_grant_aid: data.averageGrantAid,
+    program_enrollment: data.programEnrollment || [],
+    academics: data.academics || {},
+    financial_aid: data.financialAid || {},
+    admissions: data.admissions || {},
+    student_life: data.studentLife || {},
+    rankings: data.rankings || [],
+    courses: data.courses || {},
+    masters_courses: data.mastersCourses || {},
+    photos: data.photos || [],
+    contact: data.contact || {},
+  };
+};
 
 const AdminUniversities = () => {
   const [universities, setUniversities] = useState<University[]>([]);
@@ -314,13 +401,28 @@ const AdminUniversities = () => {
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   useEffect(() => {
-    // Load mock data instead of fetching from Supabase
-    setLoading(true);
-    setTimeout(() => {
-      setUniversities(mockUniversities);
-      setLoading(false);
-    }, 500);
+    fetchUniversities();
   }, []);
+
+  const fetchUniversities = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('universities')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      const transformedData = (data || []).map(transformFromSupabase);
+      setUniversities(transformedData);
+    } catch (error: any) {
+      console.error("Error fetching universities:", error);
+      toast.error(error.message || "Failed to load universities");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const startEditing = (university: University) => {
     openDetailEditor(university);
@@ -377,47 +479,69 @@ const AdminUniversities = () => {
 
     setSaving(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const universityData: University = {
+        id: editing || '',
+        name: formData.name!,
+        region: formData.region!,
+        type: formData.type!,
+        tuitionFee: formData.tuitionFee || "",
+        admissionCutOff: formData.admissionCutOff || "",
+        programs: formData.programs || "",
+        logo: formData.logo,
+        description: formData.description || "",
+        campus: formData.campus || [],
+        studentPopulation: formData.studentPopulation,
+        yearEstablished: formData.yearEstablished,
+        website: formData.website,
+        abbreviation: formData.abbreviation,
+        photos: formData.photos || [],
+        academics: formData.academics,
+        financialAid: formData.financialAid,
+        admissions: formData.admissions,
+        studentLife: formData.studentLife,
+        rankings: formData.rankings || [],
+        courses: formData.courses,
+        mastersCourses: formData.mastersCourses,
+        contact: formData.contact,
+        programEnrollment: formData.programEnrollment,
+        fullTimePercentage: formData.fullTimePercentage,
+        partTimePercentage: formData.partTimePercentage,
+        malePercentage: formData.malePercentage,
+        femalePercentage: formData.femalePercentage,
+        undergraduatePopulation: formData.undergraduatePopulation,
+        acceptanceRate: formData.acceptanceRate,
+        averageGrantAid: formData.averageGrantAid,
+      };
+
+      const supabaseData = transformToSupabase(universityData);
 
       if (editing && universities.find((u) => u.id === editing)) {
         // Update existing university
+        const { data, error } = await supabase
+          .from('universities')
+          .update(supabaseData)
+          .eq('id', editing)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        const updatedUniversity = transformFromSupabase(data);
         setUniversities(prev => prev.map(uni => 
-          uni.id === editing 
-            ? { ...uni, ...formData, updated_at: new Date().toISOString() }
-            : uni
-        ));
+          uni.id === editing ? updatedUniversity : uni
+        ).sort((a, b) => a.name.localeCompare(b.name)));
         toast.success("University updated successfully");
       } else {
         // Add new university
-        const newUniversity: University = {
-          id: Date.now().toString(),
-          name: formData.name!,
-          region: formData.region!,
-          type: formData.type!,
-          tuitionFee: formData.tuitionFee || "",
-          admissionCutOff: formData.admissionCutOff || "",
-          programs: formData.programs || "",
-          specialization: formData.specialization || "",
-          logo: formData.logo,
-          description: formData.description || "",
-          campus: formData.campus || [],
-          studentPopulation: formData.studentPopulation,
-          yearEstablished: formData.yearEstablished,
-          website: formData.website,
-          abbreviation: formData.abbreviation,
-          photos: formData.photos || [],
-          academics: formData.academics,
-          financialAid: formData.financialAid,
-          admissions: formData.admissions,
-          studentLife: formData.studentLife,
-          rankings: formData.rankings || [],
-          courses: formData.courses,
-          mastersCourses: formData.mastersCourses,
-          contact: formData.contact,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        const { data, error } = await supabase
+          .from('universities')
+          .insert(supabaseData)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        const newUniversity = transformFromSupabase(data);
         setUniversities(prev => [...prev, newUniversity].sort((a, b) => a.name.localeCompare(b.name)));
         toast.success("University added successfully");
       }
@@ -470,15 +594,31 @@ const AdminUniversities = () => {
     collapseSidebar();
   };
 
-  const handleDetailSave = (updatedData: University) => {
-    setUniversities(prev => prev.map(uni => 
-      uni.id === updatedData.id 
-        ? { ...updatedData, updated_at: new Date().toISOString() }
-        : uni
-    ));
-    setDetailEditorOpen(false);
-    setSelectedUniversity(null);
-    toast.success("University details saved successfully");
+  const handleDetailSave = async (updatedData: University) => {
+    try {
+      const supabaseData = transformToSupabase(updatedData);
+      
+      const { data, error } = await supabase
+        .from('universities')
+        .update(supabaseData)
+        .eq('id', updatedData.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const updatedUniversity = transformFromSupabase(data);
+      setUniversities(prev => prev.map(uni => 
+        uni.id === updatedData.id ? updatedUniversity : uni
+      ).sort((a, b) => a.name.localeCompare(b.name)));
+      
+      setDetailEditorOpen(false);
+      setSelectedUniversity(null);
+      toast.success("University details saved successfully");
+    } catch (error: any) {
+      console.error("Error saving university details:", error);
+      toast.error(error.message || "Failed to save university details");
+    }
   };
 
   const deleteUniversity = (id: string) => {
@@ -489,8 +629,12 @@ const AdminUniversities = () => {
   const handleConfirmDelete = async () => {
     if (universityToDelete !== null) {
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 300));
+        const { error } = await supabase
+          .from('universities')
+          .delete()
+          .eq('id', universityToDelete);
+
+        if (error) throw error;
         
         setUniversities(prev => prev.filter(uni => uni.id !== universityToDelete));
         toast.success("University deleted successfully");
@@ -507,8 +651,7 @@ const AdminUniversities = () => {
     return universities.filter((uni) => {
       const matchesSearch =
         uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        uni.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        uni.specialization?.toLowerCase().includes(searchQuery.toLowerCase());
+        uni.region.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesRegion = !selectedRegion || uni.region === selectedRegion;
       const matchesType = !selectedType || uni.type === selectedType;
       return matchesSearch && matchesRegion && matchesType;
@@ -1438,18 +1581,6 @@ const AdminUniversities = () => {
                   onChange={handleInputChange}
                   className="au-form-input"
                   placeholder="e.g., 100+ Programs"
-                />
-              </div>
-
-              <div className="au-form-group">
-                <label className="au-form-label">Specialization</label>
-                <input
-                  type="text"
-                  name="specialization"
-                  value={formData.specialization || ""}
-                  onChange={handleInputChange}
-                  className="au-form-input"
-                  placeholder="e.g., Research & Medicine"
                 />
               </div>
 

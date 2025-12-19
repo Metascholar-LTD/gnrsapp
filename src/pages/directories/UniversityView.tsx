@@ -2,8 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
-import { ArrowLeft, ChevronLeft, ChevronRight, Facebook, Twitter, Linkedin, Globe, MapPin, Users } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Facebook, Twitter, Linkedin, Youtube, Instagram, Globe, MapPin, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UniversityData {
   id: string;
@@ -13,7 +14,6 @@ interface UniversityData {
   tuitionFee: string;
   admissionCutOff: string;
   programs: string;
-  specialization: string;
   logo?: string;
   description: string;
   campus?: string[];
@@ -43,8 +43,7 @@ interface UniversityData {
   admissions?: {
     acceptanceRate?: string;
     yieldRate?: string;
-    satRange?: string;
-    actRange?: string;
+    wassceScoreRange?: string;
   };
   studentLife?: {
     campusHousing?: string;
@@ -52,15 +51,135 @@ interface UniversityData {
     athletics?: string;
   };
   rankings?: { list: string; position: string }[];
+  courses?: Record<string, string[]>;
+  mastersCourses?: Record<string, Record<string, string[]>>;
+  contact?: {
+    address?: string;
+    phone?: string;
+    email?: string;
+    facebook?: string;
+    twitter?: string;
+    linkedin?: string;
+    youtube?: string;
+    instagram?: string;
+  };
 }
+
+// Helper function to transform Supabase data (snake_case) to app format (camelCase)
+const transformFromSupabase = (data: any): UniversityData => {
+  return {
+    id: data.id,
+    name: data.name,
+    abbreviation: data.abbreviation,
+    region: data.region,
+    type: data.type,
+    logo: data.logo,
+    description: data.description,
+    website: data.website,
+    campus: data.campus || [],
+    studentPopulation: data.student_population,
+    yearEstablished: data.year_established,
+    tuitionFee: data.tuition_fee,
+    admissionCutOff: data.admission_cut_off,
+    programs: data.programs,
+    fullTimePercentage: data.full_time_percentage,
+    partTimePercentage: data.part_time_percentage,
+    malePercentage: data.male_percentage,
+    femalePercentage: data.female_percentage,
+    undergraduatePopulation: data.undergraduate_population,
+    acceptanceRate: data.acceptance_rate,
+    averageGrantAid: data.average_grant_aid,
+    programEnrollment: data.program_enrollment || [],
+    academics: data.academics || {},
+    financialAid: data.financial_aid || {},
+    admissions: data.admissions || {},
+    studentLife: data.student_life || {},
+    rankings: data.rankings || [],
+    courses: data.courses || {},
+    mastersCourses: data.masters_courses || {},
+    photos: data.photos || [],
+    contact: data.contact || {},
+  };
+};
 
 const UniversityView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [university, setUniversity] = useState<UniversityData | null>(null);
+  const [allUniversities, setAllUniversities] = useState<UniversityData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'academics' | 'financial' | 'admissions' | 'student' | 'courses'>('academics');
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [selectedCollege, setSelectedCollege] = useState<string>('');
   const [degreeLevel, setDegreeLevel] = useState<'undergraduate' | 'postgraduate' | ''>('');
+
+  useEffect(() => {
+    if (id) {
+      fetchUniversity(id);
+      fetchAllUniversities();
+    }
+  }, [id]);
+
+  const fetchUniversity = async (universityId: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('universities')
+        .select('*')
+        .eq('id', universityId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const transformedData = transformFromSupabase(data);
+        setUniversity(transformedData);
+      }
+    } catch (error: any) {
+      console.error("Error fetching university:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllUniversities = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('universities')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      if (data) {
+        const transformedData = (data || []).map(transformFromSupabase);
+        setAllUniversities(transformedData);
+      }
+    } catch (error: any) {
+      console.error("Error fetching all universities:", error);
+    }
+  };
+
+  // Helper function to format percentage values - adds % if missing
+  const formatPercentage = (value: string | number | undefined | null): string => {
+    if (value === undefined || value === null || value === '') return '';
+    const strValue = String(value).trim();
+    if (strValue === '') return '';
+    // If it already ends with %, return as is
+    if (strValue.endsWith('%')) return strValue;
+    // If it's a valid number, add %
+    const numValue = parseFloat(strValue);
+    if (!isNaN(numValue)) return `${numValue}%`;
+    return strValue;
+  };
+
+  // Helper function to extract numeric value from percentage string for bar widths
+  const getPercentageNumber = (value: string | number | undefined | null): number => {
+    if (value === undefined || value === null || value === '') return 0;
+    const strValue = String(value).trim().replace('%', '');
+    const numValue = parseFloat(strValue);
+    return isNaN(numValue) ? 0 : numValue;
+  };
 
   // University logo mapping
   const universityLogos: Record<string, string> = {
@@ -753,236 +872,7 @@ const UniversityView: React.FC = () => {
     };
   };
 
-  // Mock university data - in production, fetch from API
-  const universities: UniversityData[] = [
-    generateDefaultUniversityData({
-      id: '1',
-      name: 'University of Ghana',
-      region: 'Greater Accra',
-      type: 'Public',
-      tuitionFee: 'GHS 2,500 - 4,500',
-      admissionCutOff: 'Aggregate 6-24',
-      programs: '100+ Programs',
-      specialization: 'Research & Medicine',
-      logo: universityLogos['University of Ghana'],
-      description: 'The University of Ghana is the oldest and largest of the thirteen Ghanaian national public universities. It was founded in 1948 and is located in Legon, Accra. The university offers a wide range of undergraduate and postgraduate programs across various disciplines including Arts, Sciences, Business, Law, Medicine, and Engineering. The university is known for its strong research programs and has produced many notable alumni in various fields.',
-      campus: ['Legon', 'Accra City'],
-      studentPopulation: '40,000+',
-      yearEstablished: '1948',
-    }),
-    generateDefaultUniversityData({
-      id: '2',
-      name: 'Kwame Nkrumah University of Science and Technology',
-      region: 'Ashanti',
-      type: 'Public',
-      tuitionFee: 'GHS 2,200 - 4,200',
-      admissionCutOff: 'Aggregate 6-26',
-      programs: '80+ Programs',
-      specialization: 'Science & Engineering',
-      logo: universityLogos['Kwame Nkrumah University of Science and Technology'],
-      description: 'KNUST is a public university located in Kumasi, Ghana. It focuses on science and technology education and is one of the leading universities in Africa. The university is known for its strong engineering, technology, and applied sciences programs. KNUST has produced many engineers, scientists, and technologists who have contributed significantly to Ghana\'s development.',
-      campus: ['Kumasi'],
-      studentPopulation: '35,000+',
-      yearEstablished: '1952',
-    }),
-    generateDefaultUniversityData({
-      id: '3',
-      name: 'University of Cape Coast',
-      region: 'Central',
-      type: 'Public',
-      tuitionFee: 'GHS 2,000 - 3,800',
-      admissionCutOff: 'Aggregate 8-28',
-      programs: '60+ Programs',
-      specialization: 'Education & Research',
-      logo: universityLogos['University of Cape Coast'],
-      description: 'The University of Cape Coast is a public university located in Cape Coast, Ghana. It was established in 1962 and specializes in education and research. The university is known for its strong programs in education, sciences, humanities, and social sciences.',
-      campus: ['Cape Coast'],
-      studentPopulation: '25,000+',
-      yearEstablished: '1962',
-    }),
-    generateDefaultUniversityData({
-      id: '4',
-      name: 'Ashesi University',
-      region: 'Eastern',
-      type: 'Private',
-      tuitionFee: 'GHS 15,000 - 18,000',
-      admissionCutOff: 'Aggregate 6-12',
-      programs: '15+ Programs',
-      specialization: 'Leadership & Innovation',
-      logo: undefined,
-      description: 'Ashesi University is a private, non-profit liberal arts university located in Berekuso, Ghana. Founded in 2002, Ashesi has gained recognition for its innovative approach to education and its focus on ethical leadership and entrepreneurship. The university offers programs in Business Administration, Computer Science, Management Information Systems, and Engineering.',
-      campus: ['Berekuso'],
-      studentPopulation: '1,200+',
-      yearEstablished: '2002',
-    }),
-    generateDefaultUniversityData({
-      id: '5',
-      name: 'Ghana Institute of Management and Public Administration',
-      region: 'Greater Accra',
-      type: 'Public',
-      tuitionFee: 'GHS 2,800 - 5,000',
-      admissionCutOff: 'Aggregate 10-30',
-      programs: '30+ Programs',
-      specialization: 'Management & Governance',
-      logo: universityLogos['Ghana Institute of Management and Public Administration'],
-      description: 'GIMPA is a public university located in Accra, Ghana. It specializes in management, public administration, and governance education. The institute offers executive education and degree programs in Business Administration, Public Administration, and related fields.',
-      campus: ['Accra'],
-      studentPopulation: '8,000+',
-      yearEstablished: '1961',
-    }),
-    generateDefaultUniversityData({
-      id: '6',
-      name: 'University of Professional Studies',
-      region: 'Greater Accra',
-      type: 'Public',
-      tuitionFee: 'GHS 2,400 - 4,500',
-      admissionCutOff: 'Aggregate 8-28',
-      programs: '40+ Programs',
-      specialization: 'Professional Studies',
-      logo: undefined,
-      description: 'UPSA is a public university located in Accra, Ghana. It focuses on professional studies including accounting, finance, marketing, and management. The university is known for producing skilled professionals for the business sector and offers programs in Business Administration, Accounting, Marketing, and Communication Studies.',
-      campus: ['Accra'],
-      studentPopulation: '12,000+',
-      yearEstablished: '1965',
-    }),
-    generateDefaultUniversityData({
-      id: '7',
-      name: 'Central University',
-      region: 'Greater Accra',
-      type: 'Private',
-      tuitionFee: 'GHS 8,000 - 12,000',
-      admissionCutOff: 'Aggregate 12-30',
-      programs: '50+ Programs',
-      specialization: 'Christian Values',
-      logo: undefined,
-      description: 'Central University is a private Christian university located in Miotso, Ghana. It offers a range of undergraduate and postgraduate programs with a focus on Christian values and academic excellence. Programs include Business Administration, Theology, Nursing, Engineering, and Information Technology.',
-      campus: ['Miotso', 'Kumasi'],
-      studentPopulation: '5,000+',
-      yearEstablished: '1988',
-    }),
-    generateDefaultUniversityData({
-      id: '8',
-      name: 'Regent University College of Science and Technology',
-      region: 'Greater Accra',
-      type: 'Private',
-      tuitionFee: 'GHS 6,500 - 10,000',
-      admissionCutOff: 'Aggregate 14-30',
-      programs: '25+ Programs',
-      specialization: 'Technology & Innovation',
-      logo: undefined,
-      description: 'Regent University is a private university located in Accra, Ghana. It focuses on science and technology education and offers programs in engineering, computer science, business, and information technology. The university emphasizes practical skills and industry-relevant training.',
-      campus: ['Accra'],
-      studentPopulation: '3,500+',
-      yearEstablished: '2003',
-    }),
-    generateDefaultUniversityData({
-      id: '9',
-      name: 'University of Education, Winneba',
-      region: 'Central',
-      type: 'Public',
-      tuitionFee: 'GHS 2,100 - 3,900',
-      admissionCutOff: 'Aggregate 8-28',
-      programs: '70+ Programs',
-      specialization: 'Teacher Education',
-      logo: universityLogos['University of Education, Winneba'],
-      description: 'The University of Education, Winneba is a public university located in Winneba, Ghana. Established in 1992, it specializes in teacher education and training. The university offers programs in education, sciences, humanities, and social sciences, producing qualified teachers and educational professionals.',
-      campus: ['Winneba', 'Kumasi', 'Mampong'],
-      studentPopulation: '30,000+',
-      yearEstablished: '1992',
-    }),
-    generateDefaultUniversityData({
-      id: '10',
-      name: 'University of Mines and Technology',
-      region: 'Western',
-      type: 'Public',
-      tuitionFee: 'GHS 2,300 - 4,000',
-      admissionCutOff: 'Aggregate 6-24',
-      programs: '25+ Programs',
-      specialization: 'Mining & Petroleum',
-      logo: universityLogos['University of Mines and Technology'],
-      description: 'The University of Mines and Technology is a public university located in Tarkwa, Ghana. It specializes in mining, petroleum, and engineering education. UMaT is known for producing skilled professionals in mining engineering, petroleum engineering, and related technical fields.',
-      campus: ['Tarkwa'],
-      studentPopulation: '6,000+',
-      yearEstablished: '2004',
-    }),
-    generateDefaultUniversityData({
-      id: '11',
-      name: 'University for Development Studies',
-      region: 'Northern',
-      type: 'Public',
-      tuitionFee: 'GHS 2,000 - 3,500',
-      admissionCutOff: 'Aggregate 8-30',
-      programs: '55+ Programs',
-      specialization: 'Development Studies',
-      logo: universityLogos['University for Development Studies'],
-      description: 'The University for Development Studies is a public university with campuses in Tamale, Navrongo, and Wa, Ghana. Established in 1992, UDS focuses on development-oriented education and research. The university offers programs in agriculture, health sciences, education, and development studies.',
-      campus: ['Tamale', 'Navrongo', 'Wa'],
-      studentPopulation: '20,000+',
-      yearEstablished: '1992',
-    }),
-    generateDefaultUniversityData({
-      id: '12',
-      name: 'Catholic University of Ghana',
-      region: 'Bono',
-      type: 'Private',
-      tuitionFee: 'GHS 7,500 - 11,000',
-      admissionCutOff: 'Aggregate 12-28',
-      programs: '35+ Programs',
-      specialization: 'Catholic Education',
-      logo: universityLogos['Catholic University of Ghana'],
-      description: 'The Catholic University of Ghana is a private Catholic university located in Fiapre, Sunyani, Ghana. Established in 2003, it offers programs grounded in Catholic values and academic excellence. Programs include Business Administration, Information Technology, Nursing, and Theology.',
-      campus: ['Fiapre'],
-      studentPopulation: '4,000+',
-      yearEstablished: '2003',
-    }),
-    generateDefaultUniversityData({
-      id: '13',
-      name: 'Pentecost University College',
-      region: 'Greater Accra',
-      type: 'Private',
-      tuitionFee: 'GHS 6,000 - 9,500',
-      admissionCutOff: 'Aggregate 14-30',
-      programs: '30+ Programs',
-      specialization: 'Christian Business',
-      logo: universityLogos['Pentecost University College'],
-      description: 'Pentecost University College is a private Christian university located in Sowutuom, Accra, Ghana. It offers undergraduate and postgraduate programs with a focus on Christian values, business, and technology. Programs include Business Administration, Information Technology, and Theology.',
-      campus: ['Sowutuom'],
-      studentPopulation: '3,000+',
-      yearEstablished: '2003',
-    }),
-    generateDefaultUniversityData({
-      id: '14',
-      name: 'University of Energy and Natural Resources',
-      region: 'Bono',
-      type: 'Public',
-      tuitionFee: 'GHS 2,200 - 4,000',
-      admissionCutOff: 'Aggregate 8-26',
-      programs: '20+ Programs',
-      specialization: 'Energy & Environment',
-      logo: universityLogos['University of Energy and Natural Resources'],
-      description: 'The University of Energy and Natural Resources is a public university located in Sunyani, Ghana. Established in 2011, UENR focuses on energy, natural resources, and environmental studies. The university offers programs in renewable energy, environmental science, and natural resource management.',
-      campus: ['Sunyani', 'Dormaa Ahenkro'],
-      studentPopulation: '5,000+',
-      yearEstablished: '2011',
-    }),
-    generateDefaultUniversityData({
-      id: '15',
-      name: 'Accra Institute of Technology',
-      region: 'Greater Accra',
-      type: 'Private',
-      tuitionFee: 'GHS 5,500 - 8,500',
-      admissionCutOff: 'Aggregate 16-30',
-      programs: '20+ Programs',
-      specialization: 'Technology & Engineering',
-      logo: universityLogos['Accra Institute of Technology'],
-      description: 'Accra Institute of Technology is a private university located in Accra, Ghana. It focuses on technology, engineering, and business education. AIT offers programs in computer science, information technology, engineering, and business administration with an emphasis on practical skills and industry relevance.',
-      campus: ['Accra'],
-      studentPopulation: '2,500+',
-      yearEstablished: '2009',
-    }),
-  ];
-
-  const university = universities.find(u => u.id === id);
+  // University data is now fetched from Supabase
 
   // Reset selected college and degree level when university changes
   useEffect(() => {
@@ -994,6 +884,19 @@ const UniversityView: React.FC = () => {
   useEffect(() => {
     setDegreeLevel('');
   }, [selectedCollege]);
+
+  // Memoize other universities list
+  const otherUniversities = useMemo(() => {
+    return allUniversities
+      .filter(u => u.id !== university?.id)
+      .slice(0, 5);
+  }, [allUniversities, university?.id]);
+
+  if (loading) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>Loading university details...</div>
+    );
+  }
 
   if (!university) {
     return (
@@ -1226,6 +1129,14 @@ const UniversityView: React.FC = () => {
       color: hsl(220 20% 40%);
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
       margin: 0;
+    }
+
+    .university-view-description-text p {
+      margin: 0 0 1rem 0;
+    }
+
+    .university-view-description-text p:last-child {
+      margin-bottom: 0;
     }
 
     .university-view-photos-section {
@@ -2101,15 +2012,31 @@ const UniversityView: React.FC = () => {
               <div className="university-view-left-section">
                 <div className="university-view-logo-section">
                   <div className="university-view-social-icons">
-                    <a href="#" className="university-view-social-icon" aria-label="Facebook">
-                      <Facebook size={18} />
-                    </a>
-                    <a href="#" className="university-view-social-icon" aria-label="Twitter">
-                      <Twitter size={18} />
-                    </a>
-                    <a href="#" className="university-view-social-icon" aria-label="LinkedIn">
-                      <Linkedin size={18} />
-                    </a>
+                    {university.contact?.facebook && (
+                      <a href={university.contact.facebook} target="_blank" rel="noopener noreferrer" className="university-view-social-icon" aria-label="Facebook">
+                        <Facebook size={18} />
+                      </a>
+                    )}
+                    {university.contact?.twitter && (
+                      <a href={university.contact.twitter} target="_blank" rel="noopener noreferrer" className="university-view-social-icon" aria-label="Twitter">
+                        <Twitter size={18} />
+                      </a>
+                    )}
+                    {university.contact?.linkedin && (
+                      <a href={university.contact.linkedin} target="_blank" rel="noopener noreferrer" className="university-view-social-icon" aria-label="LinkedIn">
+                        <Linkedin size={18} />
+                      </a>
+                    )}
+                    {university.contact?.youtube && (
+                      <a href={university.contact.youtube} target="_blank" rel="noopener noreferrer" className="university-view-social-icon" aria-label="YouTube">
+                        <Youtube size={18} />
+                      </a>
+                    )}
+                    {university.contact?.instagram && (
+                      <a href={university.contact.instagram} target="_blank" rel="noopener noreferrer" className="university-view-social-icon" aria-label="Instagram">
+                        <Instagram size={18} />
+                      </a>
+                    )}
                   </div>
                   <div className="university-view-logo">
                     {university.logo ? (
@@ -2162,7 +2089,7 @@ const UniversityView: React.FC = () => {
                     {university.acceptanceRate && (
                       <tr>
                         <td>ACCEPTANCE RATE*</td>
-                        <td>{university.acceptanceRate}</td>
+                        <td>{formatPercentage(university.acceptanceRate)}</td>
                       </tr>
                     )}
                     {university.website && (
@@ -2186,7 +2113,13 @@ const UniversityView: React.FC = () => {
           <div className="university-view-about-photos-wrapper">
             <div className="university-view-description">
               <h2 className="university-view-description-title">ABOUT</h2>
-              <p className="university-view-description-text">{university.description}</p>
+              <div className="university-view-description-text">
+                {university.description.split('\n').filter(line => line.trim()).map((paragraph, index) => (
+                  <p key={index} style={{ marginBottom: '1rem' }}>
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
             </div>
 
             {university.photos && university.photos.length > 0 && (
@@ -2287,13 +2220,13 @@ const UniversityView: React.FC = () => {
                     {university.academics.graduationRate && (
                       <div className="university-view-stat-item">
                         <div className="university-view-stat-label">GRADUATION RATE</div>
-                        <div className="university-view-stat-value">{university.academics.graduationRate}</div>
+                        <div className="university-view-stat-value">{formatPercentage(university.academics.graduationRate)}</div>
                       </div>
                     )}
                     {university.academics.retentionRate && (
                       <div className="university-view-stat-item">
                         <div className="university-view-stat-label">RETENTION RATE</div>
-                        <div className="university-view-stat-value">{university.academics.retentionRate}</div>
+                        <div className="university-view-stat-value">{formatPercentage(university.academics.retentionRate)}</div>
                       </div>
                     )}
                   </motion.div>
@@ -2310,11 +2243,11 @@ const UniversityView: React.FC = () => {
                     {university.financialAid.aidPercentage && (
                       <div className="university-view-stat-item">
                         <div className="university-view-stat-label">FINANCIAL AID PERCENTAGE</div>
-                        <div className="university-view-stat-value">{university.financialAid.aidPercentage}</div>
+                        <div className="university-view-stat-value">{formatPercentage(university.financialAid.aidPercentage)}</div>
                         <div className="university-view-stat-bar">
                           <div
                             className="university-view-stat-bar-fill"
-                            style={{ width: university.financialAid.aidPercentage }}
+                            style={{ width: `${getPercentageNumber(university.financialAid.aidPercentage)}%` }}
                           />
                         </div>
                       </div>
@@ -2339,15 +2272,15 @@ const UniversityView: React.FC = () => {
                     {university.admissions.acceptanceRate && (
                       <div className="university-view-stat-item">
                         <div className="university-view-stat-label">ADMISSIONS RATE</div>
-                        <div className="university-view-stat-value">{university.admissions.acceptanceRate}</div>
+                        <div className="university-view-stat-value">{formatPercentage(university.admissions.acceptanceRate)}</div>
                         <div className="university-view-stat-bar">
                           <div
                             className="university-view-stat-bar-fill"
-                            style={{ width: university.admissions.acceptanceRate }}
+                            style={{ width: `${getPercentageNumber(university.admissions.acceptanceRate)}%` }}
                           />
                           <div
                             className="university-view-stat-bar-fill light"
-                            style={{ width: `${100 - parseFloat(university.admissions.acceptanceRate)}%`, position: 'absolute', right: 0 }}
+                            style={{ width: `${100 - getPercentageNumber(university.admissions.acceptanceRate)}%`, position: 'absolute', right: 0 }}
                           />
                         </div>
                       </div>
@@ -2355,17 +2288,23 @@ const UniversityView: React.FC = () => {
                     {university.admissions.yieldRate && (
                       <div className="university-view-stat-item">
                         <div className="university-view-stat-label">ADMISSIONS YIELD</div>
-                        <div className="university-view-stat-value">{university.admissions.yieldRate}</div>
+                        <div className="university-view-stat-value">{formatPercentage(university.admissions.yieldRate)}</div>
                         <div className="university-view-stat-bar">
                           <div
                             className="university-view-stat-bar-fill"
-                            style={{ width: university.admissions.yieldRate }}
+                            style={{ width: `${getPercentageNumber(university.admissions.yieldRate)}%` }}
                           />
                           <div
                             className="university-view-stat-bar-fill light"
-                            style={{ width: `${100 - parseFloat(university.admissions.yieldRate)}%`, position: 'absolute', right: 0 }}
+                            style={{ width: `${100 - getPercentageNumber(university.admissions.yieldRate)}%`, position: 'absolute', right: 0 }}
                           />
                         </div>
+                      </div>
+                    )}
+                    {university.admissions.wassceScoreRange && (
+                      <div className="university-view-stat-item">
+                        <div className="university-view-stat-label">WASSCE SCORE RANGE</div>
+                        <div className="university-view-stat-value">{university.admissions.wassceScoreRange}</div>
                       </div>
                     )}
                   </motion.div>
@@ -2933,11 +2872,7 @@ const UniversityView: React.FC = () => {
               Explore other universities in Ghana
             </p>
             <div className="university-view-other-universities-grid">
-              {useMemo(() => {
-                return universities
-                  .filter(u => u.id !== university.id)
-                  .slice(0, 5)
-                  .map((otherUni) => (
+              {otherUniversities.map((otherUni) => (
                     <Link
                       key={otherUni.id}
                       to={`/directories/universities/${otherUni.id}`}
@@ -2969,8 +2904,7 @@ const UniversityView: React.FC = () => {
                         </div>
                       )}
                     </Link>
-                  ));
-              }, [university.id])}
+              ))}
             </div>
           </div>
         </div>

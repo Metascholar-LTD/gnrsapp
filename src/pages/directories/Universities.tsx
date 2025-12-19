@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface University {
   id: string;
@@ -13,15 +14,38 @@ interface University {
   tuitionFee: string;
   admissionCutOff: string;
   programs: string;
-  specialization: string;
   logo?: string;
   description: string;
   campus?: string[];
   studentPopulation?: string;
   yearEstablished?: string;
+  website?: string;
+  abbreviation?: string;
 }
 
+// Helper function to transform Supabase data (snake_case) to app format (camelCase)
+const transformFromSupabase = (data: any): University => {
+  return {
+    id: data.id,
+    name: data.name,
+    abbreviation: data.abbreviation,
+    region: data.region,
+    type: data.type,
+    logo: data.logo,
+    description: data.description,
+    website: data.website,
+    campus: data.campus || [],
+    studentPopulation: data.student_population,
+    yearEstablished: data.year_established,
+    tuitionFee: data.tuition_fee,
+    admissionCutOff: data.admission_cut_off,
+    programs: data.programs,
+  };
+};
+
 const Universities: React.FC = () => {
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCampus, setSelectedCampus] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -30,250 +54,30 @@ const Universities: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // University logo mapping from Cloudinary
-  const universityLogos: Record<string, string> = {
-    'University of Ghana': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1763379495/46600902-ca9e-407d-9392-06a45b9d9b1a.png',
-    'Kwame Nkrumah University of Science and Technology': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1763379648/e9c10d56-1f3e-4151-8123-93d77fefe7aa.png',
-    'University of Cape Coast': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1763379582/9c190837-92c2-4230-b205-4ab9f0c8c6a1.png',
-    'Ghana Institute of Management and Public Administration': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1763379384/9c8b41be-3e40-4ee3-8ae5-8951832cd82c.png',
-    'University of Education, Winneba': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1763379251/673184a4-9fd7-433b-b33e-ab7871fa5a1b.png',
-    'University for Development Studies': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1763379766/0a0d9027-8f25-4d2f-a291-8fae7914dec3.png',
-    'University of Mines and Technology': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1759428982/WhatsApp_Image_2025-10-02_at_15.46.11_f720a723_lzrtfp.jpg',
-    'Catholic University of Ghana': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1756722559/catholic-university-ghana-logo_onhrgj.jpg',
-    'Pentecost University College': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1756722725/OIP_czwzp0.webp',
-    'University of Energy and Natural Resources': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1758510525/download_uxkc4q.jpg',
-    'Accra Institute of Technology': 'https://res.cloudinary.com/dsypclqxk/image/upload/v1759428988/WhatsApp_Image_2025-10-02_at_15.47.06_33dd4bda_pj0a6t.jpg',
+  useEffect(() => {
+    fetchUniversities();
+  }, []);
+
+  const fetchUniversities = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('universities')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      const transformedData = (data || []).map(transformFromSupabase);
+      setUniversities(transformedData);
+    } catch (error: any) {
+      console.error("Error fetching universities:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Mock university data - replace with actual API data
-  const universities: University[] = [
-    {
-      id: '1',
-      name: 'University of Ghana',
-      region: 'Greater Accra',
-      type: 'Public',
-      tuitionFee: 'GHS 2,500 - 4,500',
-      admissionCutOff: 'Aggregate 6-24',
-      programs: '100+ Programs',
-      specialization: 'Research & Medicine',
-      logo: universityLogos['University of Ghana'],
-      description: 'The University of Ghana is the oldest and largest of the thirteen Ghanaian national public universities. It was founded in 1948 and is located in Legon, Accra. The university offers a wide range of undergraduate and postgraduate programs across various disciplines including Arts, Sciences, Business, Law, Medicine, and Engineering.',
-      campus: ['Legon', 'Accra City'],
-      studentPopulation: '40,000+',
-      yearEstablished: '1948'
-    },
-    {
-      id: '2',
-      name: 'Kwame Nkrumah University of Science and Technology',
-      region: 'Ashanti',
-      type: 'Public',
-      tuitionFee: 'GHS 2,200 - 4,200',
-      admissionCutOff: 'Aggregate 6-26',
-      programs: '80+ Programs',
-      specialization: 'Science & Engineering',
-      logo: universityLogos['Kwame Nkrumah University of Science and Technology'],
-      description: 'KNUST is a public university located in Kumasi, Ghana. It focuses on science and technology education and is one of the leading universities in Africa. The university is known for its strong engineering, technology, and applied sciences programs.',
-      campus: ['Kumasi'],
-      studentPopulation: '35,000+',
-      yearEstablished: '1952'
-    },
-    {
-      id: '3',
-      name: 'University of Cape Coast',
-      region: 'Central',
-      type: 'Public',
-      tuitionFee: 'GHS 2,000 - 3,800',
-      admissionCutOff: 'Aggregate 8-28',
-      programs: '60+ Programs',
-      specialization: 'Education & Research',
-      logo: universityLogos['University of Cape Coast'],
-      description: 'The University of Cape Coast is a public university located in Cape Coast, Ghana. It was established in 1962 and specializes in education and research. The university is known for its strong programs in education, sciences, humanities, and social sciences.',
-      campus: ['Cape Coast'],
-      studentPopulation: '25,000+',
-      yearEstablished: '1962'
-    },
-    {
-      id: '4',
-      name: 'Ashesi University',
-      region: 'Eastern',
-      type: 'Private',
-      tuitionFee: 'GHS 15,000 - 18,000',
-      admissionCutOff: 'Aggregate 6-12',
-      programs: '15+ Programs',
-      specialization: 'Leadership & Innovation',
-      logo: undefined, // No logo found for Ashesi
-      description: 'Ashesi University is a private, non-profit liberal arts university located in Berekuso, Ghana. Founded in 2002, Ashesi has gained recognition for its innovative approach to education and its focus on ethical leadership and entrepreneurship. The university offers programs in Business Administration, Computer Science, Management Information Systems, and Engineering.',
-      campus: ['Berekuso'],
-      studentPopulation: '1,200+',
-      yearEstablished: '2002'
-    },
-    {
-      id: '5',
-      name: 'Ghana Institute of Management and Public Administration',
-      region: 'Greater Accra',
-      type: 'Public',
-      tuitionFee: 'GHS 2,800 - 5,000',
-      admissionCutOff: 'Aggregate 10-30',
-      programs: '30+ Programs',
-      specialization: 'Management & Governance',
-      logo: universityLogos['Ghana Institute of Management and Public Administration'],
-      description: 'GIMPA is a public university located in Accra, Ghana. It specializes in management, public administration, and governance education. The institute offers executive education and degree programs in Business Administration, Public Administration, and related fields.',
-      campus: ['Accra'],
-      studentPopulation: '8,000+',
-      yearEstablished: '1961'
-    },
-    {
-      id: '6',
-      name: 'University of Professional Studies',
-      region: 'Greater Accra',
-      type: 'Public',
-      tuitionFee: 'GHS 2,400 - 4,500',
-      admissionCutOff: 'Aggregate 8-28',
-      programs: '40+ Programs',
-      specialization: 'Professional Studies',
-      logo: undefined, // No logo found for UPSA
-      description: 'UPSA is a public university located in Accra, Ghana. It focuses on professional studies including accounting, finance, marketing, and management. The university is known for producing skilled professionals for the business sector and offers programs in Business Administration, Accounting, Marketing, and Communication Studies.',
-      campus: ['Accra'],
-      studentPopulation: '12,000+',
-      yearEstablished: '1965'
-    },
-    {
-      id: '7',
-      name: 'Central University',
-      region: 'Greater Accra',
-      type: 'Private',
-      tuitionFee: 'GHS 8,000 - 12,000',
-      admissionCutOff: 'Aggregate 12-30',
-      programs: '50+ Programs',
-      specialization: 'Christian Values',
-      logo: undefined, // No logo found
-      description: 'Central University is a private Christian university located in Miotso, Ghana. It offers a range of undergraduate and postgraduate programs with a focus on Christian values and academic excellence. Programs include Business Administration, Theology, Nursing, Engineering, and Information Technology.',
-      campus: ['Miotso', 'Kumasi'],
-      studentPopulation: '5,000+',
-      yearEstablished: '1988'
-    },
-    {
-      id: '8',
-      name: 'Regent University College of Science and Technology',
-      region: 'Greater Accra',
-      type: 'Private',
-      tuitionFee: 'GHS 6,500 - 10,000',
-      admissionCutOff: 'Aggregate 14-30',
-      programs: '25+ Programs',
-      specialization: 'Technology & Innovation',
-      logo: undefined, // No logo found
-      description: 'Regent University is a private university located in Accra, Ghana. It focuses on science and technology education and offers programs in engineering, computer science, business, and information technology. The university emphasizes practical skills and industry-relevant training.',
-      campus: ['Accra'],
-      studentPopulation: '3,500+',
-      yearEstablished: '2003'
-    },
-    {
-      id: '9',
-      name: 'University of Education, Winneba',
-      region: 'Central',
-      type: 'Public',
-      tuitionFee: 'GHS 2,100 - 3,900',
-      admissionCutOff: 'Aggregate 8-28',
-      programs: '70+ Programs',
-      specialization: 'Teacher Education',
-      logo: universityLogos['University of Education, Winneba'],
-      description: 'The University of Education, Winneba is a public university located in Winneba, Ghana. Established in 1992, it specializes in teacher education and training. The university offers programs in education, sciences, humanities, and social sciences, producing qualified teachers and educational professionals.',
-      campus: ['Winneba', 'Kumasi', 'Mampong'],
-      studentPopulation: '30,000+',
-      yearEstablished: '1992'
-    },
-    {
-      id: '10',
-      name: 'University of Mines and Technology',
-      region: 'Western',
-      type: 'Public',
-      tuitionFee: 'GHS 2,300 - 4,000',
-      admissionCutOff: 'Aggregate 6-24',
-      programs: '25+ Programs',
-      specialization: 'Mining & Petroleum',
-      logo: universityLogos['University of Mines and Technology'],
-      description: 'The University of Mines and Technology is a public university located in Tarkwa, Ghana. It specializes in mining, petroleum, and engineering education. UMaT is known for producing skilled professionals in mining engineering, petroleum engineering, and related technical fields.',
-      campus: ['Tarkwa'],
-      studentPopulation: '6,000+',
-      yearEstablished: '2004'
-    },
-    {
-      id: '11',
-      name: 'University for Development Studies',
-      region: 'Northern',
-      type: 'Public',
-      tuitionFee: 'GHS 2,000 - 3,500',
-      admissionCutOff: 'Aggregate 8-30',
-      programs: '55+ Programs',
-      specialization: 'Development Studies',
-      logo: universityLogos['University for Development Studies'],
-      description: 'The University for Development Studies is a public university with campuses in Tamale, Navrongo, and Wa, Ghana. Established in 1992, UDS focuses on development-oriented education and research. The university offers programs in agriculture, health sciences, education, and development studies.',
-      campus: ['Tamale', 'Navrongo', 'Wa'],
-      studentPopulation: '20,000+',
-      yearEstablished: '1992'
-    },
-    {
-      id: '12',
-      name: 'Catholic University of Ghana',
-      region: 'Bono',
-      type: 'Private',
-      tuitionFee: 'GHS 7,500 - 11,000',
-      admissionCutOff: 'Aggregate 12-28',
-      programs: '35+ Programs',
-      specialization: 'Catholic Education',
-      logo: universityLogos['Catholic University of Ghana'],
-      description: 'The Catholic University of Ghana is a private Catholic university located in Fiapre, Sunyani, Ghana. Established in 2003, it offers programs grounded in Catholic values and academic excellence. Programs include Business Administration, Information Technology, Nursing, and Theology.',
-      campus: ['Fiapre'],
-      studentPopulation: '4,000+',
-      yearEstablished: '2003'
-    },
-    {
-      id: '13',
-      name: 'Pentecost University College',
-      region: 'Greater Accra',
-      type: 'Private',
-      tuitionFee: 'GHS 6,000 - 9,500',
-      admissionCutOff: 'Aggregate 14-30',
-      programs: '30+ Programs',
-      specialization: 'Christian Business',
-      logo: universityLogos['Pentecost University College'],
-      description: 'Pentecost University College is a private Christian university located in Sowutuom, Accra, Ghana. It offers undergraduate and postgraduate programs with a focus on Christian values, business, and technology. Programs include Business Administration, Information Technology, and Theology.',
-      campus: ['Sowutuom'],
-      studentPopulation: '3,000+',
-      yearEstablished: '2003'
-    },
-    {
-      id: '14',
-      name: 'University of Energy and Natural Resources',
-      region: 'Bono',
-      type: 'Public',
-      tuitionFee: 'GHS 2,200 - 4,000',
-      admissionCutOff: 'Aggregate 8-26',
-      programs: '20+ Programs',
-      specialization: 'Energy & Environment',
-      logo: universityLogos['University of Energy and Natural Resources'],
-      description: 'The University of Energy and Natural Resources is a public university located in Sunyani, Ghana. Established in 2011, UENR focuses on energy, natural resources, and environmental studies. The university offers programs in renewable energy, environmental science, and natural resource management.',
-      campus: ['Sunyani', 'Dormaa Ahenkro'],
-      studentPopulation: '5,000+',
-      yearEstablished: '2011'
-    },
-    {
-      id: '15',
-      name: 'Accra Institute of Technology',
-      region: 'Greater Accra',
-      type: 'Private',
-      tuitionFee: 'GHS 5,500 - 8,500',
-      admissionCutOff: 'Aggregate 16-30',
-      programs: '20+ Programs',
-      specialization: 'Technology & Engineering',
-      logo: universityLogos['Accra Institute of Technology'],
-      description: 'Accra Institute of Technology is a private university located in Accra, Ghana. It focuses on technology, engineering, and business education. AIT offers programs in computer science, information technology, engineering, and business administration with an emphasis on practical skills and industry relevance.',
-      campus: ['Accra'],
-      studentPopulation: '2,500+',
-      yearEstablished: '2009'
-    },
-  ].sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
-
+  // Filtered universities based on search and filters
   const filteredUniversities = useMemo(() => {
     return universities.filter(uni => {
       const matchesSearch = uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -283,7 +87,7 @@ const Universities: React.FC = () => {
       const matchesType = !selectedType || uni.type === selectedType;
       return matchesSearch && matchesCampus && matchesRegion && matchesType;
     });
-  }, [searchQuery, selectedCampus, selectedRegion, selectedType]);
+  }, [universities, searchQuery, selectedCampus, selectedRegion, selectedType]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredUniversities.length / itemsPerPage);
@@ -1032,6 +836,14 @@ const Universities: React.FC = () => {
     }
   `;
 
+  if (loading) {
+    return (
+      <div className="universities-page">
+        <div style={{ padding: '2rem', textAlign: 'center' }}>Loading universities...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="universities-page">
       <style>{isolatedStyles}</style>
@@ -1156,7 +968,9 @@ const Universities: React.FC = () => {
 
                           <div>
                             <p className="university-description">
-                              {university.description}
+                              {university.description.length > 150 
+                                ? `${university.description.substring(0, 150)}...` 
+                                : university.description}
                             </p>
                             <div className="university-view-profile-wrapper">
                               <Link 

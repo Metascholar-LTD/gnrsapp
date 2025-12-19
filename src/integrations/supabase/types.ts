@@ -83,6 +83,117 @@ export type Database = {
         }
         Relationships: []
       }
+      universities: {
+        Row: {
+          id: string
+          name: string
+          abbreviation: string | null
+          region: string
+          type: string
+          logo: string | null
+          description: string
+          website: string | null
+          campus: string[]
+          student_population: string | null
+          year_established: string | null
+          tuition_fee: string | null
+          admission_cut_off: string | null
+          programs: string | null
+          specialization: string | null
+          full_time_percentage: number | null
+          part_time_percentage: number | null
+          male_percentage: number | null
+          female_percentage: number | null
+          undergraduate_population: string | null
+          acceptance_rate: string | null
+          average_grant_aid: string | null
+          program_enrollment: Json
+          academics: Json
+          financial_aid: Json
+          admissions: Json
+          student_life: Json
+          rankings: Json
+          courses: Json
+          masters_courses: Json
+          photos: string[]
+          contact: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          abbreviation?: string | null
+          region: string
+          type: string
+          logo?: string | null
+          description: string
+          website?: string | null
+          campus?: string[]
+          student_population?: string | null
+          year_established?: string | null
+          tuition_fee?: string | null
+          admission_cut_off?: string | null
+          programs?: string | null
+          specialization?: string | null
+          full_time_percentage?: number | null
+          part_time_percentage?: number | null
+          male_percentage?: number | null
+          female_percentage?: number | null
+          undergraduate_population?: string | null
+          acceptance_rate?: string | null
+          average_grant_aid?: string | null
+          program_enrollment?: Json
+          academics?: Json
+          financial_aid?: Json
+          admissions?: Json
+          student_life?: Json
+          rankings?: Json
+          courses?: Json
+          masters_courses?: Json
+          photos?: string[]
+          contact?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          abbreviation?: string | null
+          region?: string
+          type?: string
+          logo?: string | null
+          description?: string
+          website?: string | null
+          campus?: string[]
+          student_population?: string | null
+          year_established?: string | null
+          tuition_fee?: string | null
+          admission_cut_off?: string | null
+          programs?: string | null
+          specialization?: string | null
+          full_time_percentage?: number | null
+          part_time_percentage?: number | null
+          male_percentage?: number | null
+          female_percentage?: number | null
+          undergraduate_population?: string | null
+          acceptance_rate?: string | null
+          average_grant_aid?: string | null
+          program_enrollment?: Json
+          academics?: Json
+          financial_aid?: Json
+          admissions?: Json
+          student_life?: Json
+          rankings?: Json
+          courses?: Json
+          masters_courses?: Json
+          photos?: string[]
+          contact?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
