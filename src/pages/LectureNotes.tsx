@@ -21,8 +21,6 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Grid3x3,
-  List,
   Bookmark
 } from "lucide-react";
 import {
@@ -77,7 +75,7 @@ const LectureNotes = () => {
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
   const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  // Removed viewMode - only grid view is used
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -133,7 +131,8 @@ const LectureNotes = () => {
       uploadDate: "2024-02-15",
       verified: true,
       pages: 45,
-      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80"
+      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80",
+      fileType: "PDF"
     },
     { 
       id: "2", 
@@ -152,7 +151,8 @@ const LectureNotes = () => {
       uploadDate: "2024-02-10",
       verified: true,
       pages: 32,
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80"
+      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80",
+      fileType: "PDF"
     },
     { 
       id: "3", 
@@ -190,7 +190,8 @@ const LectureNotes = () => {
       uploadDate: "2023-12-18",
       verified: true,
       pages: 58,
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80"
+      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80",
+      fileType: "PDF"
     },
     { 
       id: "5", 
@@ -228,7 +229,8 @@ const LectureNotes = () => {
       uploadDate: "2024-02-20",
       verified: true,
       pages: 42,
-      imageUrl: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&auto=format&fit=crop&q=80"
+      imageUrl: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&auto=format&fit=crop&q=80",
+      fileType: "PDF"
     },
   ];
 
@@ -240,15 +242,59 @@ const LectureNotes = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Recommended notes - top 6 by views
+  const recommendedNotes = useMemo(() => {
+    return [...lectureNotes]
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 6);
+  }, []);
+
   // Get unique values for filters
   const universities = useMemo(() => 
     Array.from(new Set(lectureNotes.map(n => n.universityShort))).sort(),
     []
   );
-  const courses = useMemo(() => 
-    Array.from(new Set(lectureNotes.map(n => n.faculty))).sort(),
-    []
-  );
+  const courses = [
+    "Business",
+    "Mobile",
+    "Social Media",
+    "Marketing",
+    "Technology",
+    "Art & Photos",
+    "Career",
+    "Design",
+    "Education",
+    "Presentations & Public Speaking",
+    "Government & Nonprofit",
+    "Healthcare",
+    "Internet",
+    "Law",
+    "Leadership & Management",
+    "Automotive",
+    "Engineering",
+    "Software",
+    "Recruiting & HR",
+    "Retail",
+    "Sales",
+    "Services",
+    "Science",
+    "Small Business & Entrepreneurship",
+    "Food",
+    "Environment",
+    "Economy & Finance",
+    "Data & Analytics",
+    "Investor Relations",
+    "Sports",
+    "Spiritual",
+    "News & Politics",
+    "Travel",
+    "Self Improvement",
+    "Real Estate",
+    "Entertainment & Humor",
+    "Health & Medicine",
+    "Devices & Hardware",
+    "Lifestyle"
+  ].sort();
   const semesters = ["1st", "2nd"];
 
   // Filtering logic
@@ -263,11 +309,10 @@ const LectureNotes = () => {
       
       const matchesUniversity = !selectedUniversity || note.universityShort === selectedUniversity;
       const matchesCourse = !selectedCourse || note.faculty === selectedCourse;
-      const matchesSemester = !selectedSemester || note.semester === selectedSemester;
       
-      return matchesSearch && matchesUniversity && matchesCourse && matchesSemester;
+      return matchesSearch && matchesUniversity && matchesCourse;
     });
-  }, [debouncedSearchQuery, selectedUniversity, selectedCourse, selectedSemester]);
+  }, [debouncedSearchQuery, selectedUniversity, selectedCourse]);
 
   // Check scroll position for button visibility
   useEffect(() => {
@@ -310,10 +355,9 @@ const LectureNotes = () => {
     setDebouncedSearchQuery("");
     setSelectedUniversity(null);
     setSelectedCourse(null);
-    setSelectedSemester(null);
   }, []);
 
-  const hasActiveFilters = selectedUniversity || selectedCourse || selectedSemester;
+  const hasActiveFilters = selectedUniversity || selectedCourse;
 
   const formatNumber = (num: number): string => {
     if (num >= 1000000) {
@@ -352,20 +396,134 @@ const LectureNotes = () => {
   const isolatedStyles = `
     .lecture-notes-page {
       min-height: 100vh;
-      background: white;
+      background: #f2f4fe;
     }
 
     .lecture-notes-content-wrapper {
       min-height: calc(100vh - 80px);
       display: flex;
       align-items: flex-start;
+      gap: 2rem;
       width: 100%;
+      background: #f2f4fe;
     }
 
     .lecture-notes-main-content {
       flex: 1;
       padding: 2rem;
       min-width: 0;
+    }
+
+    .lecture-notes-recommended-sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      padding: 2rem 1.5rem 2rem 0;
+    }
+
+    .lecture-notes-recommended-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: hsl(220 30% 15%);
+      margin: 0 0 1.5rem 0;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .lecture-notes-recommended-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .lecture-notes-recommended-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .lecture-notes-recommended-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .lecture-notes-recommended-thumbnail {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #f1f5f9;
+    }
+
+    .lecture-notes-recommended-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .lecture-notes-recommended-badge {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 0.125rem;
+      letter-spacing: 0.025em;
+    }
+
+    .lecture-notes-recommended-content {
+      padding: 0.75rem;
+      position: relative;
+    }
+
+    .lecture-notes-recommended-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .lecture-notes-recommended-card-title {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: hsl(220 30% 15%);
+      margin: 0;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .lecture-notes-recommended-bookmark {
+      flex-shrink: 0;
+      padding: 0.25rem;
+      cursor: pointer;
+      color: hsl(220 20% 60%);
+      transition: color 0.2s;
+    }
+
+    .lecture-notes-recommended-bookmark:hover {
+      color: hsl(220 30% 15%);
+    }
+
+    .lecture-notes-recommended-author {
+      font-size: 0.75rem;
+      color: hsl(220 20% 40%);
+      margin: 0 0 0.375rem 0;
+    }
+
+    .lecture-notes-recommended-stats {
+      font-size: 0.6875rem;
+      color: hsl(220 20% 50%);
+      margin: 0;
     }
 
     .lecture-notes-header {
@@ -382,7 +540,7 @@ const LectureNotes = () => {
     }
 
     .lecture-notes-subtitle {
-      font-size: 16px;
+      font-size: 13px;
       color: hsl(220 20% 40%);
       margin: 0 0 1.5rem 0;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
@@ -617,6 +775,20 @@ const LectureNotes = () => {
     }
 
     @media (max-width: 1024px) {
+      .lecture-notes-content-wrapper {
+        flex-direction: column;
+      }
+
+      .lecture-notes-recommended-sidebar {
+        width: 100%;
+        padding: 2rem 1.5rem 0 1.5rem;
+      }
+
+      .lecture-notes-recommended-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
       .lecture-notes-grid-container {
         padding: 0 20px;
       }
@@ -930,11 +1102,26 @@ const LectureNotes = () => {
       .lecture-notes-content-wrapper {
         padding-top: 60px;
         flex-direction: column;
+        gap: 1.5rem;
       }
 
       .lecture-notes-main-content {
         padding: 1rem;
         width: 100%;
+      }
+
+      .lecture-notes-recommended-sidebar {
+        padding: 0 1rem;
+      }
+
+      .lecture-notes-recommended-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .lecture-notes-recommended-title {
+        font-size: 1.125rem;
+        margin-bottom: 1rem;
       }
 
       .lecture-notes-header {
@@ -947,7 +1134,7 @@ const LectureNotes = () => {
       }
 
       .lecture-notes-subtitle {
-        font-size: 14px;
+        font-size: 12px;
         margin-bottom: 1.25rem;
         line-height: 1.5;
       }
@@ -1062,10 +1249,21 @@ const LectureNotes = () => {
     @media (min-width: 768px) and (max-width: 1199px) {
       .lecture-notes-content-wrapper {
         padding-top: 70px;
+        flex-direction: column;
       }
 
       .lecture-notes-main-content {
         padding: 1.5rem;
+      }
+
+      .lecture-notes-recommended-sidebar {
+        width: 100%;
+        padding: 0 1.5rem;
+      }
+
+      .lecture-notes-recommended-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
       }
 
       .lecture-notes-header {
@@ -1078,7 +1276,7 @@ const LectureNotes = () => {
       }
 
       .lecture-notes-subtitle {
-        font-size: 17px;
+        font-size: 13px;
         margin-bottom: 1.75rem;
       }
 
@@ -1120,6 +1318,11 @@ const LectureNotes = () => {
         padding: 2rem;
       }
 
+      .lecture-notes-recommended-sidebar {
+        width: 300px;
+        padding: 2rem 1.5rem 2rem 0;
+      }
+
       .lecture-notes-header {
         margin-bottom: 2.5rem;
       }
@@ -1130,7 +1333,7 @@ const LectureNotes = () => {
       }
 
       .lecture-notes-subtitle {
-        font-size: 18px;
+        font-size: 14px;
         margin-bottom: 2rem;
       }
 
@@ -1158,6 +1361,11 @@ const LectureNotes = () => {
         padding: 2rem clamp(2rem, 5vw, 4rem);
       }
 
+      .lecture-notes-recommended-sidebar {
+        width: 340px;
+        padding: 2rem 2rem 2rem 0;
+      }
+
       .lecture-notes-header {
         margin-bottom: 3rem;
       }
@@ -1168,7 +1376,7 @@ const LectureNotes = () => {
       }
 
       .lecture-notes-subtitle {
-        font-size: 18px;
+        font-size: 14px;
         margin-bottom: 2rem;
       }
 
@@ -1250,13 +1458,13 @@ const LectureNotes = () => {
                 </div>
 
                 <div className="lecture-notes-filter-group">
-                  <label className="lecture-notes-filter-label">Course</label>
+                  <label className="lecture-notes-filter-label">Field</label>
                   <Select
                     value={selectedCourse ?? ""}
                     onValueChange={(value) => setSelectedCourse(value || null)}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All Courses" />
+                      <SelectValue placeholder="All Fields" />
                     </SelectTrigger>
                     <SelectContent>
                       {courses.map((course) => (
@@ -1268,24 +1476,6 @@ const LectureNotes = () => {
                   </Select>
                 </div>
 
-                <div className="lecture-notes-filter-group">
-                  <label className="lecture-notes-filter-label">Semester</label>
-                  <Select
-                    value={selectedSemester ?? ""}
-                    onValueChange={(value) => setSelectedSemester(value || null)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All Semesters" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {semesters.map((sem) => (
-                        <SelectItem key={sem} value={sem}>
-                          {sem}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
             </div>
 
@@ -1377,7 +1567,7 @@ const LectureNotes = () => {
                             <span className="hidden md:inline text-sm">Filters</span>
                             {hasActiveFilters && (
                               <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
-                                {[selectedUniversity, selectedCourse, selectedSemester].filter(Boolean).length}
+                                {[selectedUniversity, selectedCourse].filter(Boolean).length}
                               </span>
                             )}
                           </Button>
@@ -1389,28 +1579,8 @@ const LectureNotes = () => {
                         <span className="font-semibold text-[hsl(220_30%_15%)]">{filteredNotes.length}</span>{" "}
                         {filteredNotes.length === 1 ? "note" : "notes"} found
                       </div>
-                      <div className="lecture-notes-view-toggle">
-                        <span className="lecture-notes-results-count-mobile">
-                          <span>{filteredNotes.length}</span> {filteredNotes.length === 1 ? "note" : "notes"}
-                        </span>
-                        <div style={{ display: 'flex', gap: '0.25rem' }}>
-                          <button
-                            className={`lecture-notes-view-button ${viewMode === "grid" ? "active" : ""}`}
-                            onClick={() => setViewMode("grid")}
-                            title="Grid View"
-                            type="button"
-                          >
-                            <Grid3x3 size={18} />
-                          </button>
-                          <button
-                            className={`lecture-notes-view-button ${viewMode === "list" ? "active" : ""}`}
-                            onClick={() => setViewMode("list")}
-                            title="List View"
-                            type="button"
-                          >
-                            <List size={18} />
-                          </button>
-                        </div>
+                      <div className="lecture-notes-results-count-mobile">
+                        <span>{filteredNotes.length}</span> {filteredNotes.length === 1 ? "note" : "notes"}
                       </div>
                     </div>
                   </div>
@@ -1440,16 +1610,6 @@ const LectureNotes = () => {
                         </Badge>
                       )}
                       
-                      {selectedSemester && (
-                        <Badge className="px-3 py-1.5 flex items-center gap-2 bg-green-600 text-white">
-                          {selectedSemester}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
-                            onClick={() => setSelectedSemester(null)}
-                          />
-                        </Badge>
-                      )}
-
                       <Button 
                         variant="ghost" 
                         size="sm"
@@ -1481,66 +1641,6 @@ const LectureNotes = () => {
                   >
                     Clear All Filters
                   </Button>
-                </div>
-              ) : viewMode === "list" ? (
-                <div className="lecture-notes-list-view">
-                  {filteredNotes.map((note) => (
-                    <motion.div
-                      key={note.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="lecture-notes-list-item"
-                    >
-                      <div className="lecture-notes-list-item-title">
-                        {note.courseName || note.title}
-                      </div>
-                      <div className="lecture-notes-list-item-actions">
-                        <button
-                          type="button"
-                          onClick={() => console.log('Preview:', note.id)}
-                          className="group relative inline-block text-sm font-medium text-[hsl(220_30%_15%)] transition-colors duration-300 hover:text-[hsl(220_20%_40%)]"
-                        >
-                          <motion.span
-                            className="relative inline-block pb-1 flex items-center gap-1.5"
-                            whileHover={{ x: 2 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                          >
-                            <Eye className="w-4 h-4" />
-                            View
-                            <span
-                              className="absolute bottom-0 left-0 h-[2px] bg-[#60a5fa] transition-all duration-300 group-hover:bg-[#3b82f6]"
-                              style={{
-                                width: 'calc(100% + 14px)',
-                                clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
-                              }}
-                            />
-                          </motion.span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => console.log('Download:', note.id)}
-                          className="group relative inline-block text-sm font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
-                        >
-                          <motion.span
-                            className="relative inline-block pb-1 flex items-center gap-1.5"
-                            whileHover={{ x: 2 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                          >
-                            <Download className="w-4 h-4" />
-                            Download
-                            <span
-                              className="absolute bottom-0 left-0 h-[2px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
-                              style={{
-                                width: 'calc(100% + 14px)',
-                                clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
-                              }}
-                            />
-                          </motion.span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
                 </div>
               ) : (
                 <div className="lecture-notes-grid-container">
@@ -1580,7 +1680,7 @@ const LectureNotes = () => {
                             <div className="flex-1 flex flex-col justify-between p-2.5 min-w-0">
                               {/* Top Section: Title and Bookmark */}
                               <div className="flex items-start justify-between gap-2 mb-1.5">
-                                <h3 className="text-xs font-semibold text-slate-900 line-clamp-2 leading-snug flex-1 group-hover:text-blue-600 transition-colors">
+                                <h3 className="text-xs font-semibold text-slate-900 line-clamp-2 leading-snug flex-1">
                                   {note.title}
                                 </h3>
                                 <button
@@ -1704,6 +1804,57 @@ const LectureNotes = () => {
               )}
             </div>
           </div>
+
+          {/* Recommended Section */}
+          <aside className="lecture-notes-recommended-sidebar">
+            <h2 className="lecture-notes-recommended-title">Recommended</h2>
+            <div className="lecture-notes-recommended-grid">
+              {recommendedNotes.map((note) => (
+                <motion.div
+                  key={note.id}
+                  className="lecture-notes-recommended-card"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  whileHover={{ y: -2 }}
+                  onClick={() => console.log('View recommended:', note.id)}
+                >
+                  <div className="lecture-notes-recommended-thumbnail">
+                    <img
+                      src={note.imageUrl || "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&auto=format&fit=crop&q=80"}
+                      alt={note.title}
+                    />
+                    <div className="lecture-notes-recommended-badge">
+                      {note.fileType || (note.fileSize?.toLowerCase().includes('pdf') ? 'PDF' : 'PPTX')}
+                    </div>
+                  </div>
+                  <div className="lecture-notes-recommended-content">
+                    <div className="lecture-notes-recommended-card-header">
+                      <h3 className="lecture-notes-recommended-card-title">
+                        {note.title}
+                      </h3>
+                      <button
+                        className="lecture-notes-recommended-bookmark"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('Bookmark:', note.id);
+                        }}
+                        title="Save"
+                      >
+                        <Bookmark className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <p className="lecture-notes-recommended-author">
+                      by {note.lecturer}
+                    </p>
+                    <p className="lecture-notes-recommended-stats">
+                      {note.pages} slides • {formatNumber(note.views)} views
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </aside>
         </div>
       </div>
 
