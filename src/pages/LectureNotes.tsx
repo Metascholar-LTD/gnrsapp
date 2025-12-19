@@ -82,6 +82,15 @@ const LectureNotes = () => {
   const [carouselScrollStates, setCarouselScrollStates] = useState<Record<number, { canScrollLeft: boolean; canScrollRight: boolean }>>({});
   const scrollContainerRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
+  // Auto-collapse sidebar on smaller desktop sizes (1200px - 1599px) on initial load
+  useEffect(() => {
+    const width = window.innerWidth;
+    // On smaller desktop (1200-1599px), collapse by default
+    if (width >= 1200 && width < 1600) {
+      setIsFilterSidebarCollapsed(true);
+    }
+  }, []);
+
 
   // Mock lecture notes data with images
   const lectureNotes: LectureNote[] = [
