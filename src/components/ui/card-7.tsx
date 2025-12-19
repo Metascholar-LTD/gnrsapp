@@ -136,8 +136,6 @@ export const ExamPaperCard = React.forwardRef<HTMLDivElement, ExamPaperCardProps
                 <Calendar className="w-4 h-4" />
                 <span>{semester} Semester, {year}</span>
               </div>
-              <span className="text-[hsl(220_15%_60%)]">•</span>
-              <span className="text-xs">{fileSize}</span>
             </div>
 
             <div className="mt-auto flex items-center justify-end gap-6">

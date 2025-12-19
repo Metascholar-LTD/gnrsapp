@@ -1316,7 +1316,7 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
             <div style={{ 
               background: "#ffffff", 
               border: "1px solid #e5e7eb", 
-              borderRadius: "0.5rem",
+              borderRadius: "0.5rem", 
               overflow: "hidden"
             }}>
               {(formData.programEnrollment || []).length === 0 ? (
@@ -1352,8 +1352,8 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                   </div>
                   {/* Program Rows */}
                   {(formData.programEnrollment || []).map((program, index) => {
-                    const availableColors = getAvailableColorsForProgram(index);
-                    return (
+                  const availableColors = getAvailableColorsForProgram(index);
+                  return (
                       <div 
                         key={index}
                         className="ude-program-table-row"
@@ -1368,15 +1368,15 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.background = "#f9fafb"}
                         onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-                      >
+                          >
                         <div style={{ fontSize: "0.875rem", color: "#6b7280", fontWeight: 500 }}>
                           {index + 1}
                         </div>
-                        <input
-                          type="text"
-                          value={program.label}
-                          onChange={(e) => updateProgramEnrollment(index, "label", e.target.value)}
-                          className="ude-form-input"
+                          <input
+                            type="text"
+                            value={program.label}
+                            onChange={(e) => updateProgramEnrollment(index, "label", e.target.value)}
+                            className="ude-form-input"
                           placeholder="Enter program name"
                           style={{ 
                             padding: "0.5rem 0.625rem",
@@ -1384,53 +1384,53 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                             margin: 0
                           }}
                         />
-                        <input
-                          type="number"
-                          value={program.percentage}
-                          onChange={(e) => updateProgramEnrollment(index, "percentage", Number(e.target.value))}
-                          className="ude-form-input"
+                          <input
+                            type="number"
+                            value={program.percentage}
+                            onChange={(e) => updateProgramEnrollment(index, "percentage", Number(e.target.value))}
+                            className="ude-form-input"
                           placeholder="0"
-                          min="0"
-                          max="100"
+                            min="0"
+                            max="100"
                           style={{ 
                             padding: "0.5rem 0.625rem",
                             fontSize: "0.875rem",
                             margin: 0
                           }}
-                        />
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                          <div style={{
+                          />
+                          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                            <div style={{
                             width: "24px",
                             height: "24px",
-                            backgroundColor: program.color,
+                              backgroundColor: program.color,
                             borderRadius: "0.25rem",
-                            border: "1px solid #d1d5db",
-                            flexShrink: 0
-                          }} />
-                          <select
-                            value={program.color}
-                            onChange={(e) => updateProgramEnrollment(index, "color", e.target.value)}
-                            className="ude-form-select"
+                              border: "1px solid #d1d5db",
+                              flexShrink: 0
+                            }} />
+                            <select
+                              value={program.color}
+                              onChange={(e) => updateProgramEnrollment(index, "color", e.target.value)}
+                              className="ude-form-select"
                             style={{ 
                               flex: 1,
                               padding: "0.5rem 0.625rem",
                               fontSize: "0.875rem",
                               margin: 0
                             }}
-                          >
-                            {availableColors.length === 0 ? (
-                              <option value={program.color}>
+                            >
+                              {availableColors.length === 0 ? (
+                                <option value={program.color}>
                                 {availableColors.find(c => c.value === program.color)?.name || "No colors"}
-                              </option>
-                            ) : (
-                              availableColors.map((color) => (
-                                <option key={color.value} value={color.value}>
-                                  {color.name}
                                 </option>
-                              ))
-                            )}
-                          </select>
-                        </div>
+                              ) : (
+                                availableColors.map((color) => (
+                                  <option key={color.value} value={color.value}>
+                                    {color.name}
+                                  </option>
+                                ))
+                              )}
+                            </select>
+                          </div>
                         <button
                           className="ude-icon-btn ude-icon-btn-danger"
                           onClick={() => removeProgramEnrollment(index)}
@@ -1439,8 +1439,8 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                         >
                           <Trash2 size={12} />
                         </button>
-                      </div>
-                    );
+                    </div>
+                  );
                   })}
                 </>
               )}
@@ -1737,70 +1737,70 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                             </div>
                           </div>
                           <div className="ude-item-card-actions" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              className="ude-icon-btn"
-                              onClick={() => {
-                                setEditingCourse({ college, level: 'undergraduate' });
-                                setNewCourseName("");
+                      <button
+                        className="ude-icon-btn"
+                        onClick={() => {
+                          setEditingCourse({ college, level: 'undergraduate' });
+                          setNewCourseName("");
                                 if (!isExpanded) toggleCollege(college);
-                              }}
+                        }}
                               title="Add course"
-                            >
-                              <Plus size={14} />
-                            </button>
-                            <button
-                              className="ude-icon-btn ude-icon-btn-danger"
-                              onClick={() => {
-                                const newCourses = { ...formData.courses };
-                                delete newCourses[college];
-                                setFormData(prev => ({ ...prev, courses: newCourses }));
+                      >
+                        <Plus size={14} />
+                      </button>
+                      <button
+                        className="ude-icon-btn ude-icon-btn-danger"
+                        onClick={() => {
+                          const newCourses = { ...formData.courses };
+                          delete newCourses[college];
+                          setFormData(prev => ({ ...prev, courses: newCourses }));
                                 setExpandedColleges(prev => {
                                   const newSet = new Set(prev);
                                   newSet.delete(college);
                                   return newSet;
                                 });
-                              }}
+                        }}
                               title="Delete college"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
 
                         {isExpanded && (
                           <div style={{ padding: "1rem", borderTop: "1px solid #e5e7eb" }}>
-                            {editingCourse?.college === college && editingCourse.level === 'undergraduate' && (
+                  {editingCourse?.college === college && editingCourse.level === 'undergraduate' && (
                               <div className="ude-array-input-group" style={{ marginBottom: "1rem" }}>
-                                <input
-                                  type="text"
-                                  className="ude-form-input ude-array-input"
-                                  placeholder="Enter course name..."
-                                  value={newCourseName}
-                                  onChange={(e) => setNewCourseName(e.target.value)}
-                                  onKeyPress={(e) => {
-                                    if (e.key === "Enter") {
-                                      e.preventDefault();
-                                      addCourse(college);
-                                    }
-                                  }}
+                      <input
+                        type="text"
+                        className="ude-form-input ude-array-input"
+                        placeholder="Enter course name..."
+                        value={newCourseName}
+                        onChange={(e) => setNewCourseName(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addCourse(college);
+                          }
+                        }}
                                   autoFocus
-                                />
-                                <button
-                                  className="ude-btn ude-btn-primary"
-                                  onClick={() => addCourse(college)}
-                                  style={{ padding: "0.5rem 1rem" }}
-                                >
-                                  Add
-                                </button>
-                                <button
-                                  className="ude-btn ude-btn-secondary"
-                                  onClick={() => setEditingCourse(null)}
-                                  style={{ padding: "0.5rem 1rem" }}
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            )}
+                      />
+                      <button
+                        className="ude-btn ude-btn-primary"
+                        onClick={() => addCourse(college)}
+                        style={{ padding: "0.5rem 1rem" }}
+                      >
+                        Add
+                      </button>
+                      <button
+                        className="ude-btn ude-btn-secondary"
+                        onClick={() => setEditingCourse(null)}
+                        style={{ padding: "0.5rem 1rem" }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
 
                             {courseCount === 0 ? (
                               <div style={{ 
@@ -1819,7 +1819,7 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                                 gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", 
                                 gap: "0.5rem" 
                               }}>
-                                {courses.map((course, courseIndex) => (
+                    {courses.map((course, courseIndex) => (
                                   <div 
                                     key={courseIndex} 
                                     style={{
@@ -1840,19 +1840,19 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                                     }}>
                                       {course}
                                     </span>
-                                    <button
-                                      className="ude-icon-btn ude-icon-btn-danger"
-                                      onClick={() => removeCourse(college, courseIndex)}
+                        <button
+                          className="ude-icon-btn ude-icon-btn-danger"
+                          onClick={() => removeCourse(college, courseIndex)}
                                       style={{ flexShrink: 0 }}
                                       title="Remove course"
-                                    >
+                        >
                                       <Trash2 size={12} />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                             )}
-                          </div>
+                </div>
                         )}
                       </div>
                     );
@@ -1944,22 +1944,22 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                             </div>
                           </div>
                           <div className="ude-item-card-actions" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              className="ude-icon-btn"
+                      <button
+                        className="ude-icon-btn"
                               onClick={() => {
                                 addDepartment(college);
                                 if (!isCollegeExpanded) toggleCollege(college);
                               }}
                               title="Add department"
-                            >
-                              <Plus size={14} />
-                            </button>
-                            <button
-                              className="ude-icon-btn ude-icon-btn-danger"
-                              onClick={() => {
-                                const newMastersCourses = { ...formData.mastersCourses };
-                                delete newMastersCourses[college];
-                                setFormData(prev => ({ ...prev, mastersCourses: newMastersCourses }));
+                      >
+                        <Plus size={14} />
+                      </button>
+                      <button
+                        className="ude-icon-btn ude-icon-btn-danger"
+                        onClick={() => {
+                          const newMastersCourses = { ...formData.mastersCourses };
+                          delete newMastersCourses[college];
+                          setFormData(prev => ({ ...prev, mastersCourses: newMastersCourses }));
                                 setExpandedColleges(prev => {
                                   const newSet = new Set(prev);
                                   newSet.delete(college);
@@ -1970,13 +1970,13 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                                   newMap.delete(college);
                                   return newMap;
                                 });
-                              }}
+                        }}
                               title="Delete college"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
 
                         {isCollegeExpanded && (
                           <div style={{ padding: "1rem", borderTop: "1px solid #e5e7eb" }}>
@@ -2045,29 +2045,29 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                                           </div>
                                         </div>
                                         <div className="ude-item-card-actions" onClick={(e) => e.stopPropagation()}>
-                                          <button
-                                            className="ude-icon-btn"
-                                            onClick={() => {
-                                              setEditingCourse({ college, department, level: 'masters' });
-                                              setNewCourseName("");
+                          <button
+                            className="ude-icon-btn"
+                            onClick={() => {
+                              setEditingCourse({ college, department, level: 'masters' });
+                              setNewCourseName("");
                                               if (!isDeptExpanded) toggleDepartment(college, department);
-                                            }}
+                            }}
                                             title="Add course"
-                                          >
-                                            <Plus size={14} />
-                                          </button>
-                                          <button
-                                            className="ude-icon-btn ude-icon-btn-danger"
-                                            onClick={() => {
-                                              const newDepts = { ...formData.mastersCourses?.[college] };
-                                              delete newDepts[department];
-                                              setFormData(prev => ({
-                                                ...prev,
-                                                mastersCourses: {
-                                                  ...(prev.mastersCourses || {}),
-                                                  [college]: newDepts,
-                                                },
-                                              }));
+                          >
+                            <Plus size={14} />
+                          </button>
+                          <button
+                            className="ude-icon-btn ude-icon-btn-danger"
+                            onClick={() => {
+                              const newDepts = { ...formData.mastersCourses?.[college] };
+                              delete newDepts[department];
+                              setFormData(prev => ({
+                                ...prev,
+                                mastersCourses: {
+                                  ...(prev.mastersCourses || {}),
+                                  [college]: newDepts,
+                                },
+                              }));
                                               setExpandedDepartments(prev => {
                                                 const newMap = new Map(prev);
                                                 const deptSet = newMap.get(college) || new Set();
@@ -2076,48 +2076,48 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                                                 newMap.set(college, newDeptSet);
                                                 return newMap;
                                               });
-                                            }}
+                            }}
                                             title="Delete department"
-                                          >
-                                            <Trash2 size={14} />
-                                          </button>
-                                        </div>
-                                      </div>
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
 
                                       {isDeptExpanded && (
                                         <div style={{ padding: "0.875rem", borderTop: "1px solid #e5e7eb" }}>
-                                          {editingCourse?.college === college && editingCourse.department === department && (
+                      {editingCourse?.college === college && editingCourse.department === department && (
                                             <div className="ude-array-input-group" style={{ marginBottom: "1rem" }}>
-                                              <input
-                                                type="text"
-                                                className="ude-form-input ude-array-input"
-                                                placeholder="Enter course name..."
-                                                value={newCourseName}
-                                                onChange={(e) => setNewCourseName(e.target.value)}
-                                                onKeyPress={(e) => {
-                                                  if (e.key === "Enter") {
-                                                    e.preventDefault();
-                                                    addCourse(college, department);
-                                                  }
-                                                }}
+                          <input
+                            type="text"
+                            className="ude-form-input ude-array-input"
+                            placeholder="Enter course name..."
+                            value={newCourseName}
+                            onChange={(e) => setNewCourseName(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                addCourse(college, department);
+                              }
+                            }}
                                                 autoFocus
-                                              />
-                                              <button
-                                                className="ude-btn ude-btn-primary"
-                                                onClick={() => addCourse(college, department)}
-                                                style={{ padding: "0.5rem 1rem" }}
-                                              >
-                                                Add
-                                              </button>
-                                              <button
-                                                className="ude-btn ude-btn-secondary"
-                                                onClick={() => setEditingCourse(null)}
-                                                style={{ padding: "0.5rem 1rem" }}
-                                              >
-                                                Cancel
-                                              </button>
-                                            </div>
-                                          )}
+                          />
+                          <button
+                            className="ude-btn ude-btn-primary"
+                            onClick={() => addCourse(college, department)}
+                            style={{ padding: "0.5rem 1rem" }}
+                          >
+                            Add
+                          </button>
+                          <button
+                            className="ude-btn ude-btn-secondary"
+                            onClick={() => setEditingCourse(null)}
+                            style={{ padding: "0.5rem 1rem" }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      )}
 
                                           {courseCount === 0 ? (
                                             <div style={{ 
@@ -2136,7 +2136,7 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                                               gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", 
                                               gap: "0.5rem" 
                                             }}>
-                                              {courses.map((course, courseIndex) => (
+                        {courses.map((course, courseIndex) => (
                                                 <div 
                                                   key={courseIndex} 
                                                   style={{
@@ -2157,21 +2157,21 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                                                   }}>
                                                     {course}
                                                   </span>
-                                                  <button
-                                                    className="ude-icon-btn ude-icon-btn-danger"
-                                                    onClick={() => removeCourse(college, courseIndex, department)}
+                            <button
+                              className="ude-icon-btn ude-icon-btn-danger"
+                              onClick={() => removeCourse(college, courseIndex, department)}
                                                     style={{ flexShrink: 0 }}
                                                     title="Remove course"
-                                                  >
+                            >
                                                     <Trash2 size={12} />
-                                                  </button>
-                                                </div>
-                                              ))}
-                                            </div>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                                           )}
-                                        </div>
+                    </div>
                                       )}
-                                    </div>
+                </div>
                                   );
                                 })}
                               </div>
@@ -2243,7 +2243,7 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                   fontSize: "0.875rem"
                 }}>
                   No photos added yet. Click "Upload Photo" or "Add URL" to get started.
-                </div>
+            </div>
               ) : (
                 <>
                   {/* Table Header */}
@@ -2266,7 +2266,7 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                     <div></div>
                   </div>
                   {/* Photo Rows */}
-                  {(formData.photos || []).map((photo, index) => (
+                {(formData.photos || []).map((photo, index) => (
                     <div 
                       key={index}
                       className="ude-photo-table-row"
@@ -2329,16 +2329,16 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                       />
                       <button
                         className="ude-icon-btn ude-icon-btn-danger"
-                        onClick={() => removeArrayItem("photos", index)}
+                      onClick={() => removeArrayItem("photos", index)}
                         style={{ width: "28px", height: "28px" }}
                         title="Remove photo"
-                      >
+                    >
                         <Trash2 size={12} />
                       </button>
-                    </div>
-                  ))}
+                  </div>
+                ))}
                 </>
-              )}
+            )}
             </div>
           </div>
         </div>
@@ -2397,7 +2397,7 @@ const UniversityDetailEditor: React.FC<UniversityDetailEditorProps> = ({
                   className="ude-form-input"
                   placeholder="https://facebook.com/university"
                 />
-              </div>
+        </div>
 
               <div className="ude-form-group">
                 <label className="ude-form-label">Twitter URL</label>

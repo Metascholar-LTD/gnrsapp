@@ -1432,7 +1432,6 @@ const PastQuestionsManager = () => {
                     </>
                   )}
                 </span>
-                <span style={{ fontSize: "0.6875rem", color: "#9ca3af" }}>{formatFileSize(question.fileSize)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.6875rem", color: "#6b7280", marginBottom: "0.75rem", padding: "0.5rem", background: "#f9fafb", borderRadius: "0.25rem" }}>
                 <span>📥 {question.downloads.toLocaleString()}</span>
