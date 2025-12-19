@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import feather from "feather-icons";
 import { MEDIA_QUERIES } from "@/lib/breakpoints";
 import { 
@@ -14,6 +14,40 @@ import PastQuestionsManager from "./components/PastQuestionsManager";
 
 const AdminEducationHub = () => {
   const [activeTab, setActiveTab] = useState("university-past-questions");
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const spacerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Handle sticky tabs spacing - account for navbar
+    const handleScroll = () => {
+      if (!tabsContainerRef.current || !spacerRef.current) return;
+      
+      // Get navbar height
+      const navbar = document.querySelector('#admin-scope .navbar');
+      const navbarHeight = navbar ? navbar.getBoundingClientRect().height : 0;
+      
+      const rect = tabsContainerRef.current.getBoundingClientRect();
+      const isSticky = rect.top <= navbarHeight;
+      
+      if (isSticky) {
+        tabsContainerRef.current.classList.add('sticky-active');
+        spacerRef.current.style.height = `${rect.height}px`;
+      } else {
+        tabsContainerRef.current.classList.remove('sticky-active');
+        spacerRef.current.style.height = '0px';
+      }
+    };
+
+    // Use the content area's scroll event instead of window
+    const contentArea = document.querySelector('#admin-scope .content');
+    if (contentArea) {
+      contentArea.addEventListener('scroll', handleScroll);
+      handleScroll(); // Check initial state
+      return () => contentArea.removeEventListener('scroll', handleScroll);
+    }
+    
+    return () => {};
+  }, []);
 
   useEffect(() => {
     // Replace feather icons after render
@@ -84,6 +118,7 @@ const AdminEducationHub = () => {
     #aeh-wrapper {
       width: 100%;
       padding: 0;
+      margin: 0;
       background: #f5f5f5;
       min-height: 100vh;
     }
@@ -93,6 +128,7 @@ const AdminEducationHub = () => {
       background: #000000;
       color: white;
       border-bottom: 3px solid #dc2626;
+      margin: 0;
     }
 
     #aeh-header-content {
@@ -121,6 +157,7 @@ const AdminEducationHub = () => {
       background: #ffffff;
       border-bottom: 2px solid #e5e5e5;
       padding: 1.5rem 2rem;
+      margin: 0;
     }
 
     #aeh-section-header-content {
@@ -155,9 +192,20 @@ const AdminEducationHub = () => {
       scrollbar-width: thin;
       scrollbar-color: #cbd5e1 #f1f5f9;
       position: sticky;
-      top: 0;
+      top: -20px; /* Account for content area padding */
+      margin-top: 0;
+      margin-left: -20px;
+      margin-right: -20px;
+      padding-left: calc(20px + 2rem);
+      padding-right: calc(20px + 2rem);
       z-index: 50;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* When sticky, ensure it's right at the top */
+    #aeh-tabs-container.sticky-active {
+      top: -20px;
+      margin-top: 0;
     }
 
     #aeh-tabs-container::-webkit-scrollbar {
@@ -216,10 +264,24 @@ const AdminEducationHub = () => {
       color: #0066cc;
     }
 
+    #aeh-tabs-spacer {
+      height: 0;
+      transition: height 0.2s ease;
+      background-color: #f5f5f5;
+      margin: 0;
+    }
+    
     #aeh-content {
       padding: 2rem;
       background-color: #f5f5f5;
-      padding-top: calc(2rem + 60px); /* Add padding to account for sticky tabs height */
+      margin: 0;
+      padding-top: 2rem;
+    }
+    
+    /* Remove default content padding for this page */
+    #admin-scope .content #aeh-wrapper {
+      margin: -20px;
+      padding: 0;
     }
 
     #aeh-content-wrapper {
@@ -576,7 +638,7 @@ const AdminEducationHub = () => {
         </div>
       </div>
       
-      <div id="aeh-tabs-container">
+      <div id="aeh-tabs-container" ref={tabsContainerRef}>
         {tabs.map((tab) => {
           const IconComponent = tab.icon;
           return (
@@ -593,6 +655,8 @@ const AdminEducationHub = () => {
           );
         })}
       </div>
+      
+      <div id="aeh-tabs-spacer" ref={spacerRef}></div>
       
       <div id="aeh-content">
         <div id="aeh-content-wrapper">
