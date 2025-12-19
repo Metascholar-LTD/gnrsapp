@@ -985,7 +985,7 @@ const Universities: React.FC = () => {
                                   Read More
                                   <span className="university-view-profile-link-underline" />
                                 </motion.span>
-                              </Link>
+                            </Link>
                             </div>
                           </div>
 

@@ -1138,20 +1138,13 @@ const PastQuestionsManager = () => {
           <p className="pqm-stat-label">Total Downloads</p>
           <p className="pqm-stat-value">{stats.totalDownloads.toLocaleString()}</p>
         </div>
-        <div className="pqm-stat-card">
-          <div className="pqm-stat-icon" style={{ background: "#e0e7ff" }}>
-            <Eye size={24} color="#6366f1" />
-          </div>
-          <p className="pqm-stat-label">Total Views</p>
-          <p className="pqm-stat-value">{stats.totalViews.toLocaleString()}</p>
-        </div>
-        <div className="pqm-stat-card">
-          <div className="pqm-stat-icon" style={{ background: "#fce7f3" }}>
-            <TrendingUp size={24} color="#ec4899" />
-          </div>
-          <p className="pqm-stat-label">Total Size</p>
-          <p className="pqm-stat-value">{formatFileSize(stats.totalSize)}</p>
-        </div>
+         <div className="pqm-stat-card">
+           <div className="pqm-stat-icon" style={{ background: "#e0e7ff" }}>
+             <Eye size={24} color="#6366f1" />
+           </div>
+           <p className="pqm-stat-label">Total Views</p>
+           <p className="pqm-stat-value">{stats.totalViews.toLocaleString()}</p>
+         </div>
       </div>
 
       {/* Controls */}
