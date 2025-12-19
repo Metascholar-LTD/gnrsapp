@@ -10,6 +10,7 @@ import {
   Book,
   BookOpen
 } from "lucide-react";
+import PastQuestionsManager from "./components/PastQuestionsManager";
 
 const AdminEducationHub = () => {
   const [activeTab, setActiveTab] = useState("university-past-questions");
@@ -218,6 +219,7 @@ const AdminEducationHub = () => {
     #aeh-content {
       padding: 2rem;
       background-color: #f5f5f5;
+      padding-top: calc(2rem + 60px); /* Add padding to account for sticky tabs height */
     }
 
     #aeh-content-wrapper {
@@ -518,6 +520,11 @@ const AdminEducationHub = () => {
   const renderTabContent = (tabId: string) => {
     const tab = tabs.find(t => t.id === tabId);
     if (!tab) return null;
+
+    // Render PastQuestionsManager for university past questions
+    if (tabId === "university-past-questions") {
+      return <PastQuestionsManager />;
+    }
 
     const IconComponent = tab.icon;
 

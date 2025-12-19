@@ -35,12 +35,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ExamPaper {
   id: string;
   title: string;
   courseCode: string;
-  courseName: string;
+  courseName: string; // Kept for backward compatibility but will use title
   faculty: string;
   year: number;
   semester: "1st" | "2nd";
@@ -52,7 +53,39 @@ interface ExamPaper {
   fileSize: string;
   uploadDate: string;
   verified: boolean;
+  fileUrl?: string; // For PDF download/preview
 }
+
+// Helper function to format file size from bytes to string
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+};
+
+// Transform Supabase data to ExamPaper format
+const transformFromSupabase = (data: any): ExamPaper => {
+  return {
+    id: data.id,
+    title: data.title || "",
+    courseCode: data.course_code || "",
+    courseName: data.title || "", // Use title as courseName for compatibility
+    faculty: data.faculty || "",
+    year: data.year || new Date().getFullYear(),
+    semester: data.semester || "1st",
+    university: data.university || "",
+    universityShort: data.university_short || "",
+    examType: data.exam_type || "End of Semester",
+    downloads: data.downloads || 0,
+    views: data.views || 0,
+    fileSize: formatFileSize(data.file_size || 0),
+    uploadDate: data.upload_date || data.created_at?.split('T')[0] || "",
+    verified: data.verified || false,
+    fileUrl: data.file_url || "",
+  };
+};
 
 // University logo mapping
 const universityLogos: Record<string, string> = {
@@ -81,10 +114,118 @@ const PastQuestions = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list" | "grouped">("grouped");
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedUniversities, setExpandedUniversities] = useState<Record<string, boolean>>({});
+  const [examPapers, setExamPapers] = useState<ExamPaper[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const itemsPerPage = 24;
 
-  // Mock exam papers data
-  const examPapers: ExamPaper[] = [
+  // Fetch exam papers from Supabase
+  useEffect(() => {
+    fetchExamPapers();
+  }, []);
+
+  const fetchExamPapers = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('past_questions' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      console.log("Fetched past questions:", data?.length || 0, "items");
+      
+      if (data) {
+        const transformed = data.map(transformFromSupabase);
+        console.log("Transformed past questions:", transformed.length, "items");
+        setExamPapers(transformed);
+      } else {
+        setExamPapers([]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching exam papers:", error);
+      // Fallback to empty array on error
+      setExamPapers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle PDF preview
+  const handlePreview = (paper: ExamPaper) => {
+    if (paper.fileUrl) {
+      setPreviewUrl(paper.fileUrl);
+      setPreviewModalOpen(true);
+      // Increment views
+      incrementViews(paper.id);
+    }
+  };
+
+  // Handle PDF download
+  const handleDownload = async (paper: ExamPaper) => {
+    if (paper.fileUrl) {
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = paper.fileUrl;
+      link.download = `${paper.courseCode}_${paper.year}_${paper.semester}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Increment downloads
+      incrementDownloads(paper.id);
+    }
+  };
+
+  // Increment views
+  const incrementViews = async (id: string) => {
+    try {
+      const paper = examPapers.find(p => p.id === id);
+      if (!paper) return;
+
+      const { error } = await supabase
+        .from('past_questions' as any)
+        .update({ views: (paper.views || 0) + 1 })
+        .eq('id', id);
+
+      if (!error) {
+        setExamPapers(prev => prev.map(p => 
+          p.id === id ? { ...p, views: (p.views || 0) + 1 } : p
+        ));
+      }
+    } catch (error) {
+      console.error("Error incrementing views:", error);
+    }
+  };
+
+  // Increment downloads
+  const incrementDownloads = async (id: string) => {
+    try {
+      const paper = examPapers.find(p => p.id === id);
+      if (!paper) return;
+
+      const { error } = await supabase
+        .from('past_questions' as any)
+        .update({ downloads: (paper.downloads || 0) + 1 })
+        .eq('id', id);
+
+      if (!error) {
+        setExamPapers(prev => prev.map(p => 
+          p.id === id ? { ...p, downloads: (p.downloads || 0) + 1 } : p
+        ));
+      }
+    } catch (error) {
+      console.error("Error incrementing downloads:", error);
+    }
+  };
+
+  // Mock exam papers data (fallback - will be removed once Supabase is connected)
+  const mockExamPapers: ExamPaper[] = [
     { 
       id: "1", 
       title: "Advanced Engineering Mathematics", 
@@ -201,15 +342,15 @@ const PastQuestions = () => {
   // Get unique values for filters
   const universities = useMemo(() => 
     Array.from(new Set(examPapers.map(p => p.universityShort))).sort(),
-    []
+    [examPapers]
   );
   const faculties = useMemo(() => 
     Array.from(new Set(examPapers.map(p => p.faculty))).sort(),
-    []
+    [examPapers]
   );
   const years = useMemo(() => 
     Array.from(new Set(examPapers.map(p => p.year))).sort((a, b) => b - a),
-    []
+    [examPapers]
   );
   const semesters = ["1st", "2nd"];
 
@@ -217,10 +358,11 @@ const PastQuestions = () => {
   const filteredPapers = useMemo(() => {
     return examPapers.filter(paper => {
       const matchesSearch = 
+        !debouncedSearchQuery ||
         paper.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
         paper.courseCode.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-        paper.courseName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-        paper.university.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+        paper.university.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        paper.faculty.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
       
       const matchesUniversity = !selectedUniversity || paper.universityShort === selectedUniversity;
       const matchesFaculty = !selectedFaculty || paper.faculty === selectedFaculty;
@@ -229,7 +371,7 @@ const PastQuestions = () => {
       
       return matchesSearch && matchesUniversity && matchesFaculty && matchesYear && matchesSemester;
     });
-  }, [debouncedSearchQuery, selectedUniversity, selectedFaculty, selectedYear, selectedSemester]);
+  }, [examPapers, debouncedSearchQuery, selectedUniversity, selectedFaculty, selectedYear, selectedSemester]);
 
   // Group papers by university
   const groupedPapers = useMemo(() => {
@@ -1068,6 +1210,89 @@ const PastQuestions = () => {
         margin-top: 3rem;
       }
     }
+
+    /* PDF Preview Modal Styles */
+    .pqm-preview-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .pqm-preview-content {
+      width: 100%;
+      max-width: 1200px;
+      height: 90vh;
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pqm-preview-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f9fafb;
+    }
+
+    .pqm-preview-body {
+      flex: 1;
+      overflow: auto;
+      padding: 1rem;
+    }
+
+    .pqm-preview-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .pqm-icon-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      transition: all 0.2s;
+    }
+
+    .pqm-icon-btn:hover {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    @media (max-width: 768px) {
+      .pqm-preview-modal {
+        padding: 1rem;
+      }
+
+      .pqm-preview-content {
+        height: 95vh;
+      }
+
+      .pqm-preview-header {
+        padding: 0.75rem 1rem;
+      }
+
+      .pqm-preview-body {
+        padding: 0.5rem;
+      }
+    }
   `;
 
   return (
@@ -1380,7 +1605,23 @@ const PastQuestions = () => {
             </div>
 
             {/* Content Area */}
-            {filteredPapers.length > 0 ? (
+            {loading ? (
+              <div style={{ 
+                textAlign: "center", 
+                padding: "4rem 2rem",
+                gridColumn: '1 / -1'
+              }}>
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-white" style={{ border: '1px solid hsl(40 20% 88%)' }}>
+                  <FileText className="w-8 h-8 animate-pulse" style={{ color: 'hsl(220 20% 40%)' }} />
+                </div>
+                <h3 className="text-xl font-semibold mb-2" style={{ color: 'hsl(220 30% 15%)' }}>
+                  Loading past questions...
+                </h3>
+                <p className="text-sm" style={{ color: 'hsl(220 20% 40%)' }}>
+                  Please wait while we fetch the latest papers
+                </p>
+              </div>
+            ) : filteredPapers.length > 0 ? (
               <>
                 {viewMode === "grouped" ? (
                   <div className="space-y-4 mt-6">
@@ -1458,8 +1699,8 @@ const PastQuestions = () => {
                                       examType={paper.examType}
                                       universityLogo={universityLogos[paper.universityShort]}
                                       hideUniversityBadge={true}
-                                      onPreview={() => console.log('Preview:', paper.id)}
-                                      onDownload={() => console.log('Download:', paper.id)}
+                                      onPreview={() => handlePreview(paper)}
+                                      onDownload={() => handleDownload(paper)}
                                     />
                                   ))}
                                 </div>
@@ -1489,8 +1730,8 @@ const PastQuestions = () => {
                           examType={paper.examType}
                           universityLogo={universityLogos[paper.universityShort]}
                           hideUniversityBadge={true}
-                          onPreview={() => console.log('Preview:', paper.id)}
-                          onDownload={() => console.log('Download:', paper.id)}
+                          onPreview={() => handlePreview(paper)}
+                          onDownload={() => handleDownload(paper)}
                         />
                       ))}
                     </div>
@@ -1562,8 +1803,8 @@ const PastQuestions = () => {
                           fileSize={paper.fileSize}
                           verified={paper.verified}
                           universityLogo={universityLogos[paper.universityShort]}
-                          onPreview={() => console.log('Preview:', paper.id)}
-                          onDownload={() => console.log('Download:', paper.id)}
+                          onPreview={() => handlePreview(paper)}
+                          onDownload={() => handleDownload(paper)}
                         />
                       ))}
                     </div>
@@ -1646,6 +1887,30 @@ const PastQuestions = () => {
         <PartneringUniversities />
 
         <Footer />
+
+        {/* PDF Preview Modal */}
+        {previewModalOpen && previewUrl && (
+          <div className="pqm-preview-modal" onClick={() => setPreviewModalOpen(false)}>
+            <div className="pqm-preview-content" onClick={(e) => e.stopPropagation()}>
+              <div className="pqm-preview-header">
+                <h3 style={{ margin: 0, fontWeight: 600 }}>PDF Preview</h3>
+                <button
+                  className="pqm-icon-btn"
+                  onClick={() => setPreviewModalOpen(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="pqm-preview-body">
+                <iframe
+                  src={previewUrl}
+                  className="pqm-preview-iframe"
+                  title="PDF Preview"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
