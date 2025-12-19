@@ -11,6 +11,7 @@ import {
   BookOpen
 } from "lucide-react";
 import PastQuestionsManager from "./components/PastQuestionsManager";
+import ShsBeceQuestionsManager from "./components/ShsBeceQuestionsManager";
 
 const AdminEducationHub = () => {
   const [activeTab, setActiveTab] = useState("university-past-questions");
@@ -586,6 +587,11 @@ const AdminEducationHub = () => {
     // Render PastQuestionsManager for university past questions
     if (tabId === "university-past-questions") {
       return <PastQuestionsManager />;
+    }
+
+    // Render ShsBeceQuestionsManager for SHS and BECE past questions
+    if (tabId === "shs-bece-past-questions") {
+      return <ShsBeceQuestionsManager />;
     }
 
     const IconComponent = tab.icon;
