@@ -17,6 +17,7 @@ interface UniversityData {
   logo?: string;
   description: string;
   campus?: string[];
+  mainCampus?: string;
   studentPopulation?: string;
   yearEstablished?: string;
   website?: string;
@@ -77,6 +78,7 @@ const transformFromSupabase = (data: any): UniversityData => {
     description: data.description,
     website: data.website,
     campus: data.campus || [],
+    mainCampus: data.main_campus,
     studentPopulation: data.student_population,
     yearEstablished: data.year_established,
     tuitionFee: data.tuition_fee,
@@ -1225,6 +1227,69 @@ const UniversityView: React.FC = () => {
       border-radius: 0.25rem;
     }
 
+    .university-view-campus-section {
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid hsl(40 20% 88%);
+    }
+
+    .university-view-campus-title {
+      font-size: clamp(1.125rem, 3vw, 1.5rem);
+      font-weight: 600;
+      color: hsl(220 30% 15%);
+      margin: 0 0 1.5rem 0;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .university-view-campus-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .university-view-campus-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      color: #374151;
+      font-weight: 400;
+    }
+
+    .university-view-campus-item[data-main="true"] {
+      background: #eff6ff;
+      border: 2px solid #2563eb;
+      font-weight: 600;
+    }
+
+    .university-view-campus-icon {
+      color: #6b7280;
+      flex-shrink: 0;
+    }
+
+    .university-view-campus-item[data-main="true"] .university-view-campus-icon {
+      color: #2563eb;
+    }
+
+    .university-view-campus-name {
+      flex: 1;
+    }
+
+    .university-view-campus-badge {
+      font-size: 0.75rem;
+      color: #2563eb;
+      background: #dbeafe;
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: 600;
+    }
+
     .university-view-breakdown-section {
       background: white;
       border-radius: 1rem;
@@ -1683,6 +1748,10 @@ const UniversityView: React.FC = () => {
         padding: clamp(1rem, 4vw, 1.5rem);
       }
 
+      .university-view-campus-section {
+        padding: clamp(1rem, 4vw, 1.5rem);
+      }
+
       .university-view-breakdown-section {
         padding: clamp(1rem, 4vw, 1.5rem);
       }
@@ -1838,6 +1907,20 @@ const UniversityView: React.FC = () => {
       .university-view-photos-section {
         padding: clamp(0.875rem, 3vw, 1rem);
         border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+      }
+
+      .university-view-campus-section {
+        padding: clamp(0.875rem, 3vw, 1rem);
+        border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+      }
+
+      .university-view-campus-grid {
+        gap: 0.5rem;
+      }
+
+      .university-view-campus-item {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.8125rem;
       }
 
       .university-view-photo-container {
@@ -2164,6 +2247,28 @@ const UniversityView: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Campus Locations Section */}
+          {university.campus && university.campus.length > 0 && (
+            <div className="university-view-campus-section">
+              <h2 className="university-view-campus-title">CAMPUS LOCATIONS</h2>
+              <div className="university-view-campus-grid">
+                {university.campus.map((campus, index) => (
+                  <div 
+                    key={index} 
+                    className="university-view-campus-item"
+                    data-main={university.mainCampus === campus}
+                  >
+                    <MapPin size={18} className="university-view-campus-icon" />
+                    <span className="university-view-campus-name">{campus}</span>
+                    {university.mainCampus === campus && (
+                      <span className="university-view-campus-badge">Main Campus</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Breakdown Section */}
           <div className="university-view-breakdown-section">

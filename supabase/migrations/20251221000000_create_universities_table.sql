@@ -13,6 +13,7 @@ CREATE TABLE public.universities (
   
   -- Campus and Location
   campus TEXT[] DEFAULT ARRAY[]::TEXT[],
+  main_campus TEXT,
   
   -- Statistics
   student_population TEXT,
@@ -111,6 +112,7 @@ INSERT INTO public.universities (
   description,
   website,
   campus,
+  main_campus,
   student_population,
   year_established,
   tuition_fee,
@@ -142,6 +144,7 @@ INSERT INTO public.universities (
   'KNUST is a public university located in Kumasi, Ghana. It focuses on science and technology education and is one of the leading universities in Africa. The university is known for its strong engineering, technology, and applied sciences programs.',
   'www.knust.edu.gh',
   ARRAY['Kumasi'],
+  'Kumasi',
   '35,000+',
   '1952',
   'GHS 2,200 - 4,200',

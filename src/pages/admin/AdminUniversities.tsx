@@ -17,6 +17,7 @@ interface University {
   logo?: string;
   description: string;
   campus?: string[];
+  mainCampus?: string;
   studentPopulation?: string;
   yearEstablished?: string;
   website?: string;
@@ -79,6 +80,7 @@ const transformFromSupabase = (data: any): University => {
     description: data.description,
     website: data.website,
     campus: data.campus || [],
+    mainCampus: data.main_campus,
     studentPopulation: data.student_population,
     yearEstablished: data.year_established,
     tuitionFee: data.tuition_fee,
@@ -117,6 +119,7 @@ const transformToSupabase = (data: University): any => {
     description: data.description,
     website: data.website,
     campus: data.campus || [],
+    main_campus: data.mainCampus,
     student_population: data.studentPopulation,
     year_established: data.yearEstablished,
     tuition_fee: data.tuitionFee,
