@@ -32,6 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Card } from "@/components/ui/card";
 
 interface LectureNote {
   id: string;
@@ -2530,6 +2532,40 @@ const LectureNotes = () => {
         margin-top: 0;
       }
     }
+
+    .lecture-notes-faqs-section {
+      margin-top: 4rem;
+    }
+
+    .lecture-notes-faqs-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .lecture-notes-faqs-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: hsl(220 30% 15%);
+      margin: 0 0 0.75rem 0;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    .lecture-notes-faqs-subtitle {
+      font-size: 1.125rem;
+      color: hsl(220 20% 40%);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1023px) {
+      .lecture-notes-faqs-title {
+        font-size: 2rem;
+      }
+
+      .lecture-notes-faqs-subtitle {
+        font-size: 1rem;
+      }
+    }
   `;
 
   return (
@@ -3032,6 +3068,207 @@ const LectureNotes = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* FAQs Section */}
+              <div className="lecture-notes-faqs-section">
+                <div className="lecture-notes-faqs-header">
+                  <h2 className="lecture-notes-faqs-title">Frequently Asked Questions</h2>
+                  <p className="lecture-notes-faqs-subtitle">Everything you need to know about MetaSlides and Lecture Notes</p>
+                </div>
+                <div className="space-y-4">
+                  <Card className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="faq-1" className="border-none">
+                        <AccordionTrigger 
+                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                          style={{ 
+                            fontSize: '1.13rem', 
+                            fontWeight: 600, 
+                            color: '#0066cc', 
+                            fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif'
+                          }}
+                        >
+                          What file formats are supported for upload?
+                        </AccordionTrigger>
+                        <AccordionContent 
+                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                          style={{ fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif' }}
+                        >
+                          We support PDF, PPTX, and PPT file formats. These are the most common formats for lecture notes and presentations, ensuring compatibility across different devices and platforms.
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
+
+                  <Card className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="faq-2" className="border-none">
+                        <AccordionTrigger 
+                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                          style={{ 
+                            fontSize: '1.13rem', 
+                            fontWeight: 600, 
+                            color: '#0066cc', 
+                            fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif'
+                          }}
+                        >
+                          How do I upload my lecture notes or presentations?
+                        </AccordionTrigger>
+                        <AccordionContent 
+                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                          style={{ fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif' }}
+                        >
+                          Simply click the "Upload a presentation" button in the upload section, select your file (PDF, PPTX, or PPT), and fill in the required information including title, field, and lecturer name. The page count will be automatically detected for PDF and PPTX files.
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
+
+                  <Card className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="faq-3" className="border-none">
+                        <AccordionTrigger 
+                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                          style={{ 
+                            fontSize: '1.13rem', 
+                            fontWeight: 600, 
+                            color: '#0066cc', 
+                            fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif'
+                          }}
+                        >
+                          What is the maximum file size I can upload?
+                        </AccordionTrigger>
+                        <AccordionContent 
+                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                          style={{ fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif' }}
+                        >
+                          The maximum file size for uploads is 100MB. This ensures that even large presentations with many slides or detailed PDFs can be uploaded without issues.
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
+
+                  <Card className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="faq-4" className="border-none">
+                        <AccordionTrigger 
+                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                          style={{ 
+                            fontSize: '1.13rem', 
+                            fontWeight: 600, 
+                            color: '#0066cc', 
+                            fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif'
+                          }}
+                        >
+                          Can I download lecture notes for offline use?
+                        </AccordionTrigger>
+                        <AccordionContent 
+                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                          style={{ fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif' }}
+                        >
+                          Yes! Once you find a lecture note you're interested in, simply click the "Download" button on the card. The file will be downloaded to your device for offline viewing and studying.
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
+
+                  <Card className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="faq-5" className="border-none">
+                        <AccordionTrigger 
+                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                          style={{ 
+                            fontSize: '1.13rem', 
+                            fontWeight: 600, 
+                            color: '#0066cc', 
+                            fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif'
+                          }}
+                        >
+                          How do I search for specific lecture notes?
+                        </AccordionTrigger>
+                        <AccordionContent 
+                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                          style={{ fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif' }}
+                        >
+                          You can search by title, field, or lecturer name using the search bar at the top. You can also use the quick filter buttons (Business, Technology, Design, Marketing, Education) or the field dropdown to narrow down your search.
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
+
+                  <Card className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="faq-6" className="border-none">
+                        <AccordionTrigger 
+                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                          style={{ 
+                            fontSize: '1.13rem', 
+                            fontWeight: 600, 
+                            color: '#0066cc', 
+                            fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif'
+                          }}
+                        >
+                          Are the lecture notes verified before being published?
+                        </AccordionTrigger>
+                        <AccordionContent 
+                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                          style={{ fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif' }}
+                        >
+                          Yes, our team reviews and verifies lecture notes before they are published. Verified notes are marked with a badge to ensure quality and accuracy of the content.
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
+
+                  <Card className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="faq-7" className="border-none">
+                        <AccordionTrigger 
+                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                          style={{ 
+                            fontSize: '1.13rem', 
+                            fontWeight: 600, 
+                            color: '#0066cc', 
+                            fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif'
+                          }}
+                        >
+                          Can I preview a lecture note before downloading?
+                        </AccordionTrigger>
+                        <AccordionContent 
+                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                          style={{ fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif' }}
+                        >
+                          Absolutely! Click the "Preview" button on any lecture note card to view the content in your browser before deciding to download it.
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
+
+                  <Card className="border border-[#e6e8ef] rounded-xl focus-within:ring-0 focus-within:border-[#e6e8ef]">
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="faq-8" className="border-none">
+                        <AccordionTrigger 
+                          className="px-5 py-4 text-left bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-0" 
+                          style={{ 
+                            fontSize: '1.13rem', 
+                            fontWeight: 600, 
+                            color: '#0066cc', 
+                            fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif'
+                          }}
+                        >
+                          What is MetaSlides?
+                        </AccordionTrigger>
+                        <AccordionContent 
+                          className="px-5 pb-4 text-[15px] desktop:text-[16px] text-[#4b5563] leading-relaxed bg-[#f8fafc]" 
+                          style={{ fontFamily: 'DM Sans, system-ui, -apple-system, sans-serif' }}
+                        >
+                          MetaSlides is our platform for sharing and accessing educational presentations and lecture materials. It's part of the Ghana National Resource System, designed to help students across Ghana access quality educational content from various universities and institutions.
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
                 </div>
               </div>
             </div>
