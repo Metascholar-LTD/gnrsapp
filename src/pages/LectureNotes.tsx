@@ -807,12 +807,93 @@ const LectureNotes = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Recommended notes - top 6 by views
+  // Helper function to normalize values between 0 and 1
+  const normalize = (value: number, min: number, max: number): number => {
+    if (max === min) return 0.5;
+    return Math.min(1, Math.max(0, (value - min) / (max - min)));
+  };
+
+  // Calculate recommendation score using hybrid algorithm
+  const calculateRecommendationScore = (note: LectureNote): number => {
+    const now = Date.now();
+    const uploadDate = new Date(note.uploadDate).getTime();
+    const daysSinceUpload = Math.max(1, (now - uploadDate) / (1000 * 60 * 60 * 24));
+    
+    // 1. Engagement Score (40% weight)
+    const viewsNormalized = normalize(note.views || 0, 0, 10000);
+    const downloadsNormalized = normalize(note.downloads || 0, 0, 1000);
+    const viewsPerDay = (note.views || 0) / daysSinceUpload;
+    const viewsPerDayNormalized = normalize(viewsPerDay, 0, 100);
+    
+    const engagementScore = (
+      viewsNormalized * 0.3 +           // Views normalized
+      downloadsNormalized * 0.5 +       // Downloads (more valuable)
+      viewsPerDayNormalized * 0.2        // Views per day (velocity)
+    );
+    
+    // 2. Quality Score (25% weight)
+    const qualityScore = (
+      (note.verified ? 1.0 : 0.3) +                       // Verified content
+      (note.imageUrl ? 0.2 : 0) +                          // Has thumbnail
+      (note.pages >= 10 && note.pages <= 100 ? 0.3 : 0.1)  // Optimal page count
+    );
+    
+    // 3. Freshness Score (15% weight) - decays over 1 year
+    const freshnessScore = Math.max(0, 1 - (daysSinceUpload / 365));
+    
+    // 4. Relevance Score (20% weight) - default for now, can add user context later
+    const relevanceScore = 0.5;
+    
+    // Final weighted score
+    return (
+      engagementScore * 0.40 +
+      qualityScore * 0.25 +
+      freshnessScore * 0.15 +
+      relevanceScore * 0.20
+    );
+  };
+
+  // Recommended notes using hybrid scoring with diversity enforcement
   const recommendedNotes = useMemo(() => {
-    return [...lectureNotes]
-      .sort((a, b) => (b.views || 0) - (a.views || 0))
-      .slice(0, 6);
-  }, []);
+    if (lectureNotes.length === 0) return [];
+    
+    // Calculate scores for all notes
+    const scored = lectureNotes.map(note => ({
+      note,
+      score: calculateRecommendationScore(note)
+    })).sort((a, b) => b.score - a.score);
+    
+    // Ensure diversity: max 2 per field, max 2 per university
+    const selected: LectureNote[] = [];
+    const fieldCounts = new Map<string, number>();
+    const uniCounts = new Map<string, number>();
+    
+    // First pass: select diverse items
+    for (const { note } of scored) {
+      if (selected.length >= 6) break;
+      
+      const fieldCount = fieldCounts.get(note.faculty) || 0;
+      const uniCount = uniCounts.get(note.universityShort) || 0;
+      
+      // Allow if we haven't exceeded limits
+      if (fieldCount < 2 && uniCount < 2) {
+        selected.push(note);
+        fieldCounts.set(note.faculty, fieldCount + 1);
+        uniCounts.set(note.universityShort, uniCount + 1);
+      }
+    }
+    
+    // Fill remaining slots if needed (relax diversity constraints)
+    if (selected.length < 6) {
+      const remaining = scored
+        .filter(({ note }) => !selected.find(s => s.id === note.id))
+        .slice(0, 6 - selected.length)
+        .map(({ note }) => note);
+      selected.push(...remaining);
+    }
+    
+    return selected;
+  }, [lectureNotes]);
 
   // Get unique values for filters
   const universities = useMemo(() => 
