@@ -1,6 +1,6 @@
 // Cloudinary utility for uploading files and generating thumbnails
 
-const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dsypclqxk';
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'deydftoe3';
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'ml_default';
 
 // Extract thumbnail from file using Cloudinary
