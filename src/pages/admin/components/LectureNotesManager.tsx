@@ -407,12 +407,13 @@ const LectureNotesManager = () => {
 
       // Extract thumbnail from first page using Cloudinary if useAutoThumbnail is enabled
       let thumbnailUrl = formData.imageUrl || "";
-      if (useAutoThumbnail && !formData.imageUrl) {
+      if (useAutoThumbnail) {
         setIsExtractingThumbnail(true);
         setUploadProgress(70);
         
         try {
           // Upload file to Cloudinary to extract thumbnail
+          // Always extract when useAutoThumbnail is enabled (even if there's an existing thumbnail)
           const cloudinaryThumbnail = await extractThumbnailWithCloudinary(file, 'lecture-notes');
           
           if (cloudinaryThumbnail) {
@@ -422,6 +423,8 @@ const LectureNotesManager = () => {
         } catch (error) {
           console.error("Error extracting thumbnail with Cloudinary:", error);
           toast.info("Could not extract thumbnail. You can upload one manually.");
+          // Keep existing thumbnail if extraction fails
+          thumbnailUrl = formData.imageUrl || "";
         }
         
         setIsExtractingThumbnail(false);
@@ -488,8 +491,8 @@ const LectureNotesManager = () => {
         fileSize: 0,
         fileType: undefined,
         pages: 0,
-        // Also clear thumbnail if it was auto-generated
-        imageUrl: useAutoThumbnail ? "" : prev.imageUrl,
+        // Always clear thumbnail when file is deleted
+        imageUrl: "",
       }));
 
       // Reset file input
@@ -497,10 +500,9 @@ const LectureNotesManager = () => {
         fileInputRef.current.value = "";
       }
 
-      // Reset auto thumbnail if enabled
-      if (useAutoThumbnail) {
-        setUseAutoThumbnail(false);
-      }
+      // Reset auto thumbnail checkbox to default (true) when deleting
+      // This ensures thumbnails will be extracted on next upload
+      setUseAutoThumbnail(true);
 
       // Reset pages detection state
       setPagesAutoDetected(false);
