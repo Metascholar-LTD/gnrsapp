@@ -454,6 +454,81 @@ const LectureNotesManager = () => {
     }
   };
 
+  // Delete uploaded file
+  const handleDeleteFile = async () => {
+    if (!formData.fileUrl) return;
+
+    try {
+      // Extract file path from URL
+      const urlParts = formData.fileUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      const filePath = `lecture-notes/${fileName}`;
+
+      // Delete from Supabase Storage
+      const { error } = await supabase.storage
+        .from('lecture-notes')
+        .remove([filePath]);
+
+      if (error) {
+        console.error("Error deleting file:", error);
+        toast.error("Failed to delete file from storage");
+        return;
+      }
+
+      // Clear form data
+      setFormData(prev => ({
+        ...prev,
+        fileUrl: "",
+        fileSize: 0,
+        fileType: undefined,
+        pages: 0,
+        // Also clear thumbnail if it was auto-generated
+        imageUrl: useAutoThumbnail ? "" : prev.imageUrl,
+      }));
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      // Reset auto thumbnail if enabled
+      if (useAutoThumbnail) {
+        setUseAutoThumbnail(false);
+      }
+
+      toast.success("File deleted successfully");
+    } catch (error: any) {
+      console.error("Error deleting file:", error);
+      toast.error(`Failed to delete file: ${error.message}`);
+    }
+  };
+
+  // Delete uploaded thumbnail image
+  const handleDeleteThumbnail = async () => {
+    if (!formData.imageUrl) return;
+
+    try {
+      // If thumbnail is from Cloudinary, we can't delete it from here
+      // Just clear it from the form
+      // If it's from Supabase, we could delete it, but for simplicity, just clear it
+      
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: "",
+      }));
+
+      // Reset image input
+      if (imageInputRef.current) {
+        imageInputRef.current.value = "";
+      }
+
+      toast.success("Thumbnail removed successfully");
+    } catch (error: any) {
+      console.error("Error deleting thumbnail:", error);
+      toast.error(`Failed to delete thumbnail: ${error.message}`);
+    }
+  };
+
   // Image upload handler
   const handleImageUpload = async (file: File) => {
     if (!file) return;
@@ -1899,9 +1974,41 @@ const LectureNotesManager = () => {
                       PDF, PPTX, PPT (Max 100MB)
                     </p>
                     {formData.fileUrl && (
-                      <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#d1fae5', borderRadius: '0.5rem', color: '#065f46' }}>
-                        <FileCheck className="w-4 h-4" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.5rem' }} />
-                        {formData.fileUrl.split('/').pop()} ({formatFileSize(formData.fileSize)})
+                      <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#d1fae5', borderRadius: '0.5rem', color: '#065f46', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0 }}>
+                          <FileCheck className="w-4 h-4" style={{ flexShrink: 0 }} />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {formData.fileUrl.split('/').pop()} ({formatFileSize(formData.fileSize)})
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteFile();
+                          }}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '0.25rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#dc2626',
+                            borderRadius: '0.25rem',
+                            flexShrink: 0,
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#fee2e2';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                          }}
+                          title="Delete file"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       </div>
                     )}
                     {uploading && (
@@ -1975,8 +2082,41 @@ const LectureNotesManager = () => {
                       JPG, PNG, WEBP (Max 5MB)
                     </p>
                     {formData.imageUrl && (
-                      <div style={{ marginTop: '1rem' }}>
-                        <img src={formData.imageUrl} alt="Thumbnail" style={{ maxWidth: '200px', maxHeight: '150px', borderRadius: '0.5rem' }} />
+                      <div style={{ marginTop: '1rem', position: 'relative', display: 'inline-block' }}>
+                        <img src={formData.imageUrl} alt="Thumbnail" style={{ maxWidth: '200px', maxHeight: '150px', borderRadius: '0.5rem', display: 'block' }} />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteThumbnail();
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '0.5rem',
+                            right: '0.5rem',
+                            background: 'rgba(220, 38, 38, 0.9)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '0.25rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#ffffff',
+                            borderRadius: '50%',
+                            width: '24px',
+                            height: '24px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(220, 38, 38, 1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(220, 38, 38, 0.9)';
+                          }}
+                          title="Delete thumbnail"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
                       </div>
                     )}
                   </div>
