@@ -12,12 +12,15 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ConfirmationModal } from "@/components/admin";
+import { extractThumbnailWithCloudinary, uploadImageToCloudinary } from "@/utils/cloudinary";
 
 interface LectureNote {
   id: string;
   title: string;
   field: string;
   lecturer: string;
+  university?: string;
+  universityShort?: string;
   downloads: number;
   views: number;
   fileSize: number;
@@ -35,6 +38,9 @@ interface LectureNoteFormData {
   title: string;
   field: string;
   lecturer: string;
+  university: string;
+  universityShort: string;
+  customUniversity: string;
   fileUrl: string;
   fileSize: number;
   verified: boolean;
@@ -66,6 +72,8 @@ const LectureNotesManager = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDetectingPages, setIsDetectingPages] = useState(false);
+  const [isExtractingThumbnail, setIsExtractingThumbnail] = useState(false);
+  const [useAutoThumbnail, setUseAutoThumbnail] = useState(true);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -76,6 +84,9 @@ const LectureNotesManager = () => {
     title: "",
     field: "",
     lecturer: "",
+    university: "",
+    universityShort: "",
+    customUniversity: "",
     fileUrl: "",
     fileSize: 0,
     verified: false,
@@ -83,6 +94,21 @@ const LectureNotesManager = () => {
     imageUrl: "",
     fileType: "",
   });
+
+  // University options
+  const universities = [
+    { name: "University of Ghana", short: "UG" },
+    { name: "Kwame Nkrumah University of Science and Technology", short: "KNUST" },
+    { name: "University of Cape Coast", short: "UCC" },
+    { name: "University of Education, Winneba", short: "UEW" },
+    { name: "University of Mines and Technology", short: "UMaT" },
+    { name: "University for Development Studies", short: "UDS" },
+    { name: "Ghana Institute of Management and Public Administration", short: "GIMPA" },
+    { name: "Catholic University of Ghana", short: "CUG" },
+    { name: "Pentecost University College", short: "PUC" },
+    { name: "University of Energy and Natural Resources", short: "UENR" },
+    { name: "Accra Institute of Technology", short: "AIT" },
+  ];
 
 
   const fields = [
@@ -149,6 +175,8 @@ const LectureNotesManager = () => {
           title: item.title || "",
           field: item.field || item.faculty || "",
           lecturer: item.lecturer || "",
+          university: item.university || "",
+          universityShort: item.university_short || item.universityShort || "",
           fileUrl: item.file_url || "",
           fileSize: item.file_size || 0,
           downloads: item.downloads || 0,
@@ -212,15 +240,31 @@ const LectureNotesManager = () => {
       // Dynamically import pdfjs-dist
       const pdfjsLib = await import('pdfjs-dist');
       
-      // Set worker source - use a CDN version
+      // Set worker source - use local worker file from public folder
+      // Works in both development and production (Vite copies public folder to dist)
       if (typeof window !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+        // Use base URL from Vite (handles different base paths in production)
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        // Ensure baseUrl ends with / and remove it, then add worker path
+        const workerPath = `${baseUrl.replace(/\/$/, '')}/pdf.worker.min.js`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = workerPath;
       }
       
       const arrayBuffer = await file.arrayBuffer();
-      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const loadingTask = pdfjsLib.getDocument({ 
+        data: arrayBuffer,
+        verbosity: 0, // Suppress warnings
+        useSystemFonts: false,
+        useWorkerFetch: false,
+        isEvalSupported: false
+      });
       const pdf = await loadingTask.promise;
-      return pdf.numPages;
+      const pageCount = pdf.numPages;
+      
+      // Clean up
+      await pdf.destroy();
+      
+      return pageCount;
     } catch (error) {
       console.error("Error extracting PDF page count:", error);
       return 0;
@@ -352,20 +396,44 @@ const LectureNotesManager = () => {
 
       if (uploadError) throw uploadError;
 
-      setUploadProgress(80);
+      setUploadProgress(60);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('lecture-notes')
         .getPublicUrl(fileName);
 
-      // Update form data with file URL, size, type, and auto-detected page count
+      // Extract thumbnail from first page using Cloudinary if useAutoThumbnail is enabled
+      let thumbnailUrl = formData.imageUrl || "";
+      if (useAutoThumbnail && !formData.imageUrl) {
+        setIsExtractingThumbnail(true);
+        setUploadProgress(70);
+        
+        try {
+          // Upload file to Cloudinary to extract thumbnail
+          const cloudinaryThumbnail = await extractThumbnailWithCloudinary(file, 'lecture-notes');
+          
+          if (cloudinaryThumbnail) {
+            thumbnailUrl = cloudinaryThumbnail;
+            toast.success("Thumbnail extracted from first page using Cloudinary!");
+          }
+        } catch (error) {
+          console.error("Error extracting thumbnail with Cloudinary:", error);
+          toast.info("Could not extract thumbnail. You can upload one manually.");
+        }
+        
+        setIsExtractingThumbnail(false);
+        setUploadProgress(90);
+      }
+
+      // Update form data with file URL, size, type, auto-detected page count, and thumbnail
       setFormData(prev => ({
         ...prev,
         fileUrl: publicUrl,
         fileSize: file.size,
         fileType: detectedFileType,
         pages: pageCount > 0 ? pageCount : prev.pages, // Only update if we got a valid count
+        imageUrl: thumbnailUrl || prev.imageUrl, // Use extracted thumbnail or keep existing
       }));
 
       setUploadProgress(100);
@@ -407,32 +475,17 @@ const LectureNotesManager = () => {
     setUploadProgress(0);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `lecture-notes/images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('lecture-notes')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('lecture-notes')
-        .getPublicUrl(fileName);
+      // Upload to Cloudinary
+      const imageUrl = await uploadImageToCloudinary(file, 'lecture-notes/images');
 
       // Update form data with image URL
       setFormData(prev => ({
         ...prev,
-        imageUrl: publicUrl,
+        imageUrl: imageUrl,
       }));
 
       setUploadProgress(100);
-      toast.success("Image uploaded successfully");
+      toast.success("Image uploaded successfully to Cloudinary");
     } catch (error: any) {
       console.error("Error uploading image:", error);
       toast.error(`Failed to upload image: ${error.message}`);
@@ -477,12 +530,40 @@ const LectureNotesManager = () => {
       return;
     }
 
+    // Determine university values
+    let universityName = "";
+    let universityShortName = "";
+    
+    if (formData.university === "OTHER") {
+      // Custom university
+      if (!formData.customUniversity.trim()) {
+        toast.error("Please enter your affiliation/university");
+        return;
+      }
+      universityName = formData.customUniversity.trim();
+      // Generate short name from custom university (first letters of each word)
+      universityShortName = formData.customUniversity
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase())
+        .join('')
+        .substring(0, 10); // Limit to 10 chars
+    } else if (formData.university) {
+      // Selected from dropdown
+      const selectedUni = universities.find(u => u.name === formData.university);
+      if (selectedUni) {
+        universityName = selectedUni.name;
+        universityShortName = selectedUni.short;
+      }
+    }
+
     setSaving(true);
     try {
       const dataToSave = {
         title: formData.title,
         field: formData.field,
         lecturer: formData.lecturer,
+        university: universityName || null,
+        university_short: universityShortName || null,
         file_url: formData.fileUrl,
         file_size: formData.fileSize || 0,
         verified: formData.verified,
@@ -521,6 +602,9 @@ const LectureNotesManager = () => {
         title: "",
         field: "",
         lecturer: "",
+        university: "",
+        universityShort: "",
+        customUniversity: "",
         fileUrl: "",
         fileSize: 0,
         verified: false,
@@ -597,10 +681,15 @@ const LectureNotesManager = () => {
   // Start editing
   const startEditing = (note: LectureNote) => {
     setEditing(note.id);
+    // Check if university is in the list
+    const foundUni = universities.find(u => u.name === note.university || u.short === note.universityShort);
     setFormData({
       title: note.title,
       field: note.field,
       lecturer: note.lecturer,
+      university: foundUni ? foundUni.name : (note.university ? "OTHER" : ""),
+      universityShort: foundUni ? foundUni.short : "",
+      customUniversity: foundUni ? "" : (note.university || ""),
       fileUrl: note.fileUrl,
       fileSize: note.fileSize,
       verified: note.verified,
@@ -1433,6 +1522,9 @@ const LectureNotesManager = () => {
               title: "",
               field: "",
               lecturer: "",
+              university: "",
+              universityShort: "",
+              customUniversity: "",
               fileUrl: "",
               fileSize: 0,
               verified: false,
@@ -1725,6 +1817,41 @@ const LectureNotesManager = () => {
                     placeholder="e.g., Dr. Kwame Mensah"
                   />
                 </div>
+                <div className="lnm-form-group full-width">
+                  <label className="lnm-form-label">University/Affiliation</label>
+                  <select
+                    className="lnm-form-select"
+                    value={formData.university}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData(prev => ({
+                        ...prev,
+                        university: value,
+                        universityShort: value === "OTHER" ? "" : (universities.find(u => u.name === value)?.short || ""),
+                        customUniversity: value === "OTHER" ? prev.customUniversity : ""
+                      }));
+                    }}
+                  >
+                    <option value="">Select University (Optional)</option>
+                    {universities.map(uni => (
+                      <option key={uni.short} value={uni.name}>{uni.name}</option>
+                    ))}
+                    <option value="OTHER">Other (Enter custom affiliation)</option>
+                  </select>
+                  {formData.university === "OTHER" && (
+                    <input
+                      type="text"
+                      className="lnm-form-input"
+                      style={{ marginTop: '0.75rem' }}
+                      value={formData.customUniversity}
+                      onChange={(e) => setFormData(prev => ({ ...prev, customUniversity: e.target.value }))}
+                      placeholder="Enter your university or affiliation"
+                    />
+                  )}
+                  <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#6b7280' }}>
+                    Select your university from the list, or choose "Other" to enter a custom affiliation
+                  </p>
+                </div>
                 <div className="lnm-form-group">
                   <label className="lnm-form-label">
                     Pages/Slides
@@ -1796,6 +1923,43 @@ const LectureNotesManager = () => {
                 </div>
                 <div className="lnm-form-group full-width">
                   <label className="lnm-form-label">Thumbnail Image (Optional)</label>
+                  
+                  {/* Auto-extract option */}
+                  {formData.fileUrl && (
+                    <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#f3f4f6', borderRadius: '0.5rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={useAutoThumbnail}
+                          onChange={(e) => {
+                            setUseAutoThumbnail(e.target.checked);
+                            if (e.target.checked && formData.fileUrl) {
+                              // Re-extract thumbnail if checkbox is checked
+                              const fileInput = fileInputRef.current;
+                              if (fileInput && fileInput.files && fileInput.files[0]) {
+                                handleFileUpload(fileInput.files[0]);
+                              }
+                            }
+                          }}
+                          style={{ flexShrink: 0 }}
+                        />
+                        <span style={{ fontSize: '0.875rem', color: '#374151' }}>
+                          Use first page/slide as thumbnail (auto-extracted)
+                        </span>
+                      </label>
+                      {isExtractingThumbnail && (
+                        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Extracting thumbnail from first page...
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Manual upload option */}
+                  <div style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: '#6b7280' }}>
+                    {useAutoThumbnail ? 'Or upload a custom thumbnail:' : 'Upload a custom thumbnail:'}
+                  </div>
                   <div
                     className={`lnm-upload-zone ${isDragging ? 'dragging' : ''}`}
                     onDragOver={handleDragOver}
@@ -1823,7 +1987,10 @@ const LectureNotesManager = () => {
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) handleImageUpload(file);
+                      if (file) {
+                        setUseAutoThumbnail(false); // Disable auto when manual upload
+                        handleImageUpload(file);
+                      }
                     }}
                   />
                 </div>

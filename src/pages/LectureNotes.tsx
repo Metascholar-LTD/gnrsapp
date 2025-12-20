@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Search, 
   Download, 
@@ -38,22 +39,19 @@ import { Card } from "@/components/ui/card";
 interface LectureNote {
   id: string;
   title: string;
-  courseCode: string;
-  courseName: string;
-  faculty: string;
-  year: number;
-  semester: "1st" | "2nd";
-  university: string;
-  universityShort: string;
+  field: string; // Changed from faculty
+  university?: string;
+  universityShort?: string;
   lecturer: string;
   downloads: number;
   views: number;
-  fileSize: string;
+  fileSize: number; // Changed from string to number
   uploadDate: string;
   verified: boolean;
   pages: number;
   imageUrl?: string;
   fileType?: string; // PDF, PPTX, PPT, etc.
+  fileUrl: string;
 }
 
 // University logo mapping
@@ -79,6 +77,8 @@ const LectureNotes = () => {
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
   const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(false);
+  const [lectureNotes, setLectureNotes] = useState<LectureNote[]>([]);
+  const [loading, setLoading] = useState(true);
   // Removed viewMode - only grid view is used
   // Multiple carousel scroll states
   const [carouselScrollStates, setCarouselScrollStates] = useState<Record<number, { canScrollLeft: boolean; canScrollRight: boolean }>>({});
@@ -93,711 +93,59 @@ const LectureNotes = () => {
     }
   }, []);
 
+  // Fetch lecture notes from Supabase
+  useEffect(() => {
+    fetchLectureNotes();
+  }, []);
 
-  // Mock lecture notes data with images
-  const lectureNotes: LectureNote[] = [
-    { 
-      id: "1", 
-      title: "Introduction to Computer Science", 
-      courseCode: "CS 101",
-      courseName: "Introduction to Computer Science",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "1st",
-      university: "University of Ghana", 
-      universityShort: "UG",
-      lecturer: "Dr. Kwame Mensah",
-      downloads: 3420, 
-      views: 6890,
-      fileSize: "12.5 MB", 
-      uploadDate: "2024-02-15",
-      verified: true,
-      pages: 45,
-      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "2", 
-      title: "Organic Chemistry Fundamentals", 
-      courseCode: "CHEM 201",
-      courseName: "Organic Chemistry Fundamentals",
-      faculty: "Physical & Biological Sciences", 
-      year: 2024, 
-      semester: "1st",
-      university: "Kwame Nkrumah University of Science and Technology", 
-      universityShort: "KNUST",
-      lecturer: "Prof. Ama Asante",
-      downloads: 2890, 
-      views: 5420,
-      fileSize: "8.3 MB", 
-      uploadDate: "2024-02-10",
-      verified: true,
-      pages: 32,
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "3", 
-      title: "Business Ethics and Corporate Governance", 
-      courseCode: "BUS 301",
-      courseName: "Business Ethics and Corporate Governance",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "2nd",
-      university: "University of Cape Coast", 
-      universityShort: "UCC",
-      lecturer: "Dr. Kofi Adjei",
-      downloads: 2150, 
-      views: 4230,
-      fileSize: "6.7 MB", 
-      uploadDate: "2024-01-22",
-      verified: true,
-      pages: 28,
-      imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "4", 
-      title: "Advanced Calculus", 
-      courseCode: "MATH 401",
-      courseName: "Advanced Calculus",
-      faculty: "Engineering", 
-      year: 2023, 
-      semester: "2nd",
-      university: "University of Mines and Technology", 
-      universityShort: "UMaT",
-      lecturer: "Prof. Yaw Boateng",
-      downloads: 3670, 
-      views: 7120,
-      fileSize: "15.2 MB", 
-      uploadDate: "2023-12-18",
-      verified: true,
-      pages: 58,
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "5", 
-      title: "Constitutional Law Principles", 
-      courseCode: "LAW 201",
-      courseName: "Constitutional Law Principles",
-      faculty: "Law", 
-      year: 2024, 
-      semester: "1st",
-      university: "University of Ghana", 
-      universityShort: "UG",
-      lecturer: "Dr. Efua Ofori",
-      downloads: 1890, 
-      views: 3650,
-      fileSize: "9.1 MB", 
-      uploadDate: "2024-02-05",
-      verified: true,
-      pages: 38,
-      imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "6", 
-      title: "Database Management Systems", 
-      courseCode: "CS 302",
-      courseName: "Database Management Systems",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "1st",
-      university: "University of Ghana", 
-      universityShort: "UG",
-      lecturer: "Dr. Samuel Tetteh",
-      downloads: 4120, 
-      views: 8250,
-      fileSize: "11.8 MB", 
-      uploadDate: "2024-02-20",
-      verified: true,
-      pages: 42,
-      imageUrl: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "7", 
-      title: "Data Structures and Algorithms", 
-      courseCode: "CS 201",
-      courseName: "Data Structures and Algorithms",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "1st",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Dr. Michael Asante",
-      downloads: 5230, 
-      views: 9820,
-      fileSize: "14.2 MB", 
-      uploadDate: "2024-03-01",
-      verified: true,
-      pages: 52,
-      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "8", 
-      title: "Microeconomics Principles", 
-      courseCode: "ECON 101",
-      courseName: "Microeconomics Principles",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "1st",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Prof. Nana Yaa",
-      downloads: 3120, 
-      views: 6540,
-      fileSize: "9.8 MB", 
-      uploadDate: "2024-02-28",
-      verified: true,
-      pages: 35,
-      imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "9", 
-      title: "Organic Reactions and Mechanisms", 
-      courseCode: "CHEM 301",
-      courseName: "Organic Reactions and Mechanisms",
-      faculty: "Physical & Biological Sciences", 
-      year: 2024, 
-      semester: "2nd",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Dr. Akosua Darko",
-      downloads: 2780, 
-      views: 5120,
-      fileSize: "11.5 MB", 
-      uploadDate: "2024-01-15",
-      verified: true,
-      pages: 48,
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "10", 
-      title: "Financial Accounting Fundamentals", 
-      courseCode: "ACC 101",
-      courseName: "Financial Accounting Fundamentals",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "1st",
-      university: "UCC", 
-      universityShort: "UCC",
-      lecturer: "Dr. Kwabena Osei",
-      downloads: 4560, 
-      views: 8230,
-      fileSize: "10.3 MB", 
-      uploadDate: "2024-02-12",
-      verified: true,
-      pages: 40,
-      imageUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "11", 
-      title: "Linear Algebra and Vector Spaces", 
-      courseCode: "MATH 301",
-      courseName: "Linear Algebra and Vector Spaces",
-      faculty: "Engineering", 
-      year: 2024, 
-      semester: "1st",
-      university: "UMaT", 
-      universityShort: "UMaT",
-      lecturer: "Prof. Kofi Mensah",
-      downloads: 3890, 
-      views: 7120,
-      fileSize: "13.7 MB", 
-      uploadDate: "2024-02-18",
-      verified: true,
-      pages: 55,
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "12", 
-      title: "Criminal Law and Procedure", 
-      courseCode: "LAW 301",
-      courseName: "Criminal Law and Procedure",
-      faculty: "Law", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Dr. Ama Serwaa",
-      downloads: 2340, 
-      views: 4890,
-      fileSize: "8.9 MB", 
-      uploadDate: "2024-01-20",
-      verified: true,
-      pages: 33,
-      imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "13", 
-      title: "Software Engineering Principles", 
-      courseCode: "CS 401",
-      courseName: "Software Engineering Principles",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "1st",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Dr. Emmanuel Boateng",
-      downloads: 5670, 
-      views: 10450,
-      fileSize: "15.6 MB", 
-      uploadDate: "2024-03-05",
-      verified: true,
-      pages: 62,
-      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "14", 
-      title: "Macroeconomics Analysis", 
-      courseCode: "ECON 201",
-      courseName: "Macroeconomics Analysis",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UCC", 
-      universityShort: "UCC",
-      lecturer: "Prof. Yaw Asiedu",
-      downloads: 3450, 
-      views: 6780,
-      fileSize: "9.5 MB", 
-      uploadDate: "2024-01-25",
-      verified: true,
-      pages: 37,
-      imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "15", 
-      title: "Inorganic Chemistry Concepts", 
-      courseCode: "CHEM 202",
-      courseName: "Inorganic Chemistry Concepts",
-      faculty: "Physical & Biological Sciences", 
-      year: 2024, 
-      semester: "1st",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Dr. Comfort Adjei",
-      downloads: 2980, 
-      views: 5560,
-      fileSize: "10.8 MB", 
-      uploadDate: "2024-02-08",
-      verified: true,
-      pages: 41,
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "16", 
-      title: "Managerial Accounting", 
-      courseCode: "ACC 201",
-      courseName: "Managerial Accounting",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Dr. Nana Kwame",
-      downloads: 4120, 
-      views: 7890,
-      fileSize: "11.2 MB", 
-      uploadDate: "2024-01-30",
-      verified: true,
-      pages: 44,
-      imageUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "17", 
-      title: "Differential Equations", 
-      courseCode: "MATH 302",
-      courseName: "Differential Equations",
-      faculty: "Engineering", 
-      year: 2024, 
-      semester: "1st",
-      university: "UMaT", 
-      universityShort: "UMaT",
-      lecturer: "Prof. Akosua Mensah",
-      downloads: 3560, 
-      views: 6890,
-      fileSize: "12.4 MB", 
-      uploadDate: "2024-02-22",
-      verified: true,
-      pages: 50,
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "18", 
-      title: "Contract Law Principles", 
-      courseCode: "LAW 202",
-      courseName: "Contract Law Principles",
-      faculty: "Law", 
-      year: 2024, 
-      semester: "1st",
-      university: "UCC", 
-      universityShort: "UCC",
-      lecturer: "Dr. Kofi Asante",
-      downloads: 2890, 
-      views: 5230,
-      fileSize: "9.3 MB", 
-      uploadDate: "2024-02-14",
-      verified: true,
-      pages: 36,
-      imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "19", 
-      title: "Computer Networks and Security", 
-      courseCode: "CS 303",
-      courseName: "Computer Networks and Security",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Dr. Sarah Mensah",
-      downloads: 4980, 
-      views: 9120,
-      fileSize: "14.8 MB", 
-      uploadDate: "2024-01-18",
-      verified: true,
-      pages: 59,
-      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "20", 
-      title: "International Trade Economics", 
-      courseCode: "ECON 301",
-      courseName: "International Trade Economics",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "1st",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Prof. Kwame Asante",
-      downloads: 3670, 
-      views: 7230,
-      fileSize: "10.1 MB", 
-      uploadDate: "2024-02-25",
-      verified: true,
-      pages: 39,
-      imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "21", 
-      title: "Physical Chemistry Fundamentals", 
-      courseCode: "CHEM 303",
-      courseName: "Physical Chemistry Fundamentals",
-      faculty: "Physical & Biological Sciences", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UCC", 
-      universityShort: "UCC",
-      lecturer: "Dr. Mary Adjei",
-      downloads: 3120, 
-      views: 5890,
-      fileSize: "11.7 MB", 
-      uploadDate: "2024-01-12",
-      verified: true,
-      pages: 46,
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "22", 
-      title: "Cost Accounting Methods", 
-      courseCode: "ACC 301",
-      courseName: "Cost Accounting Methods",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "1st",
-      university: "UMaT", 
-      universityShort: "UMaT",
-      lecturer: "Dr. John Osei",
-      downloads: 4230, 
-      views: 8120,
-      fileSize: "10.9 MB", 
-      uploadDate: "2024-02-28",
-      verified: true,
-      pages: 43,
-      imageUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "23", 
-      title: "Statistics and Probability", 
-      courseCode: "MATH 203",
-      courseName: "Statistics and Probability",
-      faculty: "Engineering", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Prof. Grace Boateng",
-      downloads: 3890, 
-      views: 7450,
-      fileSize: "13.1 MB", 
-      uploadDate: "2024-01-28",
-      verified: true,
-      pages: 53,
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "24", 
-      title: "Property Law and Real Estate", 
-      courseCode: "LAW 303",
-      courseName: "Property Law and Real Estate",
-      faculty: "Law", 
-      year: 2024, 
-      semester: "1st",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Dr. Abena Darko",
-      downloads: 2670, 
-      views: 5120,
-      fileSize: "9.6 MB", 
-      uploadDate: "2024-02-16",
-      verified: true,
-      pages: 34,
-      imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "25", 
-      title: "Web Development Fundamentals", 
-      courseCode: "CS 204",
-      courseName: "Web Development Fundamentals",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "1st",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Dr. Patricia Mensah",
-      downloads: 5120, 
-      views: 9650,
-      fileSize: "13.4 MB", 
-      uploadDate: "2024-03-10",
-      verified: true,
-      pages: 56,
-      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "26", 
-      title: "International Business Strategy", 
-      courseCode: "BUS 401",
-      courseName: "International Business Strategy",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "2nd",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Prof. Kofi Asante",
-      downloads: 3890, 
-      views: 7450,
-      fileSize: "10.7 MB", 
-      uploadDate: "2024-01-28",
-      verified: true,
-      pages: 41,
-      imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "27", 
-      title: "Biochemistry Principles", 
-      courseCode: "BIO 301",
-      courseName: "Biochemistry Principles",
-      faculty: "Physical & Biological Sciences", 
-      year: 2024, 
-      semester: "1st",
-      university: "UCC", 
-      universityShort: "UCC",
-      lecturer: "Dr. Comfort Osei",
-      downloads: 3450, 
-      views: 6780,
-      fileSize: "12.1 MB", 
-      uploadDate: "2024-02-22",
-      verified: true,
-      pages: 49,
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "28", 
-      title: "Taxation Law and Practice", 
-      courseCode: "LAW 304",
-      courseName: "Taxation Law and Practice",
-      faculty: "Law", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Dr. Nana Yaa Boateng",
-      downloads: 2780, 
-      views: 5340,
-      fileSize: "9.4 MB", 
-      uploadDate: "2024-01-15",
-      verified: true,
-      pages: 35,
-      imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "29", 
-      title: "Machine Learning Basics", 
-      courseCode: "CS 402",
-      courseName: "Machine Learning Basics",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "1st",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Dr. Samuel Darko",
-      downloads: 6230, 
-      views: 11200,
-      fileSize: "16.2 MB", 
-      uploadDate: "2024-03-15",
-      verified: true,
-      pages: 68,
-      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "30", 
-      title: "Financial Markets and Institutions", 
-      courseCode: "FIN 301",
-      courseName: "Financial Markets and Institutions",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UCC", 
-      universityShort: "UCC",
-      lecturer: "Prof. Yaw Mensah",
-      downloads: 4120, 
-      views: 7890,
-      fileSize: "11.3 MB", 
-      uploadDate: "2024-02-05",
-      verified: true,
-      pages: 44,
-      imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "31", 
-      title: "Analytical Chemistry Methods", 
-      courseCode: "CHEM 304",
-      courseName: "Analytical Chemistry Methods",
-      faculty: "Physical & Biological Sciences", 
-      year: 2024, 
-      semester: "1st",
-      university: "UMaT", 
-      universityShort: "UMaT",
-      lecturer: "Dr. Akosua Adjei",
-      downloads: 3120, 
-      views: 5890,
-      fileSize: "10.5 MB", 
-      uploadDate: "2024-02-18",
-      verified: true,
-      pages: 42,
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "32", 
-      title: "Auditing Principles", 
-      courseCode: "ACC 302",
-      courseName: "Auditing Principles",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Dr. Kofi Boateng",
-      downloads: 4560, 
-      views: 8230,
-      fileSize: "11.8 MB", 
-      uploadDate: "2024-01-22",
-      verified: true,
-      pages: 47,
-      imageUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "33", 
-      title: "Numerical Methods", 
-      courseCode: "MATH 303",
-      courseName: "Numerical Methods",
-      faculty: "Engineering", 
-      year: 2024, 
-      semester: "1st",
-      university: "KNUST", 
-      universityShort: "KNUST",
-      lecturer: "Prof. Grace Asante",
-      downloads: 3780, 
-      views: 7120,
-      fileSize: "13.9 MB", 
-      uploadDate: "2024-02-28",
-      verified: true,
-      pages: 54,
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "34", 
-      title: "Family Law Principles", 
-      courseCode: "LAW 305",
-      courseName: "Family Law Principles",
-      faculty: "Law", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UCC", 
-      universityShort: "UCC",
-      lecturer: "Dr. Efua Mensah",
-      downloads: 2890, 
-      views: 5230,
-      fileSize: "9.7 MB", 
-      uploadDate: "2024-02-12",
-      verified: true,
-      pages: 37,
-      imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-    { 
-      id: "35", 
-      title: "Cybersecurity Fundamentals", 
-      courseCode: "CS 403",
-      courseName: "Cybersecurity Fundamentals",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "1st",
-      university: "UMaT", 
-      universityShort: "UMaT",
-      lecturer: "Dr. Michael Osei",
-      downloads: 5340, 
-      views: 9820,
-      fileSize: "14.6 MB", 
-      uploadDate: "2024-03-08",
-      verified: true,
-      pages: 61,
-      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "36", 
-      title: "Investment Analysis", 
-      courseCode: "FIN 302",
-      courseName: "Investment Analysis",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "2nd",
-      university: "UG", 
-      universityShort: "UG",
-      lecturer: "Prof. Nana Kwame Asante",
-      downloads: 4230, 
-      views: 8120,
-      fileSize: "10.2 MB", 
-      uploadDate: "2024-01-30",
-      verified: true,
-      pages: 40,
-      imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80",
-      fileType: "PDF"
-    },
-  ];
+  const fetchLectureNotes = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('lecture_notes' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        const transformed = data.map((item: any) => ({
+          id: item.id,
+          title: item.title || "",
+          field: item.field || "",
+          university: item.university || "",
+          universityShort: item.university_short || item.universityShort || "",
+          lecturer: item.lecturer || "",
+          downloads: item.downloads || 0,
+          views: item.views || 0,
+          fileSize: item.file_size || 0,
+          uploadDate: item.upload_date || item.created_at || "",
+          verified: item.verified || false,
+          pages: item.pages || 0,
+          imageUrl: item.image_url || "",
+          fileType: item.file_type || "",
+          fileUrl: item.file_url || "",
+        }));
+        setLectureNotes(transformed);
+      } else {
+        setLectureNotes([]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching lecture notes:", error);
+      setLectureNotes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format file size helper
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  };
 
   // Debounce search query
   useEffect(() => {
@@ -872,14 +220,14 @@ const LectureNotes = () => {
     for (const { note } of scored) {
       if (selected.length >= 6) break;
       
-      const fieldCount = fieldCounts.get(note.faculty) || 0;
-      const uniCount = uniCounts.get(note.universityShort) || 0;
+      const fieldCount = fieldCounts.get(note.field) || 0;
+      const uniCount = uniCounts.get(note.universityShort || "") || 0;
       
       // Allow if we haven't exceeded limits
       if (fieldCount < 2 && uniCount < 2) {
         selected.push(note);
-        fieldCounts.set(note.faculty, fieldCount + 1);
-        uniCounts.set(note.universityShort, uniCount + 1);
+        fieldCounts.set(note.field, fieldCount + 1);
+        uniCounts.set(note.universityShort || "", uniCount + 1);
       }
     }
     
@@ -897,8 +245,8 @@ const LectureNotes = () => {
 
   // Get unique values for filters
   const universities = useMemo(() => 
-    Array.from(new Set(lectureNotes.map(n => n.universityShort))).sort(),
-    []
+    Array.from(new Set(lectureNotes.map(n => n.universityShort).filter(Boolean))).sort(),
+    [lectureNotes]
   );
   const courses = [
     "Business",
@@ -948,17 +296,16 @@ const LectureNotes = () => {
     return lectureNotes.filter(note => {
       const matchesSearch = 
         note.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-        note.courseCode.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-        note.courseName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-        note.university.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        note.field.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        (note.university || "").toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
         note.lecturer.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
       
       const matchesUniversity = !selectedUniversity || note.universityShort === selectedUniversity;
-      const matchesCourse = !selectedCourse || note.faculty === selectedCourse;
+      const matchesCourse = !selectedCourse || note.field === selectedCourse;
       
       return matchesSearch && matchesUniversity && matchesCourse;
     });
-  }, [debouncedSearchQuery, selectedUniversity, selectedCourse]);
+  }, [lectureNotes, debouncedSearchQuery, selectedUniversity, selectedCourse]);
 
   // Group filtered notes into chunks of 12 for carousels
   const carouselRows = useMemo(() => {
@@ -2941,7 +2288,7 @@ const LectureNotes = () => {
                               {/* File Type Badge - Top Left */}
                               <div className="absolute top-2 left-2">
                                 <span className="px-1.5 py-0.5 text-[10px] font-semibold uppercase bg-black/70 text-white rounded">
-                                  {note.fileType || (note.fileSize?.toLowerCase().includes('pdf') ? 'PDF' : 'PPTX')}
+                                  {note.fileType || 'PDF'}
                                 </span>
                               </div>
                             </div>
@@ -3375,7 +2722,7 @@ const LectureNotes = () => {
                       alt={note.title}
                     />
                     <div className="lecture-notes-recommended-badge">
-                      {note.fileType || (note.fileSize?.toLowerCase().includes('pdf') ? 'PDF' : 'PPTX')}
+                      {note.fileType || 'PDF'}
                     </div>
                   </div>
                   <div className="lecture-notes-recommended-content">
