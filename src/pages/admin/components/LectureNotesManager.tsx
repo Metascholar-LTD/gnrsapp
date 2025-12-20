@@ -2041,7 +2041,7 @@ const LectureNotesManager = () => {
                       {formData.fileUrl ? 'File uploaded' : 'Click to upload or drag and drop'}
                     </p>
                     <p style={{ margin: 0, fontSize: '0.75rem', color: '#6b7280' }}>
-                      PDF, PPTX, PPT (Max 100MB)
+                      PDF "Upload PPTX or PPT files as PDFs" (Max 100MB)
                     </p>
                     {formData.fileUrl && (
                       <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#d1fae5', borderRadius: '0.5rem', color: '#065f46', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
