@@ -74,6 +74,8 @@ const LectureNotesManager = () => {
   const [isDetectingPages, setIsDetectingPages] = useState(false);
   const [isExtractingThumbnail, setIsExtractingThumbnail] = useState(false);
   const [useAutoThumbnail, setUseAutoThumbnail] = useState(true);
+  const [pagesAutoDetected, setPagesAutoDetected] = useState(false);
+  const [allowPagesEdit, setAllowPagesEdit] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -427,6 +429,10 @@ const LectureNotesManager = () => {
       }
 
       // Update form data with file URL, size, type, auto-detected page count, and thumbnail
+      const wasAutoDetected = pageCount > 0;
+      setPagesAutoDetected(wasAutoDetected);
+      setAllowPagesEdit(!wasAutoDetected); // Allow editing if auto-detection failed
+      
       setFormData(prev => ({
         ...prev,
         fileUrl: publicUrl,
@@ -495,6 +501,10 @@ const LectureNotesManager = () => {
       if (useAutoThumbnail) {
         setUseAutoThumbnail(false);
       }
+
+      // Reset pages detection state
+      setPagesAutoDetected(false);
+      setAllowPagesEdit(false);
 
       toast.success("File deleted successfully");
     } catch (error: any) {
@@ -673,6 +683,8 @@ const LectureNotesManager = () => {
 
       setEditing(null);
       setShowAddForm(false);
+      setPagesAutoDetected(false);
+      setAllowPagesEdit(false);
       setFormData({
         title: "",
         field: "",
@@ -758,6 +770,9 @@ const LectureNotesManager = () => {
     setEditing(note.id);
     // Check if university is in the list
     const foundUni = universities.find(u => u.name === note.university || u.short === note.universityShort);
+    // Reset pages detection state when editing (existing notes may not have been auto-detected)
+    setPagesAutoDetected(false);
+    setAllowPagesEdit(true);
     setFormData({
       title: note.title,
       field: note.field,
@@ -1928,31 +1943,84 @@ const LectureNotesManager = () => {
                   </p>
                 </div>
                 <div className="lnm-form-group">
-                  <label className="lnm-form-label">
+                  <label className="lnm-form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     Pages/Slides
-                    {formData.pages > 0 && formData.fileUrl && (
-                      <span style={{ fontSize: '0.75rem', color: '#10b981', marginLeft: '0.5rem', fontWeight: 'normal' }}>
-                        (Auto-detected)
+                    {pagesAutoDetected && formData.pages > 0 && !allowPagesEdit && (
+                      <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 'normal', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <CheckCircle2 className="w-3 h-3" />
+                        Auto-detected
                       </span>
                     )}
+                    {pagesAutoDetected && !allowPagesEdit && formData.pages > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setAllowPagesEdit(true);
+                        }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '0.125rem 0.25rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          color: '#3b82f6',
+                          fontSize: '0.75rem',
+                          borderRadius: '0.25rem',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#eff6ff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent';
+                        }}
+                        title="Edit page count"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                        Edit
+                      </button>
+                    )}
                   </label>
-                  <input
-                    type="number"
-                    className="lnm-form-input"
-                    value={formData.pages}
-                    onChange={(e) => setFormData(prev => ({ ...prev, pages: parseInt(e.target.value) || 0 }))}
-                    min="0"
-                    placeholder={isDetectingPages ? "Detecting pages..." : "Auto-detected or enter manually"}
-                    disabled={isDetectingPages}
-                    style={{
-                      backgroundColor: formData.pages > 0 && formData.fileUrl ? '#f0fdf4' : 'white',
-                      borderColor: formData.pages > 0 && formData.fileUrl ? '#86efac' : undefined
-                    }}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="number"
+                      className="lnm-form-input"
+                      value={formData.pages}
+                      onChange={(e) => setFormData(prev => ({ ...prev, pages: parseInt(e.target.value) || 0 }))}
+                      min="0"
+                      placeholder={isDetectingPages ? "Detecting pages..." : (pagesAutoDetected && !allowPagesEdit ? "Auto-detected" : "Enter page/slide count")}
+                      disabled={isDetectingPages || (pagesAutoDetected && !allowPagesEdit)}
+                      readOnly={pagesAutoDetected && !allowPagesEdit}
+                      style={{
+                        backgroundColor: pagesAutoDetected && !allowPagesEdit ? '#f0fdf4' : 'white',
+                        borderColor: pagesAutoDetected && !allowPagesEdit ? '#86efac' : undefined,
+                        cursor: pagesAutoDetected && !allowPagesEdit ? 'not-allowed' : 'text',
+                        paddingRight: pagesAutoDetected && !allowPagesEdit ? '2.5rem' : undefined,
+                      }}
+                    />
+                    {pagesAutoDetected && !allowPagesEdit && formData.pages > 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        right: '0.75rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        pointerEvents: 'none',
+                      }}>
+                        <CheckCircle2 className="w-4 h-4" style={{ color: '#10b981' }} />
+                      </div>
+                    )}
+                  </div>
                   {isDetectingPages && (
                     <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <Loader2 className="w-3 h-3 animate-spin" />
                       Analyzing file to detect page/slide count...
+                    </div>
+                  )}
+                  {pagesAutoDetected && allowPagesEdit && (
+                    <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>⚠️ Manual override enabled. The auto-detected value was {formData.pages}.</span>
                     </div>
                   )}
                 </div>
