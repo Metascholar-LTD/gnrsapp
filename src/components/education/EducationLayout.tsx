@@ -79,6 +79,7 @@ interface EducationPageLayoutProps {
   heroImage?: string;
   heroVideo?: string;
   heroVideoPoster?: string;
+  descriptionClassName?: string;
   children: ReactNode;
 }
 
@@ -96,6 +97,7 @@ export const EducationPageLayout = ({
   heroImage,
   heroVideo,
   heroVideoPoster,
+  descriptionClassName,
   children,
 }: EducationPageLayoutProps) => {
   const { theme: derivedTheme, signature } = deriveTheme(title, heroTheme);
@@ -173,7 +175,7 @@ export const EducationPageLayout = ({
                 {title}
               </h1>
               <div className="hero-title-separator" aria-hidden="true" />
-              <p className="text-lg md:text-xl text-white leading-relaxed">{description}</p>
+              <p className={descriptionClassName || "text-lg md:text-xl text-white leading-relaxed"}>{description}</p>
             </div>
 
             {heroActions && (

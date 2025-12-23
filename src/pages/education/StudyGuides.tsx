@@ -67,6 +67,7 @@ const StudyGuides = () => (
   <EducationPageLayout
     title="Study Guides & Tutorials"
     description="Publisher-grade guides crafted with lecturers, instructional designers, and industry mentors to make every study hour intentional."
+    descriptionClassName="text-sm md:text-base text-white leading-relaxed"
     breadcrumbs={[
       { label: "Home", href: "/" },
       { label: "Education Hub" },
