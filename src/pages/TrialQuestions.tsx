@@ -651,34 +651,49 @@ const TrialQuestions = () => {
 
                       {/* Stats and Actions */}
                       <div className="pt-3 border-t border-slate-100">
-                        <div className="flex items-center justify-between mb-2.5 text-xs text-slate-500 font-medium">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1">
-                              <Download className="w-3 h-3" />
-                              {formatNumber(question.downloads)}
-                            </div>
-                            <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => console.log('Preview:', question.id)}
+                            className="group relative inline-block text-[11px] font-medium text-slate-700 transition-colors duration-300 hover:text-blue-600"
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          >
+                            <motion.span
+                              className="relative inline-block pb-0.5 flex items-center gap-0.5"
+                              whileHover={{ x: 1 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            >
                               <Eye className="w-3 h-3" />
-                              {formatNumber(question.views)}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="h-8 w-8 p-0 border-slate-200 hover:bg-slate-50"
+                              Preview
+                              <span
+                                className="absolute bottom-0 left-0 h-[1px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                                style={{
+                                  width: 'calc(100% + 8px)',
+                                  clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                }}
+                              />
+                            </motion.span>
+                          </button>
+                          <button
+                            onClick={() => console.log('Download:', question.id)}
+                            className="group relative inline-block text-[11px] font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                           >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            size="sm"
-                            className="h-8 text-xs font-medium bg-slate-700 hover:bg-slate-800 text-white"
-                          >
-                            <Download className="w-3 h-3 mr-1" />
-                            Download
-                          </Button>
+                            <motion.span
+                              className="relative inline-block pb-0.5 flex items-center gap-0.5"
+                              whileHover={{ x: 1 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            >
+                              <Download className="w-3 h-3" />
+                              Download
+                              <span
+                                className="absolute bottom-0 left-0 h-[1px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                                style={{
+                                  width: 'calc(100% + 8px)',
+                                  clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                }}
+                              />
+                            </motion.span>
+                          </button>
                         </div>
                       </div>
                     </div>

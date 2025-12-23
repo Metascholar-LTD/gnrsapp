@@ -435,15 +435,10 @@ export const Navigation = React.memo(() => {
   return (
     <>
       <div id="nav-wrapper" className="nav-fixed-top">
-        <div className="nav-top-bar">
+        {/* Top bar commented out - removed contact info and social icons */}
+        {/* <div className="nav-top-bar">
           <div className="nav-top-bar-content">
-            <div className="nav-top-bar-left">
-              <small><i className="fa fa-map-marker-alt nav-top-icon"></i>Accra, Ghana</small>
-              <small><i className="fa fa-clock nav-top-icon"></i>Mon - Fri: 8.00 am - 5.00 pm</small>
-            </div>
             <div className="nav-top-bar-right">
-              <small><i className="fa fa-envelope nav-top-icon"></i>info@gnrs.gov.gh</small>
-              <small><i className="fa fa-phone-alt nav-top-icon"></i>+233 XX XXX XXXX</small>
               <div className="nav-top-social">
                 <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="nav-top-social-icon" aria-label="Facebook">
                   <i className="fab fa-facebook-f"></i>
@@ -457,7 +452,7 @@ export const Navigation = React.memo(() => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <nav id="nav-main" className="nav-main">
           <Link to="/" className="nav-brand" onClick={closeMobileMenu}>
@@ -682,11 +677,6 @@ export const Navigation = React.memo(() => {
                   <i className="fab fa-linkedin-in"></i>
                 </a>
               </div>
-            </div>
-            <div className="nav-mobile-contact">
-              <p><i className="fa fa-map-marker-alt nav-mobile-contact-icon"></i>Accra, Ghana</p>
-              <p><i className="fa fa-phone-alt nav-mobile-contact-icon"></i>+233 XX XXX XXXX</p>
-              <p><i className="fa fa-envelope nav-mobile-contact-icon"></i>info@gnrs.gov.gh</p>
             </div>
           </div>
         </div>
