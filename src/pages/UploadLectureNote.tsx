@@ -469,7 +469,7 @@ const UploadLectureNote = () => {
     .upload-lecture-note-title {
       font-size: 2rem;
       font-weight: 700;
-      color: #0066cc;
+      color: #4b5563;
       margin: 0 0 0.5rem 0;
       text-align: center;
       letter-spacing: 0.01em;

@@ -30,3 +30,6 @@ dist-ssr
 /meta-consult
 /Resume_Builder
 /pages
+
+# Large unused dependencies
+/public/nutrient-viewer
