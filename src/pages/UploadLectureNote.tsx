@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { extractThumbnailWithCloudinary } from "@/utils/cloudinary";
 import { DIRECTORY_PADDING, MEDIA_QUERIES } from "@/lib/breakpoints";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface FormData {
   title: string;
@@ -415,6 +416,8 @@ const UploadLectureNote = () => {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
+  const fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
+
   const isolatedStyles = `
     .upload-lecture-note-page {
       min-height: 100vh;
@@ -427,15 +430,62 @@ const UploadLectureNote = () => {
       flex: 1;
       display: flex;
       flex-direction: column;
-      max-width: 900px;
+      max-width: 1400px;
       margin: 0 auto;
       width: 100%;
       padding: ${DIRECTORY_PADDING.MOBILE.PADDING};
       padding-top: ${DIRECTORY_PADDING.MOBILE.PADDING_TOP};
     }
 
-    .upload-lecture-note-header {
-      margin-bottom: 2rem;
+    .upload-lecture-note-back-button-wrapper {
+      margin-bottom: 1.5rem;
+    }
+
+    .upload-lecture-note-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      width: 100%;
+    }
+
+    .upload-lecture-note-animation-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .upload-lecture-note-animation {
+      width: 100%;
+      max-width: 320px;
+      height: 320px;
+    }
+
+    .upload-lecture-note-title-section {
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    .upload-lecture-note-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0066cc;
+      margin: 0 0 0.5rem 0;
+      text-align: center;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+    }
+
+    .upload-lecture-note-subtitle {
+      font-size: 1rem;
+      color: #4b5563;
+      margin: 0;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .upload-lecture-note-form-wrapper {
+      width: 100%;
     }
 
     .upload-lecture-note-back-button {
@@ -460,35 +510,21 @@ const UploadLectureNote = () => {
       color: #1e293b;
     }
 
-    .upload-lecture-note-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #1e293b;
-      margin: 0 0 0.5rem 0;
-      line-height: 1.2;
-    }
-
-    .upload-lecture-note-subtitle {
-      font-size: 1rem;
-      color: #64748b;
-      margin: 0;
-      line-height: 1.5;
-    }
-
     .upload-lecture-note-card {
       background: white;
-      border-radius: 1rem;
-      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      border: 1px solid #e6e8ef;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       overflow: hidden;
       flex: 1;
       display: flex;
       flex-direction: column;
+      max-width: 100%;
     }
 
     .upload-lecture-note-card-header {
-      padding: ${DIRECTORY_PADDING.MOBILE.PADDING};
-      border-bottom: 1px solid #e2e8f0;
+      padding: 1.25rem ${DIRECTORY_PADDING.MOBILE.PADDING};
+      border-bottom: 1px solid #e6e8ef;
       background: white;
     }
 
@@ -499,8 +535,8 @@ const UploadLectureNote = () => {
     }
 
     .upload-lecture-note-card-footer {
-      padding: ${DIRECTORY_PADDING.MOBILE.PADDING};
-      border-top: 1px solid #e2e8f0;
+      padding: 1rem ${DIRECTORY_PADDING.MOBILE.PADDING};
+      border-top: 1px solid #e6e8ef;
       background: #f8fafc;
       display: flex;
       align-items: center;
@@ -541,8 +577,29 @@ const UploadLectureNote = () => {
         padding-top: ${DIRECTORY_PADDING.TABLET.PADDING_TOP};
       }
 
+      .upload-lecture-note-layout {
+        grid-template-columns: 5fr 7fr;
+        gap: 3rem;
+        align-items: start;
+      }
+
+      .upload-lecture-note-animation-wrapper {
+        position: sticky;
+        top: 100px;
+      }
+
+      .upload-lecture-note-animation {
+        max-width: 100%;
+        width: 100%;
+        height: 320px;
+      }
+
+      .upload-lecture-note-title {
+        font-size: 2rem;
+      }
+
       .upload-lecture-note-card-header {
-        padding: ${DIRECTORY_PADDING.TABLET.PADDING};
+        padding: 1.25rem ${DIRECTORY_PADDING.TABLET.PADDING};
       }
 
       .upload-lecture-note-card-content {
@@ -550,11 +607,7 @@ const UploadLectureNote = () => {
       }
 
       .upload-lecture-note-card-footer {
-        padding: ${DIRECTORY_PADDING.TABLET.PADDING};
-      }
-
-      .upload-lecture-note-title {
-        font-size: 2.25rem;
+        padding: 1rem ${DIRECTORY_PADDING.TABLET.PADDING};
       }
     }
 
@@ -565,8 +618,29 @@ const UploadLectureNote = () => {
         padding-top: ${DIRECTORY_PADDING.DESKTOP.PADDING_TOP};
       }
 
+      .upload-lecture-note-layout {
+        grid-template-columns: 5fr 7fr;
+        gap: 3rem;
+        align-items: start;
+      }
+
+      .upload-lecture-note-animation-wrapper {
+        position: sticky;
+        top: 120px;
+      }
+
+      .upload-lecture-note-animation {
+        max-width: 100%;
+        width: 100%;
+        height: 320px;
+      }
+
+      .upload-lecture-note-title {
+        font-size: 2rem;
+      }
+
       .upload-lecture-note-card-header {
-        padding: ${DIRECTORY_PADDING.DESKTOP.PADDING};
+        padding: 1.25rem ${DIRECTORY_PADDING.DESKTOP.PADDING};
       }
 
       .upload-lecture-note-card-content {
@@ -574,11 +648,7 @@ const UploadLectureNote = () => {
       }
 
       .upload-lecture-note-card-footer {
-        padding: ${DIRECTORY_PADDING.DESKTOP.PADDING};
-      }
-
-      .upload-lecture-note-title {
-        font-size: 2.5rem;
+        padding: 1rem ${DIRECTORY_PADDING.DESKTOP.PADDING};
       }
     }
 
@@ -589,8 +659,29 @@ const UploadLectureNote = () => {
         padding-top: ${DIRECTORY_PADDING.LARGE_DESKTOP.PADDING_TOP};
       }
 
+      .upload-lecture-note-layout {
+        grid-template-columns: 5fr 7fr;
+        gap: 3rem;
+        align-items: start;
+      }
+
+      .upload-lecture-note-animation-wrapper {
+        position: sticky;
+        top: 120px;
+      }
+
+      .upload-lecture-note-animation {
+        max-width: 100%;
+        width: 100%;
+        height: 320px;
+      }
+
+      .upload-lecture-note-title {
+        font-size: 2rem;
+      }
+
       .upload-lecture-note-card-header {
-        padding: ${DIRECTORY_PADDING.LARGE_DESKTOP.PADDING};
+        padding: 1.25rem ${DIRECTORY_PADDING.LARGE_DESKTOP.PADDING};
       }
 
       .upload-lecture-note-card-content {
@@ -598,11 +689,7 @@ const UploadLectureNote = () => {
       }
 
       .upload-lecture-note-card-footer {
-        padding: ${DIRECTORY_PADDING.LARGE_DESKTOP.PADDING};
-      }
-
-      .upload-lecture-note-title {
-        font-size: 2.75rem;
+        padding: 1rem ${DIRECTORY_PADDING.LARGE_DESKTOP.PADDING};
       }
     }
   `;
@@ -612,8 +699,8 @@ const UploadLectureNote = () => {
       <style>{isolatedStyles}</style>
       
       <div className="upload-lecture-note-container">
-        {/* Header */}
-        <div className="upload-lecture-note-header">
+        {/* Back Button */}
+        <div className="upload-lecture-note-back-button-wrapper">
           <button
             onClick={() => navigate('/education/lecture-notes')}
             className="upload-lecture-note-back-button"
@@ -621,24 +708,70 @@ const UploadLectureNote = () => {
             <BackIcon className="w-4 h-4" />
             Back to Lecture Notes
           </button>
-          <h1 className="upload-lecture-note-title">Upload Lecture Note</h1>
-          <p className="upload-lecture-note-subtitle">
-            Share your knowledge and inspire the next generation
-          </p>
         </div>
 
-        {/* Main Card */}
-        <div className="upload-lecture-note-card">
+        {/* Layout: Animation + Form */}
+        <div className="upload-lecture-note-layout">
+          {/* Left Side - Animation with Title */}
+          <div className="upload-lecture-note-animation-wrapper">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="upload-lecture-note-animation"
+            >
+              <DotLottieReact
+                src="https://lottie.host/a8b91dde-8500-4d9d-903c-298886ed34b1/EKa41OwTn9.lottie"
+                loop
+                autoplay
+                style={{ width: '100%', height: '100%' }}
+              />
+            </motion.div>
+            <div className="upload-lecture-note-title-section">
+              <h1 
+                className="upload-lecture-note-title"
+                style={{ fontFamily: fontFamily }}
+              >
+                Upload Lecture Note
+              </h1>
+              <p 
+                className="upload-lecture-note-subtitle"
+                style={{ fontFamily: fontFamily }}
+              >
+                Share your knowledge and inspire the next generation
+              </p>
+            </div>
+          </div>
+
+          {/* Right Side - Form */}
+          <div className="upload-lecture-note-form-wrapper">
+            {/* Main Card */}
+            <div className="upload-lecture-note-card">
           {/* Card Header */}
           <div className="upload-lecture-note-card-header">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 m-0">
+                <h2 
+                  className="text-lg font-semibold m-0"
+                  style={{ 
+                    fontSize: '1.13rem', 
+                    fontWeight: 600, 
+                    color: '#0066cc',
+                    fontFamily: fontFamily 
+                  }}
+                >
                   {step === 1 && "Select Your File"}
                   {step === 2 && "Add Details"}
                   {step === 3 && "Review & Submit"}
                 </h2>
-                <p className="text-sm text-slate-600 mt-1 m-0">
+                <p 
+                  className="text-sm mt-1 m-0"
+                  style={{ 
+                    fontSize: '0.9375rem',
+                    color: '#4b5563',
+                    fontFamily: fontFamily 
+                  }}
+                >
                   {step === 1 && "Upload a PDF, PPT, or PPTX file (max 100MB)"}
                   {step === 2 && "Provide information about your lecture note"}
                   {step === 3 && "Please review your information before submitting"}
@@ -763,7 +896,15 @@ const UploadLectureNote = () => {
                   <div className="space-y-4">
                     {/* Title */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                      <label 
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
                         Title <span className="text-red-500">*</span>
                       </label>
                       <Input
@@ -782,7 +923,15 @@ const UploadLectureNote = () => {
 
                     {/* Field */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                      <label 
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
                         Field/Category <span className="text-red-500">*</span>
                       </label>
                       <Select
@@ -810,7 +959,15 @@ const UploadLectureNote = () => {
 
                     {/* Lecturer */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                      <label 
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
                         Lecturer/Author <span className="text-red-500">*</span>
                       </label>
                       <Input
@@ -829,7 +986,15 @@ const UploadLectureNote = () => {
 
                     {/* University / Affiliation */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                      <label 
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
                         University / Affiliation <span className="text-red-500">*</span>
                       </label>
                       <Select
@@ -875,7 +1040,15 @@ const UploadLectureNote = () => {
 
                     {/* Pages */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                      <label 
+                        className="block text-sm font-medium mb-1.5"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
                         Number of {fileType === "PDF" ? "Pages" : "Slides"} <span className="text-red-500">*</span>
                       </label>
                       <Input
@@ -907,47 +1080,164 @@ const UploadLectureNote = () => {
                   transition={{ duration: 0.3 }}
                   className="space-y-5"
                 >
-                  <div className="bg-slate-50 rounded-lg p-6 space-y-4 border border-slate-200">
+                  <div className="bg-[#f8fafc] rounded-lg p-6 space-y-4 border border-[#e6e8ef]">
                     <div className="flex items-start gap-3">
-                      <FileText className="w-5 h-5 text-slate-600 mt-0.5 flex-shrink-0" />
+                      <FileText className="w-5 h-5 text-[#4b5563] mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-700">File</p>
-                        <p className="text-sm text-slate-600 truncate">{file?.name}</p>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p 
+                          className="text-sm font-medium mb-1"
+                          style={{ 
+                            fontSize: '0.9375rem',
+                            fontWeight: 600,
+                            color: '#1e293b',
+                            fontFamily: fontFamily 
+                          }}
+                        >
+                          File
+                        </p>
+                        <p 
+                          className="text-sm truncate"
+                          style={{ 
+                            fontSize: '0.9375rem',
+                            color: '#4b5563',
+                            fontFamily: fontFamily 
+                          }}
+                        >
+                          {file?.name}
+                        </p>
+                        <p 
+                          className="text-xs mt-1"
+                          style={{ 
+                            fontSize: '0.8125rem',
+                            color: '#6b7280',
+                            fontFamily: fontFamily 
+                          }}
+                        >
                           {formatFileSize(file?.size || 0)} • {fileType}
                         </p>
                       </div>
                     </div>
 
-                    <div className="h-px bg-slate-200" />
+                    <div className="h-px bg-[#e6e8ef]" />
 
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-1">Title</p>
-                      <p className="text-sm text-slate-900">{formData.title}</p>
+                      <p 
+                        className="text-sm font-medium mb-1"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
+                        Title
+                      </p>
+                      <p 
+                        className="text-sm"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
+                        {formData.title}
+                      </p>
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-1">Field</p>
-                      <p className="text-sm text-slate-900">{formData.field}</p>
+                      <p 
+                        className="text-sm font-medium mb-1"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
+                        Field
+                      </p>
+                      <p 
+                        className="text-sm"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
+                        {formData.field}
+                      </p>
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-1">Lecturer</p>
-                      <p className="text-sm text-slate-900">{formData.lecturer}</p>
+                      <p 
+                        className="text-sm font-medium mb-1"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
+                        Lecturer
+                      </p>
+                      <p 
+                        className="text-sm"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
+                        {formData.lecturer}
+                      </p>
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-1">University / Affiliation</p>
-                      <p className="text-sm text-slate-900">
+                      <p 
+                        className="text-sm font-medium mb-1"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
+                        University / Affiliation
+                      </p>
+                      <p 
+                        className="text-sm"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
                         {formData.university === "custom" ? formData.customUniversity : formData.university}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-1">
+                      <p 
+                        className="text-sm font-medium mb-1"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
                         {fileType === "PDF" ? "Pages" : "Slides"}
                       </p>
-                      <p className="text-sm text-slate-900">{formData.pages}</p>
+                      <p 
+                        className="text-sm"
+                        style={{ 
+                          fontSize: '0.9375rem',
+                          color: '#1e293b',
+                          fontFamily: fontFamily 
+                        }}
+                      >
+                        {formData.pages}
+                      </p>
                     </div>
                   </div>
 
@@ -1027,6 +1317,8 @@ const UploadLectureNote = () => {
                 )}
               </Button>
             )}
+          </div>
+        </div>
           </div>
         </div>
       </div>
