@@ -2331,7 +2331,7 @@ const LectureNotes = () => {
                               {/* Bottom Section: Actions */}
                               <div className="flex items-center gap-3 pt-1.5 border-t border-slate-100">
                                 <button
-                                  onClick={() => console.log('Preview:', note.id)}
+                                  onClick={() => window.open(`/education/lecture-notes/${note.id}`, '_blank')}
                                   className="group relative inline-block text-[11px] font-medium text-slate-700 transition-colors duration-300 hover:text-blue-600"
                                   style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                                 >
@@ -2714,7 +2714,7 @@ const LectureNotes = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                   whileHover={{ y: -2 }}
-                  onClick={() => console.log('View recommended:', note.id)}
+                  onClick={() => window.open(`/education/lecture-notes/${note.id}`, '_blank')}
                 >
                   <div className="lecture-notes-recommended-thumbnail">
                     <img
