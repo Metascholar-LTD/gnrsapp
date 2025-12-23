@@ -15,7 +15,6 @@ import {
   Filter,
   X,
   CheckCircle2,
-  Calendar,
   File,
   Target
 } from "lucide-react";
@@ -623,29 +622,10 @@ const TrialQuestions = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-transparent"></div>
                       
-                      {/* University Logo and Name - Top Right */}
-                      {universityLogos[question.universityShort] && (
-                        <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5">
-                          <div className="w-10 h-10 rounded-lg bg-slate-100/95 backdrop-blur-sm p-1.5 shadow-lg flex items-center justify-center border border-white/20">
-                            <img 
-                              src={universityLogos[question.universityShort]} 
-                              alt={question.universityShort}
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                          <span className="text-xs font-semibold text-white/95 bg-black/20 backdrop-blur-sm px-2 py-0.5 rounded-md">
-                            {question.universityShort}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {/* Top Section - Course Code and Difficulty */}
+                      {/* Top Section - Course Code */}
                       <div className="absolute top-3 left-3 z-10 flex items-center gap-2 flex-wrap">
                         <Badge className="px-2.5 py-1 text-xs font-bold bg-sky-100 text-slate-800 border-0 hover:bg-sky-100 hover:text-slate-800">
                           {question.courseCode}
-                        </Badge>
-                        <Badge className={`px-2.5 py-1 text-xs font-bold border-0 ${getDifficultyColor(question.difficulty)}`}>
-                          {question.difficulty}
                         </Badge>
                         {question.verified && (
                           <CheckCircle2 className="w-4 h-4 text-green-400" />
@@ -666,10 +646,6 @@ const TrialQuestions = () => {
                         <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
                           <Target className="w-3.5 h-3.5" />
                           <span>{question.questions} questions</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>{question.semester} Sem, {question.year} • {question.fileSize}</span>
                         </div>
                       </div>
 
