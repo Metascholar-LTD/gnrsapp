@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 interface LectureNote {
   id: string;
@@ -83,6 +84,7 @@ const LectureNotes = () => {
   // Multiple carousel scroll states
   const [carouselScrollStates, setCarouselScrollStates] = useState<Record<number, { canScrollLeft: boolean; canScrollRight: boolean }>>({});
   const scrollContainerRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const navigate = useNavigate();
 
   // Auto-collapse sidebar on smaller desktop sizes (1200px - 1599px) on initial load
   useEffect(() => {
@@ -2452,7 +2454,10 @@ const LectureNotes = () => {
                         Choose your file and add it here.
                       </p>
                       <div className="lecture-notes-upload-button-wrapper">
-                        <button className="lecture-notes-upload-button">
+                        <button 
+                          className="lecture-notes-upload-button"
+                          onClick={() => navigate('/education/lecture-notes/upload')}
+                        >
                           <Upload className="w-4 h-4 mr-1.5" />
                           Upload a presentation
                         </button>

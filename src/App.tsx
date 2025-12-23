@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import PastQuestions from "./pages/PastQuestions";
 import LectureNotes from "./pages/LectureNotes";
 import LectureNoteViewer from "./pages/LectureNoteViewer";
+import UploadLectureNote from "./pages/UploadLectureNote";
 import TrialQuestions from "./pages/TrialQuestions";
 import ScholarshipHub from "./pages/scholarship/ScholarshipHub";
 import ScholarshipView from "./pages/scholarship/ScholarshipView";
@@ -115,6 +116,7 @@ const App = () => (
           <Route path="/education/past-questions" element={<PastQuestions />} />
           <Route path="/education/shs-bece-questions" element={<ShsBeceQuestions />} />
           <Route path="/education/lecture-notes" element={<LectureNotes />} />
+          <Route path="/education/lecture-notes/upload" element={<UploadLectureNote />} />
           <Route path="/education/lecture-notes/:id" element={<LectureNoteViewer />} />
           <Route path="/education/trial-questions" element={<TrialQuestions />} />
           <Route path="/education/study-guides" element={<StudyGuides />} />
