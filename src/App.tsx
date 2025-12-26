@@ -12,6 +12,7 @@ import LectureNotes from "./pages/LectureNotes";
 import LectureNoteViewer from "./pages/LectureNoteViewer";
 import UploadLectureNote from "./pages/UploadLectureNote";
 import TrialQuestions from "./pages/TrialQuestions";
+import TrialQuestionDetail from "./pages/TrialQuestionDetail";
 import ScholarshipHub from "./pages/scholarship/ScholarshipHub";
 import ScholarshipView from "./pages/scholarship/ScholarshipView";
 import FieldBasedScholarships from "./pages/scholarship/FieldBasedScholarships";
@@ -119,6 +120,7 @@ const App = () => (
           <Route path="/education/lecture-notes/upload" element={<UploadLectureNote />} />
           <Route path="/education/lecture-notes/:id" element={<LectureNoteViewer />} />
           <Route path="/education/trial-questions" element={<TrialQuestions />} />
+          <Route path="/education/trial-questions/:id" element={<TrialQuestionDetail />} />
           <Route path="/education/study-guides" element={<StudyGuides />} />
           <Route path="/education/ebooks" element={<Ebooks />} />
           <Route path="/education/course-recommendations" element={<CourseRecommendations />} />
