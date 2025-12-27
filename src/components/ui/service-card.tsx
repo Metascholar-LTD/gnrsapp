@@ -11,10 +11,10 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
-        red: "bg-red-500/90 text-primary-foreground",
-        blue: "bg-blue-500/90 text-primary-foreground",
-        gray: "bg-secondary text-secondary-foreground",
+        default: "bg-slate-50 text-slate-900 border border-slate-200/60 hover:border-slate-300/50",
+        blue: "bg-slate-50/90 text-slate-900 border border-slate-200/50 hover:border-slate-300/60",
+        gray: "bg-slate-100/70 text-slate-900 border border-slate-300/40 hover:border-slate-400/50",
+        red: "bg-slate-50/80 text-slate-900 border border-slate-200/40 hover:border-slate-300/50",
       },
     },
     defaultVariants: {
@@ -84,7 +84,7 @@ const ServiceCard = React.forwardRef<HTMLDivElement, ServiceCardProps>(
           <a
             href={href}
             aria-label={`Learn more about ${title}`}
-            className="mt-auto flex items-center text-xs font-semibold group-hover:underline"
+            className="mt-auto flex items-center text-xs font-semibold text-slate-700 hover:text-slate-900 group-hover:underline transition-colors"
           >
             DOWNLOAD
             <motion.div variants={arrowAnimation}>

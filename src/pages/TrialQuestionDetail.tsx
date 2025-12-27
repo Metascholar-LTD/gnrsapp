@@ -22,6 +22,7 @@ import {
   File
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface MCQ {
   id: string;
@@ -393,49 +394,66 @@ const TrialQuestionDetail = () => {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Trial Questions
               </Button>
-
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <Badge className="px-3 py-1 bg-blue-100 text-blue-700 border-0">
-                        {mockData.courseCode}
-                      </Badge>
-                      <span className="text-sm text-slate-500">{mockData.universityShort}</span>
-                    </div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
-                      {mockData.title}
-                    </h1>
-                    <p className="text-slate-600">{mockData.courseName} • {mockData.faculty}</p>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Tabs */}
             <div className="mb-6">
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-1 inline-flex gap-2">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'flex-start' }}>
                 <button
                   onClick={() => setActiveTab("mcq")}
-                  className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 ${
-                    activeTab === "mcq"
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                  }`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    border: `1px solid ${activeTab === "mcq" ? '#0066cc' : '#e5e5e5'}`,
+                    borderRadius: '0.5rem',
+                    background: activeTab === "mcq" ? '#0066cc' : '#ffffff',
+                    color: activeTab === "mcq" ? '#ffffff' : '#000000',
+                    fontWeight: 500,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontFamily: fontFamily
+                  }}
                 >
-                  <Target className="w-4 h-4" />
-                  MCQs ({mockData.mcqs.length})
+                  <Target size={16} style={{ color: activeTab === "mcq" ? '#ffffff' : '#000000' }} />
+                  <span>MCQs</span>
+                  <span style={{
+                    background: activeTab === "mcq" ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+                    padding: '0.125rem 0.5rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600
+                  }}>{mockData.mcqs.length}</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("written")}
-                  className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 ${
-                    activeTab === "written"
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                  }`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    border: `1px solid ${activeTab === "written" ? '#0066cc' : '#e5e5e5'}`,
+                    borderRadius: '0.5rem',
+                    background: activeTab === "written" ? '#0066cc' : '#ffffff',
+                    color: activeTab === "written" ? '#ffffff' : '#000000',
+                    fontWeight: 500,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontFamily: fontFamily
+                  }}
                 >
-                  <FileText className="w-4 h-4" />
-                  Section B ({mockData.writtenQuestions.length})
+                  <FileText size={16} style={{ color: activeTab === "written" ? '#ffffff' : '#000000' }} />
+                  <span>Section B</span>
+                  <span style={{
+                    background: activeTab === "written" ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+                    padding: '0.125rem 0.5rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600
+                  }}>{mockData.sectionBDocuments.length}</span>
                 </button>
               </div>
             </div>
@@ -443,32 +461,26 @@ const TrialQuestionDetail = () => {
             {/* MCQ Section - FAQs Style */}
             {activeTab === "mcq" && (
               <div className="grid grid-cols-1 desktop:grid-cols-12 gap-12 items-start">
-                {/* Left Column - Info */}
-                <div className="desktop:col-span-5 flex flex-col">
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-                    <h2 className="text-xl font-bold text-slate-900 mb-4" style={{ fontFamily }}>
-                      Practice Questions
-                    </h2>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-600" style={{ fontFamily }}>Page</span>
-                        <span className="font-semibold text-slate-900" style={{ fontFamily }}>
-                          {currentPage} of {totalPages}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-600" style={{ fontFamily }}>Questions</span>
-                        <span className="font-semibold text-slate-900" style={{ fontFamily }}>
-                          {answeredQuestions.size} / {mockData.mcqs.length} answered
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-600" style={{ fontFamily }}>Current Page</span>
-                        <span className={`font-semibold ${currentPageAnswered ? 'text-green-600' : 'text-amber-600'}`} style={{ fontFamily }}>
-                          {currentPageQuestions.filter(q => answeredQuestions.has(q.id)).length} / {currentPageQuestions.length}
-                        </span>
-                      </div>
+                {/* Left Column - Animation */}
+                <div className="desktop:col-span-5 flex flex-col items-center">
+                  <DotLottieReact
+                    src="https://lottie.host/4cec0971-25c2-4494-847e-233a665c648e/VHp9KJUzBX.lottie"
+                    loop
+                    autoplay
+                    style={{ height: '280px', width: '280px' }}
+                  />
+                  <div className="mt-6 text-center w-full">
+                    <div className="flex items-center justify-center mb-3">
+                      <Badge className="px-3 py-1 bg-slate-100 text-slate-700 border-0 hover:bg-slate-100 hover:text-slate-700" style={{ fontFamily }}>
+                        {mockData.courseCode}
+                      </Badge>
                     </div>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily }}>
+                      {mockData.title}
+                    </h2>
+                    <p className="text-sm text-slate-600" style={{ fontFamily }}>
+                      {mockData.courseName} • {mockData.faculty}
+                    </p>
                   </div>
                 </div>
 
