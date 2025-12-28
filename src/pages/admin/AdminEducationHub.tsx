@@ -13,6 +13,7 @@ import {
 import PastQuestionsManager from "./components/PastQuestionsManager";
 import ShsBeceQuestionsManager from "./components/ShsBeceQuestionsManager";
 import LectureNotesManager from "./components/LectureNotesManager";
+import TrialQuestionsManager from "./components/TrialQuestionsManager";
 
 const AdminEducationHub = () => {
   const [activeTab, setActiveTab] = useState("university-past-questions");
@@ -598,6 +599,11 @@ const AdminEducationHub = () => {
     // Render LectureNotesManager for lecture notes and e-learning
     if (tabId === "lecture-notes") {
       return <LectureNotesManager />;
+    }
+
+    // Render TrialQuestionsManager for trial questions
+    if (tabId === "trial-questions") {
+      return <TrialQuestionsManager />;
     }
 
     const IconComponent = tab.icon;

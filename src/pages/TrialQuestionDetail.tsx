@@ -68,6 +68,76 @@ interface TrialQuestionData {
 
 const QUESTIONS_PER_PAGE = 10;
 
+// Mock questions data matching TrialQuestions.tsx
+const allTrialQuestions = [
+  { 
+    id: "1", 
+    title: "Mathematics Practice Set 1", 
+    courseCode: "MATH 101",
+    courseName: "Basic Mathematics",
+    faculty: "Engineering", 
+    year: 2024, 
+    semester: "1st" as const,
+    university: "University of Ghana", 
+    universityShort: "UG",
+  },
+  { 
+    id: "2", 
+    title: "Chemistry Fundamentals Practice", 
+    courseCode: "CHEM 101",
+    courseName: "General Chemistry",
+    faculty: "Physical & Biological Sciences", 
+    year: 2024, 
+    semester: "1st" as const,
+    university: "Kwame Nkrumah University of Science and Technology", 
+    universityShort: "KNUST",
+  },
+  { 
+    id: "3", 
+    title: "English Language Practice Test", 
+    courseCode: "ENG 101",
+    courseName: "English Language",
+    faculty: "Arts & Humanities", 
+    year: 2024, 
+    semester: "1st" as const,
+    university: "University of Cape Coast", 
+    universityShort: "UCC",
+  },
+  { 
+    id: "4", 
+    title: "Physics Problem Set", 
+    courseCode: "PHY 201",
+    courseName: "General Physics",
+    faculty: "Engineering", 
+    year: 2024, 
+    semester: "1st" as const,
+    university: "University of Mines and Technology", 
+    universityShort: "UMaT",
+  },
+  { 
+    id: "5", 
+    title: "Economics Practice Questions", 
+    courseCode: "ECO 101",
+    courseName: "Introduction to Economics",
+    faculty: "Business & Economics", 
+    year: 2024, 
+    semester: "1st" as const,
+    university: "University of Ghana", 
+    universityShort: "UG",
+  },
+  { 
+    id: "6", 
+    title: "Computer Science Practice Set", 
+    courseCode: "CS 101",
+    courseName: "Introduction to Computer Science",
+    faculty: "Computing & IT", 
+    year: 2024, 
+    semester: "1st" as const,
+    university: "University of Ghana", 
+    universityShort: "UG",
+  },
+];
+
 const TrialQuestionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -77,17 +147,20 @@ const TrialQuestionDetail = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showResult, setShowResult] = useState<Record<string, boolean>>({});
 
+  // Get the selected question data based on ID
+  const selectedQuestion = allTrialQuestions.find(q => q.id === id) || allTrialQuestions[0];
+
   // Mock data - In production, this would come from an API
   const mockData: TrialQuestionData = {
-    id: id || "1",
-    title: "Mathematics Practice Set 1",
-    courseCode: "MATH 101",
-    courseName: "Basic Mathematics",
-    faculty: "Engineering",
-    year: 2024,
-    semester: "1st",
-    university: "University of Ghana",
-    universityShort: "UG",
+    id: selectedQuestion.id,
+    title: selectedQuestion.title,
+    courseCode: selectedQuestion.courseCode,
+    courseName: selectedQuestion.courseName,
+    faculty: selectedQuestion.faculty,
+    year: selectedQuestion.year,
+    semester: selectedQuestion.semester,
+    university: selectedQuestion.university,
+    universityShort: selectedQuestion.universityShort,
     mcqs: [
       {
         id: "mcq-1",

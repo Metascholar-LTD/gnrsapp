@@ -46,7 +46,6 @@ interface TrialQuestion {
   uploadDate: string;
   verified: boolean;
   questions: number;
-  difficulty: "Easy" | "Medium" | "Hard";
   imageUrl?: string;
 }
 
@@ -94,7 +93,6 @@ const TrialQuestions = () => {
       uploadDate: "2024-02-15",
       verified: true,
       questions: 50,
-      difficulty: "Medium",
       imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80"
     },
     { 
@@ -114,7 +112,6 @@ const TrialQuestions = () => {
       uploadDate: "2024-02-10",
       verified: true,
       questions: 45,
-      difficulty: "Hard",
       imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80"
     },
     { 
@@ -134,7 +131,6 @@ const TrialQuestions = () => {
       uploadDate: "2024-02-08",
       verified: true,
       questions: 40,
-      difficulty: "Easy",
       imageUrl: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&auto=format&fit=crop&q=80"
     },
     { 
@@ -154,7 +150,6 @@ const TrialQuestions = () => {
       uploadDate: "2024-02-12",
       verified: true,
       questions: 55,
-      difficulty: "Hard",
       imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80"
     },
     { 
@@ -174,7 +169,6 @@ const TrialQuestions = () => {
       uploadDate: "2024-02-05",
       verified: true,
       questions: 42,
-      difficulty: "Medium",
       imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=80"
     },
     { 
@@ -194,7 +188,6 @@ const TrialQuestions = () => {
       uploadDate: "2024-02-20",
       verified: true,
       questions: 60,
-      difficulty: "Medium",
       imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80"
     },
   ];
@@ -218,9 +211,8 @@ const TrialQuestions = () => {
     const matchesFaculty = !selectedFaculty || question.faculty === selectedFaculty;
     const matchesYear = !selectedYear || question.year === selectedYear;
     const matchesSemester = !selectedSemester || question.semester === selectedSemester;
-    const matchesDifficulty = !selectedDifficulty || question.difficulty === selectedDifficulty;
     
-    return matchesSearch && matchesUniversity && matchesFaculty && matchesYear && matchesSemester && matchesDifficulty;
+    return matchesSearch && matchesUniversity && matchesFaculty && matchesYear && matchesSemester
   });
 
   const clearAllFilters = () => {
@@ -232,7 +224,7 @@ const TrialQuestions = () => {
     setSelectedDifficulty(null);
   };
 
-  const hasActiveFilters = selectedUniversity || selectedFaculty || selectedYear || selectedSemester || selectedDifficulty;
+  const hasActiveFilters = selectedUniversity || selectedFaculty || selectedYear || selectedSemester
 
   const formatNumber = (num: number): string => {
     if (num >= 1000000) {
