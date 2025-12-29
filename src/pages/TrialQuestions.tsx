@@ -69,7 +69,6 @@ const TrialQuestions = () => {
   const [selectedUniversity, setSelectedUniversity] = useState<string | null>(null);
   const [selectedFaculty, setSelectedFaculty] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [trialQuestions, setTrialQuestions] = useState<TrialQuestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -147,7 +146,6 @@ const TrialQuestions = () => {
   const universities = Array.from(new Set(trialQuestions.map(q => q.universityShort))).sort();
   const faculties = Array.from(new Set(trialQuestions.map(q => q.faculty))).sort();
   const years = Array.from(new Set(trialQuestions.map(q => q.year))).sort((a, b) => b - a);
-  const semesters = ["1st", "2nd"];
 
   // Filtering logic
   const filteredQuestions = useMemo(() => {
@@ -162,22 +160,20 @@ const TrialQuestions = () => {
       const matchesUniversity = !selectedUniversity || question.universityShort === selectedUniversity;
       const matchesFaculty = !selectedFaculty || question.faculty === selectedFaculty;
       const matchesYear = !selectedYear || question.year === selectedYear;
-      const matchesSemester = !selectedSemester || question.semester === selectedSemester;
       
-      return matchesSearch && matchesUniversity && matchesFaculty && matchesYear && matchesSemester;
+      return matchesSearch && matchesUniversity && matchesFaculty && matchesYear;
     });
     return filtered;
-  }, [trialQuestions, searchQuery, selectedUniversity, selectedFaculty, selectedYear, selectedSemester]);
+  }, [trialQuestions, searchQuery, selectedUniversity, selectedFaculty, selectedYear]);
 
   const clearAllFilters = () => {
     setSearchQuery("");
     setSelectedUniversity(null);
     setSelectedFaculty(null);
     setSelectedYear(null);
-    setSelectedSemester(null);
   };
 
-  const hasActiveFilters = selectedUniversity || selectedFaculty || selectedYear || selectedSemester;
+  const hasActiveFilters = selectedUniversity || selectedFaculty || selectedYear;
 
   const formatNumber = (num: number): string => {
     if (num >= 1000000) {
@@ -386,24 +382,6 @@ const TrialQuestions = () => {
                                 </Select>
                               </div>
 
-                              <div>
-                                <label className="text-sm font-medium text-slate-700 mb-2 block">Semester</label>
-                                <Select
-                                  value={selectedSemester ?? ""}
-                                  onValueChange={(value) => setSelectedSemester(value || null)}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="All Semesters" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {semesters.map((sem) => (
-                                      <SelectItem key={sem} value={sem}>
-                                        {sem}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
                             </div>
                           </div>
                         </div>
@@ -453,15 +431,6 @@ const TrialQuestions = () => {
                   </Badge>
                 )}
                 
-                {selectedSemester && (
-                  <Badge className="px-3 py-1.5 flex items-center gap-2 bg-slate-700 text-white">
-                    {selectedSemester}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
-                      onClick={() => setSelectedSemester(null)}
-                    />
-                  </Badge>
-                )}
 
                 <Button 
                   variant="ghost" 
@@ -567,7 +536,7 @@ const TrialQuestions = () => {
                         <div className="flex items-center gap-2 text-xs text-slate-500">
                           <span>{question.universityShort}</span>
                           <span>•</span>
-                          <span>{question.year} {question.semester}</span>
+                          <span>{question.year}</span>
                         </div>
                       </div>
                     </div>

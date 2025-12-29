@@ -7,11 +7,19 @@ import {
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
   FileCheck, AlertCircle, Loader2, Grid3x3, List, 
   MoreVertical, CheckSquare, Square, FileX, RefreshCw, Save,
-  Target, HelpCircle, FilePlus
+  Target, HelpCircle, FilePlus, Settings
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ConfirmationModal } from "@/components/admin";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MCQ {
   id: string;
@@ -92,6 +100,9 @@ const TrialQuestionsManager = () => {
   const [managingMCQs, setManagingMCQs] = useState<string | null>(null);
   const [managingSectionB, setManagingSectionB] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<"mcq" | "sectionB">("mcq"); // Toggle between Section A and B
+  const [mcqModalOpen, setMcqModalOpen] = useState(false);
+  const [sectionBModalOpen, setSectionBModalOpen] = useState(false);
+  const [justSavedQuestionId, setJustSavedQuestionId] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -467,7 +478,7 @@ const TrialQuestionsManager = () => {
         semester: formData.semester,
         university: formData.university,
         university_short: formData.universityShort,
-        questions: mcqs.length,
+        questions: 0, // Will be updated when MCQs are added via modal
         verified: formData.verified,
         downloads: 0,
         views: 0,
@@ -500,37 +511,12 @@ const TrialQuestionsManager = () => {
         toast.success("Trial question added successfully");
       }
 
-      // Save MCQs
-      if (mcqs.length > 0 && managingMCQs === trialQuestionId) {
-        // Delete existing MCQs
-        await supabase
-          .from('trial_question_mcqs' as any)
-          .delete()
-          .eq('trial_question_id', trialQuestionId);
-
-        // Insert new MCQs
-        const mcqsToSave = mcqs.map(mcq => ({
-          trial_question_id: trialQuestionId,
-          question: mcq.question,
-          options: mcq.options,
-          correct_answer: mcq.correctAnswer,
-          explanation: mcq.explanation,
-        }));
-
-        const { error: mcqError } = await supabase
-          .from('trial_question_mcqs' as any)
-          .insert(mcqsToSave);
-
-        if (mcqError) throw mcqError;
-      }
-
+      // Don't save MCQs here - they'll be managed separately via modal
+      
+      // Reset form and close
       setEditing(null);
       setShowAddForm(false);
-      setManagingMCQs(null);
-      setManagingSectionB(null);
-      setActiveSection("mcq");
-      setMcqs([]);
-      setSectionBDocuments([]);
+      setJustSavedQuestionId(trialQuestionId); // Store ID for managing questions
       setFormData({
         title: "",
         courseCode: "",
@@ -539,11 +525,24 @@ const TrialQuestionsManager = () => {
         year: new Date().getFullYear(),
         semester: "",
         university: "",
-    universityShort: "",
-    verified: false,
+        universityShort: "",
+        verified: false,
         imageUrl: "",
       });
       fetchTrialQuestions();
+      
+      // Show success message with option to manage questions
+      toast.success("Trial question saved! You can now add Section A (MCQs) and Section B documents.", {
+        duration: 5000,
+        action: {
+          label: "Manage Questions",
+          onClick: () => {
+            setManagingMCQs(trialQuestionId);
+            setMcqModalOpen(true);
+            fetchMCQs(trialQuestionId);
+          }
+        }
+      });
     } catch (error: any) {
       console.error("Error saving trial question:", error);
       toast.error(`Failed to save: ${error.message}`);
@@ -763,30 +762,7 @@ const TrialQuestionsManager = () => {
   };
 
   const openManageMCQs = (id: string) => {
-    const q = trialQuestions.find(tq => tq.id === id);
-    if (!q) return;
-    
-    setEditing(id);
-    setFormData({
-      title: q.title,
-      courseCode: q.courseCode,
-      courseName: q.courseName,
-      faculty: q.faculty,
-      year: q.year,
-      semester: q.semester,
-      university: q.university,
-      universityShort: q.universityShort,
-      verified: q.verified,
-      imageUrl: q.imageUrl || "",
-    });
-    setMcqs(q.mcqs || []);
-    setSectionBDocuments(q.sectionBDocuments || []);
-    setShowAddForm(true);
-    setActiveSection("mcq");
-    setManagingMCQs(id);
-    setManagingSectionB(id); // Set both so toggle appears
-    fetchMCQs(id);
-    fetchSectionBDocuments(id);
+    window.location.href = `/admin/education/trial-questions/${id}/manage`;
   };
 
 
@@ -1242,560 +1218,24 @@ const TrialQuestionsManager = () => {
             </div>
           </div>
 
-          {/* Section Toggle - Only show when managing */}
-          {(managingMCQs || managingSectionB) && (
-            <div style={{ 
-              marginTop: '2rem', 
-              paddingTop: '2rem', 
-              borderTop: '2px solid #e5e5e5',
-              marginBottom: '1.5rem'
-            }}>
-              <div style={{
-                display: 'flex',
-                gap: '0.5rem',
-                background: '#f8fafc',
-                padding: '0.25rem',
-                borderRadius: '0.5rem',
-                border: '1px solid #e5e5e5',
-                width: 'fit-content',
-              }}>
-                <button
-                  onClick={() => {
-                    setActiveSection("mcq");
-                    if (!managingMCQs && (editing || showAddForm)) {
-                      const currentId = editing || "new";
-                      setManagingMCQs(currentId);
-                      if (currentId !== "new") fetchMCQs(currentId);
-                    }
-                  }}
-                  style={{
-                    padding: '0.5rem 1.25rem',
-                    border: 'none',
-                    borderRadius: '0.375rem',
-                    background: activeSection === "mcq" ? '#0066cc' : 'transparent',
-                    color: activeSection === "mcq" ? '#ffffff' : '#64748b',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <Target size={16} />
-                  Section A (MCQs)
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveSection("sectionB");
-                    if (!managingSectionB && (editing || showAddForm)) {
-                      const currentId = editing || "new";
-                      setManagingSectionB(currentId);
-                      if (currentId !== "new") fetchSectionBDocuments(currentId);
-                    }
-                  }}
-                  style={{
-                    padding: '0.5rem 1.25rem',
-                    border: 'none',
-                    borderRadius: '0.375rem',
-                    background: activeSection === "sectionB" ? '#0066cc' : 'transparent',
-                    color: activeSection === "sectionB" ? '#ffffff' : '#64748b',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <FileText size={16} />
-                  Section B
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* MCQ Management Section - Only show when activeSection is "mcq" */}
-          {activeSection === "mcq" && (managingMCQs || showAddForm) && (
-            <div style={{ marginTop: '0', paddingTop: '0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h4 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#000000', margin: 0 }}>
-                  Section A - MCQs ({mcqs.length})
-                </h4>
-                <button
-                  onClick={addMCQ}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    border: '1px solid #0066cc',
-                    borderRadius: '0.375rem',
-                    background: '#ffffff',
-                    color: '#0066cc',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                  }}
-                >
-                  <Plus size={16} />
-                  Add MCQ
-                </button>
-              </div>
-
-            {/* MCQ Form */}
-            {(editingMCQ !== null || mcqs.length === 0) && (
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e5e5e5',
-                borderRadius: '0.5rem',
-                padding: '1.5rem',
-                marginBottom: '1.5rem',
-              }}>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
-                    Question *
-                  </label>
-                  <textarea
-                    value={mcqForm.question}
-                    onChange={(e) => setMcqForm(prev => ({ ...prev, question: e.target.value }))}
-                    placeholder="Enter the question..."
-                    rows={3}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      fontFamily: 'inherit',
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
-                    Options *
-                  </label>
-                  {mcqForm.options.map((option, idx) => (
-                    <div key={option.id} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 600, minWidth: '24px' }}>{option.label}:</span>
-                      <input
-                        type="text"
-                        value={option.text}
-                        onChange={(e) => {
-                          const newOptions = [...mcqForm.options];
-                          newOptions[idx].text = e.target.value;
-                          setMcqForm(prev => ({ ...prev, options: newOptions }));
-                        }}
-                        placeholder={`Option ${option.label}`}
-                        style={{
-                          flex: 1,
-                          padding: '0.75rem',
-                          border: '1px solid #e5e5e5',
-                          borderRadius: '0.375rem',
-                          fontSize: '0.875rem',
-                        }}
-                      />
-                      <input
-                        type="radio"
-                        name="correctAnswer"
-                        checked={mcqForm.correctAnswer === option.id}
-                        onChange={() => setMcqForm(prev => ({ ...prev, correctAnswer: option.id }))}
-                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                      />
-                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Correct</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
-                    Explanation *
-                  </label>
-                  <textarea
-                    value={mcqForm.explanation}
-                    onChange={(e) => setMcqForm(prev => ({ ...prev, explanation: e.target.value }))}
-                    placeholder="Enter explanation for the correct answer..."
-                    rows={2}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      fontFamily: 'inherit',
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button
-                    onClick={saveMCQ}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: 'none',
-                      borderRadius: '0.375rem',
-                      background: '#0066cc',
-                      color: '#ffffff',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {editingMCQ ? 'Update MCQ' : 'Add MCQ'}
-                  </button>
-                  {editingMCQ && (
-                    <button
-                      onClick={() => {
-                        setEditingMCQ(null);
-                        addMCQ();
-                      }}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        border: '1px solid #e5e5e5',
-                        borderRadius: '0.375rem',
-                        background: '#ffffff',
-                        color: '#374151',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* MCQ List */}
-            {mcqs.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {mcqs.map((mcq, idx) => (
-                  <div
-                    key={mcq.id}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: '0.5rem',
-                      padding: '1rem',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'start',
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'start' }}>
-                        <span style={{ fontWeight: 700, color: '#0066cc' }}>{idx + 1}.</span>
-                        <span style={{ fontSize: '0.875rem', color: '#374151' }}>{mcq.question}</span>
-                      </div>
-                      <div style={{ marginLeft: '1.5rem', fontSize: '0.8125rem', color: '#64748b' }}>
-                        Correct Answer: <strong>{mcq.correctAnswer}</strong>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button
-                        onClick={() => editMCQ(mcq.id)}
-                        style={{
-                          padding: '0.5rem',
-                          border: '1px solid #e5e5e5',
-                          borderRadius: '0.375rem',
-                          background: '#ffffff',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => deleteMCQ(mcq.id)}
-                        style={{
-                          padding: '0.5rem',
-                          border: '1px solid #e5e5e5',
-                          borderRadius: '0.375rem',
-                          background: '#ffffff',
-                          cursor: 'pointer',
-                          color: '#dc2626',
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            </div>
-          )}
-
-          {/* Section B Management Section - Only show when activeSection is "sectionB" */}
-          {activeSection === "sectionB" && (managingSectionB || showAddForm) && (
-            <div style={{ marginTop: '0', paddingTop: '0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h4 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#000000', margin: 0 }}>
-                  Section B - Documents ({sectionBDocuments.length})
-                </h4>
-                <button
-                  onClick={addSectionBDocument}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    border: '1px solid #0066cc',
-                    borderRadius: '0.375rem',
-                    background: '#ffffff',
-                    color: '#0066cc',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                  }}
-                >
-                  <Plus size={16} />
-                  Add Document
-                </button>
-              </div>
-
-              {/* Section B Form */}
-              {(editingSectionB !== null || sectionBDocuments.length === 0) && (
-                <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e5e5e5',
-                  borderRadius: '0.5rem',
-                  padding: '1.5rem',
-                  marginBottom: '1.5rem',
-                }}>
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
-                      Title *
-                    </label>
-                    <input
-                      type="text"
-                      value={sectionBForm.title}
-                      onChange={(e) => setSectionBForm(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="e.g., Section B - Set 1"
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid #e5e5e5',
-                        borderRadius: '0.375rem',
-                        fontSize: '0.875rem',
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
-                      Description *
-                    </label>
-                    <textarea
-                      value={sectionBForm.description}
-                      onChange={(e) => setSectionBForm(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Describe the document..."
-                      rows={2}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid #e5e5e5',
-                        borderRadius: '0.375rem',
-                        fontSize: '0.875rem',
-                        fontFamily: 'inherit',
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
-                      Document File *
-                    </label>
-                    <div
-                      ref={dropZoneRef}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsDragging(false);
-                        const file = e.dataTransfer.files[0];
-                        if (file) handleSectionBFileUpload(file);
-                      }}
-                      style={{
-                        border: `2px dashed ${isDragging ? '#0066cc' : '#e5e5e5'}`,
-                        borderRadius: '0.375rem',
-                        padding: '2rem',
-                        textAlign: 'center',
-                        background: isDragging ? '#f0f7ff' : '#ffffff',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                      }}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      {sectionBForm.fileUrl ? (
-                        <div>
-                          <FileCheck size={32} style={{ color: '#10b981', margin: '0 auto 0.5rem' }} />
-                          <p style={{ fontSize: '0.875rem', color: '#374151', margin: '0 0 0.25rem 0' }}>
-                            File uploaded: {sectionBForm.fileUrl.split('/').pop()}
-                          </p>
-                          <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>
-                            Size: {sectionBForm.fileSize}
-                          </p>
-                        </div>
-                      ) : (
-                        <div>
-                          <Upload size={32} style={{ color: '#94a3b8', margin: '0 auto 0.5rem' }} />
-                          <p style={{ fontSize: '0.875rem', color: '#374151', margin: '0 0 0.25rem 0' }}>
-                            Click to upload or drag and drop
-                          </p>
-                          <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>
-                            PDF files only (max 50MB)
-                          </p>
-                        </div>
-                      )}
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="application/pdf"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleSectionBFileUpload(file);
-                        }}
-                        style={{ display: 'none' }}
-                      />
-                    </div>
-                    {uploading && (
-                      <div style={{ marginTop: '0.5rem' }}>
-                        <div style={{ background: '#e5e5e5', borderRadius: '9999px', height: '4px', overflow: 'hidden' }}>
-                          <div style={{
-                            background: '#0066cc',
-                            height: '100%',
-                            width: `${uploadProgress}%`,
-                            transition: 'width 0.3s',
-                          }} />
-                        </div>
-                        <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
-                          Uploading... {uploadProgress}%
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={saveSectionBDocument}
-                      disabled={saving}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        border: 'none',
-                        borderRadius: '0.375rem',
-                        background: '#0066cc',
-                        color: '#ffffff',
-                        cursor: saving ? 'not-allowed' : 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        opacity: saving ? 0.6 : 1,
-                      }}
-                    >
-                      {editingSectionB ? 'Update Document' : 'Add Document'}
-                    </button>
-                    {editingSectionB && (
-                      <button
-                        onClick={() => {
-                          setEditingSectionB(null);
-                          addSectionBDocument();
-                        }}
-                        style={{
-                          padding: '0.5rem 1rem',
-                          border: '1px solid #e5e5e5',
-                          borderRadius: '0.375rem',
-                          background: '#ffffff',
-                          color: '#374151',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Section B Documents List */}
-              {sectionBDocuments.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {sectionBDocuments.map((doc) => (
-                    <div
-                      key={doc.id}
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #e5e5e5',
-                        borderRadius: '0.5rem',
-                        padding: '1rem',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'start',
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <h5 style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#000000', marginBottom: '0.25rem' }}>
-                          {doc.title}
-                        </h5>
-                        <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '0.5rem' }}>
-                          {doc.description}
-                        </p>
-                        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#94a3b8' }}>
-                          <span>📄 {doc.fileSize}</span>
-                          <span>📥 {doc.downloadCount} downloads</span>
-                          <span>📅 {new Date(doc.uploadDate).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                          onClick={() => editSectionBDocument(doc.id)}
-                          style={{
-                            padding: '0.5rem',
-                            border: '1px solid #e5e5e5',
-                            borderRadius: '0.375rem',
-                            background: '#ffffff',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => deleteSectionBDocument(doc.id)}
-                          style={{
-                            padding: '0.5rem',
-                            border: '1px solid #e5e5e5',
-                            borderRadius: '0.375rem',
-                            background: '#ffffff',
-                            cursor: 'pointer',
-                            color: '#dc2626',
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Save Button */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem', paddingTop: '2rem', borderTop: '2px solid #e5e5e5' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e5e5e5' }}>
             <button
               onClick={() => {
                 setShowAddForm(false);
                 setEditing(null);
-                setManagingMCQs(null);
-                setManagingSectionB(null);
-                setActiveSection("mcq");
-                setMcqs([]);
-                setSectionBDocuments([]);
+                setFormData({
+                  title: "",
+                  courseCode: "",
+                  courseName: "",
+                  faculty: "",
+                  year: new Date().getFullYear(),
+                  semester: "",
+                  university: "",
+                  universityShort: "",
+                  verified: false,
+                  imageUrl: "",
+                });
               }}
               style={{
                 padding: '0.75rem 1.5rem',
@@ -1841,8 +1281,525 @@ const TrialQuestionsManager = () => {
               )}
             </button>
           </div>
+
+          {/* MCQ and Section B management removed from initial form - they're now in modals */}
+
         </motion.div>
       )}
+
+      {/* MCQ Management Modal */}
+      <Dialog open={mcqModalOpen} onOpenChange={setMcqModalOpen}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+          <style>{`
+            [data-radix-dialog-overlay][data-state="open"] {
+              backdrop-filter: blur(12px) saturate(180%) !important;
+              -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+              background: rgba(0, 0, 0, 0.5) !important;
+            }
+          `}</style>
+          
+          {/* Header */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            padding: '1.5rem 2rem',
+            borderBottom: '1px solid #e5e5e5',
+            background: '#f8fafc',
+          }}>
+            <div style={{
+              width: '4px',
+              height: '32px',
+              background: '#94a3b8',
+              borderRadius: '2px',
+            }}></div>
+            <div style={{ flex: 1 }}>
+              <DialogTitle style={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: '#1e293b',
+                margin: 0,
+              }}>
+                {editingMCQ === "new" ? "Add New MCQ" : "Edit MCQ"}
+              </DialogTitle>
+              <DialogDescription style={{
+                fontSize: '0.875rem',
+                color: '#64748b',
+                marginTop: '0.25rem',
+              }}>
+                {editingMCQ === "new" ? "Create a new multiple choice question" : "Update the MCQ details"}
+              </DialogDescription>
+            </div>
+            <button
+              onClick={() => setMcqModalOpen(false)}
+              style={{
+                padding: '0.5rem',
+                border: 'none',
+                background: 'transparent',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                color: '#64748b',
+              }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div style={{ padding: '2rem', maxHeight: 'calc(90vh - 120px)', overflowY: 'auto' }}>
+            {/* Section Toggle */}
+            <div style={{
+              display: 'flex',
+              gap: '0.5rem',
+              background: '#f8fafc',
+              padding: '0.25rem',
+              borderRadius: '0.5rem',
+              border: '1px solid #e5e5e5',
+              width: 'fit-content',
+              marginBottom: '2rem',
+            }}>
+              <button
+                onClick={() => setActiveSection("mcq")}
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  background: activeSection === "mcq" ? '#0066cc' : 'transparent',
+                  color: activeSection === "mcq" ? '#ffffff' : '#64748b',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <Target size={16} />
+                Section A (MCQs)
+              </button>
+              <button
+                onClick={() => {
+                  setActiveSection("sectionB");
+                  setSectionBModalOpen(true);
+                  setMcqModalOpen(false);
+                }}
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  background: activeSection === "sectionB" ? '#0066cc' : 'transparent',
+                  color: activeSection === "sectionB" ? '#ffffff' : '#64748b',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <FileText size={16} />
+                Section B
+              </button>
+            </div>
+
+            {/* MCQ List and Add Button */}
+            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: 600, color: '#000000', margin: 0 }}>
+                MCQs ({mcqs.length})
+              </h4>
+              <button
+                onClick={addMCQ}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: '1px solid #0066cc',
+                  borderRadius: '0.375rem',
+                  background: '#ffffff',
+                  color: '#0066cc',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                }}
+              >
+                <Plus size={16} />
+                Add MCQ
+              </button>
+            </div>
+
+            {/* MCQ Form (when editing) */}
+            {editingMCQ !== null && (
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e5e5e5',
+                borderRadius: '0.5rem',
+                padding: '1.5rem',
+                marginBottom: '1.5rem',
+              }}>
+                <h5 style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: '1rem', color: '#000000' }}>
+                  {editingMCQ === "new" ? "Add New MCQ" : "Edit MCQ"}
+                </h5>
+                
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
+                    Question *
+                  </label>
+                  <textarea
+                    value={mcqForm.question}
+                    onChange={(e) => setMcqForm(prev => ({ ...prev, question: e.target.value }))}
+                    placeholder="Enter the question..."
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem',
+                      fontFamily: 'inherit',
+                      resize: 'vertical',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
+                    Options *
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    {mcqForm.options.map((option, idx) => (
+                      <div key={option.id} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <span style={{
+                          minWidth: '24px',
+                          height: '24px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: '#0066cc',
+                          color: '#ffffff',
+                          borderRadius: '0.25rem',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                        }}>
+                          {option.label}
+                        </span>
+                        <input
+                          type="text"
+                          value={option.text}
+                          onChange={(e) => {
+                            const newOptions = [...mcqForm.options];
+                            newOptions[idx].text = e.target.value;
+                            setMcqForm(prev => ({ ...prev, options: newOptions }));
+                          }}
+                          placeholder={`Option ${option.label}`}
+                          style={{
+                            flex: 1,
+                            padding: '0.5rem 0.75rem',
+                            border: '1px solid #e5e5e5',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
+                    Correct Answer *
+                  </label>
+                  <select
+                    value={mcqForm.correctAnswer}
+                    onChange={(e) => setMcqForm(prev => ({ ...prev, correctAnswer: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    <option value="">Select correct answer</option>
+                    {mcqForm.options.map(opt => (
+                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
+                    Explanation
+                  </label>
+                  <textarea
+                    value={mcqForm.explanation}
+                    onChange={(e) => setMcqForm(prev => ({ ...prev, explanation: e.target.value }))}
+                    placeholder="Explain why this is the correct answer..."
+                    rows={2}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem',
+                      fontFamily: 'inherit',
+                      resize: 'vertical',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={() => setEditingMCQ(null)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: '0.375rem',
+                      background: '#ffffff',
+                      color: '#374151',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveMCQ}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      background: '#0066cc',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {editingMCQ === "new" ? "Add MCQ" : "Update MCQ"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* MCQ List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {mcqs.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '3rem 2rem',
+                  background: '#f8fafc',
+                  border: '2px dashed #cbd5e1',
+                  borderRadius: '0.5rem',
+                }}>
+                  <Target size={48} style={{ color: '#cbd5e1', margin: '0 auto 1rem' }} />
+                  <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
+                    No MCQs added yet. Click "Add MCQ" to get started.
+                  </p>
+                </div>
+              ) : (
+                mcqs.map((mcq, index) => (
+                  <div
+                    key={mcq.id}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: '0.5rem',
+                      padding: '1.25rem',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                          <span style={{
+                            minWidth: '28px',
+                            height: '28px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: '#0066cc',
+                            color: '#ffffff',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                          }}>
+                            {index + 1}
+                          </span>
+                          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#000000' }}>
+                            {mcq.question}
+                          </span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginLeft: '36px' }}>
+                          {mcq.options.map(opt => (
+                            <div key={opt.id} style={{
+                              display: 'flex',
+                              gap: '0.5rem',
+                              alignItems: 'center',
+                              padding: '0.5rem',
+                              background: opt.id === mcq.correctAnswer ? '#dcfce7' : '#f8fafc',
+                              border: `1px solid ${opt.id === mcq.correctAnswer ? '#10b981' : '#e5e5e5'}`,
+                              borderRadius: '0.375rem',
+                            }}>
+                              <span style={{
+                                minWidth: '20px',
+                                height: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: opt.id === mcq.correctAnswer ? '#10b981' : '#94a3b8',
+                                color: '#ffffff',
+                                borderRadius: '0.25rem',
+                                fontSize: '0.7rem',
+                                fontWeight: 600,
+                              }}>
+                                {opt.label}
+                              </span>
+                              <span style={{ fontSize: '0.8125rem', color: '#374151' }}>{opt.text}</span>
+                              {opt.id === mcq.correctAnswer && (
+                                <CheckCircle2 size={16} style={{ color: '#10b981', marginLeft: 'auto' }} />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        {mcq.explanation && (
+                          <div style={{
+                            marginTop: '0.75rem',
+                            marginLeft: '36px',
+                            padding: '0.75rem',
+                            background: '#f0f9ff',
+                            border: '1px solid #bae6fd',
+                            borderRadius: '0.375rem',
+                          }}>
+                            <p style={{ fontSize: '0.8125rem', color: '#0369a1', margin: 0 }}>
+                              <strong>Explanation:</strong> {mcq.explanation}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          onClick={() => editMCQ(mcq.id)}
+                          style={{
+                            padding: '0.5rem',
+                            border: '1px solid #e5e5e5',
+                            borderRadius: '0.375rem',
+                            background: '#ffffff',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => deleteMCQ(mcq.id)}
+                          style={{
+                            padding: '0.5rem',
+                            border: '1px solid #e5e5e5',
+                            borderRadius: '0.375rem',
+                            background: '#ffffff',
+                            cursor: 'pointer',
+                            color: '#dc2626',
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <DialogFooter style={{
+            padding: '1.5rem 2rem',
+            borderTop: '1px solid #e5e5e5',
+            background: '#f8fafc',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <button
+              onClick={() => setMcqModalOpen(false)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                border: '1px solid #e5e5e5',
+                borderRadius: '0.375rem',
+                background: '#ffffff',
+                color: '#374151',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+              }}
+            >
+              Close
+            </button>
+            <button
+              onClick={async () => {
+                if (!managingMCQs) return;
+                try {
+                  // Delete existing MCQs
+                  await supabase
+                    .from('trial_question_mcqs' as any)
+                    .delete()
+                    .eq('trial_question_id', managingMCQs);
+
+                  // Insert new MCQs
+                  if (mcqs.length > 0) {
+                    const mcqsToSave = mcqs.map(mcq => ({
+                      trial_question_id: managingMCQs,
+                      question: mcq.question,
+                      options: mcq.options,
+                      correct_answer: mcq.correctAnswer,
+                      explanation: mcq.explanation,
+                      display_order: mcqs.indexOf(mcq),
+                    }));
+
+                    const { error: mcqError } = await supabase
+                      .from('trial_question_mcqs' as any)
+                      .insert(mcqsToSave);
+
+                    if (mcqError) throw mcqError;
+                  }
+
+                  // Update questions count in trial_questions table
+                  const { error: updateError } = await supabase
+                    .from('trial_questions' as any)
+                    .update({ questions: mcqs.length })
+                    .eq('id', managingMCQs);
+
+                  if (updateError) throw updateError;
+
+                  toast.success("MCQs saved successfully");
+                  setMcqModalOpen(false);
+                  fetchTrialQuestions();
+                } catch (error: any) {
+                  console.error("Error saving MCQs:", error);
+                  toast.error(`Failed to save MCQs: ${error.message}`);
+                }
+              }}
+              style={{
+                padding: '0.75rem 1.5rem',
+                border: 'none',
+                borderRadius: '0.375rem',
+                background: '#0066cc',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Save size={18} />
+              Save MCQs ({mcqs.length})
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Questions List */}
       {loading ? (
@@ -1901,7 +1858,7 @@ const TrialQuestionsManager = () => {
                       <CheckCircle2 size={16} style={{ color: '#10b981' }} />
                     )}
                     <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
-                      {question.universityShort} • {question.year} • {question.semester}
+                      {question.universityShort} • {question.year}
                     </span>
                   </div>
                   <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#000000', marginBottom: '0.25rem' }}>

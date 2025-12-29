@@ -95,6 +95,7 @@ import AdminHomePage from "./pages/admin/AdminHomePage";
 import AdminFAQsPage from "./pages/admin/adminInfo/AdminFAQsPage";
 import AdminEducationHub from "./pages/admin/AdminEducationHub";
 import AdminUniversities from "./pages/admin/AdminUniversities";
+import AdminTrialQuestionManage from "./pages/admin/components/AdminTrialQuestionManage";
 
 const queryClient = new QueryClient();
 
@@ -211,6 +212,7 @@ const App = () => (
             <Route path="news" element={<AdminDashboard />} />
             <Route path="jobs" element={<AdminDashboard />} />
             <Route path="education" element={<AdminEducationHub />} />
+            <Route path="education/trial-questions/:id/manage" element={<AdminTrialQuestionManage />} />
             <Route path="directories" element={<AdminDashboard />} />
             <Route path="directories/universities" element={<AdminUniversities />} />
             <Route path="skilled-workers" element={<AdminDashboard />} />
