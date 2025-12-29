@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -49,6 +50,7 @@ interface SectionBDocument {
   fileSize: string;
   uploadDate: string;
   downloadCount: number;
+  fileUrl?: string;
 }
 
 interface TrialQuestionData {
@@ -68,76 +70,6 @@ interface TrialQuestionData {
 
 const QUESTIONS_PER_PAGE = 10;
 
-// Mock questions data matching TrialQuestions.tsx
-const allTrialQuestions = [
-  { 
-    id: "1", 
-    title: "Mathematics Practice Set 1", 
-    courseCode: "MATH 101",
-    courseName: "Basic Mathematics",
-    faculty: "Engineering", 
-    year: 2024, 
-    semester: "1st" as const,
-    university: "University of Ghana", 
-    universityShort: "UG",
-  },
-  { 
-    id: "2", 
-    title: "Chemistry Fundamentals Practice", 
-    courseCode: "CHEM 101",
-    courseName: "General Chemistry",
-    faculty: "Physical & Biological Sciences", 
-    year: 2024, 
-    semester: "1st" as const,
-    university: "Kwame Nkrumah University of Science and Technology", 
-    universityShort: "KNUST",
-  },
-  { 
-    id: "3", 
-    title: "English Language Practice Test", 
-    courseCode: "ENG 101",
-    courseName: "English Language",
-    faculty: "Arts & Humanities", 
-    year: 2024, 
-    semester: "1st" as const,
-    university: "University of Cape Coast", 
-    universityShort: "UCC",
-  },
-  { 
-    id: "4", 
-    title: "Physics Problem Set", 
-    courseCode: "PHY 201",
-    courseName: "General Physics",
-    faculty: "Engineering", 
-    year: 2024, 
-    semester: "1st" as const,
-    university: "University of Mines and Technology", 
-    universityShort: "UMaT",
-  },
-  { 
-    id: "5", 
-    title: "Economics Practice Questions", 
-    courseCode: "ECO 101",
-    courseName: "Introduction to Economics",
-    faculty: "Business & Economics", 
-    year: 2024, 
-    semester: "1st" as const,
-    university: "University of Ghana", 
-    universityShort: "UG",
-  },
-  { 
-    id: "6", 
-    title: "Computer Science Practice Set", 
-    courseCode: "CS 101",
-    courseName: "Introduction to Computer Science",
-    faculty: "Computing & IT", 
-    year: 2024, 
-    semester: "1st" as const,
-    university: "University of Ghana", 
-    universityShort: "UG",
-  },
-];
-
 const TrialQuestionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -146,211 +78,164 @@ const TrialQuestionDetail = () => {
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const [showResult, setShowResult] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+  const [questionData, setQuestionData] = useState<TrialQuestionData | null>(null);
 
-  // Get the selected question data based on ID
-  const selectedQuestion = allTrialQuestions.find(q => q.id === id) || allTrialQuestions[0];
+  // Fetch question data from database
+  useEffect(() => {
+    if (id) {
+      fetchQuestionData(id);
+    }
+  }, [id]);
 
-  // Mock data - In production, this would come from an API
-  const mockData: TrialQuestionData = {
-    id: selectedQuestion.id,
-    title: selectedQuestion.title,
-    courseCode: selectedQuestion.courseCode,
-    courseName: selectedQuestion.courseName,
-    faculty: selectedQuestion.faculty,
-    year: selectedQuestion.year,
-    semester: selectedQuestion.semester,
-    university: selectedQuestion.university,
-    universityShort: selectedQuestion.universityShort,
-    mcqs: [
-      {
-        id: "mcq-1",
-        question: "What is the derivative of f(x) = x² + 3x + 2?",
-        options: [
-          { id: "A", label: "A", text: "2x + 3" },
-          { id: "B", label: "B", text: "x² + 3" },
-          { id: "C", label: "C", text: "2x + 2" },
-          { id: "D", label: "D", text: "x + 3" }
-        ],
-        correctAnswer: "A",
-        explanation: "The derivative of x² is 2x, the derivative of 3x is 3, and the derivative of a constant (2) is 0. Therefore, f'(x) = 2x + 3."
-      },
-      {
-        id: "mcq-2",
-        question: "Which of the following is a prime number?",
-        options: [
-          { id: "A", label: "A", text: "15" },
-          { id: "B", label: "B", text: "17" },
-          { id: "C", label: "C", text: "21" },
-          { id: "D", label: "D", text: "25" }
-        ],
-        correctAnswer: "B",
-        explanation: "A prime number is a natural number greater than 1 that has no positive divisors other than 1 and itself. 17 is the only prime number among the options."
-      },
-      {
-        id: "mcq-3",
-        question: "What is the value of sin(90°)?",
-        options: [
-          { id: "A", label: "A", text: "0" },
-          { id: "B", label: "B", text: "1" },
-          { id: "C", label: "C", text: "0.5" },
-          { id: "D", label: "D", text: "√2/2" }
-        ],
-        correctAnswer: "B",
-        explanation: "The sine of 90 degrees is 1. This is a fundamental trigonometric value."
-      },
-      {
-        id: "mcq-4",
-        question: "Solve for x: 2x + 5 = 13",
-        options: [
-          { id: "A", label: "A", text: "x = 4" },
-          { id: "B", label: "B", text: "x = 5" },
-          { id: "C", label: "C", text: "x = 6" },
-          { id: "D", label: "D", text: "x = 7" }
-        ],
-        correctAnswer: "A",
-        explanation: "Subtract 5 from both sides: 2x = 8. Divide by 2: x = 4."
-      },
-      {
-        id: "mcq-5",
-        question: "What is the area of a circle with radius 5 units?",
-        options: [
-          { id: "A", label: "A", text: "10π" },
-          { id: "B", label: "B", text: "25π" },
-          { id: "C", label: "C", text: "50π" },
-          { id: "D", label: "D", text: "100π" }
-        ],
-        correctAnswer: "B",
-        explanation: "The area of a circle is πr². With radius 5, the area is π(5)² = 25π."
-      },
-      {
-        id: "mcq-6",
-        question: "What is the integral of 2x?",
-        options: [
-          { id: "A", label: "A", text: "x²" },
-          { id: "B", label: "B", text: "x² + C" },
-          { id: "C", label: "C", text: "2x²" },
-          { id: "D", label: "D", text: "x" }
-        ],
-        correctAnswer: "B",
-        explanation: "The integral of 2x is x² + C, where C is the constant of integration."
-      },
-      {
-        id: "mcq-7",
-        question: "What is the limit of (x² - 1)/(x - 1) as x approaches 1?",
-        options: [
-          { id: "A", label: "A", text: "0" },
-          { id: "B", label: "B", text: "1" },
-          { id: "C", label: "C", text: "2" },
-          { id: "D", label: "D", text: "Undefined" }
-        ],
-        correctAnswer: "C",
-        explanation: "Using L'Hôpital's rule or factoring, the limit simplifies to x + 1, which equals 2 when x = 1."
-      },
-      {
-        id: "mcq-8",
-        question: "What is the derivative of ln(x)?",
-        options: [
-          { id: "A", label: "A", text: "1/x" },
-          { id: "B", label: "B", text: "x" },
-          { id: "C", label: "C", text: "e^x" },
-          { id: "D", label: "D", text: "ln(x)" }
-        ],
-        correctAnswer: "A",
-        explanation: "The derivative of ln(x) is 1/x. This is a fundamental result in calculus."
-      },
-      {
-        id: "mcq-9",
-        question: "What is the value of cos(0°)?",
-        options: [
-          { id: "A", label: "A", text: "0" },
-          { id: "B", label: "B", text: "1" },
-          { id: "C", label: "C", text: "0.5" },
-          { id: "D", label: "D", text: "√2/2" }
-        ],
-        correctAnswer: "B",
-        explanation: "The cosine of 0 degrees is 1. This is a fundamental trigonometric value."
-      },
-      {
-        id: "mcq-10",
-        question: "What is the quadratic formula?",
-        options: [
-          { id: "A", label: "A", text: "x = (-b ± √(b² - 4ac)) / 2a" },
-          { id: "B", label: "B", text: "x = (-b ± √(b² + 4ac)) / 2a" },
-          { id: "C", label: "C", text: "x = (b ± √(b² - 4ac)) / 2a" },
-          { id: "D", label: "D", text: "x = (-b ± √(b² - 4ac)) / a" }
-        ],
-        correctAnswer: "A",
-        explanation: "The quadratic formula for solving ax² + bx + c = 0 is x = (-b ± √(b² - 4ac)) / 2a."
-      },
-      {
-        id: "mcq-11",
-        question: "What is the derivative of e^x?",
-        options: [
-          { id: "A", label: "A", text: "e^x" },
-          { id: "B", label: "B", text: "xe^x" },
-          { id: "C", label: "C", text: "ln(x)" },
-          { id: "D", label: "D", text: "1/x" }
-        ],
-        correctAnswer: "A",
-        explanation: "The derivative of e^x is e^x itself. This is a unique property of the exponential function."
-      },
-      {
-        id: "mcq-12",
-        question: "What is the sum of angles in a triangle?",
-        options: [
-          { id: "A", label: "A", text: "90°" },
-          { id: "B", label: "B", text: "180°" },
-          { id: "C", label: "C", text: "270°" },
-          { id: "D", label: "D", text: "360°" }
-        ],
-        correctAnswer: "B",
-        explanation: "The sum of angles in any triangle is always 180 degrees."
+  const fetchQuestionData = async (questionId: string) => {
+    setLoading(true);
+    try {
+      // Fetch main question data
+      const { data: questionData, error: questionError } = await supabase
+        .from('trial_questions' as any)
+        .select('*')
+        .eq('id', questionId)
+        .single();
+
+      if (questionError) throw questionError;
+
+      if (!questionData) {
+        navigate("/education/trial-questions");
+        return;
       }
-    ],
-    writtenQuestions: [
-      {
-        id: "written-1",
-        question: "Explain the concept of limits in calculus and provide an example.",
-        marks: 10
-      },
-      {
-        id: "written-2",
-        question: "Solve the following system of equations: 2x + 3y = 7 and x - y = 1",
-        marks: 8
-      },
-      {
-        id: "written-3",
-        question: "Prove that the sum of angles in a triangle is 180 degrees.",
-        marks: 12
-      }
-    ],
-    sectionBDocuments: [
-      {
-        id: "doc-1",
-        title: "Section B - Set 1",
-        description: "Comprehensive written questions",
-        fileSize: "2.4 MB",
-        uploadDate: "2024-02-15",
-        downloadCount: 1234
-      },
-      {
-        id: "doc-2",
-        title: "Section B - Set 2",
-        description: "Advanced problem solving",
-        fileSize: "3.1 MB",
-        uploadDate: "2024-02-20",
-        downloadCount: 892
-      },
-      {
-        id: "doc-3",
-        title: "Section B - Practice Papers",
-        description: "Additional practice materials",
-        fileSize: "1.8 MB",
-        uploadDate: "2024-02-25",
-        downloadCount: 567
-      }
-    ]
+
+      const question = questionData as any;
+
+      // Fetch MCQs
+      const { data: mcqsData, error: mcqsError } = await supabase
+        .from('trial_question_mcqs' as any)
+        .select('*')
+        .eq('trial_question_id', questionId)
+        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (mcqsError) throw mcqsError;
+
+      // Fetch Section B documents
+      const { data: sectionBData, error: sectionBError } = await supabase
+        .from('trial_question_section_b' as any)
+        .select('*')
+        .eq('trial_question_id', questionId)
+        .order('created_at', { ascending: true });
+
+      if (sectionBError) throw sectionBError;
+
+      // Transform data
+      const transformedData: TrialQuestionData = {
+        id: question.id,
+        title: question.title || "",
+        courseCode: question.course_code || "",
+        courseName: question.course_name || "",
+        faculty: question.faculty || "",
+        year: question.year || new Date().getFullYear(),
+        semester: (question.semester || "1st") as "1st" | "2nd",
+        university: question.university || "",
+        universityShort: question.university_short || "",
+        mcqs: (mcqsData || []).map((item: any) => ({
+          id: item.id,
+          question: item.question || "",
+          options: item.options || [
+            { id: "A", label: "A", text: "" },
+            { id: "B", label: "B", text: "" },
+            { id: "C", label: "C", text: "" },
+            { id: "D", label: "D", text: "" },
+          ],
+          correctAnswer: item.correct_answer || "",
+          explanation: item.explanation || "",
+        })),
+        writtenQuestions: [], // Not used in current implementation
+        sectionBDocuments: (sectionBData || []).map((item: any) => ({
+          id: item.id,
+          title: item.title || "",
+          description: item.description || "",
+          fileUrl: item.file_url || "",
+          fileSize: typeof item.file_size === 'number' 
+            ? `${(item.file_size / (1024 * 1024)).toFixed(1)} MB` 
+            : (item.file_size || "0 MB"),
+          uploadDate: item.upload_date || item.created_at?.split('T')[0] || "",
+          downloadCount: item.downloads || item.download_count || 0,
+        })),
+      };
+
+      setQuestionData(transformedData);
+
+      // Increment views
+      await supabase
+        .from('trial_questions' as any)
+        .update({ views: (question.views || 0) + 1 })
+        .eq('id', questionId);
+    } catch (error: any) {
+      console.error("Error fetching question data:", error);
+      navigate("/education/trial-questions");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Handle Section B document download
+  const handleSectionBDownload = async (docId: string, fileUrl: string) => {
+    try {
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = '';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Increment download count
+      const doc = questionData?.sectionBDocuments.find(d => d.id === docId);
+      if (doc) {
+        await supabase
+          .from('trial_question_section_b' as any)
+          .update({ 
+            downloads: (doc.downloadCount || 0) + 1,
+            download_count: (doc.downloadCount || 0) + 1
+          })
+          .eq('id', docId);
+
+        // Update local state
+        setQuestionData(prev => prev ? {
+          ...prev,
+          sectionBDocuments: prev.sectionBDocuments.map(d => 
+            d.id === docId ? { ...d, downloadCount: (d.downloadCount || 0) + 1 } : d
+          )
+        } : null);
+      }
+    } catch (error) {
+      console.error("Error downloading document:", error);
+    }
+  };
+
+  if (loading || !questionData) {
+    return (
+      <>
+        <InitScripts />
+        <Spinner />
+        <Navigation />
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-slate-100">
+              <Target className="w-12 h-12 text-slate-400 animate-pulse" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3 text-slate-700">
+              Loading question...
+            </h3>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  // Use fetched data
+  const mockData: TrialQuestionData = questionData;
 
   // Pagination logic
   const totalPages = Math.ceil(mockData.mcqs.length / QUESTIONS_PER_PAGE);
@@ -764,14 +649,18 @@ const TrialQuestionDetail = () => {
                       <ServiceCard
                         key={doc.id}
                         title={doc.title}
-                        href={`#download-${doc.id}`}
+                        href={doc.id}
                         imgSrc={images[index % images.length]}
                         imgAlt={doc.description}
                         variant={variant}
                         className="min-h-[160px] cursor-pointer"
                         onClick={(e) => {
                           e.preventDefault();
-                          console.log('Download:', doc.id);
+                          // Find the document with fileUrl from database
+                          const sectionBDoc = questionData.sectionBDocuments.find(d => d.id === doc.id);
+                          if (sectionBDoc && sectionBDoc.fileUrl) {
+                            handleSectionBDownload(doc.id, sectionBDoc.fileUrl);
+                          }
                         }}
                       />
                     );

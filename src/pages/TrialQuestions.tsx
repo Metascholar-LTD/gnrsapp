@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -39,10 +40,8 @@ interface TrialQuestion {
   semester: "1st" | "2nd";
   university: string;
   universityShort: string;
-  examType: string;
   downloads: number;
   views: number;
-  fileSize: string;
   uploadDate: string;
   verified: boolean;
   questions: number;
@@ -71,149 +70,104 @@ const TrialQuestions = () => {
   const [selectedFaculty, setSelectedFaculty] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [trialQuestions, setTrialQuestions] = useState<TrialQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock trial questions data with images
-  const trialQuestions: TrialQuestion[] = [
-    { 
-      id: "1", 
-      title: "Mathematics Practice Set 1", 
-      courseCode: "MATH 101",
-      courseName: "Basic Mathematics",
-      faculty: "Engineering", 
-      year: 2024, 
-      semester: "1st",
-      university: "University of Ghana", 
-      universityShort: "UG",
-      examType: "Trial Questions", 
-      downloads: 4560, 
-      views: 8920,
-      fileSize: "5.2 MB", 
-      uploadDate: "2024-02-15",
-      verified: true,
-      questions: 50,
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "2", 
-      title: "Chemistry Fundamentals Practice", 
-      courseCode: "CHEM 101",
-      courseName: "General Chemistry",
-      faculty: "Physical & Biological Sciences", 
-      year: 2024, 
-      semester: "1st",
-      university: "Kwame Nkrumah University of Science and Technology", 
-      universityShort: "KNUST",
-      examType: "Trial Questions", 
-      downloads: 3890, 
-      views: 7450,
-      fileSize: "4.8 MB", 
-      uploadDate: "2024-02-10",
-      verified: true,
-      questions: 45,
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "3", 
-      title: "English Language Practice Test", 
-      courseCode: "ENG 101",
-      courseName: "English Language",
-      faculty: "Arts & Humanities", 
-      year: 2024, 
-      semester: "1st",
-      university: "University of Cape Coast", 
-      universityShort: "UCC",
-      examType: "Trial Questions", 
-      downloads: 3120, 
-      views: 6230,
-      fileSize: "3.5 MB", 
-      uploadDate: "2024-02-08",
-      verified: true,
-      questions: 40,
-      imageUrl: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "4", 
-      title: "Physics Problem Set", 
-      courseCode: "PHY 201",
-      courseName: "General Physics",
-      faculty: "Engineering", 
-      year: 2024, 
-      semester: "1st",
-      university: "University of Mines and Technology", 
-      universityShort: "UMaT",
-      examType: "Trial Questions", 
-      downloads: 4230, 
-      views: 8120,
-      fileSize: "6.1 MB", 
-      uploadDate: "2024-02-12",
-      verified: true,
-      questions: 55,
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "5", 
-      title: "Economics Practice Questions", 
-      courseCode: "ECO 101",
-      courseName: "Introduction to Economics",
-      faculty: "Business & Economics", 
-      year: 2024, 
-      semester: "1st",
-      university: "University of Ghana", 
-      universityShort: "UG",
-      examType: "Trial Questions", 
-      downloads: 2780, 
-      views: 5420,
-      fileSize: "4.2 MB", 
-      uploadDate: "2024-02-05",
-      verified: true,
-      questions: 42,
-      imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=80"
-    },
-    { 
-      id: "6", 
-      title: "Computer Science Practice Set", 
-      courseCode: "CS 101",
-      courseName: "Introduction to Computer Science",
-      faculty: "Computing & IT", 
-      year: 2024, 
-      semester: "1st",
-      university: "University of Ghana", 
-      universityShort: "UG",
-      examType: "Trial Questions", 
-      downloads: 5120, 
-      views: 9850,
-      fileSize: "7.3 MB", 
-      uploadDate: "2024-02-20",
-      verified: true,
-      questions: 60,
-      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80"
-    },
-  ];
+  // Fetch trial questions from database
+  useEffect(() => {
+    fetchTrialQuestions();
+  }, []);
+
+  const fetchTrialQuestions = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('trial_questions' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      if (data) {
+        const transformed = data.map((item: any) => ({
+          id: item.id,
+          title: item.title || "",
+          courseCode: item.course_code || "",
+          courseName: item.course_name || "",
+          faculty: item.faculty || "",
+          year: item.year || new Date().getFullYear(),
+          semester: (item.semester || "1st") as "1st" | "2nd",
+          university: item.university || "",
+          universityShort: item.university_short || "",
+          downloads: item.downloads || 0,
+          views: item.views || 0,
+          uploadDate: item.upload_date || item.created_at?.split('T')[0] || "",
+          verified: item.verified || false,
+          questions: item.questions || 0,
+          imageUrl: item.image_url || "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=80",
+        }));
+        setTrialQuestions(transformed);
+      } else {
+        setTrialQuestions([]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching trial questions:", error);
+      setTrialQuestions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Increment views when card is clicked
+  const incrementViews = async (id: string) => {
+    try {
+      const question = trialQuestions.find(q => q.id === id);
+      if (!question) return;
+
+      const { error } = await supabase
+        .from('trial_questions' as any)
+        .update({ views: (question.views || 0) + 1 })
+        .eq('id', id);
+
+      if (!error) {
+        setTrialQuestions(prev => prev.map(q => 
+          q.id === id ? { ...q, views: (q.views || 0) + 1 } : q
+        ));
+      }
+    } catch (error) {
+      console.error("Error incrementing views:", error);
+    }
+  };
 
   // Get unique values for filters
   const universities = Array.from(new Set(trialQuestions.map(q => q.universityShort))).sort();
   const faculties = Array.from(new Set(trialQuestions.map(q => q.faculty))).sort();
   const years = Array.from(new Set(trialQuestions.map(q => q.year))).sort((a, b) => b - a);
   const semesters = ["1st", "2nd"];
-  const difficulties = ["Easy", "Medium", "Hard"];
 
   // Filtering logic
-  const filteredQuestions = trialQuestions.filter(question => {
-    const matchesSearch = 
-      question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      question.courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      question.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      question.university.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesUniversity = !selectedUniversity || question.universityShort === selectedUniversity;
-    const matchesFaculty = !selectedFaculty || question.faculty === selectedFaculty;
-    const matchesYear = !selectedYear || question.year === selectedYear;
-    const matchesSemester = !selectedSemester || question.semester === selectedSemester;
-    
-    return matchesSearch && matchesUniversity && matchesFaculty && matchesYear && matchesSemester
-  });
+  const filteredQuestions = useMemo(() => {
+    const filtered = trialQuestions.filter(question => {
+      const matchesSearch = 
+        !searchQuery ||
+        question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        question.courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        question.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        question.university.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesUniversity = !selectedUniversity || question.universityShort === selectedUniversity;
+      const matchesFaculty = !selectedFaculty || question.faculty === selectedFaculty;
+      const matchesYear = !selectedYear || question.year === selectedYear;
+      const matchesSemester = !selectedSemester || question.semester === selectedSemester;
+      
+      return matchesSearch && matchesUniversity && matchesFaculty && matchesYear && matchesSemester;
+    });
+    return filtered;
+  }, [trialQuestions, searchQuery, selectedUniversity, selectedFaculty, selectedYear, selectedSemester]);
 
   const clearAllFilters = () => {
     setSearchQuery("");
@@ -221,10 +175,9 @@ const TrialQuestions = () => {
     setSelectedFaculty(null);
     setSelectedYear(null);
     setSelectedSemester(null);
-    setSelectedDifficulty(null);
   };
 
-  const hasActiveFilters = selectedUniversity || selectedFaculty || selectedYear || selectedSemester
+  const hasActiveFilters = selectedUniversity || selectedFaculty || selectedYear || selectedSemester;
 
   const formatNumber = (num: number): string => {
     if (num >= 1000000) {
@@ -234,19 +187,6 @@ const TrialQuestions = () => {
       return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
     }
     return num.toString();
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "Easy":
-        return "bg-green-100 text-green-700 border-green-200";
-      case "Medium":
-        return "bg-amber-100 text-amber-700 border-amber-200";
-      case "Hard":
-        return "bg-red-100 text-red-700 border-red-200";
-      default:
-        return "bg-slate-100 text-slate-700 border-slate-200";
-    }
   };
 
   const containerVariants = {
@@ -465,25 +405,6 @@ const TrialQuestions = () => {
                                 </Select>
                               </div>
                             </div>
-
-                            <div>
-                              <label className="text-sm font-medium text-slate-700 mb-2 block">Difficulty</label>
-                              <Select
-                                value={selectedDifficulty ?? ""}
-                                onValueChange={(value) => setSelectedDifficulty(value || null)}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="All Difficulties" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {difficulties.map((diff) => (
-                                    <SelectItem key={diff} value={diff}>
-                                      {diff}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
                           </div>
                         </div>
                       </PopoverContent>
@@ -542,16 +463,6 @@ const TrialQuestions = () => {
                   </Badge>
                 )}
 
-                {selectedDifficulty && (
-                  <Badge className="px-3 py-1.5 flex items-center gap-2 bg-slate-700 text-white">
-                    {selectedDifficulty}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
-                      onClick={() => setSelectedDifficulty(null)}
-                    />
-                  </Badge>
-                )}
-
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -564,7 +475,20 @@ const TrialQuestions = () => {
             )}
           </div>
           
-          {filteredQuestions.length === 0 ? (
+          {loading ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-20"
+            >
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-slate-100">
+                <Target className="w-12 h-12 text-slate-400 animate-pulse" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-slate-700">
+                Loading trial questions...
+              </h3>
+            </motion.div>
+          ) : filteredQuestions.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -587,21 +511,21 @@ const TrialQuestions = () => {
               </Button>
             </motion.div>
           ) : (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {filteredQuestions.map((question) => (
                 <motion.div
                   key={question.id}
-                  variants={cardVariants}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                   whileHover={{ y: -8, transition: { duration: 0.3 } }}
                   className="group"
                 >
                   <div 
-                    onClick={() => navigate(`/education/trial-questions/${question.id}`)}
+                    onClick={() => {
+                      incrementViews(question.id);
+                      navigate(`/education/trial-questions/${question.id}`);
+                    }}
                     className="relative h-full rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
                   >
                     {/* Image Section with Overlay */}
@@ -650,7 +574,7 @@ const TrialQuestions = () => {
                   </div>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           )}
         </div>
       </section>
