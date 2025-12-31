@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ServiceCard } from "@/components/ui/service-card";
 import { 
-  ArrowLeft, 
+  ArrowLeft,
+  ArrowRight,
   Target,
   FileText,
   Edit2,
@@ -15,7 +16,8 @@ import {
   Plus,
   Save,
   X,
-  Loader2
+  Loader2,
+  Upload
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -86,6 +88,19 @@ const AdminTrialQuestionManage = () => {
   });
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [mcqToDelete, setMcqToDelete] = useState<string | null>(null);
+  const [sectionBModalOpen, setSectionBModalOpen] = useState(false);
+  const [editingSectionB, setEditingSectionB] = useState<string | null>(null);
+  const [sectionBForm, setSectionBForm] = useState({
+    title: "",
+    description: "",
+    fileUrl: "",
+    fileSize: "0 MB",
+  });
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [sectionBToDelete, setSectionBToDelete] = useState<string | null>(null);
+  const [deleteSectionBModalOpen, setDeleteSectionBModalOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (id) {
@@ -140,15 +155,16 @@ const AdminTrialQuestionManage = () => {
         fileUrl: doc.file_url || "",
       }));
 
+      const qData = questionData as any;
       setQuestionData({
-        id: questionData.id,
-        title: questionData.title,
-        courseCode: questionData.course_code,
-        courseName: questionData.course_name,
-        faculty: questionData.faculty,
-        year: questionData.year,
-        university: questionData.university,
-        universityShort: questionData.university_short,
+        id: qData.id,
+        title: qData.title,
+        courseCode: qData.course_code,
+        courseName: qData.course_name,
+        faculty: qData.faculty,
+        year: qData.year,
+        university: qData.university,
+        universityShort: qData.university_short,
         mcqs: transformedMCQs,
         sectionBDocuments: transformedSectionB,
       });
@@ -292,6 +308,158 @@ const AdminTrialQuestionManage = () => {
       deleteMCQ(mcqToDelete);
       setDeleteModalOpen(false);
       setMcqToDelete(null);
+    }
+  };
+
+  const addSectionBDocument = () => {
+    setEditingSectionB(null);
+    setSectionBForm({
+      title: "",
+      description: "",
+      fileUrl: "",
+      fileSize: "0 MB",
+    });
+    setSectionBModalOpen(true);
+  };
+
+  const editSectionBDocument = (docId: string) => {
+    const doc = questionData?.sectionBDocuments.find(d => d.id === docId);
+    if (doc) {
+      setEditingSectionB(docId);
+      setSectionBForm({
+        title: doc.title,
+        description: doc.description,
+        fileUrl: doc.fileUrl || "",
+        fileSize: doc.fileSize,
+      });
+      setSectionBModalOpen(true);
+    }
+  };
+
+  const handleSectionBFileUpload = async (file: File) => {
+    if (!id) return;
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${id}/${Date.now()}.${fileExt}`;
+      const filePath = `section-b/${fileName}`;
+
+      // Upload file to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('trial-questions')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('trial-questions')
+        .getPublicUrl(filePath);
+
+      // Calculate file size
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const fileSizeStr = `${fileSizeMB} MB`;
+
+      setSectionBForm(prev => ({
+        ...prev,
+        fileUrl: publicUrl,
+        fileSize: fileSizeStr,
+      }));
+
+      toast.success("File uploaded successfully");
+    } catch (error: any) {
+      console.error("Error uploading file:", error);
+      toast.error(`Failed to upload file: ${error.message}`);
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const saveSectionBDocument = async () => {
+    if (!id) return;
+
+    if (!sectionBForm.title || !sectionBForm.description) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (!sectionBForm.fileUrl && editingSectionB === null) {
+      toast.error("Please upload a file");
+      return;
+    }
+
+    try {
+      // Convert fileSize string to bytes for storage
+      const fileSizeBytes = sectionBForm.fileSize.includes('MB')
+        ? parseFloat(sectionBForm.fileSize) * 1024 * 1024
+        : parseFloat(sectionBForm.fileSize) * 1024;
+
+      const dataToSave = {
+        trial_question_id: id,
+        title: sectionBForm.title,
+        description: sectionBForm.description,
+        file_url: sectionBForm.fileUrl,
+        file_size: fileSizeBytes,
+        upload_date: new Date().toISOString(),
+        downloads: 0,
+      };
+
+      if (editingSectionB) {
+        const { error } = await supabase
+          .from('trial_question_section_b' as any)
+          .update(dataToSave)
+          .eq('id', editingSectionB);
+
+        if (error) throw error;
+        toast.success("Section B document updated successfully");
+      } else {
+        const { error } = await supabase
+          .from('trial_question_section_b' as any)
+          .insert(dataToSave);
+
+        if (error) throw error;
+        toast.success("Section B document added successfully");
+      }
+
+      setSectionBModalOpen(false);
+      fetchQuestionData(id);
+    } catch (error: any) {
+      console.error("Error saving Section B document:", error);
+      toast.error(`Failed to save document: ${error.message}`);
+    }
+  };
+
+  const deleteSectionBDocument = async (docId: string) => {
+    if (!id) return;
+
+    try {
+      const { error } = await supabase
+        .from('trial_question_section_b' as any)
+        .delete()
+        .eq('id', docId);
+
+      if (error) throw error;
+
+      toast.success("Section B document deleted successfully");
+      fetchQuestionData(id);
+    } catch (error: any) {
+      console.error("Error deleting Section B document:", error);
+      toast.error(`Failed to delete document: ${error.message}`);
+    }
+  };
+
+  const handleDeleteSectionB = () => {
+    if (sectionBToDelete) {
+      deleteSectionBDocument(sectionBToDelete);
+      setDeleteSectionBModalOpen(false);
+      setSectionBToDelete(null);
     }
   };
 
@@ -490,14 +658,44 @@ const AdminTrialQuestionManage = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5">
                 {questionData.sectionBDocuments.map((doc) => (
-                  <ServiceCard
-                    key={doc.id}
-                    title={doc.title}
-                    description={doc.description}
-                    link={doc.fileUrl || "#"}
-                    linkText="DOWNLOAD"
-                    variant="gray"
-                  />
+                  <Card key={doc.id} className="relative p-4 bg-slate-100/70 border border-slate-300/40 hover:border-slate-400/50 hover:shadow-lg transition-all">
+                    <div className="flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="text-lg font-bold tracking-tight flex-1 pr-2">{doc.title}</h3>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => editSectionBDocument(doc.id)}
+                            className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                            title="Edit"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSectionBToDelete(doc.id);
+                              setDeleteSectionBModalOpen(true);
+                            }}
+                            className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      {doc.description && (
+                        <p className="text-sm text-slate-600 mb-3 flex-1">{doc.description}</p>
+                      )}
+                      <a
+                        href={doc.fileUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-auto flex items-center text-xs font-semibold text-slate-700 hover:text-slate-900 hover:underline transition-colors"
+                      >
+                        DOWNLOAD
+                        <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                      </a>
+                    </div>
+                  </Card>
                 ))}
               </div>
             )}
@@ -735,13 +933,243 @@ const AdminTrialQuestionManage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Modal */}
+      {/* Section B Modal */}
+      <Dialog open={sectionBModalOpen} onOpenChange={setSectionBModalOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden w-[calc(100vw-2rem)] max-w-[42rem] [&>button]:hidden">
+          <style>{`
+            [data-radix-dialog-overlay][data-state="open"] {
+              backdrop-filter: blur(12px) saturate(180%) !important;
+              -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+              background: rgba(0, 0, 0, 0.5) !important;
+            }
+          `}</style>
+          
+          {/* Header - Whitish-grey */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            padding: '1.5rem 2rem',
+            borderBottom: '1px solid #e5e5e5',
+            background: '#f8fafc',
+            overflowX: 'hidden',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+          }}>
+            <div style={{
+              width: '4px',
+              height: '32px',
+              background: '#94a3b8',
+              borderRadius: '2px',
+            }}></div>
+            <div style={{ flex: 1 }}>
+              <DialogTitle style={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: '#1e293b',
+                margin: 0,
+              }}>
+                {editingSectionB ? "Edit Section B Document" : "Add New Section B Document"}
+              </DialogTitle>
+              <DialogDescription style={{
+                fontSize: '0.875rem',
+                color: '#64748b',
+                marginTop: '0.25rem',
+              }}>
+                {editingSectionB ? "Update the document details" : "Upload a new Section B document"}
+              </DialogDescription>
+            </div>
+            <button
+              onClick={() => setSectionBModalOpen(false)}
+              style={{
+                padding: '0.5rem',
+                border: 'none',
+                background: 'transparent',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                color: '#64748b',
+              }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div style={{ padding: '2rem', overflowX: 'hidden', maxWidth: '100%', boxSizing: 'border-box' }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
+                Title *
+              </label>
+              <input
+                type="text"
+                value={sectionBForm.title}
+                onChange={(e) => setSectionBForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter document title..."
+                style={{
+                  width: '100%',
+                  maxWidth: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e5e5e5',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.875rem',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
+                Description *
+              </label>
+              <textarea
+                value={sectionBForm.description}
+                onChange={(e) => setSectionBForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter document description..."
+                rows={3}
+                style={{
+                  width: '100%',
+                  maxWidth: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e5e5e5',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.875rem',
+                  fontFamily: 'inherit',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
+                File {!editingSectionB && '*'}
+              </label>
+              {sectionBForm.fileUrl ? (
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <a
+                    href={sectionBForm.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: '#0066cc',
+                      textDecoration: 'underline',
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    Current file: {sectionBForm.fileUrl.split('/').pop()}
+                  </a>
+                  <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
+                    ({sectionBForm.fileSize})
+                  </span>
+                </div>
+              ) : null}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleSectionBFileUpload(file);
+                  }
+                }}
+                style={{ display: 'none' }}
+              />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  border: '2px dashed #e5e5e5',
+                  borderRadius: '0.375rem',
+                  padding: '2rem',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  background: uploading ? '#f8fafc' : '#ffffff',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (!uploading) {
+                    e.currentTarget.style.borderColor = '#0066cc';
+                    e.currentTarget.style.background = '#f0f7ff';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!uploading) {
+                    e.currentTarget.style.borderColor = '#e5e5e5';
+                    e.currentTarget.style.background = '#ffffff';
+                  }
+                }}
+              >
+                {uploading ? (
+                  <div>
+                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-2" />
+                    <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                      Uploading... {uploadProgress > 0 && `${uploadProgress}%`}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                    <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                      Click to upload or drag and drop
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      PDF files only
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <DialogFooter style={{
+            padding: '1.5rem 2rem',
+            borderTop: '1px solid #e5e5e5',
+            background: '#f8fafc',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '0.75rem',
+            overflowX: 'hidden',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+          }}>
+            <Button
+              variant="outline"
+              onClick={() => setSectionBModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={saveSectionBDocument}
+              className="bg-blue-600 hover:bg-blue-700"
+              disabled={uploading}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {editingSectionB ? "Update Document" : "Add Document"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal for MCQs */}
       <ConfirmationModal
         open={deleteModalOpen}
         onOpenChange={setDeleteModalOpen}
         onConfirm={handleDeleteMCQ}
         title="Delete MCQ"
         description="Are you sure you want to delete this MCQ? This action cannot be undone."
+        variant="danger"
+      />
+
+      {/* Delete Confirmation Modal for Section B */}
+      <ConfirmationModal
+        open={deleteSectionBModalOpen}
+        onOpenChange={setDeleteSectionBModalOpen}
+        onConfirm={handleDeleteSectionB}
+        title="Delete Section B Document"
+        description="Are you sure you want to delete this document? This action cannot be undone."
         variant="danger"
       />
     </div>
