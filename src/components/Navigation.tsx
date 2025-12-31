@@ -114,7 +114,6 @@ export const Navigation = React.memo(() => {
             { to: '/education/shs-bece-questions', label: 'SHS and BECE Past Questions', icon: 'fa-book' },
             { to: '/education/lecture-notes', label: 'Lecture Notes & E-learning', icon: 'fa-book-open' },
             { to: '/education/trial-questions', label: 'Trial Questions', icon: 'fa-question-circle' },
-            { to: '/education/study-guides', label: 'Study Guides and Tutorials', icon: 'fa-graduation-cap' },
             { to: '/education/ebooks', label: 'E-books and Training Resources', icon: 'fa-file-pdf' }
           ]}
         ],

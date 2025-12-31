@@ -21,13 +21,6 @@ const EducationResources = () => {
       color: "#0066cc"
     },
     {
-      icon: <BookOpen className="w-8 h-8" />,
-      title: "Study Guides",
-      description: "Comprehensive study materials and guides for various subjects and examinations",
-      link: "/education/study-guides",
-      color: "#0066cc"
-    },
-    {
       icon: <Users className="w-8 h-8" />,
       title: "Study Groups",
       description: "Connect with other students, share knowledge, and prepare for exams together",

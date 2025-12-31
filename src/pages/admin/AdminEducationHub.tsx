@@ -104,12 +104,6 @@ const AdminEducationHub = () => {
       description: "Manage practice questions and mock exams"
     },
     { 
-      id: "study-guides", 
-      label: "Study Guides and Tutorials", 
-      icon: BookMarked,
-      description: "Manage comprehensive guides and tutorial materials"
-    },
-    { 
       id: "ebooks-training", 
       label: "E-books and Training Resources", 
       icon: Book,

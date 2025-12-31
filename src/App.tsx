@@ -29,7 +29,6 @@ import NationalServiceSupport from "./pages/jobs/NationalServiceSupport";
 import GraduateRecruitment from "./pages/jobs/GraduateRecruitment";
 import YouthEmploymentAgency from "./pages/jobs/YouthEmploymentAgency";
 import ShsBeceQuestions from "./pages/education/ShsBeceQuestions";
-import StudyGuides from "./pages/education/StudyGuides";
 import Ebooks from "./pages/education/Ebooks";
 import CourseRecommendations from "./pages/education/CourseRecommendations";
 import DepartmentalResources from "./pages/education/DepartmentalResources";
@@ -122,7 +121,6 @@ const App = () => (
           <Route path="/education/lecture-notes/:id" element={<LectureNoteViewer />} />
           <Route path="/education/trial-questions" element={<TrialQuestions />} />
           <Route path="/education/trial-questions/:id" element={<TrialQuestionDetail />} />
-          <Route path="/education/study-guides" element={<StudyGuides />} />
           <Route path="/education/ebooks" element={<Ebooks />} />
           <Route path="/education/course-recommendations" element={<CourseRecommendations />} />
           <Route path="/education/departmental-resources" element={<DepartmentalResources />} />
