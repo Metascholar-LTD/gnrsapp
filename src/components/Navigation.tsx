@@ -1114,14 +1114,14 @@ export const Navigation = React.memo(() => {
         /* Small Desktop: 1024px - 1599px */
         @media (min-width: 1024px) and (max-width: 1599px) {
           .nav-mega-menu .nav-mega-content {
-            top: 101px !important;
+            top: 65px !important;
           }
         }
 
         /* Large screens: 1600px+ */
         @media (min-width: 1600px) {
           .nav-mega-menu .nav-mega-content {
-            top: 125px !important;
+            top: 80px !important;
           }
         }
 
@@ -1394,14 +1394,14 @@ export const Navigation = React.memo(() => {
         /* Small Desktop: 1024px - 1599px */
         @media (min-width: 1024px) and (max-width: 1599px) {
           .nav-mega-content {
-            top: 101px !important;
+            top: 65px !important;
           }
         }
 
         /* Large screens: 1600px+ */
         @media (min-width: 1600px) {
           .nav-mega-content {
-            top: 125px !important;
+            top: 80px !important;
           }
         }
 
