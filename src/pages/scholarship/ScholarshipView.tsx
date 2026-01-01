@@ -1446,15 +1446,6 @@ const ScholarshipView = () => {
                     Visit Official Website
                     <ExternalLink className="ml-2 w-4 h-4" />
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full border-2 border-[#bd9f67] text-[#bd9f67] hover:bg-[#bd9f67] hover:text-white font-semibold"
-                    size="lg"
-                    onClick={() => window.open(scholarship.website, '_blank')}
-                  >
-                    Download Application Form
-                    <Download className="ml-2 w-4 h-4" />
-                  </Button>
                 </div>
               </motion.div>
             </div>

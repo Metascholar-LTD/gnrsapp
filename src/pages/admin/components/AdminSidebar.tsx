@@ -70,10 +70,6 @@ const AdminSidebar = () => {
       header: "Education Hub",
       items: [
         { icon: "book-open", label: "Academic Resources", path: "/admin/education" },
-        { icon: "compass", label: "Course Recommendations", path: "/admin/education/course-recommendations" },
-        { icon: "users", label: "Study Groups", path: "/admin/education/study-groups" },
-        { icon: "message-circle", label: "Discussion Forums", path: "/admin/education/forums" },
-        { icon: "bell", label: "Campus Announcements", path: "/admin/education/announcements" },
       ],
     },
     {
