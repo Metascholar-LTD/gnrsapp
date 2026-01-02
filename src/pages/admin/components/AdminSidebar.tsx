@@ -76,11 +76,6 @@ const AdminSidebar = () => {
       header: "Scholarships Bank",
       items: [
         { icon: "award", label: "Scholarships", path: "/admin/scholarships" },
-        { icon: "tag", label: "Field-Based", path: "/admin/scholarships/field-based" },
-        { icon: "dollar-sign", label: "GetFund", path: "/admin/scholarships/getfund" },
-        { icon: "briefcase", label: "GNPC", path: "/admin/scholarships/gnpc" },
-        { icon: "smartphone", label: "MTN", path: "/admin/scholarships/mtn" },
-        { icon: "globe", label: "Other Local", path: "/admin/scholarships/other-local" },
       ],
     },
     {
