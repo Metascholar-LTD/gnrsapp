@@ -20,7 +20,6 @@ import {
   Globe,
   FileText,
   Award,
-  Users,
   TrendingUp,
   AlertCircle,
   Mail,
@@ -1381,19 +1380,6 @@ const ScholarshipView = () => {
                         <div>
                           <p className="text-sm text-slate-500 mb-1">Duration</p>
                           <p className="font-semibold text-slate-900">{scholarship.duration}</p>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {scholarship.numberOfAwards && (
-                    <>
-                      <div className="h-px bg-slate-200" />
-                      <div className="flex items-start gap-3">
-                        <Users className="w-5 h-5 text-[#bd9f67] mt-0.5" />
-                        <div>
-                          <p className="text-sm text-slate-500 mb-1">Number of Awards</p>
-                          <p className="font-semibold text-slate-900">{scholarship.numberOfAwards}</p>
                         </div>
                       </div>
                     </>
