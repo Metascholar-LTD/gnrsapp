@@ -5,7 +5,7 @@ import {
   CheckCircle2, XCircle, TrendingUp, ChevronLeft, ChevronRight,
   Grid3x3, List, Save, Loader2, Image as ImageIcon,
   Award, DollarSign, Calendar, MapPin, Globe, Mail, Phone, Building2,
-  AlertCircle, FileText, BookOpen, Users, Clock
+  AlertCircle, FileText, BookOpen, Users, Clock, Info
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -62,7 +62,6 @@ interface ScholarshipFormData {
   deadline: string;
   location: string;
   level: string;
-  description: string;
   requirements: string;
   verified: boolean;
   imageUrl: string;
@@ -102,6 +101,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [scholarshipToDelete, setScholarshipToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [activeFormTab, setActiveFormTab] = useState("overview");
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<ScholarshipFormData>({
@@ -111,11 +111,10 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     currency: "GHS",
     category: "Need-Based",
     deadline: "",
-    location: "Ghana",
-    level: "Undergraduate",
-    description: "",
-    requirements: "",
-    verified: false,
+      location: "Ghana",
+      level: "Undergraduate",
+      requirements: "",
+      verified: false,
     imageUrl: "",
     featured: false,
     source: sourceFilter || "field-based",
@@ -279,7 +278,8 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       filtered = filtered.filter(s =>
         s.title.toLowerCase().includes(query) ||
         s.provider.toLowerCase().includes(query) ||
-        s.description.toLowerCase().includes(query)
+        (s.fullDescription && s.fullDescription.toLowerCase().includes(query)) ||
+        (s.description && s.description.toLowerCase().includes(query))
       );
     }
 
@@ -331,6 +331,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
   // Handlers
   const handleAdd = () => {
     setEditing(null);
+    setActiveFormTab("overview");
     setFormData({
       title: "",
       provider: "",
@@ -340,7 +341,6 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       deadline: "",
       location: "Ghana",
       level: "Undergraduate",
-      description: "",
       requirements: "",
       verified: false,
       imageUrl: "",
@@ -365,6 +365,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
 
   const handleEdit = (scholarship: Scholarship) => {
     setEditing(scholarship.id);
+    setActiveFormTab("overview");
     setFormData({
       title: scholarship.title,
       provider: scholarship.provider,
@@ -374,7 +375,6 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       deadline: scholarship.deadline,
       location: scholarship.location,
       level: scholarship.level,
-      description: scholarship.description,
       requirements: scholarship.requirements.join("\n"),
       verified: scholarship.verified,
       imageUrl: scholarship.imageUrl || "",
@@ -383,7 +383,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       website: scholarship.website || "",
       email: scholarship.email || "",
       phone: scholarship.phone || "",
-      fullDescription: scholarship.fullDescription || "",
+      fullDescription: scholarship.fullDescription || scholarship.description || "",
       benefits: scholarship.benefits?.join("\n") || "",
       eligibility: scholarship.eligibility?.join("\n") || "",
       applicationProcess: scholarship.applicationProcess?.join("\n") || "",
@@ -448,7 +448,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       deadline: formData.deadline,
       location: formData.location,
       level: formData.level,
-      description: formData.description,
+      description: formData.fullDescription || "", // Use fullDescription for description field
       requirements: formData.requirements.split("\n").filter(r => r.trim()),
       verified: formData.verified,
       imageUrl: formData.imageUrl,
@@ -1173,6 +1173,56 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       cursor: pointer;
     }
 
+    .sm-form-tabs {
+      border-bottom: 2px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0 2rem;
+      display: flex;
+      gap: 0;
+    }
+
+    .sm-form-tab {
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #6b7280;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sm-form-tab:hover {
+      color: #111827;
+      background: rgba(189, 159, 103, 0.05);
+    }
+
+    .sm-form-tab.active {
+      color: #111827;
+      font-weight: 600;
+      border-bottom-color: #bd9f67;
+    }
+
+    .sm-form-tab-content {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @media (max-width: 767px) {
       .sm-form-grid {
         grid-template-columns: 1fr;
@@ -1193,6 +1243,17 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
 
       .sm-grid {
         grid-template-columns: 1fr;
+      }
+
+      .sm-form-tabs {
+        padding: 0 1rem;
+        overflow-x: auto;
+      }
+
+      .sm-form-tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.8125rem;
+        white-space: nowrap;
       }
     }
   `;
@@ -1596,10 +1657,41 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                 </button>
               </div>
 
+              {/* Tab Navigation */}
+              <div className="sm-form-tabs">
+                <button
+                  onClick={() => setActiveFormTab("overview")}
+                  className={`sm-form-tab ${activeFormTab === "overview" ? "active" : ""}`}
+                >
+                  <Info size={16} />
+                  <span>Overview</span>
+                </button>
+                <button
+                  onClick={() => setActiveFormTab("application")}
+                  className={`sm-form-tab ${activeFormTab === "application" ? "active" : ""}`}
+                >
+                  <FileText size={16} />
+                  <span>Application Details</span>
+                </button>
+                <button
+                  onClick={() => setActiveFormTab("additional")}
+                  className={`sm-form-tab ${activeFormTab === "additional" ? "active" : ""}`}
+                >
+                  <BookOpen size={16} />
+                  <span>Additional Info</span>
+                </button>
+              </div>
+
               <div className="sm-form-body">
-                {/* Basic Information */}
-                <div className="sm-form-section">
-                  <h3 className="sm-form-section-title">Basic Information</h3>
+                {/* Overview Tab */}
+                {activeFormTab === "overview" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="sm-form-section">
+                      <h3 className="sm-form-section-title">Basic Information</h3>
                   <div className="sm-form-grid">
                     <div className="sm-form-group full-width">
                       <label className="sm-form-label">Scholarship Title *</label>
@@ -1845,21 +1937,10 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                       <label className="sm-form-label">Description *</label>
                       <textarea
                         className="sm-form-textarea"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Enter short description"
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Full Description</label>
-                      <textarea
-                        className="sm-form-textarea"
                         value={formData.fullDescription}
                         onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
-                        placeholder="Enter detailed description"
-                        rows={5}
+                        placeholder="Enter detailed description of the scholarship"
+                        rows={6}
                       />
                     </div>
 
@@ -1884,150 +1965,175 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                     </div>
                   </div>
                 </div>
+                  </motion.div>
+                )}
 
-                {/* Contact Information */}
-                <div className="sm-form-section">
-                  <h3 className="sm-form-section-title">Contact Information</h3>
-                  <div className="sm-form-grid">
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Website</label>
-                      <input
-                        type="url"
-                        className="sm-form-input"
-                        value={formData.website}
-                        onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                        placeholder="https://example.com"
-                      />
+                {/* Application Details Tab */}
+                {activeFormTab === "application" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="sm-form-section">
+                      <h3 className="sm-form-section-title">Application Details</h3>
+                      <div className="sm-form-grid">
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Requirements (one per line)</label>
+                          <textarea
+                            className="sm-form-textarea"
+                            value={formData.requirements}
+                            onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                            placeholder="Enter each requirement on a new line"
+                            rows={4}
+                          />
+                        </div>
+
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Benefits (one per line)</label>
+                          <textarea
+                            className="sm-form-textarea"
+                            value={formData.benefits}
+                            onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+                            placeholder="Enter each benefit on a new line"
+                            rows={4}
+                          />
+                        </div>
+
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Eligibility (one per line)</label>
+                          <textarea
+                            className="sm-form-textarea"
+                            value={formData.eligibility}
+                            onChange={(e) => setFormData({ ...formData, eligibility: e.target.value })}
+                            placeholder="Enter each eligibility criterion on a new line"
+                            rows={4}
+                          />
+                        </div>
+
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Application Process (one per line)</label>
+                          <textarea
+                            className="sm-form-textarea"
+                            value={formData.applicationProcess}
+                            onChange={(e) => setFormData({ ...formData, applicationProcess: e.target.value })}
+                            placeholder="Enter each step on a new line"
+                            rows={4}
+                          />
+                        </div>
+
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Required Documents (one per line)</label>
+                          <textarea
+                            className="sm-form-textarea"
+                            value={formData.documents}
+                            onChange={(e) => setFormData({ ...formData, documents: e.target.value })}
+                            placeholder="Enter each document on a new line"
+                            rows={4}
+                          />
+                        </div>
+
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Selection Criteria (one per line)</label>
+                          <textarea
+                            className="sm-form-textarea"
+                            value={formData.selectionCriteria}
+                            onChange={(e) => setFormData({ ...formData, selectionCriteria: e.target.value })}
+                            placeholder="Enter each criterion on a new line"
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Additional Info Tab */}
+                {activeFormTab === "additional" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {/* Contact Information */}
+                    <div className="sm-form-section">
+                      <h3 className="sm-form-section-title">Contact Information</h3>
+                      <div className="sm-form-grid">
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Website</label>
+                          <input
+                            type="url"
+                            className="sm-form-input"
+                            value={formData.website}
+                            onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                            placeholder="https://example.com"
+                          />
+                        </div>
+
+                        <div className="sm-form-group">
+                          <label className="sm-form-label">Email</label>
+                          <input
+                            type="email"
+                            className="sm-form-input"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            placeholder="contact@example.com"
+                          />
+                        </div>
+
+                        <div className="sm-form-group">
+                          <label className="sm-form-label">Phone</label>
+                          <input
+                            type="tel"
+                            className="sm-form-input"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            placeholder="+233 XX XXX XXXX"
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="sm-form-group">
-                      <label className="sm-form-label">Email</label>
-                      <input
-                        type="email"
-                        className="sm-form-input"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="contact@example.com"
-                      />
-                    </div>
+                    {/* Coverage & Duration */}
+                    <div className="sm-form-section">
+                      <h3 className="sm-form-section-title">Coverage & Duration</h3>
+                      <div className="sm-form-grid">
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Coverage Details (one per line)</label>
+                          <textarea
+                            className="sm-form-textarea"
+                            value={formData.coverageDetails}
+                            onChange={(e) => setFormData({ ...formData, coverageDetails: e.target.value })}
+                            placeholder="Enter each coverage detail on a new line"
+                            rows={3}
+                          />
+                        </div>
 
-                    <div className="sm-form-group">
-                      <label className="sm-form-label">Phone</label>
-                      <input
-                        type="tel"
-                        className="sm-form-input"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="+233 XX XXX XXXX"
-                      />
-                    </div>
-                  </div>
-                </div>
+                        <div className="sm-form-group">
+                          <label className="sm-form-label">Duration</label>
+                          <input
+                            type="text"
+                            className="sm-form-input"
+                            value={formData.duration}
+                            onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                            placeholder="e.g., 4 years, Full program duration"
+                          />
+                        </div>
 
-                {/* Detailed Information */}
-                <div className="sm-form-section">
-                  <h3 className="sm-form-section-title">Detailed Information</h3>
-                  <div className="sm-form-grid">
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Requirements (one per line)</label>
-                      <textarea
-                        className="sm-form-textarea"
-                        value={formData.requirements}
-                        onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                        placeholder="Enter each requirement on a new line"
-                        rows={4}
-                      />
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">Renewability</label>
+                          <input
+                            type="text"
+                            className="sm-form-input"
+                            value={formData.renewability}
+                            onChange={(e) => setFormData({ ...formData, renewability: e.target.value })}
+                            placeholder="e.g., Renewable annually based on performance"
+                          />
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Benefits (one per line)</label>
-                      <textarea
-                        className="sm-form-textarea"
-                        value={formData.benefits}
-                        onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                        placeholder="Enter each benefit on a new line"
-                        rows={4}
-                      />
-                    </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Eligibility (one per line)</label>
-                      <textarea
-                        className="sm-form-textarea"
-                        value={formData.eligibility}
-                        onChange={(e) => setFormData({ ...formData, eligibility: e.target.value })}
-                        placeholder="Enter each eligibility criterion on a new line"
-                        rows={4}
-                      />
-                    </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Application Process (one per line)</label>
-                      <textarea
-                        className="sm-form-textarea"
-                        value={formData.applicationProcess}
-                        onChange={(e) => setFormData({ ...formData, applicationProcess: e.target.value })}
-                        placeholder="Enter each step on a new line"
-                        rows={4}
-                      />
-                    </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Required Documents (one per line)</label>
-                      <textarea
-                        className="sm-form-textarea"
-                        value={formData.documents}
-                        onChange={(e) => setFormData({ ...formData, documents: e.target.value })}
-                        placeholder="Enter each document on a new line"
-                        rows={4}
-                      />
-                    </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Selection Criteria (one per line)</label>
-                      <textarea
-                        className="sm-form-textarea"
-                        value={formData.selectionCriteria}
-                        onChange={(e) => setFormData({ ...formData, selectionCriteria: e.target.value })}
-                        placeholder="Enter each criterion on a new line"
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Coverage Details (one per line)</label>
-                      <textarea
-                        className="sm-form-textarea"
-                        value={formData.coverageDetails}
-                        onChange={(e) => setFormData({ ...formData, coverageDetails: e.target.value })}
-                        placeholder="Enter each coverage detail on a new line"
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="sm-form-group">
-                      <label className="sm-form-label">Duration</label>
-                      <input
-                        type="text"
-                        className="sm-form-input"
-                        value={formData.duration}
-                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                        placeholder="e.g., 4 years, Full program duration"
-                      />
-                    </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Renewability</label>
-                      <input
-                        type="text"
-                        className="sm-form-input"
-                        value={formData.renewability}
-                        onChange={(e) => setFormData({ ...formData, renewability: e.target.value })}
-                        placeholder="e.g., Renewable annually based on performance"
-                      />
-                    </div>
-                  </div>
-                </div>
+                  </motion.div>
+                )}
               </div>
 
               <div className="sm-form-footer">
