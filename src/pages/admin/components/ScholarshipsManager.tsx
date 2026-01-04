@@ -80,7 +80,7 @@ interface ScholarshipFormData {
   coverageDetails: string;
   duration: string;
   renewability: string;
-  fieldOfStudy: string;
+  fieldOfStudy: string[];
 }
 
 const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter }) => {
@@ -127,11 +127,11 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     eligibility: "",
     applicationProcess: "",
     documents: "",
-    selectionCriteria: "",
+      selectionCriteria: "",
       coverageDetails: "",
       duration: "",
       renewability: "",
-      fieldOfStudy: "",
+      fieldOfStudy: [],
     });
 
   // Options
@@ -140,6 +140,18 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
   const levels = ["Undergraduate", "Graduate", "PhD", "Postgraduate", "Undergraduate & TVET", "Professional", "All Levels"];
   const locations = ["Ghana", "Foreign", "United Kingdom", "United States", "Germany", "France", "Europe", "Global", "Partner Countries"];
   const currencies = ["GHS", "USD", "GBP", "EUR"];
+  const availableFields = [
+    "Engineering & Technology",
+    "Health Sciences & Medicine",
+    "Business & Economics",
+    "Arts & Humanities",
+    "Agriculture & Environmental Sciences",
+    "Education",
+    "Social Sciences",
+    "Natural Sciences",
+    "Computer Science & IT",
+    "Law & Legal Studies",
+  ];
 
   useEffect(() => {
     // Load mock data (will be replaced with Supabase)
@@ -346,7 +358,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       coverageDetails: "",
       duration: "",
       renewability: "",
-      fieldOfStudy: "",
+      fieldOfStudy: [],
     });
     setShowAddForm(true);
   };
@@ -380,7 +392,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       coverageDetails: scholarship.coverageDetails?.join("\n") || "",
       duration: scholarship.duration || "",
       renewability: scholarship.renewability || "",
-      fieldOfStudy: scholarship.fieldOfStudy?.join(", ") || "",
+      fieldOfStudy: scholarship.fieldOfStudy || [],
     });
     setShowAddForm(true);
   };
@@ -454,7 +466,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       coverageDetails: formData.coverageDetails ? formData.coverageDetails.split("\n").filter(c => c.trim()) : undefined,
       duration: formData.duration,
       renewability: formData.renewability,
-      fieldOfStudy: formData.fieldOfStudy ? formData.fieldOfStudy.split(",").map(f => f.trim()).filter(f => f) : undefined,
+      fieldOfStudy: formData.fieldOfStudy && formData.fieldOfStudy.length > 0 ? formData.fieldOfStudy : undefined,
     };
 
     setTimeout(() => {
@@ -1689,7 +1701,15 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                       <select
                         className="sm-form-select"
                         value={formData.source}
-                        onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                        onChange={(e) => {
+                          const newSource = e.target.value;
+                          setFormData({ 
+                            ...formData, 
+                            source: newSource,
+                            // Clear fieldOfStudy when switching away from field-based
+                            fieldOfStudy: newSource === "field-based" ? formData.fieldOfStudy : []
+                          });
+                        }}
                       >
                         {sources.map(source => (
                           <option key={source} value={source}>{getSourceName(source)}</option>
@@ -1707,6 +1727,119 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                         placeholder="https://example.com/image.jpg"
                       />
                     </div>
+
+                    {/* Field of Study - Multi-select for Field-Based scholarships */}
+                    {formData.source === "field-based" ? (
+                      <div className="sm-form-group full-width">
+                        <label className="sm-form-label">Fields of Study * (Select all applicable)</label>
+                        <div style={{
+                          border: '1px solid #d1d5db',
+                          borderRadius: '0.5rem',
+                          padding: '0.75rem',
+                          maxHeight: '200px',
+                          overflowY: 'auto',
+                          background: 'white',
+                        }}>
+                          {availableFields.map((field) => (
+                            <label
+                              key={field}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem',
+                                cursor: 'pointer',
+                                borderRadius: '0.25rem',
+                                transition: 'background-color 0.2s',
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={formData.fieldOfStudy.includes(field)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFormData({
+                                      ...formData,
+                                      fieldOfStudy: [...formData.fieldOfStudy, field],
+                                    });
+                                  } else {
+                                    setFormData({
+                                      ...formData,
+                                      fieldOfStudy: formData.fieldOfStudy.filter(f => f !== field),
+                                    });
+                                  }
+                                }}
+                                style={{
+                                  width: '1rem',
+                                  height: '1rem',
+                                  cursor: 'pointer',
+                                  accentColor: '#bd9f67',
+                                }}
+                              />
+                              <span style={{ fontSize: '0.875rem', color: '#374151' }}>{field}</span>
+                            </label>
+                          ))}
+                        </div>
+                        {formData.fieldOfStudy.length > 0 && (
+                          <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                            {formData.fieldOfStudy.map((field) => (
+                              <span
+                                key={field}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.25rem',
+                                  padding: '0.25rem 0.5rem',
+                                  background: '#fef3c7',
+                                  color: '#92400e',
+                                  borderRadius: '0.375rem',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {field}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData({
+                                      ...formData,
+                                      fieldOfStudy: formData.fieldOfStudy.filter(f => f !== field),
+                                    });
+                                  }}
+                                  style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    color: '#92400e',
+                                  }}
+                                >
+                                  <X size={12} />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="sm-form-group full-width">
+                        <label className="sm-form-label">Field of Study (comma separated)</label>
+                        <input
+                          type="text"
+                          className="sm-form-input"
+                          value={formData.fieldOfStudy.join(", ")}
+                          onChange={(e) => {
+                            const values = e.target.value.split(",").map(f => f.trim()).filter(f => f);
+                            setFormData({ ...formData, fieldOfStudy: values });
+                          }}
+                          placeholder="Engineering, Health Sciences, Business"
+                        />
+                      </div>
+                    )}
 
                     <div className="sm-form-group full-width">
                       <label className="sm-form-label">Description *</label>
@@ -1891,17 +2024,6 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                         value={formData.renewability}
                         onChange={(e) => setFormData({ ...formData, renewability: e.target.value })}
                         placeholder="e.g., Renewable annually based on performance"
-                      />
-                    </div>
-
-                    <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Field of Study (comma separated)</label>
-                      <input
-                        type="text"
-                        className="sm-form-input"
-                        value={formData.fieldOfStudy}
-                        onChange={(e) => setFormData({ ...formData, fieldOfStudy: e.target.value })}
-                        placeholder="Engineering, Health Sciences, Business"
                       />
                     </div>
                   </div>
