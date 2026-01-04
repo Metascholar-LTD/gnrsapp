@@ -756,8 +756,26 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
 
     .sm-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 1rem;
+    }
+
+    @media (min-width: 1280px) {
+      .sm-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) and (max-width: 1279px) {
+      .sm-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .sm-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .sm-card-modern {
@@ -767,7 +785,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       border-radius: 1rem;
       border: 2px solid #e5e7eb;
       background: white;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
       transition: all 0.3s;
       display: flex;
       flex-direction: column;
@@ -775,7 +793,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     }
 
     .sm-card-modern:hover {
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 1rem 1.5rem rgba(0, 0, 0, 0.2);
       transform: translateY(-4px);
     }
 
@@ -828,7 +846,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(4px);
       border: 1px solid #86efac;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
       color: #16a34a;
     }
 
@@ -839,7 +857,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       border-radius: 0.375rem;
       background: #fbbf24;
       color: black;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
     }
 
     .sm-soon-badge {
@@ -849,7 +867,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       border-radius: 0.375rem;
       background: #ef4444;
       color: white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
     }
 
     .sm-category-badge {
@@ -860,11 +878,13 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
 
     .sm-badge-category {
       font-size: 10px;
-      padding: 0.25rem 0.5rem;
+      padding: 0.125rem 0.5rem;
+      height: auto;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(4px);
       border: 1px solid rgba(255, 255, 255, 0.5);
       color: #374151;
+      border-radius: 0.25rem;
     }
 
     .sm-checkbox-overlay {
@@ -883,9 +903,9 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     .sm-card-title-modern {
       font-size: 0.875rem;
       font-weight: 700;
-      color: #111827;
+      color: #0f172a;
       margin: 0 0 0.375rem 0;
-      line-height: 1.3;
+      line-height: 1.25;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -899,7 +919,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
 
     .sm-card-provider-modern {
       font-size: 0.75rem;
-      color: #6b7280;
+      color: #475569;
       margin: 0 0 0.75rem 0;
       font-weight: 500;
     }
@@ -917,7 +937,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       align-items: center;
       gap: 0.5rem;
       font-size: 0.75rem;
-      color: #374151;
+      color: #334155;
     }
 
     .sm-info-item span {
@@ -931,7 +951,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       gap: 0.5rem;
       margin-top: auto;
       padding-top: 0.75rem;
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid #f1f5f9;
     }
 
     .sm-badge {
@@ -959,8 +979,11 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     }
 
     .sm-badge-source {
-      background: #e0e7ff;
-      color: #3730a3;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
     }
 
 
@@ -1138,7 +1161,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       cursor: pointer;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 767px) {
       .sm-form-grid {
         grid-template-columns: 1fr;
       }
@@ -1449,20 +1472,20 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                     {/* Info Icons */}
                     <div className="sm-card-info">
                       <div className="sm-info-item">
-                        <DollarSign size={14} style={{ color: '#bd9f67', flexShrink: 0 }} />
-                        <span>{scholarship.amount} {scholarship.currency !== scholarship.amount && scholarship.currency}</span>
+                        <DollarSign size={14} style={{ color: '#bd9f67', flexShrink: 0, width: '14px', height: '14px' }} />
+                        <span style={{ fontWeight: 600 }}>{scholarship.amount} {scholarship.currency !== scholarship.amount && scholarship.currency}</span>
                       </div>
                       <div className="sm-info-item">
-                        <MapPin size={14} style={{ color: '#9ca3af', flexShrink: 0 }} />
+                        <MapPin size={14} style={{ color: '#94a3b8', flexShrink: 0, width: '14px', height: '14px' }} />
                         <span>{scholarship.location}</span>
                       </div>
                       <div className="sm-info-item">
-                        <BookOpen size={14} style={{ color: '#9ca3af', flexShrink: 0 }} />
+                        <BookOpen size={14} style={{ color: '#94a3b8', flexShrink: 0, width: '14px', height: '14px' }} />
                         <span>{scholarship.level}</span>
                       </div>
                       {daysLeft > 0 && (
                         <div className="sm-info-item">
-                          <Clock size={14} style={{ color: '#9ca3af', flexShrink: 0 }} />
+                          <Clock size={14} style={{ color: '#94a3b8', flexShrink: 0, width: '14px', height: '14px' }} />
                           <span>{daysLeft} days left</span>
                         </div>
                       )}
