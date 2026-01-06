@@ -129,6 +129,31 @@ const advantages = [
   },
 ];
 
+// Animation variants matching global scholarships page
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: {
+      type: "spring" as const,
+      stiffness: 100,
+      damping: 15,
+    }
+  },
+};
+
 const GraduateRecruitment = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -293,79 +318,128 @@ const GraduateRecruitment = () => {
             </div>
           </motion.div>
 
-          {/* Program Cards - Compact & Neat */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Program Cards - Matching global scholarship page design */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+          >
             {graduatePrograms.map((program, index) => (
               <motion.div
                 key={program.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                variants={cardVariants}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="group cursor-pointer"
                 onClick={() => navigate(`/jobs/${program.id}`, { state: { job: program } })}
               >
-                {/* Image Section - Compact */}
-                <div className="relative w-full h-40 overflow-hidden bg-slate-100">
-                  <img
-                    src={program.image}
-                    alt={program.title}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </div>
+                {/* Compact Card Style - Matching global scholarship page design */}
+                <div className="relative w-full overflow-hidden rounded-2xl border-2 bg-white shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                  style={{
+                    borderColor: "#e5e7eb"
+                  }}
+                >
+                  {/* Top accent bar - Whitish grey */}
+                  <div className="h-1 w-full bg-slate-300" />
 
-                {/* Content Section - Tight Spacing */}
-                <div className="p-4 space-y-2.5">
-                  <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                    {program.company}
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-emerald-700 transition-colors">
-                    {program.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-                    {program.description}
-                  </p>
-                  <div className="flex items-center justify-between pt-1.5 border-t border-slate-100">
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="w-3.5 h-3.5 text-slate-400" />
-                      <span className="text-xs font-semibold text-slate-900">{program.salary}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-slate-500">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{program.duration}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                    <div className="flex items-center gap-0.5">
-                      <MapPin className="w-3 h-3" />
-                      <span>{program.location.split(",")[0]}</span>
-                    </div>
-                    <span>•</span>
-                    <span>{program.type}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 pt-0.5">
-                    {program.skills.slice(0, 2).map((skill, idx) => (
-                      <Badge
-                        key={idx}
-                        variant="outline"
-                        className="text-[10px] border-slate-200 text-slate-500 bg-slate-50 px-1.5 py-0 h-5"
-                      >
-                        {skill}
+                  {/* Image Section */}
+                  <div className="relative h-32 overflow-hidden bg-slate-100">
+                    <motion.img
+                      src={program.image}
+                      alt={program.title}
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    
+                    {/* Company badge on image */}
+                    <div className="absolute top-2 left-2">
+                      <Badge variant="outline" className="text-[10px] px-2 py-0.5 h-auto bg-white/95 backdrop-blur-sm border-white/50">
+                        {program.company.split(' ')[0]}
                       </Badge>
-                    ))}
-                    {program.skills.length > 2 && (
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] border-slate-200 text-slate-500 bg-slate-50 px-1.5 py-0 h-5"
-                      >
-                        +{program.skills.length - 2}
+                    </div>
+                    
+                    {/* Type badge on image */}
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="outline" className="text-[10px] px-2 py-0.5 h-auto bg-white/95 backdrop-blur-sm border-white/50">
+                        {program.type}
                       </Badge>
-                    )}
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="flex flex-col flex-1 p-4">
+                    {/* Title */}
+                    <h3 className="text-sm font-bold text-slate-900 mb-1.5 line-clamp-2 leading-tight group-hover:text-[#bd9f67] transition-colors">
+                      {program.title}
+                    </h3>
+
+                    {/* Company */}
+                    <p className="text-xs text-slate-600 mb-3 font-medium">
+                      {program.company}
+                    </p>
+
+                    {/* Description */}
+                    <p className="text-xs text-slate-600 mb-3 line-clamp-2 leading-relaxed">
+                      {program.description}
+                    </p>
+
+                    {/* Info Icons */}
+                    <div className="space-y-1.5 mb-3 flex-1">
+                      <div className="flex items-center gap-2 text-xs text-slate-700">
+                        <DollarSign className="w-3.5 h-3.5 text-[#bd9f67] flex-shrink-0" />
+                        <span className="font-semibold truncate">{program.salary}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                        <span className="truncate">{program.duration}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                        <span className="truncate">{program.location.split(",")[0]}</span>
+                      </div>
+                      {program.requirements.length > 0 && (
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                          <FileText className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate">{program.requirements.length} requirement{program.requirements.length > 1 ? 's' : ''}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Button - Matching global scholarship page style */}
+                    <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/jobs/${program.id}`, { state: { job: program } });
+                        }}
+                        className="group relative inline-block text-xs font-semibold text-[#bd9f67] transition-colors duration-300 hover:text-[#a88a59]"
+                        style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                      >
+                        <motion.span
+                          className="relative inline-block pb-0.5 flex items-center gap-1"
+                          whileHover={{ x: 2 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        >
+                          <ArrowRight className="w-3.5 h-3.5" />
+                          View Details
+                          <span
+                            className="absolute bottom-0 left-0 h-[1px] bg-[#bd9f67] transition-all duration-300 group-hover:bg-[#a88a59]"
+                            style={{
+                              width: 'calc(100% + 8px)',
+                              clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                            }}
+                          />
+                        </motion.span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
 
           {/* CTA Section */}
           <motion.div

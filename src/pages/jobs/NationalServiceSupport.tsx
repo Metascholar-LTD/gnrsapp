@@ -132,6 +132,31 @@ const applicationSteps = [
   },
 ];
 
+// Animation variants matching global scholarships page
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: {
+      type: "spring" as const,
+      stiffness: 100,
+      damping: 15,
+    }
+  },
+};
+
 const NationalServiceSupport = () => {
   const navigate = useNavigate();
 
@@ -316,63 +341,130 @@ const NationalServiceSupport = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-            {nssPrograms.map((program, index) => (
-              <motion.div
-                key={program.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-              >
-                {/* Image Section - Compact */}
-                <div className="relative w-full h-40 overflow-hidden bg-slate-100">
-                  <img
-                    src={program.image}
-                    alt={program.title}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute top-2 left-2">
-                    <div className={`w-10 h-10 rounded-lg ${program.color} flex items-center justify-center text-xl shadow-sm`}>
-                      {program.icon}
-                    </div>
-                  </div>
-                </div>
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+          >
+            {nssPrograms.map((program, index) => {
+              // Determine accent color based on program type
+              const accentColor = 
+                program.id === "nss-1" ? "#3b82f6" : // Blue for Teaching
+                program.id === "nss-2" ? "#ef4444" : // Red for Health
+                program.id === "nss-3" ? "#10b981" : // Emerald for Public Admin
+                "#8b5cf6"; // Purple for Private Sector
 
-                {/* Content Section - Tight Spacing */}
-                <div className="p-4 space-y-2.5">
-                  <h3 className={`text-base font-bold ${program.textColor} leading-snug`}>
-                    {program.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-                    {program.description}
-                  </p>
-                  <div className="flex items-center justify-between pt-1.5 border-t border-slate-100">
-                    <div className="flex items-center gap-1 text-xs text-slate-500">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{program.duration}</span>
+              return (
+                <motion.div
+                  key={program.id}
+                  variants={cardVariants}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="group cursor-pointer"
+                >
+                  {/* Compact Card Style - Matching global scholarship page design */}
+                  <div className="relative w-full overflow-hidden rounded-2xl border-2 bg-white shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                    style={{
+                      borderColor: "#e5e7eb"
+                    }}
+                  >
+                    {/* Top accent bar */}
+                    <div className="h-1 w-full"
+                      style={{
+                        backgroundColor: accentColor
+                      }}
+                    />
+
+                    {/* Image Section */}
+                    <div className="relative h-32 overflow-hidden bg-slate-100">
+                      <motion.img
+                        src={program.image}
+                        alt={program.title}
+                        className="w-full h-full object-cover"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      
+                      {/* Icon Badge on Image */}
+                      <div className="absolute top-2 left-2">
+                        <div className={`w-8 h-8 rounded-lg ${program.color} flex items-center justify-center shadow-md backdrop-blur-sm border border-white/20`}>
+                          {program.icon}
+                        </div>
+                      </div>
+                      
+                      {/* Category badge on image */}
+                      <div className="absolute top-2 right-2">
+                        <Badge variant="outline" className="text-[10px] px-2 py-0.5 h-auto bg-white/95 backdrop-blur-sm border-white/50">
+                          {program.title.split(' ')[0]}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-slate-500">
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span className="line-clamp-1">{program.locations[0]}</span>
+
+                    {/* Card Content */}
+                    <div className="flex flex-col flex-1 p-4">
+                      {/* Title */}
+                      <h3 className="text-sm font-bold text-slate-900 mb-1.5 line-clamp-2 leading-tight group-hover:text-[#bd9f67] transition-colors">
+                        {program.title}
+                      </h3>
+
+                      {/* Description */}
+                      <p className="text-xs text-slate-600 mb-3 line-clamp-2 leading-relaxed">
+                        {program.description}
+                      </p>
+
+                      {/* Info Icons */}
+                      <div className="space-y-1.5 mb-3 flex-1">
+                        <div className="flex items-center gap-2 text-xs text-slate-700">
+                          <Clock className="w-3.5 h-3.5 text-[#bd9f67] flex-shrink-0" />
+                          <span className="font-semibold truncate">{program.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate">{program.locations[0]}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <Users className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate">{program.locations.length} location{program.locations.length > 1 ? 's' : ''}</span>
+                        </div>
+                        {program.requirements.length > 0 && (
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <FileText className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                            <span className="truncate">{program.requirements.length} requirement{program.requirements.length > 1 ? 's' : ''}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Button - Matching global scholarship page style */}
+                      <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-end">
+                        <button
+                          className="group relative inline-block text-xs font-semibold text-[#bd9f67] transition-colors duration-300 hover:text-[#a88a59]"
+                          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                        >
+                          <motion.span
+                            className="relative inline-block pb-0.5 flex items-center gap-1"
+                            whileHover={{ x: 2 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                          >
+                            <ArrowRight className="w-3.5 h-3.5" />
+                            View Details
+                            <span
+                              className="absolute bottom-0 left-0 h-[1px] bg-[#bd9f67] transition-all duration-300 group-hover:bg-[#a88a59]"
+                              style={{
+                                width: 'calc(100% + 8px)',
+                                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                              }}
+                            />
+                          </motion.span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1 pt-0.5">
-                    {program.benefits.slice(0, 3).map((benefit, idx) => (
-                      <Badge
-                        key={idx}
-                        variant="outline"
-                        className="text-[10px] border-emerald-200 text-emerald-700 bg-emerald-50 px-1.5 py-0 h-5"
-                      >
-                        {benefit}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
         </div>
       </section>
 
