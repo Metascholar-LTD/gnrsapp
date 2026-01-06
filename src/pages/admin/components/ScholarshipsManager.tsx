@@ -5,7 +5,7 @@ import {
   CheckCircle2, XCircle, TrendingUp, ChevronLeft, ChevronRight,
   Grid3x3, List, Save, Loader2, Image as ImageIcon,
   Award, DollarSign, Calendar, MapPin, Globe, Mail, Phone, Building2,
-  AlertCircle, FileText, BookOpen, Users, Clock, Info, MessageSquare
+  AlertCircle, FileText, BookOpen, Users, Clock, Info, MessageSquare, GraduationCap
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -763,9 +763,9 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     }
 
     .sm-table th {
-      padding: 1.25rem 1rem;
+      padding: 0.75rem 0.875rem;
       text-align: left;
-      font-size: 0.8125rem;
+      font-size: 0.6875rem;
       font-weight: 600;
       color: #6b7280;
       text-transform: uppercase;
@@ -778,12 +778,32 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     }
 
     .sm-table td {
-      padding: 1.25rem 1rem;
+      padding: 0.875rem 0.875rem;
       border-bottom: 1px solid #e5e7eb;
-      font-size: 0.9375rem;
+      font-size: 0.8125rem;
       color: #374151;
       vertical-align: middle;
-      line-height: 1.5;
+      line-height: 1.4;
+    }
+
+    @media (min-width: 768px) {
+      .sm-table th {
+        padding: 0.875rem 1rem;
+        font-size: 0.75rem;
+      }
+      .sm-table td {
+        padding: 1rem 1rem;
+        font-size: 0.875rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .sm-table th {
+        padding: 1rem 1.125rem;
+      }
+      .sm-table td {
+        padding: 1.125rem 1.125rem;
+      }
     }
 
     .sm-table tbody tr {
@@ -804,25 +824,28 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
 
     .sm-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      grid-template-columns: repeat(1, 1fr);
       gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .sm-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .sm-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+      }
     }
 
     @media (min-width: 1280px) {
       .sm-grid {
         grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    @media (min-width: 1024px) and (max-width: 1279px) {
-      .sm-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (min-width: 768px) and (max-width: 1023px) {
-      .sm-grid {
-        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
       }
     }
 
@@ -833,15 +856,16 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       border-radius: 1rem;
       border: 2px solid #e5e7eb;
       background: white;
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       transition: all 0.3s;
       display: flex;
       flex-direction: column;
       height: 100%;
+      cursor: pointer;
     }
 
     .sm-card-modern:hover {
-      box-shadow: 0 1rem 1.5rem rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       transform: translateY(-4px);
     }
 
@@ -850,11 +874,19 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       width: 100%;
     }
 
+    .sm-card-accent.mtn {
+      background-color: #fbbf24;
+    }
+
+    .sm-card-accent.default {
+      background-color: #bd9f67;
+    }
+
     .sm-card-image-wrapper {
       position: relative;
       height: 128px;
       overflow: hidden;
-      background: #f3f4f6;
+      background: #f1f5f9;
     }
 
     .sm-card-image-modern {
@@ -986,6 +1018,15 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       gap: 0.5rem;
       font-size: 0.75rem;
       color: #334155;
+    }
+
+    .sm-info-item:first-child {
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .sm-info-item:not(:first-child) {
+      color: #64748b;
     }
 
     .sm-info-item span {
@@ -1582,15 +1623,15 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                     <div className="sm-card-info">
                       <div className="sm-info-item">
                         <DollarSign size={14} style={{ color: '#bd9f67', flexShrink: 0, width: '14px', height: '14px' }} />
-                        <span style={{ fontWeight: 600 }}>{scholarship.amount} {scholarship.currency !== scholarship.amount && scholarship.currency}</span>
+                        <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{scholarship.amount} {scholarship.currency !== scholarship.amount && scholarship.currency}</span>
                       </div>
                       <div className="sm-info-item">
                         <MapPin size={14} style={{ color: '#94a3b8', flexShrink: 0, width: '14px', height: '14px' }} />
-                        <span>{scholarship.location}</span>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{scholarship.location}</span>
                       </div>
                       <div className="sm-info-item">
-                        <BookOpen size={14} style={{ color: '#94a3b8', flexShrink: 0, width: '14px', height: '14px' }} />
-                        <span>{scholarship.level}</span>
+                        <GraduationCap size={14} style={{ color: '#94a3b8', flexShrink: 0, width: '14px', height: '14px' }} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{scholarship.level}</span>
                       </div>
                       {daysLeft > 0 && (
                         <div className="sm-info-item">
