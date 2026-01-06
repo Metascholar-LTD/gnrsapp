@@ -38,6 +38,7 @@ import {
   BookOpen,
   Lightbulb,
   MessageSquare,
+  ArrowRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -1446,41 +1447,140 @@ const ScholarshipView = () => {
               className="mt-16"
             >
               <h2 className="text-3xl font-bold text-slate-900 mb-8">Related Scholarships</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {relatedScholarships.map((relScholarship) => (
-                  <motion.div
-                    key={relScholarship.id}
-                    whileHover={{ scale: 1.03 }}
-                    className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all cursor-pointer"
-                    onClick={() => navigate(`/scholarship/${relScholarship.id}`)}
-                  >
-                    {relScholarship.imageUrl && (
-                      <div className="relative h-48 overflow-hidden">
-                        <img
-                          src={relScholarship.imageUrl}
-                          alt={relScholarship.title}
-                          className="w-full h-full object-cover"
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {relatedScholarships.map((relScholarship) => {
+                  const isMTN = relScholarship.provider?.toLowerCase().includes("mtn") || relScholarship.title?.toLowerCase().includes("mtn");
+                  const daysLeft = getDaysUntilDeadline(relScholarship.deadline);
+                  const isDeadlineSoon = daysLeft > 0 && daysLeft <= 30;
+
+                  return (
+                    <motion.div
+                      key={relScholarship.id}
+                      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                      className="group cursor-pointer"
+                      onClick={() => navigate(`/scholarship/${relScholarship.id}`)}
+                    >
+                      {/* Compact Card Style - Matching global scholarship page design */}
+                      <div className="relative w-full overflow-hidden rounded-2xl border-2 bg-white shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                        style={{
+                          borderColor: isMTN ? "#fbbf24" : "#e5e7eb"
+                        }}
+                      >
+                        {/* Top accent bar - Only yellow for MTN */}
+                        <div className="h-1 w-full"
+                          style={{
+                            backgroundColor: isMTN ? "#fbbf24" : "#bd9f67"
+                          }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      </div>
-                    )}
-                    <div className="p-5">
-                      <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2">
-                        {relScholarship.title}
-                      </h3>
-                      <p className="text-sm text-slate-600 mb-3">{relScholarship.provider}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[#bd9f67]">
-                          <DollarSign className="w-4 h-4" />
-                          <span className="font-semibold text-sm">{relScholarship.amount}</span>
+
+                        {/* Image Section */}
+                        {relScholarship.imageUrl && (
+                          <div className="relative h-32 overflow-hidden bg-slate-100">
+                            <motion.img
+                              src={relScholarship.imageUrl}
+                              alt={relScholarship.title}
+                              className="w-full h-full object-cover"
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ duration: 0.3 }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                            
+                            {/* Badges on Image */}
+                            <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
+                              {relScholarship.verified && (
+                                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-white/95 backdrop-blur-sm border border-green-300 shadow-md">
+                                  <CheckCircle2 className="w-3 h-3 text-green-600" />
+                                </div>
+                              )}
+                              {isMTN && (
+                                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-yellow-400 text-black shadow-md">
+                                  MTN
+                                </span>
+                              )}
+                              {isDeadlineSoon && (
+                                <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-red-500 text-white shadow-md">
+                                  Soon
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* Category badge on image */}
+                            <div className="absolute top-2 right-2">
+                              <Badge variant="outline" className="text-[10px] px-2 py-0.5 h-auto bg-white/95 backdrop-blur-sm border-white/50">
+                                {relScholarship.category}
+                              </Badge>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Card Content */}
+                        <div className="flex flex-col flex-1 p-4">
+                          {/* Title */}
+                          <h3 className="text-sm font-bold text-slate-900 mb-1.5 line-clamp-2 leading-tight group-hover:text-[#bd9f67] transition-colors">
+                            {relScholarship.title}
+                          </h3>
+
+                          {/* Provider */}
+                          <p className="text-xs text-slate-600 mb-3 font-medium">
+                            {relScholarship.provider}
+                          </p>
+
+                          {/* Info Icons */}
+                          <div className="space-y-1.5 mb-3 flex-1">
+                            <div className="flex items-center gap-2 text-xs text-slate-700">
+                              <DollarSign className="w-3.5 h-3.5 text-[#bd9f67] flex-shrink-0" />
+                              <span className="font-semibold truncate">
+                                {relScholarship.amount} {relScholarship.currency !== relScholarship.amount && relScholarship.currency}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-slate-600">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                              <span className="truncate">{relScholarship.location}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-slate-600">
+                              <GraduationCap className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                              <span className="truncate">{relScholarship.level}</span>
+                            </div>
+                            {daysLeft > 0 && (
+                              <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                                <span>{daysLeft} days left</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Action Button - Matching questions page style */}
+                          <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-end">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/scholarship/${relScholarship.id}`);
+                              }}
+                              className="group relative inline-block text-xs font-semibold text-[#bd9f67] transition-colors duration-300 hover:text-[#a88a59]"
+                              style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                            >
+                              <motion.span
+                                className="relative inline-block pb-0.5 flex items-center gap-1"
+                                whileHover={{ x: 2 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                              >
+                                <ArrowRight className="w-3.5 h-3.5" />
+                                View Details
+                                <span
+                                  className="absolute bottom-0 left-0 h-[1px] bg-[#bd9f67] transition-all duration-300 group-hover:bg-[#a88a59]"
+                                  style={{
+                                    width: 'calc(100% + 8px)',
+                                    clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                  }}
+                                />
+                              </motion.span>
+                            </button>
+                          </div>
                         </div>
-                        <Badge variant="outline" className="text-xs">
-                          {relScholarship.level}
-                        </Badge>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </div>
             </motion.div>
           )}

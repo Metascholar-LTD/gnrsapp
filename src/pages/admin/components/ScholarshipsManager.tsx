@@ -5,7 +5,7 @@ import {
   CheckCircle2, XCircle, TrendingUp, ChevronLeft, ChevronRight,
   Grid3x3, List, Save, Loader2, Image as ImageIcon,
   Award, DollarSign, Calendar, MapPin, Globe, Mail, Phone, Building2,
-  AlertCircle, FileText, BookOpen, Users, Clock, Info
+  AlertCircle, FileText, BookOpen, Users, Clock, Info, MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -51,6 +51,12 @@ interface Scholarship {
   route?: string;
   created_at?: string;
   updated_at?: string;
+  faqs?: FAQ[];
+}
+
+interface FAQ {
+  question: string;
+  answer: string;
 }
 
 interface ScholarshipFormData {
@@ -80,6 +86,7 @@ interface ScholarshipFormData {
   duration: string;
   renewability: string;
   fieldOfStudy: string[];
+  faqs: string;
 }
 
 const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter }) => {
@@ -132,6 +139,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       duration: "",
       renewability: "",
       fieldOfStudy: [],
+      faqs: "",
     });
 
   // Options
@@ -360,6 +368,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       duration: "",
       renewability: "",
       fieldOfStudy: [],
+      faqs: "",
     });
     setShowAddForm(true);
   };
@@ -394,6 +403,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       duration: scholarship.duration || "",
       renewability: scholarship.renewability || "",
       fieldOfStudy: scholarship.fieldOfStudy || [],
+      faqs: scholarship.faqs ? JSON.stringify(scholarship.faqs) : "",
     });
     setShowAddForm(true);
   };
@@ -468,6 +478,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       duration: formData.duration,
       renewability: formData.renewability,
       fieldOfStudy: formData.fieldOfStudy && formData.fieldOfStudy.length > 0 ? formData.fieldOfStudy : undefined,
+      faqs: formData.faqs ? JSON.parse(formData.faqs) : undefined,
     };
 
     setTimeout(() => {
@@ -1661,25 +1672,44 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
               {/* Tab Navigation */}
               <div className="sm-form-tabs">
                 <button
-                  onClick={() => setActiveFormTab("overview")}
+                  onClick={() => {
+                    setActiveFormTab("overview");
+                    setActiveInlineEditor(null);
+                  }}
                   className={`sm-form-tab ${activeFormTab === "overview" ? "active" : ""}`}
                 >
                   <Info size={16} />
                   <span>Overview</span>
                 </button>
                 <button
-                  onClick={() => setActiveFormTab("application")}
+                  onClick={() => {
+                    setActiveFormTab("application");
+                    setActiveInlineEditor(null);
+                  }}
                   className={`sm-form-tab ${activeFormTab === "application" ? "active" : ""}`}
                 >
                   <FileText size={16} />
                   <span>Application Details</span>
                 </button>
                 <button
-                  onClick={() => setActiveFormTab("additional")}
+                  onClick={() => {
+                    setActiveFormTab("additional");
+                    setActiveInlineEditor(null);
+                  }}
                   className={`sm-form-tab ${activeFormTab === "additional" ? "active" : ""}`}
                 >
                   <BookOpen size={16} />
                   <span>Additional Info</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveFormTab("faqs");
+                    setActiveInlineEditor(null);
+                  }}
+                  className={`sm-form-tab ${activeFormTab === "faqs" ? "active" : ""}`}
+                >
+                  <MessageSquare size={16} />
+                  <span>FAQs</span>
                 </button>
               </div>
 
@@ -3046,6 +3076,226 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                             onChange={(e) => setFormData({ ...formData, renewability: e.target.value })}
                             placeholder="e.g., Renewable annually based on performance"
                           />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* FAQs Tab */}
+                {activeFormTab === "faqs" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="sm-form-section">
+                      <h3 className="sm-form-section-title">Frequently Asked Questions</h3>
+                      <div className="sm-form-grid">
+                        <div className="sm-form-group full-width">
+                          <label className="sm-form-label">FAQs (Question & Answer pairs)</label>
+                          {(() => {
+                            let faqs: FAQ[] = [];
+                            try {
+                              faqs = formData.faqs ? JSON.parse(formData.faqs) : [];
+                            } catch (e) {
+                              faqs = [];
+                            }
+                            if (faqs.length === 0) faqs = [{ question: "", answer: "" }];
+
+                            return (
+                              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                                {faqs.map((faq, index) => {
+                                  const isQuestionActive = activeInlineEditor?.field === "faqs-question" && activeInlineEditor?.index === index;
+                                  const isAnswerActive = activeInlineEditor?.field === "faqs-answer" && activeInlineEditor?.index === index;
+                                  return (
+                                    <div
+                                      key={index}
+                                      style={{
+                                        padding: "1rem",
+                                        border: "1px solid #e5e7eb",
+                                        borderRadius: "0.5rem",
+                                        background: "#f9fafb",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "0.75rem",
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "0.5rem",
+                                          marginBottom: "0.25rem",
+                                        }}
+                                      >
+                                        <span
+                                          style={{
+                                            width: "1.5rem",
+                                            height: "1.5rem",
+                                            borderRadius: "9999px",
+                                            background: "#bd9f67",
+                                            color: "white",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            fontSize: "0.75rem",
+                                            fontWeight: "bold",
+                                            flexShrink: 0,
+                                          }}
+                                        >
+                                          {index + 1}
+                                        </span>
+                                        <span style={{ fontSize: "0.75rem", color: "#6b7280", fontWeight: "500" }}>
+                                          FAQ #{index + 1}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const next = faqs.filter((_, i) => i !== index);
+                                            setFormData({
+                                              ...formData,
+                                              faqs: JSON.stringify(next.length > 0 ? next : [{ question: "", answer: "" }]),
+                                            });
+                                          }}
+                                          style={{
+                                            marginLeft: "auto",
+                                            border: "none",
+                                            background: "transparent",
+                                            color: "#ef4444",
+                                            cursor: "pointer",
+                                            padding: "0.25rem",
+                                            display: "flex",
+                                            alignItems: "center",
+                                          }}
+                                          aria-label="Remove FAQ"
+                                        >
+                                          <X size={16} />
+                                        </button>
+                                      </div>
+
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          flexDirection: (isQuestionActive || isAnswerActive) ? "column" : "row",
+                                          gap: "0.5rem",
+                                        }}
+                                      >
+                                        {/* Question Field */}
+                                        {isQuestionActive ? (
+                                          <textarea
+                                            className="sm-form-textarea"
+                                            style={{ width: "100%" }}
+                                            value={faq.question}
+                                            autoFocus
+                                            rows={2}
+                                            placeholder="Enter the question"
+                                            onChange={(e) => {
+                                              const next = [...faqs];
+                                              next[index] = { ...next[index], question: e.target.value };
+                                              setFormData({
+                                                ...formData,
+                                                faqs: JSON.stringify(next),
+                                              });
+                                            }}
+                                            onBlur={() => setActiveInlineEditor(null)}
+                                          />
+                                        ) : (
+                                          <div
+                                            onClick={() => setActiveInlineEditor({ field: "faqs-question", index })}
+                                            style={{
+                                              flex: 1,
+                                              padding: "0.75rem",
+                                              background: "white",
+                                              borderRadius: "0.375rem",
+                                              border: "1px solid #e5e7eb",
+                                              cursor: "text",
+                                            }}
+                                          >
+                                            <div style={{ fontSize: "0.75rem", color: "#9ca3af", marginBottom: "0.25rem" }}>
+                                              Question
+                                            </div>
+                                            <div style={{ fontSize: "0.875rem", color: "#111827", fontWeight: "500" }}>
+                                              {faq.question || <span style={{ color: "#9ca3af", fontStyle: "italic" }}>Click to add question</span>}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        {/* Answer Field */}
+                                        {isAnswerActive ? (
+                                          <textarea
+                                            className="sm-form-textarea"
+                                            style={{ width: "100%" }}
+                                            value={faq.answer}
+                                            autoFocus
+                                            rows={4}
+                                            placeholder="Enter the answer"
+                                            onChange={(e) => {
+                                              const next = [...faqs];
+                                              next[index] = { ...next[index], answer: e.target.value };
+                                              setFormData({
+                                                ...formData,
+                                                faqs: JSON.stringify(next),
+                                              });
+                                            }}
+                                            onBlur={() => setActiveInlineEditor(null)}
+                                          />
+                                        ) : (
+                                          <div
+                                            onClick={() => setActiveInlineEditor({ field: "faqs-answer", index })}
+                                            style={{
+                                              flex: 1,
+                                              padding: "0.75rem",
+                                              background: "white",
+                                              borderRadius: "0.375rem",
+                                              border: "1px solid #e5e7eb",
+                                              cursor: "text",
+                                            }}
+                                          >
+                                            <div style={{ fontSize: "0.75rem", color: "#9ca3af", marginBottom: "0.25rem" }}>
+                                              Answer
+                                            </div>
+                                            <div style={{ fontSize: "0.875rem", color: "#374151" }}>
+                                              {faq.answer || <span style={{ color: "#9ca3af", fontStyle: "italic" }}>Click to add answer</span>}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = [...faqs, { question: "", answer: "" }];
+                                    setFormData({
+                                      ...formData,
+                                      faqs: JSON.stringify(next),
+                                    });
+                                  }}
+                                  style={{
+                                    alignSelf: "flex-start",
+                                    marginTop: "0.5rem",
+                                    fontSize: "0.875rem",
+                                    padding: "0.5rem 1rem",
+                                    borderRadius: "0.5rem",
+                                    border: "1px dashed #d1d5db",
+                                    background: "#f9fafb",
+                                    color: "#374151",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "0.5rem",
+                                    cursor: "pointer",
+                                    fontWeight: "500",
+                                  }}
+                                >
+                                  <Plus size={16} />
+                                  Add FAQ
+                                </button>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>
