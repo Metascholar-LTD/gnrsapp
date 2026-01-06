@@ -8,6 +8,7 @@ import {
   AlertCircle, FileText, BookOpen, Users, Clock, Info, MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ScholarshipsManagerProps {
   sourceFilter?: string | null;
@@ -166,110 +167,72 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     loadScholarships();
   }, [sourceFilter]);
 
-  const loadScholarships = () => {
+  const loadScholarships = async () => {
     setLoading(true);
-    // Mock data - will be replaced with Supabase fetch
-    setTimeout(() => {
-      const mockScholarships: Scholarship[] = [
-        {
-          id: "1",
-          title: "Mastercard Foundation Scholars Program",
-          provider: "Mastercard Foundation",
-          amount: "Full Tuition",
-          currency: "USD",
-          category: "Merit-Based",
-          deadline: "2024-12-31",
-          location: "Ghana",
-          level: "Undergraduate",
-          description: "Comprehensive scholarship covering tuition, accommodation, and living expenses.",
-          requirements: ["Minimum GPA 3.5", "Financial need", "Leadership potential"],
-          verified: true,
-          imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg",
-          featured: true,
-          source: "field-based",
-          website: "https://mastercardfdn.org/scholars-program/",
-          email: "scholars@mastercardfdn.org",
-          phone: "+233 30 278 0300",
-        },
-        {
-          id: "mtn-bright-scholarship",
-          title: "MTN Ghana Foundation Bright Scholarship",
-          provider: "MTN Ghana Foundation",
-          amount: "Tuition & Academic Support",
-          currency: "GHS",
-          category: "Need-Based",
-          deadline: "2025-05-31",
-          location: "Ghana",
-          level: "Undergraduate & TVET",
-          description: "Bright Scholarship from MTN Ghana Foundation supports brilliant but needy Ghanaians studying first-degree programmes and technical/vocational skills training at public tertiary institutions.",
-          requirements: [
-            "First-year or continuing student in a first-degree programme at a Ghanaian public tertiary institution, or enrolled in recognised vocational / technical skills training",
-            "Ghanaian citizen, brilliant but needy",
-            "Good conduct, strong academic performance and, for continuing students, extra-curricular engagement is an advantage",
-            "No academic disciplinary issues and not serving a bond to be of good behaviour",
-            "Not currently benefiting from any other educational scholarship",
-          ],
-          verified: true,
-          featured: true,
-          imageUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop",
-          source: "mtn",
-          website: "https://scholarship.mtn.com.gh",
-          email: "info.mtnfoundation@mtn.com",
-          phone: "+233 24 430 0000",
-          fullDescription: "For nearly two decades, the MTN Foundation has provided transformative scholarship support across Africa. In Ghana, the MTN Ghana Foundation Bright Scholarship focuses on brilliant but needy students who would otherwise struggle to fund their tertiary education. The scholarship targets first-degree students in public universities and technical/vocational training institutions, with a strong emphasis on STEM, ICT and future-facing disciplines such as Artificial Intelligence and Data Analytics.",
-          benefits: [
-            "Contribution towards tuition fees in line with MTN Ghana Foundation policy for the scholarship cycle",
-            "Coverage of approved academic and registration-related charges",
-            "Support for books and core learning materials where applicable",
-            "Access to MTN Foundation-organised mentorship, networking and capacity-building opportunities",
-          ],
-          eligibility: [
-            "Must be a Ghanaian citizen and demonstrate that they are brilliant but needy",
-            "Must be a first-year or continuing student on a first-degree programme at a Ghanaian public tertiary institution, OR enrolled in recognised vocational/technical skills training",
-            "Continuing students must show excellent academic results and positive engagement in extra-curricular activities",
-            "Must not have any unresolved academic disciplinary cases and must not be under a bond of good behaviour",
-            "Must not be enjoying any other form of educational scholarship",
-          ],
-          applicationProcess: [
-            "Visit and apply online via the MTN Bright Scholarship portal at scholarship.mtn.com.gh",
-            "Complete the online application form with accurate personal, educational and financial information",
-            "Write and upload a one-page letter of motivation outlining your educational history, professional aspirations and reasons for needing the scholarship",
-            "Submit the application together with valid contact details such as active phone number and email address",
-            "Await notification from the MTN Ghana Foundation; shortlisted applicants will be contacted and invited to meet the scholarship panel",
-          ],
-          documents: [
-            "Completed online application form on scholarship.mtn.com.gh",
-            "One-page motivation letter describing educational and professional goals",
-            "Valid national ID or student ID as requested by the portal",
-            "Most recent academic transcripts or result slips (for continuing students)",
-            "Any additional supporting documents requested during the application process",
-          ],
-          selectionCriteria: [
-            "Strong academic performance and potential for impact",
-            "Demonstrated financial need and evidence of being 'brilliant but needy'",
-            "Programme of study aligned with MTN's focus areas such as ICT, Computer Science, Engineering, Artificial Intelligence and Data Analytics",
-            "Gender and inclusion considerations, with priority for women and persons with disability",
-            "Regional balance, with particular priority for applicants who lived and schooled in Bono East, Ahafo, Savannah, North East, Western North and Oti regions",
-          ],
-          coverageDetails: [
-            "Scholarship typically contributes to tuition and key academic charges as determined by MTN Ghana Foundation",
-            "Support is provided for an academic year at a time and may be renewed subject to performance",
-            "Non-financial benefits through mentorship, MTN engagement sessions and access to a network of Bright Scholarship alumni",
-          ],
-          duration: "Normally covers one academic year at a time, renewable for the normal duration of the programme subject to performance",
-          renewability: "Renewal is based on satisfactory academic performance, good conduct and continued financial need as assessed by MTN Ghana Foundation",
-          fieldOfStudy: [
-            "ICT and Computer Science programmes",
-            "Engineering disciplines",
-            "Artificial Intelligence and Data Analytics",
-            "Other approved programmes at public tertiary institutions and vocational/technical training centres",
-          ],
-        },
-      ];
-      
-      setScholarships(mockScholarships);
+    try {
+      let query = supabase
+        .from('scholarships' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Apply source filter if provided
+      if (sourceFilter) {
+        query = query.eq('source', sourceFilter);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Supabase error:", error);
+        toast.error("Failed to load scholarships");
+        setScholarships([]);
+        return;
+      }
+
+      if (data) {
+        // Transform Supabase data to Scholarship interface
+        const transformed: Scholarship[] = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          provider: item.provider,
+          amount: item.amount,
+          currency: item.currency,
+          category: item.category,
+          deadline: item.deadline,
+          location: item.location,
+          level: item.level,
+          description: item.description,
+          requirements: Array.isArray(item.requirements) ? item.requirements : [],
+          verified: item.verified || false,
+          imageUrl: item.image_url || undefined,
+          featured: item.featured || false,
+          source: item.source,
+          website: item.website || undefined,
+          email: item.email || undefined,
+          phone: item.phone || undefined,
+          fullDescription: item.full_description || undefined,
+          benefits: Array.isArray(item.benefits) ? item.benefits : [],
+          eligibility: Array.isArray(item.eligibility) ? item.eligibility : [],
+          applicationProcess: Array.isArray(item.application_process) ? item.application_process : [],
+          documents: Array.isArray(item.documents) ? item.documents : [],
+          selectionCriteria: Array.isArray(item.selection_criteria) ? item.selection_criteria : [],
+          coverageDetails: Array.isArray(item.coverage_details) ? item.coverage_details : [],
+          duration: item.duration || undefined,
+          renewability: item.renewability || undefined,
+          fieldOfStudy: Array.isArray(item.field_of_study) ? item.field_of_study : [],
+          faqs: Array.isArray(item.faqs) ? item.faqs : [],
+        }));
+        setScholarships(transformed);
+      } else {
+        setScholarships([]);
+      }
+    } catch (error: any) {
+      console.error("Error loading scholarships:", error);
+      toast.error("Failed to load scholarships");
+      setScholarships([]);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   // Filtering
@@ -413,86 +376,144 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (scholarshipToDelete) {
-      setScholarships(scholarships.filter(s => s.id !== scholarshipToDelete));
-      toast.success("Scholarship deleted successfully");
+  const confirmDelete = async () => {
+    if (!scholarshipToDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from('scholarships' as any)
+        .delete()
+        .eq('id', scholarshipToDelete);
+
+      if (error) throw error;
+
+      await loadScholarships();
+      setSelectedItems(new Set());
       setDeleteModalOpen(false);
       setScholarshipToDelete(null);
+      toast.success("Scholarship deleted successfully");
+    } catch (error: any) {
+      console.error("Error deleting scholarship:", error);
+      toast.error(error.message || "Failed to delete scholarship");
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedItems.size === 0) {
       toast.error("No items selected");
       return;
     }
-    const remaining = scholarships.filter(s => !selectedItems.has(s.id));
-    setScholarships(remaining);
-    setSelectedItems(new Set());
-    toast.success(`${selectedItems.size} scholarship(s) deleted`);
+    
+    try {
+      const idsToDelete = Array.from(selectedItems);
+      const { error } = await supabase
+        .from('scholarships' as any)
+        .delete()
+        .in('id', idsToDelete);
+
+      if (error) throw error;
+
+      await loadScholarships();
+      setSelectedItems(new Set());
+      toast.success(`${idsToDelete.length} scholarship(s) deleted`);
+    } catch (error: any) {
+      console.error("Error deleting scholarships:", error);
+      toast.error(error.message || "Failed to delete scholarships");
+    }
   };
 
-  const handleBulkVerify = () => {
+  const handleBulkVerify = async () => {
     if (selectedItems.size === 0) {
       toast.error("No items selected");
       return;
     }
-    const updated = scholarships.map(s => 
-      selectedItems.has(s.id) ? { ...s, verified: true } : s
-    );
-    setScholarships(updated);
-    setSelectedItems(new Set());
-    toast.success(`${selectedItems.size} scholarship(s) verified`);
+    
+    try {
+      const idsToVerify = Array.from(selectedItems);
+      const { error } = await supabase
+        .from('scholarships' as any)
+        .update({ verified: true })
+        .in('id', idsToVerify);
+
+      if (error) throw error;
+
+      await loadScholarships();
+      setSelectedItems(new Set());
+      toast.success(`${idsToVerify.length} scholarship(s) verified`);
+    } catch (error: any) {
+      console.error("Error verifying scholarships:", error);
+      toast.error(error.message || "Failed to verify scholarships");
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaving(true);
     
-    const newScholarship: Scholarship = {
-      id: editing || Date.now().toString(),
-      title: formData.title,
-      provider: formData.provider,
-      amount: formData.amount,
-      currency: formData.currency,
-      category: formData.category,
-      deadline: formData.deadline,
-      location: formData.location,
-      level: formData.level,
-      description: formData.fullDescription || "", // Use fullDescription for description field
-      requirements: formData.requirements.split("\n").filter(r => r.trim()),
-      verified: formData.verified,
-      imageUrl: formData.imageUrl,
-      featured: formData.featured,
-      source: formData.source,
-      website: formData.website,
-      email: formData.email,
-      phone: formData.phone,
-      fullDescription: formData.fullDescription,
-      benefits: formData.benefits ? formData.benefits.split("\n").filter(b => b.trim()) : undefined,
-      eligibility: formData.eligibility ? formData.eligibility.split("\n").filter(e => e.trim()) : undefined,
-      applicationProcess: formData.applicationProcess ? formData.applicationProcess.split("\n").filter(a => a.trim()) : undefined,
-      documents: formData.documents ? formData.documents.split("\n").filter(d => d.trim()) : undefined,
-      selectionCriteria: formData.selectionCriteria ? formData.selectionCriteria.split("\n").filter(s => s.trim()) : undefined,
-      coverageDetails: formData.coverageDetails ? formData.coverageDetails.split("\n").filter(c => c.trim()) : undefined,
-      duration: formData.duration,
-      renewability: formData.renewability,
-      fieldOfStudy: formData.fieldOfStudy && formData.fieldOfStudy.length > 0 ? formData.fieldOfStudy : undefined,
-      faqs: formData.faqs ? JSON.parse(formData.faqs) : undefined,
-    };
+    try {
+      const scholarshipId = editing || Date.now().toString();
+      
+      // Prepare data for Supabase (convert to snake_case and JSONB)
+      const supabaseData: any = {
+        id: scholarshipId,
+        title: formData.title,
+        provider: formData.provider,
+        amount: formData.amount,
+        currency: formData.currency,
+        category: formData.category,
+        deadline: formData.deadline,
+        location: formData.location,
+        level: formData.level,
+        description: formData.fullDescription || "",
+        requirements: formData.requirements.split("\n").filter(r => r.trim()),
+        verified: formData.verified,
+        image_url: formData.imageUrl || null,
+        featured: formData.featured,
+        source: formData.source,
+        website: formData.website || null,
+        email: formData.email || null,
+        phone: formData.phone || null,
+        full_description: formData.fullDescription || null,
+        benefits: formData.benefits ? formData.benefits.split("\n").filter(b => b.trim()) : [],
+        eligibility: formData.eligibility ? formData.eligibility.split("\n").filter(e => e.trim()) : [],
+        application_process: formData.applicationProcess ? formData.applicationProcess.split("\n").filter(a => a.trim()) : [],
+        documents: formData.documents ? formData.documents.split("\n").filter(d => d.trim()) : [],
+        selection_criteria: formData.selectionCriteria ? formData.selectionCriteria.split("\n").filter(s => s.trim()) : [],
+        coverage_details: formData.coverageDetails ? formData.coverageDetails.split("\n").filter(c => c.trim()) : [],
+        duration: formData.duration || null,
+        renewability: formData.renewability || null,
+        field_of_study: formData.fieldOfStudy && formData.fieldOfStudy.length > 0 ? formData.fieldOfStudy : [],
+        faqs: formData.faqs ? JSON.parse(formData.faqs) : [],
+      };
 
-    setTimeout(() => {
       if (editing) {
-        setScholarships(scholarships.map(s => s.id === editing ? newScholarship : s));
+        // Update existing scholarship
+        const { error } = await supabase
+          .from('scholarships' as any)
+          .update(supabaseData)
+          .eq('id', editing);
+
+        if (error) throw error;
         toast.success("Scholarship updated successfully");
       } else {
-        setScholarships([newScholarship, ...scholarships]);
+        // Insert new scholarship
+        const { error } = await supabase
+          .from('scholarships' as any)
+          .insert(supabaseData);
+
+        if (error) throw error;
         toast.success("Scholarship added successfully");
       }
-      setSaving(false);
+
+      // Reload scholarships
+      await loadScholarships();
       setShowAddForm(false);
       setEditing(null);
-    }, 1000);
+    } catch (error: any) {
+      console.error("Error saving scholarship:", error);
+      toast.error(error.message || "Failed to save scholarship");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggleSelection = (id: string) => {

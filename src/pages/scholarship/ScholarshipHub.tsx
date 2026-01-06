@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScholarshipCard } from "@/components/ui/scholarship-card";
+import { fetchAllScholarships, getDaysUntilDeadline, type Scholarship } from "@/utils/scholarshipUtils";
 import { 
   Search, 
   Filter,
@@ -44,34 +45,7 @@ import {
 import { motion, useInView } from "framer-motion";
 import { DicedHeroSection } from "@/components/ui/diced-hero-section";
 
-interface Scholarship {
-  id: string;
-  title: string;
-  provider: string;
-  amount: string;
-  currency: string;
-  category: string;
-  deadline: string;
-  location: string;
-  level: string; // Undergraduate, Graduate, PhD
-  description: string;
-  requirements: string[];
-  verified: boolean;
-  imageUrl?: string;
-  featured: boolean;
-  source?: string; // "mtn", "getfund", "gnpc", "other-local", "field-based"
-  fieldOfStudy?: string[];
-  // For Other Local Scholarships
-  type?: string;
-  tag?: string;
-  bullets?: string[];
-  statusNote?: string;
-  // For GETFund
-  color?: string;
-  // For GNPC
-  keyPoints?: string[];
-  route?: string;
-}
+// Scholarship interface is imported from utils
 
 interface Testimonial {
   id: string;
@@ -91,14 +65,42 @@ const ScholarshipHub = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [scholarships, setScholarships] = useState<Scholarship[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Statistics refs for counter animation
   const statsRef = useRef(null);
   const isStatsInView = useInView(statsRef, { once: true, margin: "-100px" });
   const [counters, setCounters] = useState({ scholarships: 0, students: 0, awarded: 0, countries: 0 });
 
-  // All scholarships from all pages - Global Scholarship Bank
-  const allScholarships: Scholarship[] = [
+  // Fetch scholarships from Supabase
+  useEffect(() => {
+    const loadScholarships = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchAllScholarships();
+        setScholarships(data);
+        
+        // Update counters
+        setCounters({
+          scholarships: data.length,
+          students: Math.floor(data.length * 150), // Estimated
+          awarded: Math.floor(data.length * 200), // Estimated
+          countries: new Set(data.map(s => s.location)).size
+        });
+      } catch (error) {
+        console.error("Error loading scholarships:", error);
+        setScholarships([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadScholarships();
+  }, []);
+
+  // All scholarships from Supabase
+  const allScholarships = scholarships;
     // MTN Scholarships (1)
     {
       id: "mtn-bright-scholarship",
@@ -535,9 +537,6 @@ const ScholarshipHub = () => {
     },
   ];
 
-  // Use allScholarships as the main data source
-  const scholarships = allScholarships;
-
   const testimonials: Testimonial[] = [
     {
       id: "1",
@@ -629,14 +628,6 @@ const ScholarshipHub = () => {
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  };
-
-  const getDaysUntilDeadline = (dateString: string): number => {
-    const today = new Date();
-    const deadline = new Date(dateString);
-    const diffTime = deadline.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
   };
 
   const containerVariants = {
