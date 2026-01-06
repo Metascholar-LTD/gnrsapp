@@ -999,8 +999,13 @@ const ScholarshipHub = () => {
             )}
           </div>
 
-          {/* Scholarships organized by source */}
-          {filteredScholarships.length === 0 ? (
+          {/* Loading State */}
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#bd9f67]"></div>
+              <p className="mt-4 text-slate-600">Loading scholarships...</p>
+            </div>
+          ) : filteredScholarships.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}

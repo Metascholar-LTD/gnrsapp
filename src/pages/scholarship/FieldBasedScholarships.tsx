@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -6,6 +6,7 @@ import { Spinner } from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { fetchScholarshipsBySource, getDaysUntilDeadline, type Scholarship } from "@/utils/scholarshipUtils";
 import { 
   Search, 
   Filter,
@@ -38,24 +39,6 @@ import {
 import { motion } from "framer-motion";
 import { DicedHeroSection } from "@/components/ui/diced-hero-section";
 
-interface Scholarship {
-  id: string;
-  title: string;
-  provider: string;
-  amount: string;
-  currency: string;
-  category: string;
-  deadline: string;
-  location: string;
-  level: string;
-  description: string;
-  requirements: string[];
-  verified: boolean;
-  imageUrl?: string;
-  featured: boolean;
-  fieldOfStudy?: string[];
-}
-
 const FieldBasedScholarships = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedField, setSelectedField] = useState<string | null>(null);
@@ -63,6 +46,8 @@ const FieldBasedScholarships = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [scholarships, setScholarships] = useState<Scholarship[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Available fields of study
   const availableFields = [
@@ -79,264 +64,41 @@ const FieldBasedScholarships = () => {
     "All Fields"
   ];
 
-  // Mock scholarships data with fieldOfStudy
-  const scholarships: Scholarship[] = [
-    { 
-      id: "1", 
-      title: "Mastercard Foundation Scholars Program", 
-      provider: "Mastercard Foundation",
-      amount: "Full Tuition",
-      currency: "USD",
-      category: "Merit-Based",
-      deadline: "2024-12-31",
-      location: "Ghana",
-      level: "Undergraduate",
-      description: "Comprehensive scholarship covering tuition, accommodation, and living expenses for outstanding students.",
-      requirements: ["Minimum GPA 3.5", "Financial need", "Leadership potential"],
-      verified: true,
-      featured: true,
-      fieldOfStudy: ["Engineering & Technology", "Health Sciences & Medicine", "Business & Economics", "Agriculture & Environmental Sciences", "Education", "Social Sciences"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg"
-    },
-    { 
-      id: "2", 
-      title: "Ghana Education Trust Fund (GETFund)", 
-      provider: "Government of Ghana",
-      amount: "50000",
-      currency: "GHS",
-      category: "Need-Based",
-      deadline: "2024-11-15",
-      location: "Ghana",
-      level: "Graduate",
-      description: "Government scholarship for Ghanaian students pursuing higher education.",
-      requirements: ["Ghanaian citizenship", "Admission to accredited university", "Financial need"],
-      verified: true,
-      featured: true,
-      fieldOfStudy: ["All Fields"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
-    },
-    { 
-      id: "3", 
-      title: "Chevening Scholarships", 
-      provider: "UK Government",
-      amount: "Full Coverage",
-      currency: "GBP",
-      category: "Merit-Based",
-      deadline: "2024-10-31",
-      location: "United Kingdom",
-      level: "Graduate",
-      description: "Fully-funded scholarships for one-year Master's degrees at UK universities.",
-      requirements: ["2+ years work experience", "Bachelor's degree", "English proficiency"],
-      verified: true,
-      featured: true,
-      fieldOfStudy: ["Business & Economics", "Social Sciences", "Arts & Humanities", "Law & Legal Studies"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392704/portrait-young-woman-with-laptop-hands-outside-school_yktf28.jpg"
-    },
-    { 
-      id: "4", 
-      title: "Fulbright Foreign Student Program", 
-      provider: "US Department of State",
-      amount: "Full Coverage",
-      currency: "USD",
-      category: "Merit-Based",
-      deadline: "2024-09-30",
-      location: "United States",
-      level: "Graduate",
-      description: "Fully-funded scholarships for graduate study in the United States.",
-      requirements: ["Bachelor's degree", "English proficiency", "Academic excellence"],
-      verified: true,
-      featured: false,
-      fieldOfStudy: ["All Fields"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392935/19234_tbfzs9.jpg"
-    },
-    { 
-      id: "5", 
-      title: "DAAD Scholarships", 
-      provider: "German Academic Exchange Service",
-      amount: "850",
-      currency: "EUR",
-      category: "Merit-Based",
-      deadline: "2024-10-15",
-      location: "Germany",
-      level: "Graduate",
-      description: "Monthly stipend and tuition coverage for Master's and PhD programs in Germany.",
-      requirements: ["Bachelor's degree", "Academic excellence", "Research proposal"],
-      verified: true,
-      featured: false,
-      fieldOfStudy: ["Engineering & Technology", "Natural Sciences", "Computer Science & IT"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg"
-    },
-    { 
-      id: "6", 
-      title: "Commonwealth Scholarships", 
-      provider: "Commonwealth Scholarship Commission",
-      amount: "Full Coverage",
-      currency: "GBP",
-      category: "Merit-Based",
-      deadline: "2024-12-01",
-      location: "United Kingdom",
-      level: "Graduate",
-      description: "Fully-funded scholarships for Master's and PhD programs in the UK.",
-      requirements: ["Commonwealth citizen", "Bachelor's degree", "Academic excellence"],
-      verified: true,
-      featured: false,
-      fieldOfStudy: ["Health Sciences & Medicine", "Education", "Social Sciences"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
-    },
-    { 
-      id: "7", 
-      title: "Erasmus Mundus Scholarships", 
-      provider: "European Union",
-      amount: "Full Coverage",
-      currency: "EUR",
-      category: "Merit-Based",
-      deadline: "2024-11-20",
-      location: "Europe",
-      level: "Graduate",
-      description: "Joint Master's and PhD programs across multiple European universities.",
-      requirements: ["Bachelor's degree", "Academic excellence", "Language proficiency"],
-      verified: true,
-      featured: false,
-      fieldOfStudy: ["Engineering & Technology", "Business & Economics", "Arts & Humanities"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392704/portrait-young-woman-with-laptop-hands-outside-school_yktf28.jpg"
-    },
-    { 
-      id: "8", 
-      title: "Agence Universitaire de la Francophonie", 
-      provider: "AUF",
-      amount: "Full Coverage",
-      currency: "EUR",
-      category: "Merit-Based",
-      deadline: "2024-10-10",
-      location: "France",
-      level: "Graduate",
-      description: "Scholarships for French-speaking students pursuing higher education.",
-      requirements: ["French proficiency", "Bachelor's degree", "Academic excellence"],
-      verified: true,
-      featured: false,
-      fieldOfStudy: ["All Fields"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392935/19234_tbfzs9.jpg"
-    },
-    { 
-      id: "9", 
-      title: "Rhodes Scholarships", 
-      provider: "Rhodes Trust",
-      amount: "Full Coverage",
-      currency: "GBP",
-      category: "Merit-Based",
-      deadline: "2024-10-15",
-      location: "United Kingdom",
-      level: "Graduate",
-      description: "World's oldest and most prestigious international scholarship program.",
-      requirements: ["Academic excellence", "Leadership potential", "Service to others"],
-      verified: true,
-      featured: true,
-      fieldOfStudy: ["All Fields"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg"
-    },
-    { 
-      id: "10", 
-      title: "Gates Cambridge Scholarships", 
-      provider: "Bill & Melinda Gates Foundation",
-      amount: "Full Coverage",
-      currency: "GBP",
-      category: "Merit-Based",
-      deadline: "2024-10-11",
-      location: "United Kingdom",
-      level: "Graduate",
-      description: "Full-cost scholarships for outstanding applicants from outside the UK.",
-      requirements: ["Academic excellence", "Leadership potential", "Commitment to improving lives"],
-      verified: true,
-      featured: true,
-      fieldOfStudy: ["All Fields"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392532/group-young-afro-american-female-students-dressed-black-graduation-gown-campus-as-background_gmnltc.jpg"
-    },
-    { 
-      id: "11", 
-      title: "MIT-Africa Program", 
-      provider: "Massachusetts Institute of Technology",
-      amount: "Full Tuition",
-      currency: "USD",
-      category: "Merit-Based",
-      deadline: "2024-11-30",
-      location: "United States",
-      level: "Graduate",
-      description: "Scholarships for African students pursuing STEM fields at MIT.",
-      requirements: ["African citizenship", "STEM background", "Academic excellence"],
-      verified: true,
-      featured: false,
-      fieldOfStudy: ["Engineering & Technology", "Natural Sciences", "Computer Science & IT"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392704/portrait-young-woman-with-laptop-hands-outside-school_yktf28.jpg"
-    },
-    { 
-      id: "12", 
-      title: "WHO Scholarships for Health Sciences", 
-      provider: "World Health Organization",
-      amount: "Full Coverage",
-      currency: "USD",
-      category: "Merit-Based",
-      deadline: "2024-12-15",
-      location: "Global",
-      level: "Graduate",
-      description: "Scholarships for students pursuing public health and medical research.",
-      requirements: ["Health sciences background", "Commitment to public health", "Academic excellence"],
-      verified: true,
-      featured: false,
-      fieldOfStudy: ["Health Sciences & Medicine"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392935/19234_tbfzs9.jpg"
-    },
-    { 
-      id: "13", 
-      title: "African Women in STEM Scholarship", 
-      provider: "TechWomen Africa",
-      amount: "15000",
-      currency: "USD",
-      category: "Merit-Based",
-      deadline: "2024-11-25",
-      location: "South Africa",
-      level: "Graduate",
-      description: "Supporting African women pursuing STEM degrees with financial assistance and mentorship.",
-      requirements: ["Female", "African citizenship", "STEM program enrollment", "Academic excellence"],
-      verified: false,
-      featured: false,
-      fieldOfStudy: ["Engineering & Technology", "Natural Sciences", "Computer Science & IT"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392704/portrait-young-woman-with-laptop-hands-outside-school_yktf28.jpg"
-    },
-    { 
-      id: "14", 
-      title: "Local Community Arts Grant", 
-      provider: "Ghana Arts Council",
-      amount: "8000",
-      currency: "GHS",
-      category: "Need-Based",
-      deadline: "2024-12-10",
-      location: "Ghana",
-      level: "Undergraduate",
-      description: "Supporting local students pursuing arts and creative programs.",
-      requirements: ["Ghanaian citizenship", "Arts program enrollment", "Financial need"],
-      verified: false,
-      featured: false,
-      fieldOfStudy: ["Arts & Humanities"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392935/19234_tbfzs9.jpg"
-    },
-    { 
-      id: "15", 
-      title: "Startup Business Scholarship", 
-      provider: "Entrepreneurship Foundation",
-      amount: "12000",
-      currency: "USD",
-      category: "Merit-Based",
-      deadline: "2024-11-20",
-      location: "Kenya",
-      level: "Graduate",
-      description: "For aspiring entrepreneurs pursuing business degrees with innovative ideas.",
-      requirements: ["Business plan submission", "Entrepreneurial experience", "Academic excellence"],
-      verified: false,
-      featured: false,
-      fieldOfStudy: ["Business & Economics"],
-      imageUrl: "https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg"
-    },
-  ];
+  // Fetch field-based scholarships from Supabase
+  useEffect(() => {
+    const loadScholarships = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchScholarshipsBySource("field-based");
+        setScholarships(data);
+      } catch (error) {
+        console.error("Error loading scholarships:", error);
+        setScholarships([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadScholarships();
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <>
+        <InitScripts />
+        <Spinner />
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#bd9f67] mb-4"></div>
+            <p className="text-slate-600">Loading scholarships...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   // Get unique values for filters
   const levels = Array.from(new Set(scholarships.map(s => s.level))).sort();
