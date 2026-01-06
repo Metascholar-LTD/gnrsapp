@@ -162,8 +162,7 @@ export const Navigation = React.memo(() => {
         ],
         tools: [
           { title: 'Application Tools & Resources', items: [
-            { to: '/scholarship-hub/essay-builder', label: 'Essay/SoP Builder', icon: 'fa-file-alt' },
-            { to: '/scholarship-hub/saved', label: 'My Saved Scholarships', icon: 'fa-bookmark' }
+            { to: '/scholarship-hub/essay-builder', label: 'Essay/SoP Builder', icon: 'fa-file-alt' }
           ]}
         ]
       },
