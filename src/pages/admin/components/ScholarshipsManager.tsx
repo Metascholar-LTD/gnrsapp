@@ -743,13 +743,15 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       border-radius: 0.75rem;
       overflow: hidden;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      max-height: calc(100vh - 400px);
-      overflow-y: auto;
+      width: 100%;
+      overflow-x: auto;
     }
 
     .sm-table {
       width: 100%;
+      min-width: 100%;
       border-collapse: collapse;
+      table-layout: auto;
     }
 
     .sm-table thead {
@@ -761,9 +763,9 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     }
 
     .sm-table th {
-      padding: 0.75rem;
+      padding: 1.25rem 1rem;
       text-align: left;
-      font-size: 0.75rem;
+      font-size: 0.8125rem;
       font-weight: 600;
       color: #6b7280;
       text-transform: uppercase;
@@ -776,11 +778,12 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
     }
 
     .sm-table td {
-      padding: 0.75rem;
+      padding: 1.25rem 1rem;
       border-bottom: 1px solid #e5e7eb;
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
       color: #374151;
       vertical-align: middle;
+      line-height: 1.5;
     }
 
     .sm-table tbody tr {

@@ -109,8 +109,9 @@ const AdminScholarshipHub = () => {
     }
 
     #ash-header-content {
-      max-width: 1600px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
     }
 
     #ash-title {
@@ -137,8 +138,9 @@ const AdminScholarshipHub = () => {
     }
 
     #ash-section-header-content {
-      max-width: 1600px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
     }
 
     #ash-section-title {
@@ -251,8 +253,9 @@ const AdminScholarshipHub = () => {
     }
 
     #ash-content-wrapper {
-      max-width: 1600px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
     }
 
     .ash-tab-content {
