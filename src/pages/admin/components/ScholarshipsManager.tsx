@@ -102,6 +102,7 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
   const [scholarshipToDelete, setScholarshipToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeFormTab, setActiveFormTab] = useState("overview");
+  const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<ScholarshipFormData>({
@@ -1978,71 +1979,857 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                     <div className="sm-form-section">
                       <h3 className="sm-form-section-title">Application Details</h3>
                       <div className="sm-form-grid">
-                        <div className="sm-form-group full-width">
-                          <label className="sm-form-label">Requirements (one per line)</label>
-                          <textarea
-                            className="sm-form-textarea"
-                            value={formData.requirements}
-                            onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                            placeholder="Enter each requirement on a new line"
-                            rows={4}
-                          />
-                        </div>
+                    {/* Requirements */}
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Requirements (each point)</label>
+                      {(() => {
+                        const items = formData.requirements ? formData.requirements.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "requirements" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a requirement"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            requirements: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a requirement"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "requirements",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            requirements: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            requirements: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove requirement"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  requirements: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add requirement
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
 
-                        <div className="sm-form-group full-width">
-                          <label className="sm-form-label">Benefits (one per line)</label>
-                          <textarea
-                            className="sm-form-textarea"
-                            value={formData.benefits}
-                            onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                            placeholder="Enter each benefit on a new line"
-                            rows={4}
-                          />
-                        </div>
+                    {/* Benefits */}
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Benefits (each point)</label>
+                      {(() => {
+                        const items = formData.benefits ? formData.benefits.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "benefits" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a benefit"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            benefits: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a benefit"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "benefits",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            benefits: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            benefits: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove benefit"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  benefits: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add benefit
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
 
-                        <div className="sm-form-group full-width">
-                          <label className="sm-form-label">Eligibility (one per line)</label>
-                          <textarea
-                            className="sm-form-textarea"
-                            value={formData.eligibility}
-                            onChange={(e) => setFormData({ ...formData, eligibility: e.target.value })}
-                            placeholder="Enter each eligibility criterion on a new line"
-                            rows={4}
-                          />
-                        </div>
+                    {/* Eligibility */}
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Eligibility (each point)</label>
+                      {(() => {
+                        const items = formData.eligibility ? formData.eligibility.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "eligibility" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter an eligibility criterion"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            eligibility: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter an eligibility criterion"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "eligibility",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            eligibility: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            eligibility: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove eligibility point"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  eligibility: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add eligibility point
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
 
-                        <div className="sm-form-group full-width">
-                          <label className="sm-form-label">Application Process (one per line)</label>
-                          <textarea
-                            className="sm-form-textarea"
-                            value={formData.applicationProcess}
-                            onChange={(e) => setFormData({ ...formData, applicationProcess: e.target.value })}
-                            placeholder="Enter each step on a new line"
-                            rows={4}
-                          />
-                        </div>
+                    {/* Application Process */}
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Application Process (each step)</label>
+                      {(() => {
+                        const items = formData.applicationProcess ? formData.applicationProcess.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "applicationProcess" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter an application step"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            applicationProcess: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter an application step"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "applicationProcess",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            applicationProcess: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            applicationProcess: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove application step"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  applicationProcess: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add application step
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
 
-                        <div className="sm-form-group full-width">
-                          <label className="sm-form-label">Required Documents (one per line)</label>
-                          <textarea
-                            className="sm-form-textarea"
-                            value={formData.documents}
-                            onChange={(e) => setFormData({ ...formData, documents: e.target.value })}
-                            placeholder="Enter each document on a new line"
-                            rows={4}
-                          />
-                        </div>
+                    {/* Documents */}
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Required Documents (each document)</label>
+                      {(() => {
+                        const items = formData.documents ? formData.documents.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "documents" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a document"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            documents: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a document"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "documents",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            documents: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            documents: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove document"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  documents: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add document
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
 
-                        <div className="sm-form-group full-width">
-                          <label className="sm-form-label">Selection Criteria (one per line)</label>
-                          <textarea
-                            className="sm-form-textarea"
-                            value={formData.selectionCriteria}
-                            onChange={(e) => setFormData({ ...formData, selectionCriteria: e.target.value })}
-                            placeholder="Enter each criterion on a new line"
-                            rows={3}
-                          />
-                        </div>
+                    {/* Selection Criteria */}
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Selection Criteria (each criterion)</label>
+                      {(() => {
+                        const items = formData.selectionCriteria ? formData.selectionCriteria.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "selectionCriteria" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a selection criterion"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            selectionCriteria: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a selection criterion"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "selectionCriteria",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            selectionCriteria: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            selectionCriteria: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove selection criterion"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  selectionCriteria: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add criterion
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
                       </div>
                     </div>
                   </motion.div>
@@ -2099,14 +2886,144 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
                       <h3 className="sm-form-section-title">Coverage & Duration</h3>
                       <div className="sm-form-grid">
                         <div className="sm-form-group full-width">
-                          <label className="sm-form-label">Coverage Details (one per line)</label>
-                          <textarea
-                            className="sm-form-textarea"
-                            value={formData.coverageDetails}
-                            onChange={(e) => setFormData({ ...formData, coverageDetails: e.target.value })}
-                            placeholder="Enter each coverage detail on a new line"
-                            rows={3}
-                          />
+                          <label className="sm-form-label">Coverage Details (each point)</label>
+                          {(() => {
+                            const items = formData.coverageDetails ? formData.coverageDetails.split("\n") : [""];
+                            return (
+                              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "coverageDetails" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a coverage detail"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            coverageDetails: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a coverage detail"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "coverageDetails",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            coverageDetails: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            coverageDetails: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove coverage detail"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = [...items, ""];
+                                    setFormData({
+                                      ...formData,
+                                      coverageDetails: next.join("\n"),
+                                    });
+                                  }}
+                                  style={{
+                                    alignSelf: "flex-start",
+                                    marginTop: "0.25rem",
+                                    fontSize: "0.75rem",
+                                    padding: "0.25rem 0.5rem",
+                                    borderRadius: "9999px",
+                                    border: "1px dashed #d1d5db",
+                                    background: "#f9fafb",
+                                    color: "#374151",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "0.25rem",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <span style={{ fontSize: "0.9rem" }}>+</span>
+                                  Add coverage detail
+                                </button>
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         <div className="sm-form-group">
