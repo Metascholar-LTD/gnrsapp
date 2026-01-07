@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { 
   Plus, X, Edit2, Trash2, 
   ChevronLeft, ChevronRight,
   Save, Loader2,
   Shield, MapPin, Clock, Users, FileText,
-  GraduationCap, Building2, Briefcase, Globe2
+  GraduationCap, Building2, Briefcase, Globe2,
+  TrendingUp, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,34 +21,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 interface NSSProgram {
   id: string;
   title: string;
   description: string;
+  descriptionParagraphs?: string[];
+  impactParagraphs?: string[];
+  impactHighlights?: string[];
+  fieldOpsGroups?: Array<{ title: string; items: string[] }>;
+  skillsFormalQualifications?: string[];
+  skillsAdditionalKnowledge?: string[];
+  skillsExperience?: string[];
+  skillsTechnical?: string[];
+  behavioralAttributes?: string[];
+  skills?: string[];
+  cultureParagraphs?: string[];
+  opportunityParagraphs?: string[];
   duration: string;
   locations: string[];
-  requirements: string[];
-  benefits: string[];
+  requirements?: string[];
+  benefits?: string[];
   icon: string;
   color: string;
   textColor: string;
   imageUrl: string;
+  applicationUrl?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 interface NSSProgramFormData {
   title: string;
-  description: string;
+  descriptionParagraphs: string; // Description tab - multiple paragraphs (separated by paragraph breaks)
+  impactParagraphs: string; // Impact tab - paragraphs
+  impactHighlights: string; // Impact tab - list items
+  fieldOpsGroups: string; // Field Ops tab - structured groups (JSON string)
+  skillsFormalQualifications: string; // Skills tab
+  skillsAdditionalKnowledge: string; // Skills tab
+  skillsExperience: string; // Skills tab
+  skillsTechnical: string; // Skills tab
+  behavioralAttributes: string; // Skills tab - list items
+  skills: string; // Skills tab - key skills (comma-separated)
+  cultureParagraphs: string; // Culture tab - paragraphs
+  opportunityParagraphs: string; // Culture tab - paragraphs
   duration: string;
   locations: string;
   requirements: string;
@@ -55,6 +72,7 @@ interface NSSProgramFormData {
   icon: string;
   color: string;
   imageUrl: string;
+  applicationUrl: string;
 }
 
 const NationalServiceSupportManager = () => {
@@ -68,10 +86,24 @@ const NationalServiceSupportManager = () => {
   const [programToDelete, setProgramToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [activeFormTab, setActiveFormTab] = useState("description");
+  const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<NSSProgramFormData>({
     title: "",
-    description: "",
+    descriptionParagraphs: "",
+    impactParagraphs: "",
+    impactHighlights: "",
+    fieldOpsGroups: "",
+    skillsFormalQualifications: "",
+    skillsAdditionalKnowledge: "",
+    skillsExperience: "",
+    skillsTechnical: "",
+    behavioralAttributes: "",
+    skills: "",
+    cultureParagraphs: "",
+    opportunityParagraphs: "",
     duration: "12 months",
     locations: "",
     requirements: "",
@@ -79,6 +111,7 @@ const NationalServiceSupportManager = () => {
     icon: "GraduationCap",
     color: "bg-blue-50 border-blue-200",
     imageUrl: "",
+    applicationUrl: "",
   });
 
   const iconOptions = [
@@ -118,7 +151,19 @@ const NationalServiceSupportManager = () => {
         const transformed: NSSProgram[] = data.map((item: any) => ({
           id: item.id,
           title: item.title,
-          description: item.description,
+          description: item.description || "",
+          descriptionParagraphs: item.description_paragraphs || [],
+          impactParagraphs: item.impact_paragraphs || [],
+          impactHighlights: item.impact_highlights || [],
+          fieldOpsGroups: item.field_ops_groups || [],
+          skillsFormalQualifications: item.skills_formal_qualifications || [],
+          skillsAdditionalKnowledge: item.skills_additional_knowledge || [],
+          skillsExperience: item.skills_experience || [],
+          skillsTechnical: item.skills_technical || [],
+          behavioralAttributes: item.behavioral_attributes || [],
+          skills: item.skills || [],
+          cultureParagraphs: item.culture_paragraphs || [],
+          opportunityParagraphs: item.opportunity_paragraphs || [],
           duration: item.duration,
           locations: item.locations || [],
           requirements: item.requirements || [],
@@ -127,6 +172,7 @@ const NationalServiceSupportManager = () => {
           color: item.color,
           textColor: item.text_color,
           imageUrl: item.image_url,
+          applicationUrl: item.application_url,
           created_at: item.created_at,
           updated_at: item.updated_at,
         }));
@@ -194,18 +240,45 @@ const NationalServiceSupportManager = () => {
   const handleSave = async (programData: NSSProgramFormData, programId?: string) => {
     setSaving(true);
     try {
+      // Parse field ops groups safely
+      let fieldOpsGroupsParsed = [];
+      if (programData.fieldOpsGroups) {
+        try {
+          fieldOpsGroupsParsed = JSON.parse(programData.fieldOpsGroups);
+        } catch (e) {
+          console.error("Error parsing field ops groups:", e);
+        }
+      }
+
+      // Extract first paragraph as short description for listings (split by double newlines for paragraphs)
+      const paragraphs = programData.descriptionParagraphs ? programData.descriptionParagraphs.split('\n\n').filter(Boolean) : [];
+      const firstParagraph = paragraphs[0] || '';
+
       const selectedColor = colorOptions.find(c => c.value === programData.color);
       const payload: any = {
         title: programData.title,
-        description: programData.description,
+        description: firstParagraph || '',
+        description_paragraphs: paragraphs,
+        impact_paragraphs: programData.impactParagraphs ? programData.impactParagraphs.split('\n').filter(Boolean) : [],
+        impact_highlights: programData.impactHighlights ? programData.impactHighlights.split('\n').filter(Boolean) : [],
+        field_ops_groups: fieldOpsGroupsParsed,
+        skills_formal_qualifications: programData.skillsFormalQualifications ? programData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+        skills_additional_knowledge: programData.skillsAdditionalKnowledge ? programData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+        skills_experience: programData.skillsExperience ? programData.skillsExperience.split('\n').filter(Boolean) : [],
+        skills_technical: programData.skillsTechnical ? programData.skillsTechnical.split('\n').filter(Boolean) : [],
+        behavioral_attributes: programData.behavioralAttributes ? programData.behavioralAttributes.split('\n').filter(Boolean) : [],
+        skills: programData.skills ? programData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+        culture_paragraphs: programData.cultureParagraphs ? programData.cultureParagraphs.split('\n').filter(Boolean) : [],
+        opportunity_paragraphs: programData.opportunityParagraphs ? programData.opportunityParagraphs.split('\n').filter(Boolean) : [],
         duration: programData.duration,
-        locations: programData.locations.split(',').map(s => s.trim()).filter(Boolean),
-        requirements: programData.requirements.split('\n').filter(Boolean),
-        benefits: programData.benefits.split('\n').filter(Boolean),
+        locations: programData.locations ? programData.locations.split(',').map(s => s.trim()).filter(Boolean) : [],
+        requirements: programData.requirements ? programData.requirements.split('\n').filter(Boolean) : [],
+        benefits: programData.benefits ? programData.benefits.split('\n').filter(Boolean) : [],
         icon: programData.icon,
         color: programData.color,
         text_color: selectedColor?.textColor || "text-slate-900",
         image_url: programData.imageUrl,
+        application_url: programData.applicationUrl,
       };
 
       if (programId) {
@@ -255,7 +328,18 @@ const NationalServiceSupportManager = () => {
   const resetForm = () => {
     setFormData({
       title: "",
-      description: "",
+      descriptionParagraphs: "",
+      impactParagraphs: "",
+      impactHighlights: "",
+      fieldOpsGroups: "",
+      skillsFormalQualifications: "",
+      skillsAdditionalKnowledge: "",
+      skillsExperience: "",
+      skillsTechnical: "",
+      behavioralAttributes: "",
+      skills: "",
+      cultureParagraphs: "",
+      opportunityParagraphs: "",
       duration: "12 months",
       locations: "",
       requirements: "",
@@ -263,6 +347,7 @@ const NationalServiceSupportManager = () => {
       icon: "GraduationCap",
       color: "bg-blue-50 border-blue-200",
       imageUrl: "",
+      applicationUrl: "",
     });
   };
 
@@ -270,16 +355,29 @@ const NationalServiceSupportManager = () => {
     setEditing(program.id);
     setFormData({
       title: program.title,
-      description: program.description,
+      descriptionParagraphs: program.descriptionParagraphs?.join('\n\n') || program.description || "",
+      impactParagraphs: program.impactParagraphs?.join('\n') || "",
+      impactHighlights: program.impactHighlights?.join('\n') || "",
+      fieldOpsGroups: program.fieldOpsGroups ? JSON.stringify(program.fieldOpsGroups, null, 2) : "",
+      skillsFormalQualifications: program.skillsFormalQualifications?.join('\n') || "",
+      skillsAdditionalKnowledge: program.skillsAdditionalKnowledge?.join('\n') || "",
+      skillsExperience: program.skillsExperience?.join('\n') || "",
+      skillsTechnical: program.skillsTechnical?.join('\n') || "",
+      behavioralAttributes: program.behavioralAttributes?.join('\n') || "",
+      skills: program.skills?.join(', ') || "",
+      cultureParagraphs: program.cultureParagraphs?.join('\n') || "",
+      opportunityParagraphs: program.opportunityParagraphs?.join('\n') || "",
       duration: program.duration,
       locations: program.locations.join(', '),
-      requirements: program.requirements.join('\n'),
-      benefits: program.benefits.join('\n'),
+      requirements: program.requirements?.join('\n') || "",
+      benefits: program.benefits?.join('\n') || "",
       icon: program.icon,
       color: program.color,
-      imageUrl: program.imageUrl,
+      imageUrl: program.imageUrl || "",
+      applicationUrl: program.applicationUrl || "",
     });
     setShowAddForm(true);
+    setActiveFormTab("description");
   };
 
   const getIconComponent = (iconName: string) => {
@@ -292,8 +390,264 @@ const NationalServiceSupportManager = () => {
     }
   };
 
+  const isolatedStyles = `
+    .sm-form-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .sm-form-content {
+      background: white;
+      border-radius: 0.75rem;
+      width: 100%;
+      max-width: 1000px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .sm-form-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 2px solid #60a5fa;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sm-form-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .sm-form-body {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .sm-form-section {
+      margin-bottom: 2rem;
+    }
+
+    .sm-form-section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+      margin: 0 0 1rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .sm-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .sm-form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sm-form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .sm-form-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .sm-form-input,
+    .sm-form-select,
+    .sm-form-textarea {
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .sm-form-input:focus,
+    .sm-form-select:focus,
+    .sm-form-textarea:focus {
+      outline: none;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+    }
+
+    .sm-form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .sm-form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .sm-checkbox {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+      accent-color: #60a5fa;
+    }
+
+    .sm-form-footer {
+      padding: 1.5rem 2rem;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      background: #f9fafb;
+    }
+
+    .sm-icon-btn {
+      padding: 0.5rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 0.375rem;
+      color: #6b7280;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sm-icon-btn:hover {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .sm-form-tabs {
+      border-bottom: 2px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0 2rem;
+      display: flex;
+      gap: 0;
+    }
+
+    .sm-form-tab {
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #6b7280;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sm-form-tab:hover {
+      color: #111827;
+      background: rgba(96, 165, 250, 0.05);
+    }
+
+    .sm-form-tab.active {
+      color: #111827;
+      font-weight: 600;
+      border-bottom-color: #60a5fa;
+    }
+
+    .sm-form-tab-content {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .sm-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .sm-btn-primary {
+      background: #60a5fa;
+      color: #ffffff;
+    }
+
+    .sm-btn-primary:hover:not(:disabled) {
+      background: #3b82f6;
+    }
+
+    .sm-btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .sm-btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .sm-btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    @media (max-width: 767px) {
+      .sm-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sm-form-tabs {
+        padding: 0 1rem;
+        overflow-x: auto;
+      }
+
+      .sm-form-tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.8125rem;
+        white-space: nowrap;
+      }
+    }
+  `;
+
   return (
-    <div className="space-y-6">
+    <>
+      <style>{isolatedStyles}</style>
+      <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="text-xl font-bold text-slate-900">National Service Support Programs</h3>
@@ -305,6 +659,7 @@ const NationalServiceSupportManager = () => {
           onClick={() => {
             resetForm();
             setEditing(null);
+            setActiveFormTab("description");
             setShowAddForm(true);
           }}
           className="bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -372,10 +727,10 @@ const NationalServiceSupportManager = () => {
                         {program.title}
                       </h3>
 
-                      {/* Description */}
-                      <p className="text-xs text-slate-600 mb-3 line-clamp-2 leading-relaxed">
-                        {program.description}
-                      </p>
+                    {/* Description */}
+                    <p className="text-xs text-slate-600 mb-3 line-clamp-2 leading-relaxed">
+                      {program.descriptionParagraphs?.[0] || program.description || ""}
+                    </p>
 
                       {/* Info Icons */}
                       <div className="space-y-1.5 mb-3 flex-1">
@@ -460,162 +815,1641 @@ const NationalServiceSupportManager = () => {
         </>
       )}
 
-      <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Edit NSS Program" : "Add New NSS Program"}</DialogTitle>
-            <DialogDescription>
-              {editing ? "Update NSS program details" : "Create a new NSS service area program"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Title *</label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="e.g., Teaching Service"
-              />
+      {/* Add/Edit Form Modal */}
+      {showAddForm && (
+        <div className="sm-form-modal" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowAddForm(false);
+            setEditing(null);
+          }
+        }}>
+          <div className="sm-form-content">
+            <div className="sm-form-header">
+              <h2 className="sm-form-title">{editing ? 'Edit NSS Program' : 'Add New NSS Program'}</h2>
+              <button className="sm-icon-btn" style={{ color: 'white' }} onClick={() => {
+                setShowAddForm(false);
+                setEditing(null);
+              }}>
+                <X size={20} />
+              </button>
             </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Description *</label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-1 block">Duration *</label>
-                <Input
-                  value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  placeholder="e.g., 12 months"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1 block">Icon</label>
-                <Select
-                  value={formData.icon}
-                  onValueChange={(value) => setFormData({ ...formData, icon: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {iconOptions.map(icon => (
-                      <SelectItem key={icon.value} value={icon.value}>{icon.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Color Theme</label>
-              <Select
-                value={formData.color}
-                onValueChange={(value) => setFormData({ ...formData, color: value })}
+
+            {/* Tab Navigation */}
+            <div className="sm-form-tabs">
+              <button
+                onClick={() => {
+                  setActiveFormTab("description");
+                  setActiveInlineEditor(null);
+                }}
+                className={`sm-form-tab ${activeFormTab === "description" ? "active" : ""}`}
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {colorOptions.map(color => (
-                    <SelectItem key={color.value} value={color.value}>{color.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <FileText size={16} />
+                <span>Description</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveFormTab("impact");
+                  setActiveInlineEditor(null);
+                }}
+                className={`sm-form-tab ${activeFormTab === "impact" ? "active" : ""}`}
+              >
+                <TrendingUp size={16} />
+                <span>Impact</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveFormTab("field-ops");
+                  setActiveInlineEditor(null);
+                }}
+                className={`sm-form-tab ${activeFormTab === "field-ops" ? "active" : ""}`}
+              >
+                <Briefcase size={16} />
+                <span>Field Ops</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveFormTab("skills");
+                  setActiveInlineEditor(null);
+                }}
+                className={`sm-form-tab ${activeFormTab === "skills" ? "active" : ""}`}
+              >
+                <GraduationCap size={16} />
+                <span>Skills & Experience</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveFormTab("culture");
+                  setActiveInlineEditor(null);
+                }}
+                className={`sm-form-tab ${activeFormTab === "culture" ? "active" : ""}`}
+              >
+                <Users size={16} />
+                <span>Culture & Apply</span>
+              </button>
             </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Locations (comma-separated)</label>
-              <Input
-                value={formData.locations}
-                onChange={(e) => setFormData({ ...formData, locations: e.target.value })}
-                placeholder="e.g., All Regions, Urban & Rural"
-              />
+
+            <div className="sm-form-body">
+              {/* Description Tab */}
+              {activeFormTab === "description" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="sm-form-tab-content"
+                >
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Basic Information</h3>
+                    <div className="sm-form-grid">
+                      <div className="sm-form-group full-width">
+                        <label className="sm-form-label">Program Title *</label>
+                        <input
+                          type="text"
+                          className="sm-form-input"
+                          value={formData.title}
+                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                          placeholder="e.g., Teaching Service"
+                        />
+                      </div>
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Duration *</label>
+                        <input
+                          type="text"
+                          className="sm-form-input"
+                          value={formData.duration}
+                          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                          placeholder="e.g., 12 months"
+                        />
+                      </div>
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Icon</label>
+                        <select
+                          className="sm-form-select"
+                          value={formData.icon}
+                          onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                        >
+                          {iconOptions.map(icon => (
+                            <option key={icon.value} value={icon.value}>{icon.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Color Theme</label>
+                        <select
+                          className="sm-form-select"
+                          value={formData.color}
+                          onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                        >
+                          {colorOptions.map(color => (
+                            <option key={color.value} value={color.value}>{color.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="sm-form-group full-width">
+                        <label className="sm-form-label">Locations (comma-separated)</label>
+                        <input
+                          type="text"
+                          className="sm-form-input"
+                          value={formData.locations}
+                          onChange={(e) => setFormData({ ...formData, locations: e.target.value })}
+                          placeholder="e.g., All Regions, Urban & Rural"
+                        />
+                      </div>
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Image URL</label>
+                        <input
+                          type="url"
+                          className="sm-form-input"
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Description</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Description * (Enter paragraphs separated by double newlines)</label>
+                      <textarea
+                        className="sm-form-textarea"
+                        value={formData.descriptionParagraphs}
+                        onChange={(e) => setFormData({ ...formData, descriptionParagraphs: e.target.value })}
+                        placeholder="Enter program description paragraphs. Press Enter twice to create a new paragraph."
+                        rows={12}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Impact Tab - Same structure as InternshipListingsManager */}
+              {activeFormTab === "impact" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="sm-form-tab-content"
+                >
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Impact Paragraphs</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Impact Paragraphs (each paragraph)</label>
+                      {(() => {
+                        const items = formData.impactParagraphs ? formData.impactParagraphs.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "impactParagraphs" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter an impact paragraph"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            impactParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter an impact paragraph"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "impactParagraphs",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            impactParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            impactParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove paragraph"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  impactParagraphs: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add paragraph
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Impact Highlights</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Impact Highlights (each point)</label>
+                      {(() => {
+                        const items = formData.impactHighlights ? formData.impactHighlights.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "impactHighlights" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter an impact highlight"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            impactHighlights: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter an impact highlight"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "impactHighlights",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            impactHighlights: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            impactHighlights: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove highlight"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  impactHighlights: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add highlight
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Field Ops Tab */}
+              {activeFormTab === "field-ops" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="sm-form-tab-content"
+                >
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Field Operations</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Field Operations Groups (JSON format - each group has title and items array)</label>
+                      <textarea
+                        className="sm-form-textarea"
+                        value={formData.fieldOpsGroups}
+                        onChange={(e) => setFormData({ ...formData, fieldOpsGroups: e.target.value })}
+                        placeholder='[{"title": "Daily Tasks", "items": ["Item 1", "Item 2"]}, {"title": "Project Work", "items": ["Item 1"]}]'
+                        rows={12}
+                      />
+                      <p style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.5rem" }}>
+                        Enter field operation groups as JSON. Each group should have a "title" and an "items" array.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Skills & Experience Tab - Same structure as InternshipListingsManager, but abbreviated for brevity */}
+              {activeFormTab === "skills" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="sm-form-tab-content"
+                >
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Formal Qualifications</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Formal Qualifications (each point)</label>
+                      {(() => {
+                        const items = formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "skillsFormalQualifications" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a qualification"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            skillsFormalQualifications: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a qualification"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "skillsFormalQualifications",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            skillsFormalQualifications: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            skillsFormalQualifications: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove qualification"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  skillsFormalQualifications: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add qualification
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  {/* Additional Knowledge, Experience, Technical Skills, Behavioral Attributes sections - same pattern as InternshipListingsManager */}
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Additional Knowledge</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Additional Knowledge (each point)</label>
+                      {(() => {
+                        const items = formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "skillsAdditionalKnowledge" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter knowledge point"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            skillsAdditionalKnowledge: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter knowledge point"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "skillsAdditionalKnowledge",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            skillsAdditionalKnowledge: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            skillsAdditionalKnowledge: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove knowledge point"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  skillsAdditionalKnowledge: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add knowledge point
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Experience</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Experience (each point)</label>
+                      {(() => {
+                        const items = formData.skillsExperience ? formData.skillsExperience.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "skillsExperience" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter experience point"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            skillsExperience: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter experience point"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "skillsExperience",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            skillsExperience: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            skillsExperience: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove experience point"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  skillsExperience: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add experience point
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Technical Skills</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Technical Skills (each point)</label>
+                      {(() => {
+                        const items = formData.skillsTechnical ? formData.skillsTechnical.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "skillsTechnical" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a technical skill"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            skillsTechnical: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a technical skill"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "skillsTechnical",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            skillsTechnical: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            skillsTechnical: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove technical skill"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  skillsTechnical: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add technical skill
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Behavioural Attributes</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Behavioural Attributes (each point)</label>
+                      {(() => {
+                        const items = formData.behavioralAttributes ? formData.behavioralAttributes.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "behavioralAttributes" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a behavioural attribute"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            behavioralAttributes: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a behavioural attribute"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "behavioralAttributes",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            behavioralAttributes: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            behavioralAttributes: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove attribute"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  behavioralAttributes: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add attribute
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Key Skills In Demand</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Key Skills (comma-separated)</label>
+                      <input
+                        type="text"
+                        className="sm-form-input"
+                        value={formData.skills}
+                        onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                        placeholder="e.g., Teaching, Communication, Leadership"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Culture & Apply Tab */}
+              {activeFormTab === "culture" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="sm-form-tab-content"
+                >
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Culture Paragraphs</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Culture Paragraphs (each paragraph)</label>
+                      {(() => {
+                        const items = formData.cultureParagraphs ? formData.cultureParagraphs.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "cultureParagraphs" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter a culture paragraph"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            cultureParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter a culture paragraph"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "cultureParagraphs",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            cultureParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            cultureParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove paragraph"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  cultureParagraphs: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add paragraph
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Opportunity Paragraphs</h3>
+                    <div className="sm-form-group full-width">
+                      <label className="sm-form-label">Opportunity Paragraphs (each paragraph)</label>
+                      {(() => {
+                        const items = formData.opportunityParagraphs ? formData.opportunityParagraphs.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => {
+                              const isActive =
+                                activeInlineEditor?.field === "opportunityParagraphs" &&
+                                activeInlineEditor.index === index;
+                              return (
+                                <div
+                                  key={index}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: isActive ? "column" : "row",
+                                    alignItems: isActive ? "stretch" : "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "9999px",
+                                        background: "#f3f4f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "0.75rem",
+                                        color: "#4b5563",
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    {isActive ? (
+                                      <textarea
+                                        className="sm-form-textarea"
+                                        style={{ width: "100%" }}
+                                        value={item}
+                                        autoFocus
+                                        rows={4}
+                                        placeholder="Enter an opportunity paragraph"
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            opportunityParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                        onBlur={() => setActiveInlineEditor(null)}
+                                      />
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        className="sm-form-input"
+                                        style={{ flex: 1 }}
+                                        value={item}
+                                        placeholder="Enter an opportunity paragraph"
+                                        onFocus={() =>
+                                          setActiveInlineEditor({
+                                            field: "opportunityParagraphs",
+                                            index,
+                                          })
+                                        }
+                                        onChange={(e) => {
+                                          const next = [...items];
+                                          next[index] = e.target.value;
+                                          setFormData({
+                                            ...formData,
+                                            opportunityParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                      />
+                                    )}
+                                    {!isActive && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const next = items.filter((_, i) => i !== index);
+                                          setFormData({
+                                            ...formData,
+                                            opportunityParagraphs: next.join("\n"),
+                                          });
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          background: "transparent",
+                                          color: "#9ca3af",
+                                          cursor: "pointer",
+                                          padding: "0.25rem",
+                                        }}
+                                        aria-label="Remove paragraph"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({
+                                  ...formData,
+                                  opportunityParagraphs: next.join("\n"),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                marginTop: "0.25rem",
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "9999px",
+                                border: "1px dashed #d1d5db",
+                                background: "#f9fafb",
+                                color: "#374151",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span>
+                              Add paragraph
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Requirements & Benefits</h3>
+                    <div className="sm-form-grid">
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Requirements (one per line)</label>
+                        <textarea
+                          className="sm-form-textarea"
+                          value={formData.requirements}
+                          onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                          placeholder="Enter requirements, one per line"
+                          rows={6}
+                        />
+                      </div>
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Benefits (one per line)</label>
+                        <textarea
+                          className="sm-form-textarea"
+                          value={formData.benefits}
+                          onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+                          placeholder="Enter benefits, one per line"
+                          rows={6}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="sm-form-section">
+                    <h3 className="sm-form-section-title">Application & Media</h3>
+                    <div className="sm-form-grid">
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Application URL</label>
+                        <input
+                          type="url"
+                          className="sm-form-input"
+                          value={formData.applicationUrl}
+                          onChange={(e) => setFormData({ ...formData, applicationUrl: e.target.value })}
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Requirements (one per line)</label>
-              <Textarea
-                value={formData.requirements}
-                onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                rows={4}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Benefits (one per line)</label>
-              <Textarea
-                value={formData.benefits}
-                onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                rows={4}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Image URL</label>
-              <Input
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="https://..."
-              />
+
+            <div className="sm-form-footer">
+              <button
+                className="sm-btn sm-btn-secondary"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setEditing(null);
+                  resetForm();
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="sm-btn sm-btn-primary"
+                onClick={() => handleSave(formData, editing || undefined)}
+                disabled={saving || !formData.title || !formData.descriptionParagraphs}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" style={{ display: 'inline-block', marginRight: '0.5rem' }} />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" style={{ display: 'inline-block', marginRight: '0.5rem' }} />
+                    {editing ? "Update" : "Create"} Program
+                  </>
+                )}
+              </button>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setShowAddForm(false);
-              setEditing(null);
-              resetForm();
-            }}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => handleSave(formData, editing || undefined)}
-              disabled={saving || !formData.title || !formData.description}
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  {editing ? "Update" : "Create"}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
-      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete NSS Program</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this NSS program? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setDeleteModalOpen(false);
-              setProgramToDelete(null);
-            }}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => programToDelete && handleDelete(programToDelete)}
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && (
+        <div className="sm-form-modal" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setDeleteModalOpen(false);
+            setProgramToDelete(null);
+          }
+        }}>
+          <div style={{ background: 'white', borderRadius: '0.75rem', padding: '2rem', maxWidth: '400px', width: '100%' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'inline-flex', padding: '1rem', borderRadius: '50%', background: '#fee2e2', marginBottom: '1rem' }}>
+                <AlertCircle style={{ width: '2rem', height: '2rem', color: '#dc2626' }} />
+              </div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Delete NSS Program</h3>
+              <p style={{ color: '#6b7280' }}>Are you sure you want to delete this NSS program? This action cannot be undone.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button className="sm-btn sm-btn-secondary" style={{ flex: 1 }} onClick={() => {
+                setDeleteModalOpen(false);
+                setProgramToDelete(null);
+              }}>
+                Cancel
+              </button>
+              <button className="sm-btn" style={{ flex: 1, background: '#dc2626', color: 'white' }} onClick={() => programToDelete && handleDelete(programToDelete)}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
+    </>
   );
 };
 
 export default NationalServiceSupportManager;
-

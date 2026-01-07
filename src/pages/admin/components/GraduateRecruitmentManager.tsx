@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { 
   Plus, X, Edit2, Trash2, 
   ChevronLeft, ChevronRight,
   Save, Loader2,
   GraduationCap, MapPin, Clock, DollarSign, Building2,
-  FileText, TrendingUp, Users, Award, Target, Calendar
+  FileText, TrendingUp, Users, Award, Target, Calendar,
+  Briefcase, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,14 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 interface GraduateProgram {
   id: string;
@@ -39,9 +32,20 @@ interface GraduateProgram {
   salary: string;
   posted: string;
   description: string;
-  requirements: string[];
-  benefits: string[];
+  descriptionParagraphs?: string[];
+  impactParagraphs?: string[];
+  impactHighlights?: string[];
+  fieldOpsGroups?: Array<{ title: string; items: string[] }>;
+  skillsFormalQualifications?: string[];
+  skillsAdditionalKnowledge?: string[];
+  skillsExperience?: string[];
+  skillsTechnical?: string[];
+  behavioralAttributes?: string[];
   skills: string[];
+  cultureParagraphs?: string[];
+  opportunityParagraphs?: string[];
+  requirements?: string[];
+  benefits?: string[];
   imageUrl?: string;
   applicationUrl?: string;
   created_at?: string;
@@ -55,10 +59,20 @@ interface GraduateProgramFormData {
   type: string;
   duration: string;
   salary: string;
-  description: string;
+  descriptionParagraphs: string; // Description tab - multiple paragraphs (separated by paragraph breaks)
+  impactParagraphs: string; // Impact tab - paragraphs
+  impactHighlights: string; // Impact tab - list items
+  fieldOpsGroups: string; // Field Ops tab - structured groups (JSON string)
+  skillsFormalQualifications: string; // Skills tab
+  skillsAdditionalKnowledge: string; // Skills tab
+  skillsExperience: string; // Skills tab
+  skillsTechnical: string; // Skills tab
+  behavioralAttributes: string; // Skills tab - list items
+  skills: string; // Skills tab - key skills (comma-separated)
+  cultureParagraphs: string; // Culture tab - paragraphs
+  opportunityParagraphs: string; // Culture tab - paragraphs
   requirements: string;
   benefits: string;
-  skills: string;
   imageUrl: string;
   applicationUrl: string;
 }
@@ -74,6 +88,9 @@ const GraduateRecruitmentManager = () => {
   const [programToDelete, setProgramToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [activeFormTab, setActiveFormTab] = useState("description");
+  const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<GraduateProgramFormData>({
     title: "",
@@ -82,10 +99,20 @@ const GraduateRecruitmentManager = () => {
     type: "Full-time",
     duration: "",
     salary: "",
-    description: "",
+    descriptionParagraphs: "",
+    impactParagraphs: "",
+    impactHighlights: "",
+    fieldOpsGroups: "",
+    skillsFormalQualifications: "",
+    skillsAdditionalKnowledge: "",
+    skillsExperience: "",
+    skillsTechnical: "",
+    behavioralAttributes: "",
+    skills: "",
+    cultureParagraphs: "",
+    opportunityParagraphs: "",
     requirements: "",
     benefits: "",
-    skills: "",
     imageUrl: "",
     applicationUrl: "",
   });
@@ -122,10 +149,21 @@ const GraduateRecruitmentManager = () => {
           duration: item.duration,
           salary: item.salary,
           posted: item.posted || new Date().toISOString().split('T')[0],
-          description: item.description,
+          description: item.description || "",
+          descriptionParagraphs: item.description_paragraphs || [],
+          impactParagraphs: item.impact_paragraphs || [],
+          impactHighlights: item.impact_highlights || [],
+          fieldOpsGroups: item.field_ops_groups || [],
+          skillsFormalQualifications: item.skills_formal_qualifications || [],
+          skillsAdditionalKnowledge: item.skills_additional_knowledge || [],
+          skillsExperience: item.skills_experience || [],
+          skillsTechnical: item.skills_technical || [],
+          behavioralAttributes: item.behavioral_attributes || [],
+          skills: item.skills || [],
+          cultureParagraphs: item.culture_paragraphs || [],
+          opportunityParagraphs: item.opportunity_paragraphs || [],
           requirements: item.requirements || [],
           benefits: item.benefits || [],
-          skills: item.skills || [],
           imageUrl: item.image_url,
           applicationUrl: item.application_url,
           created_at: item.created_at,
