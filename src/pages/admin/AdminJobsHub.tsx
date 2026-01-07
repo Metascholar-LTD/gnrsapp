@@ -182,6 +182,7 @@ const AdminJobsHub = () => {
       padding-right: calc(20px + 2rem);
       z-index: 50;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      gap: 0.25rem;
     }
     
     #ajh-tabs-container.sticky-active {
@@ -207,20 +208,21 @@ const AdminJobsHub = () => {
     }
 
     .ajh-tab {
-      padding: 1rem 1.5rem;
+      padding: 0.75rem 1rem;
       border: none;
       background: transparent;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.875rem;
+      font-weight: 500;
+      font-size: 0.8125rem;
       color: #6b7280;
       transition: all 0.2s;
       position: relative;
       white-space: nowrap;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      border-bottom: 3px solid transparent;
+      gap: 0.375rem;
+      border-bottom: 2px solid transparent;
+      flex-shrink: 0;
     }
 
     .ajh-tab:hover {
@@ -408,7 +410,7 @@ const AdminJobsHub = () => {
                 onClick={() => setActiveTab(tab.id)}
               >
                 <div className="ajh-tab-icon">
-                  <IconComponent size={16} />
+                  <IconComponent size={14} />
                 </div>
                 <span>{tab.label}</span>
               </button>

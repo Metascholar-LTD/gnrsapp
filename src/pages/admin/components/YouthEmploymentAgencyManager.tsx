@@ -337,67 +337,102 @@ const YouthEmploymentAgencyManager = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {paginatedPrograms.map((program) => (
-              <motion.div
-                key={program.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-lg border-2 overflow-hidden shadow-lg hover:shadow-xl transition-all h-full flex flex-col"
-                style={{ borderColor: "#e5e7eb" }}
-              >
-                <div className="h-1 w-full bg-slate-300" />
-                <div className="relative h-32 overflow-hidden bg-slate-100">
-                  {program.imageUrl && (
-                    <img
-                      src={program.imageUrl}
-                      alt={program.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  <div className="absolute top-2 left-2">
-                    <div className={`w-8 h-8 rounded-lg ${program.color} flex items-center justify-center shadow-md text-lg`}>
-                      {program.icon}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {paginatedPrograms.map((program) => {
+              return (
+                <motion.div
+                  key={program.id}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    type: "spring" as const,
+                    stiffness: 100,
+                    damping: 15,
+                  }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="group cursor-pointer"
+                >
+                  {/* Compact Card Style - Matching global scholarship page design */}
+                  <div className="relative w-full overflow-hidden rounded-2xl border-2 bg-white shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                    style={{
+                      borderColor: "#e5e7eb"
+                    }}
+                  >
+                    {/* Top accent bar - Whitish grey */}
+                    <div className="h-1 w-full bg-slate-300" />
+
+                    {/* Card Content - No Image Section */}
+                    <div className="flex flex-col flex-1 p-4">
+                      {/* Icon Badge */}
+                      <div className="mb-2">
+                        <div className={`w-8 h-8 rounded-lg ${program.color} flex items-center justify-center shadow-sm inline-flex text-lg`}>
+                          {program.icon}
+                        </div>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-sm font-bold text-slate-900 mb-1.5 line-clamp-2 leading-tight group-hover:text-[#bd9f67] transition-colors">
+                        {program.title}
+                      </h3>
+
+                      {/* Description */}
+                      <p className="text-xs text-slate-600 mb-3 line-clamp-2 leading-relaxed">
+                        {program.description}
+                      </p>
+
+                      {/* Info Icons */}
+                      <div className="space-y-1.5 mb-3 flex-1">
+                        <div className="flex items-center gap-2 text-xs text-slate-700">
+                          <DollarSign className="w-3.5 h-3.5 text-[#bd9f67] flex-shrink-0" />
+                          <span className="font-semibold truncate">{program.stipend}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate">{program.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate">{program.locations[0]}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <Users className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate">{program.locations.length} location{program.locations.length > 1 ? 's' : ''}</span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-end">
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(program);
+                            }}
+                          >
+                            <Edit2 className="w-3.5 h-3.5 text-slate-600 hover:text-slate-900" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setProgramToDelete(program.id);
+                              setDeleteModalOpen(true);
+                            }}
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-slate-600 hover:text-slate-900" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="text-sm font-bold text-slate-900 line-clamp-2 flex-1">{program.title}</h4>
-                    <div className="flex gap-1 ml-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(program)}>
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setProgramToDelete(program.id);
-                          setDeleteModalOpen(true);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-600 mb-3 line-clamp-2 flex-1">{program.description}</p>
-                  <div className="space-y-1.5 mb-3">
-                    <div className="flex items-center gap-2 text-xs text-slate-700">
-                      <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="font-semibold">{program.stipend}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{program.duration}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{program.locations[0]}</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
 
           {totalPages > 1 && (
