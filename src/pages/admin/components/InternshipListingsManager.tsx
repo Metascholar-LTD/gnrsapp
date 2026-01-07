@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { 
-  Plus, Search, X, Edit2, Trash2, 
+  Plus, X, Edit2, Trash2, 
   CheckCircle2, ChevronLeft, ChevronRight,
   List, Save, Loader2,
   Briefcase, Calendar, MapPin, Building2,
@@ -318,16 +318,12 @@ const InternshipListingsManager = () => {
       </div>
 
       <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <Input
-            type="text"
-            placeholder="Search internships..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <Input
+          type="text"
+          placeholder="Search internships..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
       {loading ? (

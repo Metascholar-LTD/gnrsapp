@@ -181,7 +181,7 @@ export const Navigation = React.memo(() => {
       content: {
         search: [
           { title: 'Browse Jobs', items: [
-            { to: '/jobs/browse', label: 'Verified Job Listings', icon: 'fa-search' },
+            { to: '/jobs/browse', label: 'Jobs and Company Listing', icon: 'fa-search' },
             { to: '/jobs/all', label: 'All Jobs', icon: 'fa-list' }
           ]},
           { title: 'Special Programs', items: [

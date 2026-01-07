@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { 
-  Plus, Search, Filter, X, Edit2, Trash2, Eye, 
+  Plus, Filter, X, Edit2, Trash2, Eye, 
   CheckCircle2, XCircle, TrendingUp, ChevronLeft, ChevronRight,
   Save, Loader2, Image as ImageIcon,
   Briefcase, DollarSign, Calendar, MapPin, Building2,
@@ -41,6 +41,8 @@ interface Job {
   skills: string[];
   cultureParagraphs?: string[];
   opportunityParagraphs?: string[];
+  jobCategory: string;
+  industry: string;
   educationLevel: string;
   experienceLevel: string;
   contractType: string;
@@ -72,6 +74,8 @@ interface JobFormData {
   skills: string; // Skills tab - key skills (comma-separated)
   cultureParagraphs: string; // Culture tab - paragraphs
   opportunityParagraphs: string; // Culture tab - paragraphs
+  jobCategory: string;
+  industry: string;
   educationLevel: string;
   experienceLevel: string;
   contractType: string;
@@ -123,6 +127,8 @@ const VerifiedJobListingsManager = () => {
     skills: "",
     cultureParagraphs: "",
     opportunityParagraphs: "",
+    jobCategory: "",
+    industry: "",
     educationLevel: "Bachelor",
     experienceLevel: "2 to 5 years",
     contractType: "Permanent contract",
@@ -135,20 +141,94 @@ const VerifiedJobListingsManager = () => {
     applicationUrl: "",
   });
 
+  const jobCategories = [
+    "Accounting, controlling, finance",
+    "Health and social professions",
+    "HR, training",
+    "IT, new technologies",
+    "Legal",
+    "Management",
+    "Marketing, communication",
+    "Production, maintenance, quality",
+    "Public buildings and works professions",
+    "Purchases",
+    "R&D, project management",
+    "Sales",
+    "Secretarial work, assistantship",
+    "Services",
+    "Telemarketing, teleassistance",
+    "Tourism, hotel business and catering",
+    "Transport, logistics",
+  ];
+
+  const industries = [
+    "Advice, audit, accounting",
+    "Aeronautics, naval",
+    "Agriculture, fishing, aquaculture",
+    "Airport and shipping services",
+    "Associative activities",
+    "Banking, insurance, finance",
+    "Call centers, hotlines",
+    "Chemistry, petrochemistry, raw materials, mining",
+    "Cleaning, security, surveillance",
+    "Consumer goods",
+    "Distribution, selling, wholesale",
+    "Edition, printing",
+    "Education, training",
+    "Electric, electronic, optical and precision equipments",
+    "Electricity, water, gas, nuclear, energy",
+    "Engineering, development studies",
+    "Environment, recycling",
+    "Event, receptionist",
+    "Food-processing industry",
+    "Furnishing, decoration",
+    "Government services",
+    "Greenways, forests, hunting",
+    "Handling",
+    "Health, pharmacy, hospitals, medical equipment",
+    "Hotel business, catering",
+    "Import-export business",
+    "Industry, production, manufacturing and other",
+    "IT, software engineering, Internet",
+    "Luxury, cosmetics",
+    "Maintenance, servicing, after-sales services",
+    "Marketing, communication, media",
+    "Mechanical equipment, machines",
+    "Metallurgy, steel industry",
+    "Motor, transportation equipment, reparation",
+    "Paper, wood, rubber, plastic, glass, tobacco",
+    "Pharmaceutical industry",
+    "Public buildings and works sector, construction",
+    "Quality, methods",
+    "Real-estate, architecture, town planning",
+    "Rental",
+    "Research and development",
+    "Secretarial work",
+    "Services other",
+    "Social, public and human services",
+    "Sports, cultural and social action",
+    "Telecom",
+    "Temporary work, recruitment",
+    "Textile, leather, shoes, clothing industry",
+    "Tourism, leisure activities",
+    "Transport, logistics, postal services",
+  ];
+
   const regions = [
-    "Greater Accra", "Ashanti", "Western", "Eastern", "Central",
-    "Northern", "Upper East", "Upper West", "Volta", "Brong Ahafo",
-    "Western North", "Ahafo", "Bono", "Bono East", "Oti", "North East", "Savannah"
+    "Ahafo", "Ashanti", "Bono", "Bono East", "Central",
+    "Eastern", "Greater Accra", "North East", "Northern",
+    "Oti", "Savannah", "Upper East", "Upper West", "Volta",
+    "Western", "Western North"
   ];
 
   const contractTypes = [
     "Permanent contract", "Fixed-term contract", "Freelance",
-    "Part-time work", "Internship", "Temporary work"
+    "Part-time work", "Cooperative Education Program", "Internship", "Temporary work"
   ];
 
   const educationLevels = [
-    "High school", "HND", "Bachelor", "Master", "Doctorate",
-    "College", "Technical school"
+    "Bachelor", "College", "Doctorate", "High school",
+    "HND", "Master", "Technical school"
   ];
 
   const experienceLevels = [
@@ -196,6 +276,8 @@ const VerifiedJobListingsManager = () => {
           skills: item.skills || [],
           cultureParagraphs: item.culture_paragraphs || [],
           opportunityParagraphs: item.opportunity_paragraphs || [],
+          jobCategory: item.job_category || "",
+          industry: item.industry || "",
           educationLevel: item.education_level || "Bachelor",
           experienceLevel: item.experience_level || "2 to 5 years",
           contractType: item.contract_type || "Permanent contract",
@@ -230,6 +312,8 @@ const VerifiedJobListingsManager = () => {
       company: "WESTERN GOVERNORS UNIVERSITY",
       companyLogo: "https://logo.clearbit.com/wgu.edu",
       description: "Western Governors University (WGU) is seeking an experienced and innovative Marketing Manager...",
+      jobCategory: "Marketing, communication",
+      industry: "Education, training",
       educationLevel: "Master",
       experienceLevel: "5 to 10 years",
       contractType: "Permanent contract",
@@ -246,6 +330,8 @@ const VerifiedJobListingsManager = () => {
       company: "Microsoft",
       companyLogo: "https://logo.clearbit.com/microsoft.com",
       description: "Microsoft is seeking a talented Software Engineer to join our development team...",
+      jobCategory: "IT, new technologies",
+      industry: "IT, software engineering, Internet",
       educationLevel: "Bachelor",
       experienceLevel: "2 to 5 years",
       contractType: "Permanent contract",
@@ -339,6 +425,8 @@ const VerifiedJobListingsManager = () => {
         skills: jobData.skills.split(',').map(s => s.trim()).filter(Boolean),
         culture_paragraphs: jobData.cultureParagraphs ? jobData.cultureParagraphs.split('\n').filter(Boolean) : [],
         opportunity_paragraphs: jobData.opportunityParagraphs ? jobData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+        job_category: jobData.jobCategory,
+        industry: jobData.industry,
         education_level: jobData.educationLevel,
         experience_level: jobData.experienceLevel,
         contract_type: jobData.contractType,
@@ -416,6 +504,8 @@ const VerifiedJobListingsManager = () => {
       skills: "",
       cultureParagraphs: "",
       opportunityParagraphs: "",
+      jobCategory: "",
+      industry: "",
       educationLevel: "Bachelor",
       experienceLevel: "2 to 5 years",
       contractType: "Permanent contract",
@@ -447,6 +537,8 @@ const VerifiedJobListingsManager = () => {
       skills: job.skills.join(', '),
       cultureParagraphs: job.cultureParagraphs?.join('\n') || "",
       opportunityParagraphs: job.opportunityParagraphs?.join('\n') || "",
+      jobCategory: job.jobCategory || "",
+      industry: job.industry || "",
       educationLevel: job.educationLevel,
       experienceLevel: job.experienceLevel,
       contractType: job.contractType,
@@ -743,14 +835,12 @@ const VerifiedJobListingsManager = () => {
       {/* Search and Filters */}
       <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <div className="flex-1">
             <Input
               type="text"
               placeholder="Search jobs by title, company, location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
             />
           </div>
           <div className="flex gap-2">
@@ -1120,6 +1210,32 @@ const VerifiedJobListingsManager = () => {
                           onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                           placeholder="e.g., GHS 3,000 - 5,000"
                         />
+                      </div>
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Job Category *</label>
+                        <select
+                          className="sm-form-select"
+                          value={formData.jobCategory}
+                          onChange={(e) => setFormData({ ...formData, jobCategory: e.target.value })}
+                        >
+                          <option value="">Select Job Category</option>
+                          {jobCategories.map(category => (
+                            <option key={category} value={category}>{category}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="sm-form-group">
+                        <label className="sm-form-label">Industry *</label>
+                        <select
+                          className="sm-form-select"
+                          value={formData.industry}
+                          onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                        >
+                          <option value="">Select Industry</option>
+                          {industries.map(industry => (
+                            <option key={industry} value={industry}>{industry}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="sm-form-group">
                         <label className="sm-form-label">Education Level *</label>

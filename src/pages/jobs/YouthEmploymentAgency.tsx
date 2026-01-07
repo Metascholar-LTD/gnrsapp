@@ -385,13 +385,6 @@ const YouthEmploymentAgency = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     
-                    {/* Icon Badge on Image */}
-                    <div className="absolute top-2 left-2">
-                      <div className={`w-8 h-8 rounded-lg ${program.color} flex items-center justify-center shadow-md backdrop-blur-sm border border-white/20 text-lg`}>
-                        {program.icon}
-                      </div>
-                    </div>
-                    
                     {/* Category badge on image */}
                     <div className="absolute top-2 right-2">
                       <Badge variant="outline" className="text-[10px] px-2 py-0.5 h-auto bg-white/95 backdrop-blur-sm border-white/50">

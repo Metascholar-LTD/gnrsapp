@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { 
-  Plus, Search, X, Edit2, Trash2, 
+  Plus, X, Edit2, Trash2, 
   ChevronLeft, ChevronRight,
   Save, Loader2,
   Users, MapPin, Clock, DollarSign,
@@ -314,16 +314,12 @@ const YouthEmploymentAgencyManager = () => {
       </div>
 
       <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <Input
-            type="text"
-            placeholder="Search YEA programs..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <Input
+          type="text"
+          placeholder="Search YEA programs..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
       {loading ? (
@@ -363,13 +359,6 @@ const YouthEmploymentAgencyManager = () => {
 
                     {/* Card Content - No Image Section */}
                     <div className="flex flex-col flex-1 p-4">
-                      {/* Icon Badge */}
-                      <div className="mb-2">
-                        <div className={`w-8 h-8 rounded-lg ${program.color} flex items-center justify-center shadow-sm inline-flex text-lg`}>
-                          {program.icon}
-                        </div>
-                      </div>
-
                       {/* Title */}
                       <h3 className="text-sm font-bold text-slate-900 mb-1.5 line-clamp-2 leading-tight group-hover:text-[#bd9f67] transition-colors">
                         {program.title}
