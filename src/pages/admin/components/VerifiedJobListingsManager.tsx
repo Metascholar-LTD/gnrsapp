@@ -60,8 +60,7 @@ interface JobFormData {
   title: string;
   company: string;
   companyLogo: string;
-  description: string;
-  descriptionParagraphs: string; // Description tab - multiple paragraphs
+  descriptionParagraphs: string; // Description tab - multiple paragraphs (separated by paragraph breaks)
   impactParagraphs: string; // Impact tab - paragraphs
   impactHighlights: string; // Impact tab - list items
   fieldOpsGroups: string; // Field Ops tab - structured groups (JSON string)
@@ -112,7 +111,6 @@ const VerifiedJobListingsManager = () => {
     title: "",
     company: "",
     companyLogo: "",
-    description: "",
     descriptionParagraphs: "",
     impactParagraphs: "",
     impactHighlights: "",
@@ -320,12 +318,16 @@ const VerifiedJobListingsManager = () => {
         }
       }
 
+      // Extract first paragraph as short description for listings (split by double newlines for paragraphs)
+      const paragraphs = jobData.descriptionParagraphs ? jobData.descriptionParagraphs.split('\n\n').filter(Boolean) : [];
+      const firstParagraph = paragraphs[0] || '';
+
       const jobPayload: any = {
         title: jobData.title,
         company: jobData.company,
         company_logo: jobData.companyLogo,
-        description: jobData.description,
-        description_paragraphs: jobData.descriptionParagraphs ? jobData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+        description: firstParagraph || '',
+        description_paragraphs: paragraphs,
         impact_paragraphs: jobData.impactParagraphs ? jobData.impactParagraphs.split('\n').filter(Boolean) : [],
         impact_highlights: jobData.impactHighlights ? jobData.impactHighlights.split('\n').filter(Boolean) : [],
         field_ops_groups: fieldOpsGroupsParsed,
@@ -402,7 +404,6 @@ const VerifiedJobListingsManager = () => {
       title: "",
       company: "",
       companyLogo: "",
-      description: "",
       descriptionParagraphs: "",
       impactParagraphs: "",
       impactHighlights: "",
@@ -434,8 +435,7 @@ const VerifiedJobListingsManager = () => {
       title: job.title,
       company: job.company,
       companyLogo: job.companyLogo || "",
-      description: job.description,
-      descriptionParagraphs: job.descriptionParagraphs?.join('\n') || job.description || "",
+      descriptionParagraphs: job.descriptionParagraphs?.join('\n\n') || "",
       impactParagraphs: job.impactParagraphs?.join('\n') || "",
       impactHighlights: job.impactHighlights?.join('\n') || "",
       fieldOpsGroups: job.fieldOpsGroups ? JSON.stringify(job.fieldOpsGroups, null, 2) : "",
@@ -1179,159 +1179,19 @@ const VerifiedJobListingsManager = () => {
                           placeholder="e.g., Accra"
                         />
                       </div>
-                      <div className="sm-form-group full-width">
-                        <label className="sm-form-label">Short Description * (shown in listings)</label>
-                        <textarea
-                          className="sm-form-textarea"
-                          value={formData.description}
-                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          placeholder="Brief description (shown in listings)"
-                          rows={3}
-                        />
-                      </div>
                     </div>
                   </div>
                   <div className="sm-form-section">
-                    <h3 className="sm-form-section-title">Description Paragraphs</h3>
+                    <h3 className="sm-form-section-title">Description</h3>
                     <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Description Paragraphs (each paragraph)</label>
-                      {(() => {
-                        const items = formData.descriptionParagraphs ? formData.descriptionParagraphs.split("\n") : [""];
-                        return (
-                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                            {items.map((item, index) => {
-                              const isActive =
-                                activeInlineEditor?.field === "descriptionParagraphs" &&
-                                activeInlineEditor.index === index;
-                              return (
-                                <div
-                                  key={index}
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: isActive ? "column" : "row",
-                                    alignItems: isActive ? "stretch" : "center",
-                                    gap: "0.5rem",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "0.5rem",
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        width: "1.5rem",
-                                        height: "1.5rem",
-                                        borderRadius: "9999px",
-                                        background: "#f3f4f6",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontSize: "0.75rem",
-                                        color: "#4b5563",
-                                      }}
-                                    >
-                                      {index + 1}
-                                    </span>
-                                    {isActive ? (
-                                      <textarea
-                                        className="sm-form-textarea"
-                                        style={{ width: "100%" }}
-                                        value={item}
-                                        autoFocus
-                                        rows={4}
-                                        placeholder="Enter a description paragraph"
-                                        onChange={(e) => {
-                                          const next = [...items];
-                                          next[index] = e.target.value;
-                                          setFormData({
-                                            ...formData,
-                                            descriptionParagraphs: next.join("\n"),
-                                          });
-                                        }}
-                                        onBlur={() => setActiveInlineEditor(null)}
-                                      />
-                                    ) : (
-                                      <input
-                                        type="text"
-                                        className="sm-form-input"
-                                        style={{ flex: 1 }}
-                                        value={item}
-                                        placeholder="Enter a description paragraph"
-                                        onFocus={() =>
-                                          setActiveInlineEditor({
-                                            field: "descriptionParagraphs",
-                                            index,
-                                          })
-                                        }
-                                        onChange={(e) => {
-                                          const next = [...items];
-                                          next[index] = e.target.value;
-                                          setFormData({
-                                            ...formData,
-                                            descriptionParagraphs: next.join("\n"),
-                                          });
-                                        }}
-                                      />
-                                    )}
-                                    {!isActive && (
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const next = items.filter((_, i) => i !== index);
-                                          setFormData({
-                                            ...formData,
-                                            descriptionParagraphs: next.join("\n"),
-                                          });
-                                        }}
-                                        style={{
-                                          border: "none",
-                                          background: "transparent",
-                                          color: "#9ca3af",
-                                          cursor: "pointer",
-                                          padding: "0.25rem",
-                                        }}
-                                        aria-label="Remove paragraph"
-                                      >
-                                        <X size={14} />
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const next = [...items, ""];
-                                setFormData({
-                                  ...formData,
-                                  descriptionParagraphs: next.join("\n"),
-                                });
-                              }}
-                              style={{
-                                alignSelf: "flex-start",
-                                marginTop: "0.25rem",
-                                fontSize: "0.75rem",
-                                padding: "0.25rem 0.5rem",
-                                borderRadius: "9999px",
-                                border: "1px dashed #d1d5db",
-                                background: "#f9fafb",
-                                color: "#374151",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "0.25rem",
-                                cursor: "pointer",
-                              }}
-                            >
-                              <span style={{ fontSize: "0.9rem" }}>+</span>
-                              Add paragraph
-                            </button>
-                          </div>
-                        );
-                      })()}
+                      <label className="sm-form-label">Description * (Enter paragraphs separated by line breaks)</label>
+                      <textarea
+                        className="sm-form-textarea"
+                        value={formData.descriptionParagraphs}
+                        onChange={(e) => setFormData({ ...formData, descriptionParagraphs: e.target.value })}
+                        placeholder="Enter job description paragraphs. Press Enter to create a new paragraph."
+                        rows={12}
+                      />
                     </div>
                   </div>
                 </motion.div>
@@ -2763,7 +2623,7 @@ const VerifiedJobListingsManager = () => {
               <button
                 className="sm-btn sm-btn-primary"
                 onClick={() => handleSave(formData, editing || undefined)}
-                disabled={saving || !formData.title || !formData.company}
+                disabled={saving || !formData.title || !formData.company || !formData.descriptionParagraphs}
               >
                 {saving ? (
                   <>

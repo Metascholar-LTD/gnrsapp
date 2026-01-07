@@ -82,11 +82,6 @@ const AdminSidebar = () => {
       header: "Career & Employment",
       items: [
         { icon: "briefcase", label: "Jobs", path: "/admin/jobs" },
-        { icon: "briefcase", label: "All Jobs", path: "/admin/jobs/all" },
-        { icon: "user-check", label: "Internships", path: "/admin/jobs/internships" },
-        { icon: "user", label: "NSS Support", path: "/admin/jobs/nss" },
-        { icon: "graduation-cap", label: "Graduate Recruitment", path: "/admin/jobs/graduate-recruitment" },
-        { icon: "users", label: "YEA Jobs", path: "/admin/jobs/yea" },
         { icon: "building", label: "Companies", path: "/admin/jobs/companies" },
       ],
     },

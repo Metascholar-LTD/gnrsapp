@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AIAssistant } from "@/components/AIAssistant";
 import { PageLoader } from "@/components/PageLoader";
 import Index from "./pages/Index";
@@ -211,7 +211,8 @@ const App = () => (
             <Route path="blank" element={<AdminDashboard />} />
             <Route path="news" element={<AdminDashboard />} />
             <Route path="jobs" element={<AdminJobsHub />} />
-            <Route path="jobs/all" element={<AdminJobsHub />} />
+            {/* Back-compat: keep old URL but unify UI to a single Jobs entry */}
+            <Route path="jobs/all" element={<Navigate to="/admin/jobs" replace />} />
             <Route path="jobs/internships" element={<AdminJobsHub />} />
             <Route path="jobs/nss" element={<AdminJobsHub />} />
             <Route path="jobs/graduate-recruitment" element={<AdminJobsHub />} />

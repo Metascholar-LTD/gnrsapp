@@ -11,7 +11,6 @@ import {
   FileText
 } from "lucide-react";
 import VerifiedJobListingsManager from "./components/VerifiedJobListingsManager";
-import AllJobsManager from "./components/AllJobsManager";
 import InternshipListingsManager from "./components/InternshipListingsManager";
 import NationalServiceSupportManager from "./components/NationalServiceSupportManager";
 import GraduateRecruitmentManager from "./components/GraduateRecruitmentManager";
@@ -60,12 +59,6 @@ const AdminJobsHub = () => {
       label: "Verified Job Listings",
       icon: CheckCircle2,
       description: "Manage verified and featured job listings"
-    },
-    {
-      id: "all-jobs",
-      label: "All Jobs",
-      icon: Briefcase,
-      description: "View and manage all job postings"
     },
     {
       id: "internships",
@@ -359,8 +352,6 @@ const AdminJobsHub = () => {
     switch (tabId) {
       case "verified-jobs":
         return <VerifiedJobListingsManager />;
-      case "all-jobs":
-        return <AllJobsManager />;
       case "internships":
         return <InternshipListingsManager />;
       case "nss":
