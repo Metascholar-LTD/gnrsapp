@@ -899,18 +899,6 @@ const YouthEmploymentAgencyManager = () => {
                         </select>
                       </div>
                       <div className="sm-form-group">
-                        <label className="sm-form-label">Color Theme</label>
-                        <select
-                          className="sm-form-select"
-                          value={formData.color}
-                          onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                        >
-                          {colorOptions.map(color => (
-                            <option key={color.value} value={color.value}>{color.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="sm-form-group">
                         <label className="sm-form-label">Duration *</label>
                         <input
                           type="text"
