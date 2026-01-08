@@ -6,7 +6,7 @@ import {
   Save, Loader2, Grid3x3, List,
   Building2, Briefcase,
   AlertCircle, Globe, Mail, Phone,
-  Calendar, Users
+  Calendar, Users, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ interface Company {
   phone: string;
   location?: string;
   jobCount?: number;
+  featured?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -43,6 +44,7 @@ interface CompanyFormData {
   email: string;
   phone: string;
   location: string;
+  featured: boolean;
 }
 
 const CompanyManager = () => {
@@ -69,6 +71,7 @@ const CompanyManager = () => {
     email: "",
     phone: "",
     location: "",
+    featured: false,
   });
 
   const industries = [
@@ -138,6 +141,7 @@ const CompanyManager = () => {
           phone: item.phone || "",
           location: item.location || "",
           jobCount: item.job_count || 0,
+          featured: item.featured || false,
           created_at: item.created_at,
           updated_at: item.updated_at,
         }));
@@ -222,6 +226,15 @@ const CompanyManager = () => {
   const handleSave = async (companyData: CompanyFormData, companyId?: string) => {
     setSaving(true);
     try {
+      // If marking as featured, unfeature all other companies
+      if (companyData.featured) {
+        const { error: unfeatureError } = await supabase
+          .from('companies' as any)
+          .update({ featured: false })
+          .neq('id', companyId || '');
+        if (unfeatureError) throw unfeatureError;
+      }
+
       const payload: any = {
         name: companyData.name,
         logo_url: companyData.logoUrl,
@@ -233,6 +246,7 @@ const CompanyManager = () => {
         email: companyData.email,
         phone: companyData.phone,
         location: companyData.location,
+        featured: companyData.featured || false,
       };
 
       if (companyId) {
@@ -291,6 +305,7 @@ const CompanyManager = () => {
       email: "",
       phone: "",
       location: "",
+      featured: false,
     });
   };
 
@@ -307,6 +322,7 @@ const CompanyManager = () => {
       email: company.email,
       phone: company.phone,
       location: company.location || "",
+      featured: company.featured || false,
     });
     setShowAddForm(true);
   };
@@ -574,6 +590,15 @@ const CompanyManager = () => {
                     
                     {/* Content Wrapper */}
                     <div className="relative z-10 flex flex-col flex-1">
+                    {/* Featured Badge */}
+                    {company.featured && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
+                        <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold shadow-lg">
+                          <Sparkles className="w-3 h-3" />
+                          FEATURED
+                        </div>
+                      </div>
+                    )}
                     {/* Company Logo */}
                     <div className="w-16 h-16 bg-white border-2 border-slate-200 rounded-xl flex items-center justify-center mb-4 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-md group-hover:shadow-xl overflow-hidden p-2">
                       {company.logoUrl ? (
@@ -644,8 +669,17 @@ const CompanyManager = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                     whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                    className="group bg-white rounded-lg border border-slate-200 p-5 hover:shadow-lg transition-all duration-300"
+                    className="group bg-white rounded-lg border border-slate-200 p-5 hover:shadow-lg transition-all duration-300 relative"
                   >
+                    {/* Featured Badge */}
+                    {company.featured && (
+                      <div className="absolute -top-2 -right-2 z-10">
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold shadow-lg">
+                          <Sparkles className="w-2.5 h-2.5" />
+                          FEATURED
+                        </div>
+                      </div>
+                    )}
                     <div className="flex items-center gap-4">
                       {/* Company Logo */}
                       <div className="w-16 h-16 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 overflow-hidden p-2">
@@ -811,6 +845,23 @@ const CompanyManager = () => {
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         placeholder="e.g., Greater Accra, Ghana"
                       />
+                    </div>
+                    <div className="cm-form-group full-width">
+                      <label className="cm-form-label flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.featured}
+                          onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                          className="w-4 h-4 text-red-600 border-slate-300 rounded focus:ring-red-500"
+                        />
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="w-4 h-4 text-red-600" />
+                          Mark as Featured Company
+                        </span>
+                      </label>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Only one company can be featured at a time. Selecting this will unfeature any other featured company.
+                      </p>
                     </div>
                   </div>
                 </div>
