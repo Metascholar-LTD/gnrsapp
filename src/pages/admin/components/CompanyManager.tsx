@@ -525,12 +525,13 @@ interface Job {
         background: white;
         border-radius: 0.75rem;
         width: 100%;
-        max-width: 1000px;
+        max-width: 1200px;
         max-height: 90vh;
         overflow: hidden;
         display: flex;
         flex-direction: column;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        position: relative;
       }
   
       .sm-form-header {
@@ -540,6 +541,8 @@ interface Job {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        position: relative;
+        z-index: 10;
       }
   
       .sm-form-title {
@@ -550,9 +553,11 @@ interface Job {
       }
   
       .sm-form-body {
-        padding: 1.5rem 2rem;
+        padding: 2rem;
         overflow-y: auto;
         flex: 1;
+        background: #ffffff;
+        min-height: 300px;
       }
   
       .sm-form-section {
@@ -621,6 +626,9 @@ interface Job {
         justify-content: flex-end;
         gap: 1rem;
         background: #f9fafb;
+        margin-left: 280px;
+        position: relative;
+        z-index: 10;
       }
   
       .sm-icon-btn {
@@ -641,69 +649,136 @@ interface Job {
         color: #ffffff;
       }
   
-      .sm-form-tabs {
-        border-bottom: 2px solid #e5e7eb;
-        background: #f9fafb;
-        padding: 0 2rem;
+      .sm-form-layout {
         display: flex;
-        gap: 0;
-        overflow-x: auto;
-        overflow-y: hidden;
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .sm-form-sidebar {
+        width: 280px;
+        background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
         scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 #f1f5f9;
-        position: sticky;
+        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        position: absolute;
+        top: 73px;
+        left: 0;
+        right: auto;
+        bottom: 0;
+        z-index: 1;
+      }
+
+      .sm-form-sidebar::after {
+        content: '';
+        position: absolute;
         top: 0;
-        z-index: 10;
+        right: 0;
+        width: 1px;
+        height: 100%;
+        background: linear-gradient(180deg, transparent 0%, rgba(96, 165, 250, 0.3) 50%, transparent 100%);
       }
 
-      .sm-form-tabs::-webkit-scrollbar {
-        height: 6px;
+      .sm-form-sidebar::-webkit-scrollbar {
+        width: 6px;
       }
 
-      .sm-form-tabs::-webkit-scrollbar-track {
-        background: #f1f5f9;
+      .sm-form-sidebar::-webkit-scrollbar-track {
+        background: transparent;
       }
 
-      .sm-form-tabs::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
+      .sm-form-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
         border-radius: 3px;
       }
 
-      .sm-form-tabs::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+      .sm-form-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .sm-form-tabs {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 0.5rem;
+        gap: 0.25rem;
       }
   
       .sm-form-tab {
-        padding: 1rem 1.5rem;
+        padding: 1rem 1.25rem;
         background: transparent;
         border: none;
-        border-bottom: 3px solid transparent;
-        color: #6b7280;
+        border-left: 3px solid transparent;
+        color: rgba(255, 255, 255, 0.7);
         font-weight: 500;
         font-size: 0.875rem;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         white-space: nowrap;
-        flex-shrink: 0;
+        border-radius: 0.5rem;
+        margin: 0 0.5rem;
+      }
+
+      .sm-form-tab::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: #60a5fa;
+        transform: scaleY(0);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 0 3px 3px 0;
       }
   
       .sm-form-tab:hover {
-        color: #111827;
-        background: rgba(96, 165, 250, 0.05);
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateX(4px);
       }
   
       .sm-form-tab.active {
-        color: #111827;
+        color: #ffffff;
         font-weight: 600;
-        border-bottom-color: #60a5fa;
+        background: linear-gradient(90deg, rgba(96, 165, 250, 0.15) 0%, rgba(96, 165, 250, 0.05) 100%);
+        border-left-color: #60a5fa;
+        box-shadow: 0 2px 12px rgba(96, 165, 250, 0.25), inset 0 0 20px rgba(96, 165, 250, 0.1);
+      }
+
+      .sm-form-tab.active::before {
+        transform: scaleY(1);
+      }
+
+      .sm-form-tab svg {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .sm-form-tab.active svg {
+        transform: scale(1.1);
+        color: #60a5fa;
+      }
+
+      .sm-form-content-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        margin-left: 280px;
+        min-height: 0;
       }
   
       .sm-form-tab-content {
         animation: fadeIn 0.3s ease-in-out;
+        min-height: 300px;
       }
   
       @keyframes fadeIn {
@@ -758,8 +833,29 @@ interface Job {
           grid-template-columns: 1fr;
         }
   
+        .sm-form-layout {
+          flex-direction: column;
+        }
+
+        .sm-form-sidebar {
+          position: relative;
+          width: 100%;
+          max-height: 200px;
+          border-right: none;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sm-form-content-area {
+          margin-left: 0;
+        }
+
+        .sm-form-footer {
+          margin-left: 0;
+        }
+
         .sm-form-tabs {
-          padding: 0 1rem;
+          flex-direction: row;
+          padding: 0.5rem;
           overflow-x: auto;
           overflow-y: hidden;
         }
@@ -768,6 +864,22 @@ interface Job {
           padding: 0.75rem 1rem;
           font-size: 0.8125rem;
           white-space: nowrap;
+          border-left: none;
+          border-bottom: 3px solid transparent;
+          margin: 0;
+        }
+
+        .sm-form-tab::before {
+          display: none;
+        }
+
+        .sm-form-tab.active {
+          border-left: none;
+          border-bottom-color: #60a5fa;
+        }
+
+        .sm-form-tab:hover {
+          transform: none;
         }
       }
     `;
@@ -894,7 +1006,7 @@ interface Job {
               setEditing(null);
             }
           }}>
-              <div className="sm-form-content" style={{ maxWidth: '1000px' }}>
+              <div className="sm-form-content" style={{ maxWidth: '1200px' }}>
                 <div className="sm-form-header">
                   <h2 className="sm-form-title">{editing ? 'Edit Position' : 'Add New Position'}</h2>
                   <button className="sm-icon-btn" style={{ color: 'white' }} onClick={() => {
@@ -905,61 +1017,83 @@ interface Job {
                   </button>
                 </div>
   
-                {/* Tab Navigation */}
-                <div className="sm-form-tabs">
-                  <button
-                    onClick={() => {
-                      setActiveFormTab("description");
-                      setActiveInlineEditor(null);
-                    }}
-                    className={`sm-form-tab ${activeFormTab === "description" ? "active" : ""}`}
-                  >
-                    <FileText size={16} />
-                    <span>Description</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveFormTab("impact");
-                      setActiveInlineEditor(null);
-                    }}
-                    className={`sm-form-tab ${activeFormTab === "impact" ? "active" : ""}`}
-                  >
-                    <TrendingUp size={16} />
-                    <span>Impact</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveFormTab("field-ops");
-                      setActiveInlineEditor(null);
-                    }}
-                    className={`sm-form-tab ${activeFormTab === "field-ops" ? "active" : ""}`}
-                  >
-                    <Briefcase size={16} />
-                    <span>Field Ops</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveFormTab("skills");
-                      setActiveInlineEditor(null);
-                    }}
-                    className={`sm-form-tab ${activeFormTab === "skills" ? "active" : ""}`}
-                  >
-                    <GraduationCap size={16} />
-                    <span>Skills & Experience</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveFormTab("culture");
-                      setActiveInlineEditor(null);
-                    }}
-                    className={`sm-form-tab ${activeFormTab === "culture" ? "active" : ""}`}
-                  >
-                    <Users size={16} />
-                    <span>Culture & Apply</span>
-                  </button>
+                {/* Sidebar Navigation - Positioned absolutely to extend to bottom */}
+                <div className="sm-form-sidebar">
+                  <div style={{ 
+                    padding: '1.5rem 1rem 1rem 1rem', 
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <h3 style={{ 
+                      color: 'rgba(255, 255, 255, 0.9)', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 600, 
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      margin: 0
+                    }}>
+                      Navigation
+                    </h3>
+                  </div>
+                  <div className="sm-form-tabs">
+                    <button
+                      onClick={() => {
+                        setActiveFormTab("description");
+                        setActiveInlineEditor(null);
+                      }}
+                      className={`sm-form-tab ${activeFormTab === "description" ? "active" : ""}`}
+                    >
+                      <FileText size={18} />
+                      <span>Description</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveFormTab("impact");
+                        setActiveInlineEditor(null);
+                      }}
+                      className={`sm-form-tab ${activeFormTab === "impact" ? "active" : ""}`}
+                    >
+                      <TrendingUp size={18} />
+                      <span>Impact</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveFormTab("field-ops");
+                        setActiveInlineEditor(null);
+                      }}
+                      className={`sm-form-tab ${activeFormTab === "field-ops" ? "active" : ""}`}
+                    >
+                      <Briefcase size={18} />
+                      <span>Field Ops</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveFormTab("skills");
+                        setActiveInlineEditor(null);
+                      }}
+                      className={`sm-form-tab ${activeFormTab === "skills" ? "active" : ""}`}
+                    >
+                      <GraduationCap size={18} />
+                      <span>Skills & Experience</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveFormTab("culture");
+                        setActiveInlineEditor(null);
+                      }}
+                      className={`sm-form-tab ${activeFormTab === "culture" ? "active" : ""}`}
+                    >
+                      <Users size={18} />
+                      <span>Culture & Apply</span>
+                    </button>
+                  </div>
                 </div>
-  
-                <div className="sm-form-body">
+
+                {/* Sidebar Layout */}
+                <div className="sm-form-layout">
+                  {/* Content Area */}
+                  <div className="sm-form-content-area">
+                    <div className="sm-form-body">
                   {/* Description Tab */}
                   {activeFormTab === "description" && (
                     <motion.div
@@ -2715,6 +2849,8 @@ interface Job {
                       </div>
                     </motion.div>
                   )}
+                    </div>
+                  </div>
                 </div>
   
                 {/* Footer */}
