@@ -1621,17 +1621,272 @@ const VerifiedJobListingsManager = () => {
                   <div className="sm-form-section">
                     <h3 className="sm-form-section-title">Field Operations</h3>
                     <div className="sm-form-group full-width">
-                      <label className="sm-form-label">Field Operations Groups (JSON format - each group has title and items array)</label>
-                      <textarea
-                        className="sm-form-textarea"
-                        value={formData.fieldOpsGroups}
-                        onChange={(e) => setFormData({ ...formData, fieldOpsGroups: e.target.value })}
-                        placeholder='[{"title": "Health, Safety and Environment", "items": ["Item 1", "Item 2"]}, {"title": "Survey Data Calculation", "items": ["Item 1"]}]'
-                        rows={12}
-                      />
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.5rem" }}>
-                        Enter field operation groups as JSON. Each group should have a "title" and an "items" array.
-                      </p>
+                      <label className="sm-form-label">Field Operation Groups</label>
+                      {(() => {
+                        let groups: Array<{ title: string; items: string[] }> = [];
+                        try {
+                          if (formData.fieldOpsGroups) {
+                            groups = JSON.parse(formData.fieldOpsGroups);
+                          }
+                        } catch (e) {
+                          groups = [];
+                        }
+                        if (groups.length === 0) {
+                          groups = [{ title: "", items: [""] }];
+                        }
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                            {groups.map((group, groupIndex) => (
+                              <div
+                                key={groupIndex}
+                                style={{
+                                  border: "1px solid #e5e7eb",
+                                  borderRadius: "0.5rem",
+                                  padding: "1.5rem",
+                                  background: "#f9fafb",
+                                }}
+                              >
+                                <div style={{ marginBottom: "1rem", position: "relative" }}>
+                                  {groups.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = groups.filter((_, i) => i !== groupIndex);
+                                        setFormData({
+                                          ...formData,
+                                          fieldOpsGroups: updated.length > 0 ? JSON.stringify(updated) : "",
+                                        });
+                                      }}
+                                      style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        right: 0,
+                                        padding: "0.5rem",
+                                        border: "none",
+                                        background: "transparent",
+                                        color: "#dc2626",
+                                        cursor: "pointer",
+                                        borderRadius: "0.375rem",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        zIndex: 1,
+                                      }}
+                                      aria-label="Remove operation group"
+                                    >
+                                      <X size={18} />
+                                    </button>
+                                  )}
+                                  <label className="sm-form-label" style={{ marginBottom: "0.5rem", display: "block" }}>
+                                    Operation Head {groups.length > 1 && `#${groupIndex + 1}`}
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="sm-form-input"
+                                    value={group.title}
+                                    placeholder="e.g., Health, Safety and Environment"
+                                    onChange={(e) => {
+                                      const updated = [...groups];
+                                      updated[groupIndex] = { ...updated[groupIndex], title: e.target.value };
+                                      setFormData({
+                                        ...formData,
+                                        fieldOpsGroups: JSON.stringify(updated),
+                                      });
+                                    }}
+                                    style={{ width: "100%" }}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="sm-form-label" style={{ marginBottom: "0.5rem" }}>
+                                    Operation List (each point)
+                                  </label>
+                                  {(() => {
+                                    const items = group.items.length > 0 ? group.items : [""];
+                                    return (
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                                        {items.map((item, itemIndex) => {
+                                          const isActive =
+                                            activeInlineEditor?.field === `fieldOpsItems_${groupIndex}` &&
+                                            activeInlineEditor.index === itemIndex;
+                                          return (
+                                            <div
+                                              key={itemIndex}
+                                              style={{
+                                                display: "flex",
+                                                flexDirection: isActive ? "column" : "row",
+                                                alignItems: isActive ? "stretch" : "center",
+                                                gap: "0.5rem",
+                                              }}
+                                            >
+                                              <div
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "0.5rem",
+                                                }}
+                                              >
+                                                <span
+                                                  style={{
+                                                    width: "1.5rem",
+                                                    height: "1.5rem",
+                                                    borderRadius: "9999px",
+                                                    background: "#f3f4f6",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    fontSize: "0.75rem",
+                                                    color: "#4b5563",
+                                                  }}
+                                                >
+                                                  {itemIndex + 1}
+                                                </span>
+                                                {isActive ? (
+                                                  <textarea
+                                                    className="sm-form-textarea"
+                                                    style={{ width: "100%" }}
+                                                    value={item}
+                                                    autoFocus
+                                                    rows={4}
+                                                    placeholder="Enter an operation item"
+                                                    onChange={(e) => {
+                                                      const updated = [...groups];
+                                                      const updatedItems = [...items];
+                                                      updatedItems[itemIndex] = e.target.value;
+                                                      updated[groupIndex] = { ...updated[groupIndex], items: updatedItems };
+                                                      setFormData({
+                                                        ...formData,
+                                                        fieldOpsGroups: JSON.stringify(updated),
+                                                      });
+                                                    }}
+                                                    onBlur={() => setActiveInlineEditor(null)}
+                                                  />
+                                                ) : (
+                                                  <input
+                                                    type="text"
+                                                    className="sm-form-input"
+                                                    style={{ flex: 1 }}
+                                                    value={item}
+                                                    placeholder="Enter an operation item"
+                                                    onFocus={() =>
+                                                      setActiveInlineEditor({
+                                                        field: `fieldOpsItems_${groupIndex}`,
+                                                        index: itemIndex,
+                                                      })
+                                                    }
+                                                    onChange={(e) => {
+                                                      const updated = [...groups];
+                                                      const updatedItems = [...items];
+                                                      updatedItems[itemIndex] = e.target.value;
+                                                      updated[groupIndex] = { ...updated[groupIndex], items: updatedItems };
+                                                      setFormData({
+                                                        ...formData,
+                                                        fieldOpsGroups: JSON.stringify(updated),
+                                                      });
+                                                    }}
+                                                  />
+                                                )}
+                                                {!isActive && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                      const updated = [...groups];
+                                                      const updatedItems = items.filter((_, i) => i !== itemIndex);
+                                                      updated[groupIndex] = { ...updated[groupIndex], items: updatedItems.length > 0 ? updatedItems : [""] };
+                                                      setFormData({
+                                                        ...formData,
+                                                        fieldOpsGroups: JSON.stringify(updated),
+                                                      });
+                                                    }}
+                                                    style={{
+                                                      border: "none",
+                                                      background: "transparent",
+                                                      color: "#9ca3af",
+                                                      cursor: "pointer",
+                                                      padding: "0.25rem",
+                                                    }}
+                                                    aria-label="Remove operation item"
+                                                  >
+                                                    <X size={14} />
+                                                  </button>
+                                                )}
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const updated = [...groups];
+                                            const updatedItems = [...items, ""];
+                                            updated[groupIndex] = { ...updated[groupIndex], items: updatedItems };
+                                            setFormData({
+                                              ...formData,
+                                              fieldOpsGroups: JSON.stringify(updated),
+                                            });
+                                          }}
+                                          style={{
+                                            alignSelf: "flex-start",
+                                            marginTop: "0.25rem",
+                                            fontSize: "0.75rem",
+                                            padding: "0.25rem 0.5rem",
+                                            borderRadius: "9999px",
+                                            border: "1px dashed #d1d5db",
+                                            background: "#f9fafb",
+                                            color: "#374151",
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: "0.25rem",
+                                            cursor: "pointer",
+                                          }}
+                                        >
+                                          <span style={{ fontSize: "0.9rem" }}>+</span>
+                                          Add operation item
+                                        </button>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...groups, { title: "", items: [""] }];
+                                setFormData({
+                                  ...formData,
+                                  fieldOpsGroups: JSON.stringify(updated),
+                                });
+                              }}
+                              style={{
+                                alignSelf: "flex-start",
+                                padding: "0.625rem 1.25rem",
+                                fontSize: "0.875rem",
+                                borderRadius: "0.5rem",
+                                border: "1px solid #60a5fa",
+                                background: "white",
+                                color: "#60a5fa",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                                cursor: "pointer",
+                                fontWeight: 500,
+                                transition: "all 0.2s",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = "#eff6ff";
+                                e.currentTarget.style.borderColor = "#3b82f6";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = "white";
+                                e.currentTarget.style.borderColor = "#60a5fa";
+                              }}
+                            >
+                              <Plus size={16} />
+                              Add Operation Group
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </motion.div>
