@@ -24,7 +24,7 @@ export const iconMap: Record<string, string> = {
   "smartphone": "smartphone",
   "globe": "globe",
   "user-check": "user-check",
-  "building": "building",
+  "building": "package",
   "school": "book",
   "utensils": "coffee",
   "heart": "heart",

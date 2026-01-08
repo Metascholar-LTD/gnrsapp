@@ -97,6 +97,7 @@ import AdminScholarshipHub from "./pages/admin/AdminScholarshipHub";
 import AdminUniversities from "./pages/admin/AdminUniversities";
 import AdminTrialQuestionManage from "./pages/admin/components/AdminTrialQuestionManage";
 import AdminJobsHub from "./pages/admin/AdminJobsHub";
+import CompanyManager from "./pages/admin/components/CompanyManager";
 
 const queryClient = new QueryClient();
 
@@ -217,6 +218,7 @@ const App = () => (
             <Route path="jobs/nss" element={<AdminJobsHub />} />
             <Route path="jobs/graduate-recruitment" element={<AdminJobsHub />} />
             <Route path="jobs/yea" element={<AdminJobsHub />} />
+            <Route path="jobs/companies" element={<CompanyManager />} />
             <Route path="education" element={<AdminEducationHub />} />
             <Route path="education/trial-questions/:id/manage" element={<AdminTrialQuestionManage />} />
             <Route path="directories" element={<AdminDashboard />} />
