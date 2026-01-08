@@ -6,7 +6,7 @@ import {
   Save, Loader2,
   GraduationCap, MapPin, Clock, DollarSign, Building2,
   FileText, TrendingUp, Users, Award, Target, Calendar,
-  Briefcase, AlertCircle
+  Briefcase, AlertCircle, Upload
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,6 +81,7 @@ const GraduateRecruitmentManager = () => {
   const [programs, setPrograms] = useState<GraduateProgram[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
@@ -88,6 +89,7 @@ const GraduateRecruitmentManager = () => {
   const [programToDelete, setProgramToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [activeFormTab, setActiveFormTab] = useState("description");
   const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -363,6 +365,39 @@ const GraduateRecruitmentManager = () => {
     });
     setShowAddForm(true);
     setActiveFormTab("description");
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, or WebP)");
+      return;
+    }
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `graduate-programs/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('graduate-programs')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage
+        .from('graduate-programs')
+        .getPublicUrl(fileName);
+      setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast.error(`Failed to upload image: ${error.message}`);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const isolatedStyles = `
@@ -963,11 +998,48 @@ const GraduateRecruitmentManager = () => {
                       </div>
                       <div className="sm-form-group">
                         <label className="sm-form-label">Image URL</label>
-                        <input
-                          type="url"
-                          className="sm-form-input"
-                          value={formData.imageUrl}
-                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <input
+                            type="url"
+                            className="sm-form-input"
+                            style={{ flex: 1 }}
+                            value={formData.imageUrl}
+                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                            placeholder="https://... or upload image"
+                          />
+                          <input
+                            ref={imageInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file);
+                            }}
+                            style={{ display: 'none' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => imageInputRef.current?.click()}
+                            disabled={uploading}
+                            className="sm-icon-btn"
+                            style={{
+                              padding: '0.75rem',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '0.5rem',
+                              background: uploading ? '#f3f4f6' : '#ffffff',
+                              cursor: uploading ? 'not-allowed' : 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {uploading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
                           placeholder="https://..."
                         />
                       </div>

@@ -6,7 +6,7 @@ import {
   Save, Loader2,
   Shield, MapPin, Clock, Users, FileText,
   GraduationCap, Building2, Briefcase, Globe2,
-  TrendingUp, AlertCircle
+  TrendingUp, AlertCircle, Upload
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,6 +79,7 @@ const NationalServiceSupportManager = () => {
   const [programs, setPrograms] = useState<NSSProgram[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
@@ -387,6 +388,58 @@ const NationalServiceSupportManager = () => {
       case "Building2": return <Building2 className="w-8 h-8" />;
       case "Briefcase": return <Briefcase className="w-8 h-8" />;
       default: return <Shield className="w-8 h-8" />;
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, or WebP)");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `nss-programs/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('nss-programs')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('nss-programs')
+        .getPublicUrl(fileName);
+
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: publicUrl,
+      }));
+
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast.error(`Failed to upload image: ${error.message}`);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -710,18 +763,8 @@ const NationalServiceSupportManager = () => {
                       borderColor: "#e5e7eb"
                     }}
                   >
-                    {/* Top accent bar - Whitish grey */}
-                    <div className="h-1 w-full bg-slate-300" />
-
                     {/* Card Content - No Image Section */}
                     <div className="flex flex-col flex-1 p-4">
-                      {/* Icon Badge */}
-                      <div className="mb-2">
-                        <div className={`w-8 h-8 rounded-lg ${program.color} flex items-center justify-center shadow-sm inline-flex`}>
-                          {getIconComponent(program.icon)}
-                        </div>
-                      </div>
-
                       {/* Title */}
                       <h3 className="text-sm font-bold text-slate-900 mb-1.5 line-clamp-2 leading-tight group-hover:text-[#bd9f67] transition-colors">
                         {program.title}
@@ -920,30 +963,6 @@ const NationalServiceSupportManager = () => {
                           placeholder="e.g., 12 months"
                         />
                       </div>
-                      <div className="sm-form-group">
-                        <label className="sm-form-label">Icon</label>
-                        <select
-                          className="sm-form-select"
-                          value={formData.icon}
-                          onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                        >
-                          {iconOptions.map(icon => (
-                            <option key={icon.value} value={icon.value}>{icon.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="sm-form-group">
-                        <label className="sm-form-label">Color Theme</label>
-                        <select
-                          className="sm-form-select"
-                          value={formData.color}
-                          onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                        >
-                          {colorOptions.map(color => (
-                            <option key={color.value} value={color.value}>{color.label}</option>
-                          ))}
-                        </select>
-                      </div>
                       <div className="sm-form-group full-width">
                         <label className="sm-form-label">Locations (comma-separated)</label>
                         <input
@@ -956,13 +975,48 @@ const NationalServiceSupportManager = () => {
                       </div>
                       <div className="sm-form-group">
                         <label className="sm-form-label">Image URL</label>
-                        <input
-                          type="url"
-                          className="sm-form-input"
-                          value={formData.imageUrl}
-                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                          placeholder="https://..."
-                        />
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <input
+                            type="url"
+                            className="sm-form-input"
+                            style={{ flex: 1 }}
+                            value={formData.imageUrl}
+                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                            placeholder="https://... or upload image"
+                          />
+                          <input
+                            ref={imageInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file);
+                            }}
+                            style={{ display: 'none' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => imageInputRef.current?.click()}
+                            disabled={uploading}
+                            className="sm-icon-btn"
+                            style={{
+                              padding: '0.75rem',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '0.5rem',
+                              background: uploading ? '#f3f4f6' : '#ffffff',
+                              cursor: uploading ? 'not-allowed' : 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {uploading ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

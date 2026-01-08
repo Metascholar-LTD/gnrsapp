@@ -8,7 +8,7 @@ import {
   AlertCircle, Globe, Mail, Phone,
   Calendar, Users, Sparkles, FileText,
   TrendingUp, GraduationCap, Info, Clock,
-  DollarSign, MapPin, CheckCircle2, XCircle
+  DollarSign, MapPin, CheckCircle2, XCircle, Upload
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -127,6 +127,7 @@ interface Job {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [editing, setEditing] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [showAddForm, setShowAddForm] = useState(false);
@@ -134,6 +135,7 @@ interface Job {
     const [jobToDelete, setJobToDelete] = useState<string | null>(null);
     const [activeFormTab, setActiveFormTab] = useState<"description" | "impact" | "field-ops" | "skills" | "culture">("description");
     const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
+    const imageInputRef = useRef<HTMLInputElement>(null);
   
     const [formData, setFormData] = useState<JobFormData>({
       title: "",
@@ -502,6 +504,58 @@ interface Job {
       });
       setActiveFormTab("description");
       setShowAddForm(true);
+    };
+
+    const handleImageUpload = async (file: File) => {
+      if (!file) return;
+
+      // Validate file type
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please upload a valid image file (JPEG, PNG, or WebP)");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
+
+      setUploading(true);
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `job-listings/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        // Upload to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+          .from('job-listings')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('job-listings')
+          .getPublicUrl(fileName);
+
+        setFormData(prev => ({
+          ...prev,
+          imageUrl: publicUrl,
+        }));
+
+        toast.success("Image uploaded successfully");
+      } catch (error: any) {
+        console.error("Error uploading image:", error);
+        toast.error(`Failed to upload image: ${error.message}`);
+      } finally {
+        setUploading(false);
+      }
     };
   
     // Import the same isolated styles from VerifiedJobListingsManager
@@ -2815,13 +2869,48 @@ interface Job {
                           </div>
                           <div className="sm-form-group">
                             <label className="sm-form-label">Image URL</label>
-                            <input
-                              type="url"
-                              className="sm-form-input"
-                              value={formData.imageUrl}
-                              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                              placeholder="https://..."
-                            />
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <input
+                                type="url"
+                                className="sm-form-input"
+                                style={{ flex: 1 }}
+                                value={formData.imageUrl}
+                                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                                placeholder="https://... or upload image"
+                              />
+                              <input
+                                ref={imageInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleImageUpload(file);
+                                }}
+                                style={{ display: 'none' }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => imageInputRef.current?.click()}
+                                disabled={uploading}
+                                className="sm-icon-btn"
+                                style={{
+                                  padding: '0.75rem',
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '0.5rem',
+                                  background: uploading ? '#f3f4f6' : '#ffffff',
+                                  cursor: uploading ? 'not-allowed' : 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                {uploading ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Upload className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
                           </div>
                           <div className="sm-form-group full-width">
                             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>

@@ -5,7 +5,7 @@ import {
   CheckCircle2, XCircle, TrendingUp, ChevronLeft, ChevronRight,
   Grid3x3, List, Save, Loader2, Image as ImageIcon,
   Award, DollarSign, Calendar, MapPin, Globe, Mail, Phone, Building2,
-  AlertCircle, FileText, BookOpen, Users, Clock, Info, MessageSquare, GraduationCap
+  AlertCircle, FileText, BookOpen, Users, Clock, Info, MessageSquare, GraduationCap, Upload
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -94,7 +94,9 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     category: "",
@@ -369,6 +371,39 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
       faqs: scholarship.faqs ? JSON.stringify(scholarship.faqs) : "",
     });
     setShowAddForm(true);
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, or WebP)");
+      return;
+    }
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `scholarships/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('scholarships')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage
+        .from('scholarships')
+        .getPublicUrl(fileName);
+      setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast.error(`Failed to upload image: ${error.message}`);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -1907,13 +1942,48 @@ const ScholarshipsManager: React.FC<ScholarshipsManagerProps> = ({ sourceFilter 
 
                     <div className="sm-form-group">
                       <label className="sm-form-label">Image URL</label>
-                      <input
-                        type="url"
-                        className="sm-form-input"
-                        value={formData.imageUrl}
-                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                        placeholder="https://example.com/image.jpg"
-                      />
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <input
+                          type="url"
+                          className="sm-form-input"
+                          style={{ flex: 1 }}
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                          placeholder="https://... or upload image"
+                        />
+                        <input
+                          ref={imageInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file);
+                          }}
+                          style={{ display: 'none' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => imageInputRef.current?.click()}
+                          disabled={uploading}
+                          className="sm-icon-btn"
+                          style={{
+                            padding: '0.75rem',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '0.5rem',
+                            background: uploading ? '#f3f4f6' : '#ffffff',
+                            cursor: uploading ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {uploading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Field of Study - Multi-select for Field-Based scholarships */}

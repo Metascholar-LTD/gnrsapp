@@ -369,13 +369,6 @@ const NationalServiceSupport = () => {
                       borderColor: "#e5e7eb"
                     }}
                   >
-                    {/* Top accent bar */}
-                    <div className="h-1 w-full"
-                      style={{
-                        backgroundColor: accentColor
-                      }}
-                    />
-
                     {/* Image Section */}
                     <div className="relative h-32 overflow-hidden bg-slate-100">
                       <motion.img
@@ -386,13 +379,6 @@ const NationalServiceSupport = () => {
                         transition={{ duration: 0.3 }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                      
-                      {/* Icon Badge on Image */}
-                      <div className="absolute top-2 left-2">
-                        <div className={`w-8 h-8 rounded-lg ${program.color} flex items-center justify-center shadow-md backdrop-blur-sm border border-white/20`}>
-                          {program.icon}
-                        </div>
-                      </div>
                       
                       {/* Category badge on image */}
                       <div className="absolute top-2 right-2">
