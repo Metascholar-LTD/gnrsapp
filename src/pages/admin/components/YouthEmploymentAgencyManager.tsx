@@ -116,13 +116,6 @@ const YouthEmploymentAgencyManager = () => {
     applicationUrl: "",
   });
 
-  const iconOptions = [
-    { value: "🌳", label: "Afforestation" },
-    { value: "🧹", label: "Sanitation" },
-    { value: "🔧", label: "Trades" },
-    { value: "💻", label: "ICT" },
-  ];
-
   const colorOptions = [
     { value: "bg-emerald-50 border-emerald-200", label: "Emerald", textColor: "text-emerald-900" },
     { value: "bg-blue-50 border-blue-200", label: "Blue", textColor: "text-blue-900" },
@@ -885,18 +878,6 @@ const YouthEmploymentAgencyManager = () => {
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                           placeholder="e.g., Youth in Afforestation"
                         />
-                      </div>
-                      <div className="sm-form-group">
-                        <label className="sm-form-label">Icon</label>
-                        <select
-                          className="sm-form-select"
-                          value={formData.icon}
-                          onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                        >
-                          {iconOptions.map(icon => (
-                            <option key={icon.value} value={icon.value}>{icon.label}</option>
-                          ))}
-                        </select>
                       </div>
                       <div className="sm-form-group">
                         <label className="sm-form-label">Duration *</label>
