@@ -67,15 +67,7 @@ const JobDetails = () => {
 
   useEffect(() => {
     const loadJob = async () => {
-      // First check if job is in state (from navigation)
-      const stateJob = (state as { job?: Job })?.job;
-      if (stateJob) {
-        setJob(stateJob);
-        setLoading(false);
-        return;
-      }
-
-      // If not in state, fetch from Supabase by ID
+      // Always fetch from database by ID to get complete data
       if (id) {
         setLoading(true);
         try {
@@ -92,6 +84,7 @@ const JobDetails = () => {
           }
 
           if (data) {
+            console.log("🔍 USER VIEW - RAW DB DATA:", data);
             const transformed: Job = {
               id: data.id,
               title: data.title,
@@ -117,6 +110,10 @@ const JobDetails = () => {
               city: data.city || "",
               date: data.date ? new Date(data.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
             };
+            console.log("🔍 USER VIEW - TRANSFORMED:", transformed);
+            console.log("🔍 impactParagraphs:", transformed.impactParagraphs);
+            console.log("🔍 fieldOpsGroups:", transformed.fieldOpsGroups);
+            console.log("🔍 cultureParagraphs:", transformed.cultureParagraphs);
             setJob(transformed);
           }
         } catch (error) {
@@ -130,7 +127,7 @@ const JobDetails = () => {
     };
 
     loadJob();
-  }, [id, state]);
+  }, [id]);
 
   const goBack = () => navigate("/jobs/all");
 
@@ -255,82 +252,129 @@ const JobDetails = () => {
           </section>
         );
       case "impact":
+        console.log("🎯 Impact Tab - impactParagraphs:", impactParagraphs);
+        console.log("🎯 Impact Tab - impactHighlights:", impactHighlights);
         return (
           <section className="space-y-5">
-            <div className="space-y-4 text-slate-700 leading-relaxed">
-              {impactParagraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
-            <div className="rounded-2xl bg-sky-50 border border-sky-100 p-5">
-              <p className="text-sm font-semibold text-sky-900 uppercase tracking-wide mb-3">
-                As part of our team you will
-              </p>
-              {renderList(impactHighlights)}
-            </div>
+            {impactParagraphs.length > 0 ? (
+              <div className="space-y-4 text-slate-700 leading-relaxed">
+                {impactParagraphs.map((paragraph, index) => (
+                  <p key={`impact-para-${index}`}>{paragraph}</p>
+                ))}
+              </div>
+            ) : (
+              <p className="text-slate-500 italic">No impact information available yet.</p>
+            )}
+            {impactHighlights.length > 0 && (
+              <div className="rounded-2xl bg-sky-50 border border-sky-100 p-5">
+                <p className="text-sm font-semibold text-sky-900 uppercase tracking-wide mb-3">
+                  As part of our team you will
+                </p>
+                {renderList(impactHighlights)}
+              </div>
+            )}
           </section>
         );
       case "field-ops":
+        console.log("🏗️ Field Ops Tab - fieldOperationGroups:", fieldOperationGroups);
         return (
           <section className="space-y-5">
-            <p className="text-slate-600">
-              Day-to-day survey operations span safety leadership, data mastery and precise field execution.
-            </p>
+            {fieldOperationGroups.length > 0 ? (
+              <>
+                <p className="text-slate-600">
+                  Day-to-day operations span safety leadership, data mastery and precise execution.
+                </p>
                 <div className="space-y-4">
-                  {fieldOperationGroups.map((group) => (
-                    <div key={group.title} className="rounded-2xl bg-slate-50 border border-slate-100 p-5">
+                  {fieldOperationGroups.map((group, index) => (
+                    <div key={`field-ops-${index}`} className="rounded-2xl bg-slate-50 border border-slate-100 p-5">
                       <h3 className="text-base font-semibold text-slate-900 mb-2">{group.title}</h3>
                       {renderList(group.items)}
                     </div>
                   ))}
                 </div>
+              </>
+            ) : (
+              <p className="text-slate-500 italic">No field operations information available yet.</p>
+            )}
           </section>
         );
       case "skills":
+        console.log("📚 Skills Tab - skillsData:", skillsData);
+        console.log("📚 Skills Tab - behavioralAttributes:", behavioralAttributes);
+        console.log("📚 Skills Tab - skills:", job.skills);
+        
+        const hasSkillsData = skillsData.some(block => block.items && block.items.length > 0);
+        const hasBehavioralAttributes = behavioralAttributes && behavioralAttributes.length > 0;
+        const hasKeySkills = job.skills && job.skills.length > 0;
+        
         return (
           <section className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              {skillsData.map((block) => (
-                <div key={block.title} className="rounded-2xl bg-slate-50 border border-slate-100 p-5">
-                  <h3 className="text-base font-semibold text-slate-900 mb-2">{block.title}</h3>
-                  {renderList(block.items)}
-                </div>
-              ))}
-            </div>
-            <div className="rounded-2xl bg-sky-50 border border-sky-100 p-5">
-              <h3 className="text-base font-semibold text-sky-900 mb-2">Behavioural Attributes</h3>
-              {renderList(behavioralAttributes)}
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-900 mb-3">Key Skills In Demand</h3>
-              <div className="flex flex-wrap gap-2">
-                {job.skills.map((skill) => (
-                  <Badge
-                    key={skill}
-                    variant="outline"
-                    className="rounded-full border-slate-300 text-slate-700 px-3 py-1 text-sm"
-                  >
-                    {skill}
-                  </Badge>
+            {hasSkillsData && (
+              <div className="grid gap-4 md:grid-cols-2">
+                {skillsData.map((block, index) => (
+                  block.items && block.items.length > 0 && (
+                    <div key={`skill-block-${index}`} className="rounded-2xl bg-slate-50 border border-slate-100 p-5">
+                      <h3 className="text-base font-semibold text-slate-900 mb-2">{block.title}</h3>
+                      {renderList(block.items)}
+                    </div>
+                  )
                 ))}
               </div>
-            </div>
+            )}
+            {hasBehavioralAttributes && (
+              <div className="rounded-2xl bg-sky-50 border border-sky-100 p-5">
+                <h3 className="text-base font-semibold text-sky-900 mb-2">Behavioural Attributes</h3>
+                {renderList(behavioralAttributes)}
+              </div>
+            )}
+            {hasKeySkills && (
+              <div>
+                <h3 className="text-base font-semibold text-slate-900 mb-3">Key Skills In Demand</h3>
+                <div className="flex flex-wrap gap-2">
+                  {job.skills.map((skill, index) => (
+                    <Badge
+                      key={`skill-${index}`}
+                      variant="outline"
+                      className="rounded-full border-slate-300 text-slate-700 px-3 py-1 text-sm"
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {!hasSkillsData && !hasBehavioralAttributes && !hasKeySkills && (
+              <p className="text-slate-500 italic">No skills information available yet.</p>
+            )}
           </section>
         );
       case "culture":
       default:
+        console.log("🏢 Culture Tab - cultureParagraphs:", cultureParagraphs);
+        console.log("🏢 Culture Tab - opportunityParagraphs:", opportunityParagraphs);
+        
+        const hasCultureContent = cultureParagraphs && cultureParagraphs.length > 0;
+        const hasOpportunityContent = opportunityParagraphs && opportunityParagraphs.length > 0;
+        
         return (
           <section className="space-y-6">
-            <div className="space-y-4 text-slate-700 leading-relaxed">
-              {cultureParagraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
-            <div className="space-y-4 text-slate-700 leading-relaxed">
-              {opportunityParagraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+            {hasCultureContent && (
+              <div className="space-y-4 text-slate-700 leading-relaxed">
+                {cultureParagraphs.map((paragraph, index) => (
+                  <p key={`culture-para-${index}`}>{paragraph}</p>
+                ))}
+              </div>
+            )}
+            {hasOpportunityContent && (
+              <div className="space-y-4 text-slate-700 leading-relaxed">
+                {opportunityParagraphs.map((paragraph, index) => (
+                  <p key={`opportunity-para-${index}`}>{paragraph}</p>
+                ))}
+              </div>
+            )}
+            {!hasCultureContent && !hasOpportunityContent && (
+              <p className="text-slate-500 italic">No culture information available yet.</p>
+            )}
             <div className="rounded-2xl bg-sky-50 border border-sky-100 p-5 space-y-4">
               <div>
                 <h3 className="text-lg font-semibold text-slate-900">Get notified for similar jobs</h3>

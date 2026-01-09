@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -29,65 +29,7 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const yeaPrograms = [
-  {
-    id: "yea-1",
-    title: "Youth in Afforestation",
-    description: "Join the national afforestation program. Plant trees, protect the environment, and earn while contributing to Ghana's green agenda.",
-    duration: "12-24 months",
-    stipend: "GHS 1,200/month",
-    locations: ["All Regions", "Forest Reserves"],
-    requirements: ["Ages 18-35", "Basic education", "Physical fitness"],
-    benefits: ["Environmental impact", "Skill development", "Stable income", "Community service"],
-    icon: "🌳",
-    color: "bg-emerald-50 border-emerald-200",
-    textColor: "text-emerald-900",
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "yea-2",
-    title: "Youth in Sanitation",
-    description: "Work in waste management and sanitation. Keep communities clean while earning a sustainable income.",
-    duration: "12 months",
-    stipend: "GHS 1,000/month",
-    locations: ["Urban Areas", "Municipalities"],
-    requirements: ["Ages 18-35", "Willingness to work", "Team player"],
-    benefits: ["Community service", "Regular income", "Skill training", "Job security"],
-    icon: "🧹",
-    color: "bg-blue-50 border-blue-200",
-    textColor: "text-blue-900",
-    image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "yea-3",
-    title: "Youth in Trades & Vocation",
-    description: "Learn valuable trades and vocational skills. Get trained in carpentry, masonry, plumbing, and other skilled trades.",
-    duration: "6-12 months",
-    stipend: "GHS 800-1,500/month",
-    locations: ["Training Centers", "Workshops"],
-    requirements: ["Ages 18-35", "Interest in trades", "Commitment to learn"],
-    benefits: ["Trade certification", "Hands-on training", "Employment opportunities", "Entrepreneurship support"],
-    icon: "🔧",
-    color: "bg-amber-50 border-amber-200",
-    textColor: "text-amber-900",
-    image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "yea-4",
-    title: "Youth in ICT & Digital Skills",
-    description: "Develop digital skills and ICT competencies. Get trained in computer applications, digital marketing, and online entrepreneurship.",
-    duration: "6 months",
-    stipend: "GHS 1,000/month",
-    locations: ["ICT Centers", "Online"],
-    requirements: ["Ages 18-35", "Basic computer knowledge", "Internet access"],
-    benefits: ["Digital skills", "Certification", "Online opportunities", "Tech exposure"],
-    icon: "💻",
-    color: "bg-purple-50 border-purple-200",
-    textColor: "text-purple-900",
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const yeaBenefits = [
   {
@@ -167,6 +109,35 @@ const cardVariants = {
 const YouthEmploymentAgency = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPrograms();
+  }, []);
+
+  const loadPrograms = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from('yea_programs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error loading YEA programs:", error);
+        setPrograms([]);
+        return;
+      }
+
+      setPrograms(data || []);
+    } catch (error) {
+      console.error("Error:", error);
+      setPrograms([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -351,14 +322,23 @@ const YouthEmploymentAgency = () => {
             </p>
           </motion.div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-          >
-            {yeaPrograms.map((program, index) => (
+          {loading ? (
+            <div className="text-center py-12">
+              <Spinner />
+            </div>
+          ) : programs.length === 0 ? (
+            <div className="text-center py-12 text-slate-600">
+              No YEA programs available at the moment.
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              {programs.map((program, index) => (
               <motion.div
                 key={program.id}
                 variants={cardVariants}
@@ -377,7 +357,7 @@ const YouthEmploymentAgency = () => {
                   {/* Image Section */}
                   <div className="relative h-32 overflow-hidden bg-slate-100">
                     <motion.img
-                      src={program.image}
+                      src={program.image_url || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&auto=format&fit=crop'}
                       alt={program.title}
                       className="w-full h-full object-cover"
                       whileHover={{ scale: 1.05 }}
@@ -457,8 +437,9 @@ const YouthEmploymentAgency = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
       </section>
 

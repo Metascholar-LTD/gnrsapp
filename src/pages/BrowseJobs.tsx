@@ -112,10 +112,13 @@ interface Job {
 const BrowseJobs = () => {
   const navigate = useNavigate();
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
+  const [companies, setCompanies] = useState<Array<{ name: string; logoUrl: string; fallbackUrl: string; jobs: number; industry: string; featured?: boolean }>>([]);
   const [loading, setLoading] = useState(true);
+  const [companiesLoading, setCompaniesLoading] = useState(true);
 
   useEffect(() => {
     loadRecentJobs();
+    loadCompanies();
   }, []);
 
   const loadRecentJobs = async () => {
@@ -156,6 +159,53 @@ const BrowseJobs = () => {
       setRecentJobs([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCompanies = async () => {
+    setCompaniesLoading(true);
+    try {
+      // Load featured companies
+      const { data: companiesData, error: companiesError } = await (supabase as any)
+        .from('companies')
+        .select('id, name, logo_url, industry, featured')
+        .order('featured', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      if (companiesError) {
+        console.error("Error loading companies:", companiesError);
+        setCompanies([]);
+        return;
+      }
+
+      if (companiesData) {
+        // Get job counts for each company
+        const companiesWithJobs = await Promise.all(
+          companiesData.map(async (comp: any) => {
+            const { count } = await (supabase as any)
+              .from('jobs')
+              .select('*', { count: 'exact', head: true })
+              .eq('company', comp.name)
+              .eq('verified', true);
+
+            return {
+              name: comp.name,
+              logoUrl: comp.logo_url || `https://logo.clearbit.com/${comp.name.toLowerCase().replace(/\s+/g, '')}.com`,
+              fallbackUrl: `https://logo.clearbit.com/${comp.name.toLowerCase().replace(/\s+/g, '')}.com`,
+              jobs: count || 0,
+              industry: comp.industry || "",
+              featured: comp.featured || false,
+            };
+          })
+        );
+        setCompanies(companiesWithJobs);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setCompanies([]);
+    } finally {
+      setCompaniesLoading(false);
     }
   };
   
@@ -408,55 +458,70 @@ const BrowseJobs = () => {
           >
             <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch lg:items-start">
               {/* Static Featured Card - Takes up space on Left */}
-              <div className="flex-shrink-0 w-full lg:w-[calc(25%-0.75rem)]">
-                <div 
-                  className="group relative bg-white rounded-2xl p-4 sm:p-6 border-4 border-red-600 cursor-pointer transform transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl h-full"
-                  onClick={() => navigate('/jobs/all', { state: { company: 'WESTERN GOVERNORS UNIVERSITY' } })}
-                >
-                  {/* Featured Badge */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 transition-transform duration-500 ease-out group-hover:scale-110">
-                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold shadow-lg">
-                      <Sparkles className="w-3 h-3" />
-                      FEATURED
-                    </div>
-                  </div>
-                  
-                  {/* Hover Effect Overlay */}
-                  <div className="absolute inset-0 bg-red-600 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity duration-500 ease-out"></div>
-                  
-                  {/* Company Logo */}
-                  <div className="w-16 h-16 bg-white border-2 border-slate-200 rounded-xl flex items-center justify-center mb-4 transform transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 shadow-md group-hover:shadow-xl overflow-hidden p-2">
-                    <img 
-                      src="https://logo.clearbit.com/microsoft.com" 
-                      alt="Microsoft"
-                      className="w-full h-full object-contain transition-transform duration-500 ease-out"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "https://cdn.simpleicons.org/microsoft/0078D4";
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Company Name */}
-                  <h4 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-slate-700 transition-colors duration-500 ease-out">
-                    Microsoft
-                  </h4>
-                  
-                  {/* Industry */}
-                  <p className="text-xs text-slate-500 mb-3 transition-colors duration-500 ease-out group-hover:text-slate-600">Technology</p>
-                  
-                  {/* Job Count */}
-                  <div className="flex items-center gap-2 text-slate-600 transition-colors duration-500 ease-out group-hover:text-slate-700">
-                    <Briefcase className="w-4 h-4 transition-transform duration-500 ease-out group-hover:scale-110" />
-                    <span className="text-sm font-medium">247 Open Positions</span>
-                  </div>
-                  
-                  {/* Arrow Indicator */}
-                  <div className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:scale-110">
-                    <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white transform transition-all duration-500 ease-out group-hover:translate-x-1" />
+              {companiesLoading ? (
+                <div className="flex-shrink-0 w-full lg:w-[calc(25%-0.75rem)]">
+                  <div className="bg-white rounded-2xl p-4 sm:p-6 border-4 border-red-600 h-full animate-pulse">
+                    <div className="w-16 h-16 bg-slate-200 rounded-xl mb-4"></div>
+                    <div className="h-6 bg-slate-200 rounded mb-2"></div>
+                    <div className="h-4 bg-slate-200 rounded w-2/3"></div>
                   </div>
                 </div>
-              </div>
+              ) : companies.find(c => c.featured) ? (
+                (() => {
+                  const featuredCompany = companies.find(c => c.featured) || companies[0];
+                  return (
+                    <div className="flex-shrink-0 w-full lg:w-[calc(25%-0.75rem)]">
+                      <div 
+                        className="group relative bg-white rounded-2xl p-4 sm:p-6 border-4 border-red-600 cursor-pointer transform transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl h-full"
+                        onClick={() => navigate('/jobs/all', { state: { company: featuredCompany.name } })}
+                      >
+                        {/* Featured Badge */}
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 transition-transform duration-500 ease-out group-hover:scale-110">
+                          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold shadow-lg">
+                            <Sparkles className="w-3 h-3" />
+                            FEATURED
+                          </div>
+                        </div>
+                        
+                        {/* Hover Effect Overlay */}
+                        <div className="absolute inset-0 bg-red-600 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity duration-500 ease-out"></div>
+                        
+                        {/* Company Logo */}
+                        <div className="w-16 h-16 bg-white border-2 border-slate-200 rounded-xl flex items-center justify-center mb-4 transform transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 shadow-md group-hover:shadow-xl overflow-hidden p-2">
+                          <img 
+                            src={featuredCompany.logoUrl} 
+                            alt={featuredCompany.name}
+                            className="w-full h-full object-contain transition-transform duration-500 ease-out"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = featuredCompany.fallbackUrl;
+                            }}
+                          />
+                        </div>
+                        
+                        {/* Company Name */}
+                        <h4 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-slate-700 transition-colors duration-500 ease-out">
+                          {featuredCompany.name}
+                        </h4>
+                        
+                        {/* Industry */}
+                        <p className="text-xs text-slate-500 mb-3 transition-colors duration-500 ease-out group-hover:text-slate-600">{featuredCompany.industry}</p>
+                        
+                        {/* Job Count */}
+                        <div className="flex items-center gap-2 text-slate-600 transition-colors duration-500 ease-out group-hover:text-slate-700">
+                          <Briefcase className="w-4 h-4 transition-transform duration-500 ease-out group-hover:scale-110" />
+                          <span className="text-sm font-medium">{featuredCompany.jobs} Open Positions</span>
+                        </div>
+                        
+                        {/* Arrow Indicator */}
+                        <div className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:scale-110">
+                          <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white transform transition-all duration-500 ease-out group-hover:translate-x-1" />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : null}
 
               {/* Carousel Container - Scrolls next to featured card */}
               <div className="flex-1 min-w-0 w-full lg:w-auto">
@@ -468,104 +533,17 @@ const BrowseJobs = () => {
                   className="w-full"
                 >
                   <CarouselContent className="-ml-2 md:-ml-4">
-                {[
-                  { 
-                    name: "Adidas", 
-                    logoUrl: "https://logo.clearbit.com/adidas.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/adidas/000000",
-                    domain: "adidas.com",
-                    jobs: 89,
-                    industry: "Retail & Fashion"
-                  },
-                  { 
-                    name: "Nike", 
-                    logoUrl: "https://logo.clearbit.com/nike.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/nike/111111",
-                    domain: "nike.com",
-                    jobs: 156,
-                    industry: "Retail & Fashion"
-                  },
-                  { 
-                    name: "Apple", 
-                    logoUrl: "https://logo.clearbit.com/apple.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/apple/000000",
-                    domain: "apple.com",
-                    jobs: 342,
-                    industry: "Technology"
-                  },
-                  { 
-                    name: "Google", 
-                    logoUrl: "https://logo.clearbit.com/google.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/google/4285F4",
-                    domain: "google.com",
-                    jobs: 512,
-                    industry: "Technology"
-                  },
-                  { 
-                    name: "Amazon", 
-                    logoUrl: "https://logo.clearbit.com/amazon.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/amazon/FF9900",
-                    domain: "amazon.com",
-                    jobs: 678,
-                    industry: "E-commerce & Cloud"
-                  },
-                  { 
-                    name: "Meta", 
-                    logoUrl: "https://logo.clearbit.com/meta.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/meta/0081FB",
-                    domain: "meta.com",
-                    jobs: 234,
-                    industry: "Technology"
-                  },
-                  { 
-                    name: "Tesla", 
-                    logoUrl: "https://logo.clearbit.com/tesla.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/tesla/CC0000",
-                    domain: "tesla.com",
-                    jobs: 189,
-                    industry: "Automotive & Energy"
-                  },
-                  { 
-                    name: "Netflix", 
-                    logoUrl: "https://logo.clearbit.com/netflix.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/netflix/E50914",
-                    domain: "netflix.com",
-                    jobs: 145,
-                    industry: "Entertainment"
-                  },
-                  { 
-                    name: "LinkedIn", 
-                    logoUrl: "https://logo.clearbit.com/linkedin.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/linkedin/0A66C2",
-                    domain: "linkedin.com",
-                    jobs: 267,
-                    industry: "Technology"
-                  },
-                  { 
-                    name: "Oracle", 
-                    logoUrl: "https://logo.clearbit.com/oracle.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/oracle/F80000",
-                    domain: "oracle.com",
-                    jobs: 198,
-                    industry: "Technology"
-                  },
-                  { 
-                    name: "Samsung", 
-                    logoUrl: "https://logo.clearbit.com/samsung.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/samsung/1428A0",
-                    domain: "samsung.com",
-                    jobs: 423,
-                    industry: "Electronics"
-                  },
-                  { 
-                    name: "Intel", 
-                    logoUrl: "https://logo.clearbit.com/intel.com",
-                    fallbackUrl: "https://cdn.simpleicons.org/intel/0071C5",
-                    domain: "intel.com",
-                    jobs: 312,
-                    industry: "Semiconductors"
-                  },
-                ].map((company, index) => (
+                {companiesLoading ? (
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <CarouselItem key={index} className="pl-2 md:pl-4 basis-[85%] sm:basis-1/2 lg:basis-1/4">
+                      <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 h-full animate-pulse">
+                        <div className="w-16 h-16 bg-slate-200 rounded-xl mb-4"></div>
+                        <div className="h-6 bg-slate-200 rounded mb-2"></div>
+                        <div className="h-4 bg-slate-200 rounded w-2/3"></div>
+                      </div>
+                    </CarouselItem>
+                  ))
+                ) : companies.filter(c => !c.featured).slice(0, 12).map((company, index) => (
                   <CarouselItem key={index} className="pl-2 md:pl-4 basis-[85%] sm:basis-1/2 lg:basis-1/4 relative z-10">
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -728,153 +706,93 @@ const BrowseJobs = () => {
             </motion.div>
 
             {/* Job Cards Grid */}
-            <div className="grid gap-6 md:grid-cols-3 mb-8">
-              {/* Job Card 1 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
-                onClick={() => navigate(`/jobs/${recentJobs[0].id}`, { state: { job: recentJobs[0] } })}
-              >
-                {/* Company Logo */}
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full border-4 border-blue-900 bg-yellow-400 flex items-center justify-center flex-shrink-0">
-                    <div className="text-center">
-                      <div className="text-blue-900 font-bold text-xs leading-tight">WGU</div>
-                      <div className="text-blue-900 text-[8px] leading-tight">wgu.edu</div>
+            {loading ? (
+              <div className="grid gap-6 md:grid-cols-3 mb-8">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 animate-pulse">
+                    <div className="w-16 h-16 bg-slate-200 rounded-full mb-4"></div>
+                    <div className="h-6 bg-slate-200 rounded mb-2"></div>
+                    <div className="h-4 bg-slate-200 rounded w-2/3 mb-3"></div>
+                    <div className="h-20 bg-slate-200 rounded mb-4"></div>
+                    <div className="h-4 bg-slate-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : recentJobs.length === 0 ? (
+              <div className="text-center py-12">
+                <Briefcase className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <p className="text-slate-600">No recent jobs available.</p>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-3 mb-8">
+                {recentJobs.map((job, index) => (
+                  <motion.div
+                    key={job.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
+                    onClick={() => navigate(`/jobs/${job.id}`, { state: { job } })}
+                  >
+                    {/* Company Logo */}
+                    <div className="flex items-center gap-4 mb-4">
+                      {job.companyLogo ? (
+                        <div className="w-16 h-16 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center flex-shrink-0 overflow-hidden p-2">
+                          <img 
+                            src={job.companyLogo} 
+                            alt={job.company}
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = `https://logo.clearbit.com/${job.company.toLowerCase().replace(/\s+/g, '')}.com`;
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-xl bg-slate-100 border-2 border-slate-300 flex items-center justify-center flex-shrink-0">
+                          <Building2 className="w-8 h-8 text-slate-400" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-blue-900 font-semibold leading-tight truncate">{job.company}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[8px] text-blue-900 font-semibold leading-tight">WESTERN GOVERNORS UNIVERSITY</div>
-                  </div>
-                </div>
 
-                {/* Job Title */}
-                <h3 className="text-lg font-bold text-blue-900 mb-2">
-                  Marketing Manager- Accra
-                </h3>
+                    {/* Job Title */}
+                    <h3 className="text-lg font-bold text-blue-900 mb-2 line-clamp-2">
+                      {job.title}
+                    </h3>
 
-                {/* Date & Company */}
-                <div className="text-sm text-slate-600 mb-3">
-                  <span>19.11.2025 | </span>
-                  <span className="underline">WESTERN GOVERNORS UNIVERSITY</span>
-                </div>
-
-                {/* Description */}
-                <p className="text-sm text-slate-700 mb-4 line-clamp-3 leading-relaxed">
-                  Western Governors University (WGU) is seeking an experienced and innovative Marketing Manager to lead the development and execution of marketing strategies that promote the university's mission and offerings. This remote position plays a pivotal role in enhancing WGU's brand presence, driving...
-                </p>
-
-                {/* Region & City */}
-                <div className="space-y-2 pt-2 border-t border-slate-200">
-                  <div className="text-sm font-semibold text-blue-900">
-                    Region: <span className="font-normal text-slate-700">Greater Accra</span>
-                  </div>
-                  <div className="h-px w-16 bg-slate-300"></div>
-                  <div className="text-sm font-semibold text-blue-900">
-                    Town/City: <span className="font-normal text-slate-700">East Legon</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Job Card 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
-                onClick={() => navigate(`/jobs/${recentJobs[1].id}`, { state: { job: recentJobs[1] } })}
-              >
-                {/* Company Logo */}
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center flex-shrink-0">
-                    <div className="flex items-center gap-1">
-                      <span className="text-2xl font-bold" style={{ color: '#3B82F6' }}>C</span>
-                      <span className="text-2xl font-bold" style={{ color: '#10B981' }}>o</span>
-                      <span className="text-2xl font-bold" style={{ color: '#FBBF24' }}>L</span>
-                      <span className="text-2xl font-bold" style={{ color: '#EF4444' }}>i</span>
+                    {/* Date & Company */}
+                    <div className="text-sm text-slate-600 mb-3">
+                      <span>{job.date} | </span>
+                      <span className="underline">{job.company}</span>
                     </div>
-                  </div>
-                </div>
 
-                {/* Job Title */}
-                <h3 className="text-lg font-bold text-blue-900 mb-2">
-                  Field Network Technician- Da...
-                </h3>
+                    {/* Description */}
+                    <p className="text-sm text-slate-700 mb-4 line-clamp-3 leading-relaxed">
+                      {job.description}
+                    </p>
 
-                {/* Date & Company */}
-                <div className="text-sm text-slate-600 mb-3">
-                  <span>19.11.2025 | </span>
-                  <span className="underline">COLI LINK GHANA LIMITED</span>
-                </div>
-
-                {/* Description */}
-                <p className="text-sm text-slate-700 mb-4 line-clamp-4 leading-relaxed">
-                  We are looking for a Field Network Technician. Responsibilities: Survey, Install and Setup Wi-Fi connection for customers of the company. Troubleshoot connectivity and hardware issues of customers of the company. Submit Field Technical Report on jobs daily. Respond promptly to reports forwarded
-                </p>
-
-                {/* Region & City */}
-                <div className="space-y-2 pt-2 border-t border-slate-200">
-                  <div className="text-sm font-semibold text-blue-900">
-                    Region: <span className="font-normal text-slate-700">Greater Accra</span>
-                  </div>
-                  <div className="h-px w-16 bg-slate-300"></div>
-                  <div className="text-sm font-semibold text-blue-900">
-                    Town/City: <span className="font-normal text-slate-700">East Legon</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Job Card 3 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer"
-                onClick={() => navigate(`/jobs/${recentJobs[2].id}`, { state: { job: recentJobs[2] } })}
-              >
-                {/* Company Logo */}
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-xl bg-slate-100 border-2 border-slate-300 flex items-center justify-center flex-shrink-0 relative">
-                    <div className="text-slate-500 text-2xl">✉</div>
-                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded rotate-12 border border-red-600">
-                      CONFIDENTIAL
+                    {/* Region & City */}
+                    <div className="space-y-2 pt-2 border-t border-slate-200">
+                      <div className="text-sm font-semibold text-blue-900">
+                        Region: <span className="font-normal text-slate-700">{job.region}</span>
+                      </div>
+                      {job.city && (
+                        <>
+                          <div className="h-px w-16 bg-slate-300"></div>
+                          <div className="text-sm font-semibold text-blue-900">
+                            Town/City: <span className="font-normal text-slate-700">{job.city}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
-                  </div>
-                </div>
-
-                {/* Job Title */}
-                <h3 className="text-lg font-bold text-blue-900 mb-2">
-                  Operations and Project Assist...
-                </h3>
-
-                {/* Date & Company */}
-                <div className="text-sm text-slate-600 mb-3">
-                  <span>21.10.2025 | </span>
-                  <span className="underline">N.C.</span>
-                </div>
-
-                {/* Description */}
-                <p className="text-sm text-slate-700 mb-4 line-clamp-3 leading-relaxed">
-                  Operations & Project Assistant (Ghana) Help us bring calm and clarity to the world - starting in Ghana. We're building something that matters: a global method to help people reduce stress, prevent burnout, and take back control of their mental well-being. Our first pilot starts in Ghana - and...
-                </p>
-
-                {/* Region & City */}
-                <div className="space-y-2 pt-2 border-t border-slate-200">
-                  <div className="text-sm font-semibold text-blue-900">
-                    Region: <span className="font-normal text-slate-700">Greater Accra</span>
-                  </div>
-                  <div className="h-px w-16 bg-slate-300"></div>
-                  <div className="text-sm font-semibold text-blue-900">
-                    Town/City: <span className="font-normal text-slate-700">East Legon</span>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
 
             {/* Separator Line */}
             <motion.div

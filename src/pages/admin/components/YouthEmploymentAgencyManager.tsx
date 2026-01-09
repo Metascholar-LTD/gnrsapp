@@ -139,8 +139,8 @@ const YouthEmploymentAgencyManager = () => {
 
       if (error) {
         console.error("Error loading YEA programs:", error);
-        toast.error("Failed to load YEA programs");
-        setPrograms(getMockPrograms());
+        toast.error(`Failed to load YEA programs: ${error.message || 'Unknown error'}`);
+        setPrograms([]);
         return;
       }
 
@@ -158,14 +158,14 @@ const YouthEmploymentAgencyManager = () => {
           skillsExperience: item.skills_experience || [],
           skillsTechnical: item.skills_technical || [],
           behavioralAttributes: item.behavioral_attributes || [],
-          skills: item.skills || [],
+          skills: Array.isArray(item.skills) ? item.skills : [],
           cultureParagraphs: item.culture_paragraphs || [],
           opportunityParagraphs: item.opportunity_paragraphs || [],
           duration: item.duration,
           stipend: item.stipend,
-          locations: item.locations || [],
-          requirements: item.requirements || [],
-          benefits: item.benefits || [],
+          locations: Array.isArray(item.locations) ? item.locations : [],
+          requirements: Array.isArray(item.requirements) ? item.requirements : [],
+          benefits: Array.isArray(item.benefits) ? item.benefits : [],
           icon: item.icon,
           color: item.color,
           textColor: item.text_color,
@@ -176,47 +176,16 @@ const YouthEmploymentAgencyManager = () => {
         }));
         setPrograms(transformed);
       } else {
-        setPrograms(getMockPrograms());
+        setPrograms([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast.error("Failed to load YEA programs");
-      setPrograms(getMockPrograms());
+      toast.error(`Failed to load YEA programs: ${error.message || 'Unknown error'}`);
+      setPrograms([]);
     } finally {
       setLoading(false);
     }
   };
-
-  const getMockPrograms = (): YEAProgram[] => [
-    {
-      id: "1",
-      title: "Youth in Afforestation",
-      description: "Join the national afforestation program...",
-      duration: "12-24 months",
-      stipend: "GHS 1,200/month",
-      locations: ["All Regions", "Forest Reserves"],
-      requirements: ["Ages 18-35", "Basic education", "Physical fitness"],
-      benefits: ["Environmental impact", "Skill development", "Stable income"],
-      icon: "🌳",
-      color: "bg-emerald-50 border-emerald-200",
-      textColor: "text-emerald-900",
-      imageUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&auto=format&fit=crop",
-    },
-    {
-      id: "2",
-      title: "Youth in Sanitation",
-      description: "Work in waste management and sanitation...",
-      duration: "12 months",
-      stipend: "GHS 1,000/month",
-      locations: ["Urban Areas", "Municipalities"],
-      requirements: ["Ages 18-35", "Willingness to work"],
-      benefits: ["Community service", "Regular income", "Skill training"],
-      icon: "🧹",
-      color: "bg-blue-50 border-blue-200",
-      textColor: "text-blue-900",
-      imageUrl: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&auto=format&fit=crop",
-    },
-  ];
 
   const filteredPrograms = useMemo(() => {
     let filtered = programs;
@@ -312,18 +281,21 @@ const YouthEmploymentAgencyManager = () => {
 
   const handleDelete = async (programId: string) => {
     try {
-      const { error } = await supabase
-        .from('yea_programs' as any)
+      const { error } = await (supabase as any)
+        .from('yea_programs')
         .delete()
         .eq('id', programId);
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
       toast.success("YEA program deleted successfully");
-      await loadPrograms();
       setDeleteModalOpen(false);
       setProgramToDelete(null);
+      await loadPrograms();
     } catch (error: any) {
       console.error("Error deleting YEA program:", error);
-      toast.error(error.message || "Failed to delete YEA program");
+      toast.error(error.message || "Failed to delete YEA program. Please check console for details.");
     }
   };
 

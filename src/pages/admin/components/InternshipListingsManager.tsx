@@ -135,8 +135,8 @@ const InternshipListingsManager = () => {
 
       if (error) {
         console.error("Error loading internships:", error);
-        toast.error("Failed to load internships");
-        setInternships(getMockInternships());
+        toast.error(`Failed to load internships: ${error.message || 'Unknown error'}`);
+        setInternships([]);
         return;
       }
 
@@ -156,14 +156,14 @@ const InternshipListingsManager = () => {
           skillsExperience: item.skills_experience || [],
           skillsTechnical: item.skills_technical || [],
           behavioralAttributes: item.behavioral_attributes || [],
-          skills: item.skills || [],
+          skills: Array.isArray(item.skills) ? item.skills : [],
           cultureParagraphs: item.culture_paragraphs || [],
           opportunityParagraphs: item.opportunity_paragraphs || [],
           location: item.location,
           duration: item.duration,
           type: item.type,
           stipend: item.stipend,
-          requirements: item.requirements || [],
+          requirements: Array.isArray(item.requirements) ? item.requirements : [],
           posted: item.posted || new Date().toISOString().split('T')[0],
           imageUrl: item.image_url,
           applicationUrl: item.application_url,
@@ -172,45 +172,16 @@ const InternshipListingsManager = () => {
         }));
         setInternships(transformed);
       } else {
-        setInternships(getMockInternships());
+        setInternships([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast.error("Failed to load internships");
-      setInternships(getMockInternships());
+      toast.error(`Failed to load internships: ${error.message || 'Unknown error'}`);
+      setInternships([]);
     } finally {
       setLoading(false);
     }
   };
-
-  const getMockInternships = (): Internship[] => [
-    {
-      id: "1",
-      title: "Software Development Intern",
-      company: "Tech Solutions Ghana",
-      location: "Accra, Greater Accra",
-      duration: "3-6 months",
-      type: "Full-time",
-      stipend: "GHS 1,200/month",
-      description: "Join our dynamic team to develop innovative software solutions...",
-      skills: ["JavaScript", "React", "Node.js", "Git"],
-      requirements: ["Computer Science student", "Basic programming knowledge"],
-      posted: "2 days ago",
-    },
-    {
-      id: "2",
-      title: "Marketing Communications Intern",
-      company: "Digital Marketing Agency",
-      location: "Kumasi, Ashanti",
-      duration: "4 months",
-      type: "Part-time",
-      stipend: "GHS 800/month",
-      description: "Gain hands-on experience in digital marketing...",
-      skills: ["Social Media", "Content Writing", "Analytics"],
-      requirements: ["Marketing/Communications student", "Creative mindset"],
-      posted: "5 days ago",
-    },
-  ];
 
   const filteredInternships = useMemo(() => {
     let filtered = internships;
@@ -307,18 +278,21 @@ const InternshipListingsManager = () => {
 
   const handleDelete = async (internshipId: string) => {
     try {
-      const { error } = await supabase
-        .from('internships' as any)
+      const { error } = await (supabase as any)
+        .from('internships')
         .delete()
         .eq('id', internshipId);
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
       toast.success("Internship deleted successfully");
-      await loadInternships();
       setDeleteModalOpen(false);
       setInternshipToDelete(null);
+      await loadInternships();
     } catch (error: any) {
       console.error("Error deleting internship:", error);
-      toast.error(error.message || "Failed to delete internship");
+      toast.error(error.message || "Failed to delete internship. Please check console for details.");
     }
   };
 

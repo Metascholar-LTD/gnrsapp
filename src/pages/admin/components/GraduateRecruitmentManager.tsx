@@ -135,8 +135,8 @@ const GraduateRecruitmentManager = () => {
 
       if (error) {
         console.error("Error loading graduate programs:", error);
-        toast.error("Failed to load graduate programs");
-        setPrograms(getMockPrograms());
+        toast.error(`Failed to load graduate programs: ${error.message || 'Unknown error'}`);
+        setPrograms([]);
         return;
       }
 
@@ -160,11 +160,11 @@ const GraduateRecruitmentManager = () => {
           skillsExperience: item.skills_experience || [],
           skillsTechnical: item.skills_technical || [],
           behavioralAttributes: item.behavioral_attributes || [],
-          skills: item.skills || [],
+          skills: Array.isArray(item.skills) ? item.skills : [],
           cultureParagraphs: item.culture_paragraphs || [],
           opportunityParagraphs: item.opportunity_paragraphs || [],
-          requirements: item.requirements || [],
-          benefits: item.benefits || [],
+          requirements: Array.isArray(item.requirements) ? item.requirements : [],
+          benefits: Array.isArray(item.benefits) ? item.benefits : [],
           imageUrl: item.image_url,
           applicationUrl: item.application_url,
           created_at: item.created_at,
@@ -172,34 +172,16 @@ const GraduateRecruitmentManager = () => {
         }));
         setPrograms(transformed);
       } else {
-        setPrograms(getMockPrograms());
+        setPrograms([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast.error("Failed to load graduate programs");
-      setPrograms(getMockPrograms());
+      toast.error(`Failed to load graduate programs: ${error.message || 'Unknown error'}`);
+      setPrograms([]);
     } finally {
       setLoading(false);
     }
   };
-
-  const getMockPrograms = (): GraduateProgram[] => [
-    {
-      id: "1",
-      title: "Management Trainee Program",
-      company: "First National Bank",
-      location: "Accra, Greater Accra",
-      type: "Full-time",
-      duration: "18 months",
-      salary: "Competitive",
-      posted: "3 days ago",
-      description: "Join our prestigious management trainee program...",
-      requirements: ["First Class or Second Class Upper degree", "Strong leadership potential"],
-      benefits: ["Comprehensive training program", "Mentorship from senior executives"],
-      skills: ["Leadership", "Analytical Thinking", "Communication"],
-      imageUrl: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&auto=format&fit=crop",
-    },
-  ];
 
   const filteredPrograms = useMemo(() => {
     let filtered = programs;
@@ -294,18 +276,21 @@ const GraduateRecruitmentManager = () => {
 
   const handleDelete = async (programId: string) => {
     try {
-      const { error } = await supabase
-        .from('graduate_programs' as any)
+      const { error } = await (supabase as any)
+        .from('graduate_programs')
         .delete()
         .eq('id', programId);
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
       toast.success("Graduate program deleted successfully");
-      await loadPrograms();
       setDeleteModalOpen(false);
       setProgramToDelete(null);
+      await loadPrograms();
     } catch (error: any) {
       console.error("Error deleting graduate program:", error);
-      toast.error(error.message || "Failed to delete graduate program");
+      toast.error(error.message || "Failed to delete graduate program. Please check console for details.");
     }
   };
 

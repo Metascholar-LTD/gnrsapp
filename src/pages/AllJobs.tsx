@@ -44,6 +44,8 @@ interface Job {
   city: string;
   skills: string[];
   date: string;
+  job_category?: string;
+  industry?: string;
 }
 
 const AllJobs = () => {
@@ -56,21 +58,104 @@ const AllJobs = () => {
   );
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [checkedCategories, setCheckedCategories] = useState<Record<number, boolean>>({
-    6: true, // Marketing, communication
-    11: true, // Sales
-    13: true, // Services
-    15: true, // Tourism, hotel business and catering
-  });
+  const [checkedCategories, setCheckedCategories] = useState<Record<number, boolean>>({});
   const [checkedEducationLevels, setCheckedEducationLevels] = useState<Record<number, boolean>>({});
   const [checkedIndustries, setCheckedIndustries] = useState<Record<number, boolean>>({});
   const [checkedJobTypes, setCheckedJobTypes] = useState<Record<number, boolean>>({});
   const [checkedRegions, setCheckedRegions] = useState<Record<number, boolean>>({});
   const [checkedExperienceLevels, setCheckedExperienceLevels] = useState<Record<number, boolean>>({});
 
+  // Dynamic filter options - will be calculated from jobs data
+  const [jobCategories, setJobCategories] = useState<Array<{ name: string; count: number; checked: boolean }>>([]);
+  const [educationLevels, setEducationLevels] = useState<Array<{ name: string; count: number }>>([]);
+  const [industries, setIndustries] = useState<Array<{ name: string; count: number }>>([]);
+  const [jobTypes, setJobTypes] = useState<Array<{ name: string; count: number }>>([]);
+  const [regions, setRegions] = useState<Array<{ name: string; count: number }>>([]);
+  const [experienceLevels, setExperienceLevels] = useState<Array<{ name: string; count: number }>>([]);
+
   useEffect(() => {
     loadJobs();
   }, []);
+
+  // Calculate filter counts from jobs data
+  useEffect(() => {
+    if (jobs.length === 0) {
+      setJobCategories([]);
+      setEducationLevels([]);
+      setIndustries([]);
+      setJobTypes([]);
+      setRegions([]);
+      setExperienceLevels([]);
+      return;
+    }
+
+    // Get unique categories from Supabase - fetch distinct job_category values
+    const uniqueCategories = Array.from(new Set(jobs.map(j => j.job_category).filter(Boolean)));
+    const categoryList = uniqueCategories.map(cat => ({
+      name: cat as string,
+      count: jobs.filter(j => j.job_category === cat).length,
+      checked: false
+    }));
+
+    // Calculate education level counts
+    const educationCounts: Record<string, number> = {};
+    jobs.forEach(job => {
+      educationCounts[job.educationLevel] = (educationCounts[job.educationLevel] || 0) + 1;
+    });
+    const educationList = Object.keys(educationCounts).map(level => ({
+      name: level,
+      count: educationCounts[level]
+    }));
+
+    // Calculate industry counts
+    const industryCounts: Record<string, number> = {};
+    jobs.forEach(job => {
+      if (job.industry) {
+        industryCounts[job.industry] = (industryCounts[job.industry] || 0) + 1;
+      }
+    });
+    const industryList = Object.keys(industryCounts).map(industry => ({
+      name: industry,
+      count: industryCounts[industry]
+    }));
+
+    // Calculate job type counts
+    const jobTypeCounts: Record<string, number> = {};
+    jobs.forEach(job => {
+      jobTypeCounts[job.contractType] = (jobTypeCounts[job.contractType] || 0) + 1;
+    });
+    const jobTypeList = Object.keys(jobTypeCounts).map(type => ({
+      name: type,
+      count: jobTypeCounts[type]
+    }));
+
+    // Calculate region counts
+    const regionCounts: Record<string, number> = {};
+    jobs.forEach(job => {
+      regionCounts[job.region] = (regionCounts[job.region] || 0) + 1;
+    });
+    const regionList = Object.keys(regionCounts).map(region => ({
+      name: region,
+      count: regionCounts[region]
+    }));
+
+    // Calculate experience level counts
+    const experienceCounts: Record<string, number> = {};
+    jobs.forEach(job => {
+      experienceCounts[job.experienceLevel] = (experienceCounts[job.experienceLevel] || 0) + 1;
+    });
+    const experienceList = Object.keys(experienceCounts).map(level => ({
+      name: level,
+      count: experienceCounts[level]
+    }));
+
+    setJobCategories(categoryList);
+    setEducationLevels(educationList);
+    setIndustries(industryList);
+    setJobTypes(jobTypeList);
+    setRegions(regionList);
+    setExperienceLevels(experienceList);
+  }, [jobs]);
 
   const loadJobs = async () => {
     setLoading(true);
@@ -101,6 +186,8 @@ const AllJobs = () => {
           city: item.city || "",
           skills: Array.isArray(item.skills) ? item.skills : [],
           date: item.date ? new Date(item.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+          job_category: item.job_category,
+          industry: item.industry,
         }));
         setJobs(transformed);
       }
@@ -111,126 +198,6 @@ const AllJobs = () => {
       setLoading(false);
     }
   };
-
-  const jobCategories = [
-    { name: "Accounting, controlling, finance", count: 2, checked: false },
-    { name: "Health and social professions", count: 0, checked: false },
-    { name: "HR, training", count: 0, checked: false },
-    { name: "IT, new technologies", count: 0, checked: false },
-    { name: "Legal", count: 0, checked: false },
-    { name: "Management", count: 0, checked: false },
-    { name: "Marketing, communication", count: 1, checked: true },
-    { name: "Production, maintenance, quality", count: 0, checked: false },
-    { name: "Public buildings and works professions", count: 0, checked: false },
-    { name: "Purchases", count: 0, checked: false },
-    { name: "R&D, project management", count: 0, checked: false },
-    { name: "Sales", count: 1, checked: true },
-    { name: "Secretarial work, assistantship", count: 0, checked: false },
-    { name: "Services", count: 1, checked: true },
-    { name: "Telemarketing, teleassistance", count: 0, checked: false },
-    { name: "Tourism, hotel business and catering", count: 0, checked: true },
-    { name: "Transport, logistics", count: 0, checked: false },
-  ];
-
-  const educationLevels = [
-    { name: "Bachelor", count: 11 },
-    { name: "College", count: 9 },
-    { name: "Doctorate", count: 7 },
-    { name: "High school", count: 7 },
-    { name: "HND", count: 10 },
-    { name: "Master", count: 9 },
-    { name: "Technical school", count: 8 },
-  ];
-
-  const industries = [
-    { name: "Advice, audit, accounting", count: 5 },
-    { name: "Aeronautics, naval", count: 0 },
-    { name: "Agriculture, fishing, aquaculture", count: 1 },
-    { name: "Airport and shipping services", count: 0 },
-    { name: "Associative activities", count: 2 },
-    { name: "Banking, insurance, finance", count: 11 },
-    { name: "Call centers, hotlines", count: 1 },
-    { name: "Chemistry, petrochemistry, raw materials, mining", count: 0 },
-    { name: "Cleaning, security, surveillance", count: 2 },
-    { name: "Consumer goods", count: 0 },
-    { name: "Distribution, selling, wholesale", count: 4 },
-    { name: "Edition, printing", count: 0 },
-    { name: "Education, training", count: 3 },
-    { name: "Electric, electronic, optical and precision equipments", count: 0 },
-    { name: "Electricity, water, gas, nuclear, energy", count: 0 },
-    { name: "Engineering, development studies", count: 0 },
-    { name: "Environment, recycling", count: 0 },
-    { name: "Event, receptionist", count: 0 },
-    { name: "Food-processing industry", count: 2 },
-    { name: "Furnishing, decoration", count: 0 },
-    { name: "Government services", count: 0 },
-    { name: "Greenways, forests, hunting", count: 0 },
-    { name: "Handling", count: 0 },
-    { name: "Health, pharmacy, hospitals, medical equipment", count: 0 },
-    { name: "Hotel business, catering", count: 0 },
-    { name: "Import-export business", count: 0 },
-    { name: "Industry, production, manufacturing and other", count: 0 },
-    { name: "IT, software engineering, Internet", count: 2 },
-    { name: "Luxury, cosmetics", count: 0 },
-    { name: "Maintenance, servicing, after-sales services", count: 0 },
-    { name: "Marketing, communication, media", count: 3 },
-    { name: "Mechanical equipment, machines", count: 0 },
-    { name: "Metallurgy, steel industry", count: 0 },
-    { name: "Motor, transportation equipment, reparation", count: 0 },
-    { name: "Paper, wood, rubber, plastic, glass, tobacco", count: 0 },
-    { name: "Pharmaceutical industry", count: 2 },
-    { name: "Public buildings and works sector, construction", count: 1 },
-    { name: "Quality, methods", count: 0 },
-    { name: "Real-estate, architecture, town planning", count: 0 },
-    { name: "Rental", count: 0 },
-    { name: "Research and development", count: 1 },
-    { name: "Secretarial work", count: 1 },
-    { name: "Services other", count: 2 },
-    { name: "Social, public and human services", count: 0 },
-    { name: "Sports, cultural and social action", count: 0 },
-    { name: "Telecom", count: 0 },
-    { name: "Temporary work, recruitment", count: 1 },
-    { name: "Textile, leather, shoes, clothing industry", count: 0 },
-    { name: "Tourism, leisure activities", count: 0 },
-    { name: "Transport, logistics, postal services", count: 0 },
-  ];
-
-  const jobTypes = [
-    { name: "Permanent contract", count: 13 },
-    { name: "Fixed-term contract", count: 2 },
-    { name: "Freelance", count: 2 },
-    { name: "Part-time work", count: 2 },
-    { name: "Cooperative Education Program", count: 0 },
-    { name: "Internship", count: 0 },
-    { name: "Temporary work", count: 0 },
-  ];
-
-  const regions = [
-    { name: "Ahafo", count: 0 },
-    { name: "Ashanti", count: 0 },
-    { name: "Bono", count: 0 },
-    { name: "Bono East", count: 0 },
-    { name: "Central", count: 0 },
-    { name: "Eastern", count: 0 },
-    { name: "Greater Accra", count: 0 },
-    { name: "North East", count: 0 },
-    { name: "Northern", count: 0 },
-    { name: "Oti", count: 0 },
-    { name: "Savannah", count: 0 },
-    { name: "Upper East", count: 0 },
-    { name: "Upper West", count: 0 },
-    { name: "Volta", count: 0 },
-    { name: "Western", count: 0 },
-    { name: "Western North", count: 0 },
-  ];
-
-  const experienceLevels = [
-    { name: "No experience", count: 2 },
-    { name: "Less than 2 years", count: 6 },
-    { name: "2 to 5 years", count: 7 },
-    { name: "5 to 10 years", count: 10 },
-    { name: "More than 10 years", count: 8 },
-  ];
 
   // Get active filters based on current selections
   const getActiveFilters = () => {
@@ -296,9 +263,20 @@ const AllJobs = () => {
 
   // Filter jobs based on active filters
   const filteredJobs = jobs.filter((job) => {
+    // Filter by job category if any are selected
+    const hasCategoryFilter = Object.values(checkedCategories).some(checked => checked);
+    if (hasCategoryFilter && jobCategories.length > 0) {
+      const selectedCategories = jobCategories
+        .filter((_, index) => checkedCategories[index])
+        .map(cat => cat.name);
+      if (job.job_category && !selectedCategories.includes(job.job_category)) {
+        return false;
+      }
+    }
+    
     // Filter by education level if any are selected
     const hasEducationFilter = Object.values(checkedEducationLevels).some(checked => checked);
-    if (hasEducationFilter) {
+    if (hasEducationFilter && educationLevels.length > 0) {
       const selectedEducationLevels = educationLevels
         .filter((_, index) => checkedEducationLevels[index])
         .map(level => level.name);
@@ -307,9 +285,20 @@ const AllJobs = () => {
       }
     }
     
+    // Filter by industry if any are selected
+    const hasIndustryFilter = Object.values(checkedIndustries).some(checked => checked);
+    if (hasIndustryFilter && industries.length > 0) {
+      const selectedIndustries = industries
+        .filter((_, index) => checkedIndustries[index])
+        .map(industry => industry.name);
+      if (job.industry && !selectedIndustries.includes(job.industry)) {
+        return false;
+      }
+    }
+    
     // Filter by job type if any are selected
     const hasJobTypeFilter = Object.values(checkedJobTypes).some(checked => checked);
-    if (hasJobTypeFilter) {
+    if (hasJobTypeFilter && jobTypes.length > 0) {
       const selectedJobTypes = jobTypes
         .filter((_, index) => checkedJobTypes[index])
         .map(jobType => jobType.name);
@@ -320,7 +309,7 @@ const AllJobs = () => {
     
     // Filter by region if any are selected
     const hasRegionFilter = Object.values(checkedRegions).some(checked => checked);
-    if (hasRegionFilter) {
+    if (hasRegionFilter && regions.length > 0) {
       const selectedRegions = regions
         .filter((_, index) => checkedRegions[index])
         .map(region => region.name);
@@ -331,7 +320,7 @@ const AllJobs = () => {
     
     // Filter by experience level if any are selected
     const hasExperienceFilter = Object.values(checkedExperienceLevels).some(checked => checked);
-    if (hasExperienceFilter) {
+    if (hasExperienceFilter && experienceLevels.length > 0) {
       const selectedExperienceLevels = experienceLevels
         .filter((_, index) => checkedExperienceLevels[index])
         .map(level => level.name);
@@ -368,63 +357,75 @@ const AllJobs = () => {
       setSearchQuery("");
     } else {
       // Remove category filter
-      const categoryIndex = jobCategories.findIndex(cat => cat.name === filter);
-      if (categoryIndex !== -1) {
-        setCheckedCategories(prev => ({
-          ...prev,
-          [categoryIndex]: false
-        }));
-        return;
+      if (jobCategories.length > 0) {
+        const categoryIndex = jobCategories.findIndex(cat => cat.name === filter);
+        if (categoryIndex !== -1) {
+          setCheckedCategories(prev => ({
+            ...prev,
+            [categoryIndex]: false
+          }));
+          return;
+        }
       }
       
       // Remove education level filter
-      const educationIndex = educationLevels.findIndex(level => level.name === filter);
-      if (educationIndex !== -1) {
-        setCheckedEducationLevels(prev => ({
-          ...prev,
-          [educationIndex]: false
-        }));
-        return;
+      if (educationLevels.length > 0) {
+        const educationIndex = educationLevels.findIndex(level => level.name === filter);
+        if (educationIndex !== -1) {
+          setCheckedEducationLevels(prev => ({
+            ...prev,
+            [educationIndex]: false
+          }));
+          return;
+        }
       }
       
       // Remove industry filter
-      const industryIndex = industries.findIndex(industry => industry.name === filter);
-      if (industryIndex !== -1) {
-        setCheckedIndustries(prev => ({
-          ...prev,
-          [industryIndex]: false
-        }));
-        return;
+      if (industries.length > 0) {
+        const industryIndex = industries.findIndex(industry => industry.name === filter);
+        if (industryIndex !== -1) {
+          setCheckedIndustries(prev => ({
+            ...prev,
+            [industryIndex]: false
+          }));
+          return;
+        }
       }
       
       // Remove job type filter
-      const jobTypeIndex = jobTypes.findIndex(jobType => jobType.name === filter);
-      if (jobTypeIndex !== -1) {
-        setCheckedJobTypes(prev => ({
-          ...prev,
-          [jobTypeIndex]: false
-        }));
-        return;
+      if (jobTypes.length > 0) {
+        const jobTypeIndex = jobTypes.findIndex(jobType => jobType.name === filter);
+        if (jobTypeIndex !== -1) {
+          setCheckedJobTypes(prev => ({
+            ...prev,
+            [jobTypeIndex]: false
+          }));
+          return;
+        }
       }
       
       // Remove region filter
-      const regionIndex = regions.findIndex(region => region.name === filter);
-      if (regionIndex !== -1) {
-        setCheckedRegions(prev => ({
-          ...prev,
-          [regionIndex]: false
-        }));
-        return;
+      if (regions.length > 0) {
+        const regionIndex = regions.findIndex(region => region.name === filter);
+        if (regionIndex !== -1) {
+          setCheckedRegions(prev => ({
+            ...prev,
+            [regionIndex]: false
+          }));
+          return;
+        }
       }
       
       // Remove experience level filter
-      const experienceIndex = experienceLevels.findIndex(level => level.name === filter);
-      if (experienceIndex !== -1) {
-        setCheckedExperienceLevels(prev => ({
-          ...prev,
-          [experienceIndex]: false
-        }));
-        return;
+      if (experienceLevels.length > 0) {
+        const experienceIndex = experienceLevels.findIndex(level => level.name === filter);
+        if (experienceIndex !== -1) {
+          setCheckedExperienceLevels(prev => ({
+            ...prev,
+            [experienceIndex]: false
+          }));
+          return;
+        }
       }
       
       // Remove company filter

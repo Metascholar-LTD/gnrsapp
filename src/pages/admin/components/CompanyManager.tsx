@@ -390,6 +390,13 @@ interface Job {
           date: new Date().toISOString().split('T')[0],
         };
   
+        console.log("💾 ADMIN SAVE (Company Manager) - Job Payload:", jobPayload);
+        console.log("💾 ADMIN SAVE - Impact Paragraphs:", jobPayload.impact_paragraphs);
+        console.log("💾 ADMIN SAVE - Impact Highlights:", jobPayload.impact_highlights);
+        console.log("💾 ADMIN SAVE - Field Ops Groups:", jobPayload.field_ops_groups);
+        console.log("💾 ADMIN SAVE - Culture Paragraphs:", jobPayload.culture_paragraphs);
+        console.log("💾 ADMIN SAVE - Opportunity Paragraphs:", jobPayload.opportunity_paragraphs);
+  
         if (jobId) {
           const { error } = await supabase
             .from('jobs' as any)
@@ -3078,126 +3085,58 @@ const CompanyManager = () => {
     loadCompanies();
   }, []);
 
-  const getMockCompanies = (): Company[] => [
-    {
-      id: "1",
-      name: "Microsoft",
-      logoUrl: "https://logo.clearbit.com/microsoft.com",
-      description: "Microsoft is a technology company empowering every person and organization on the planet to achieve more.",
-      industry: "Technology",
-      employees: "1001-5000",
-      founded: "2005",
-      website: "https://microsoft.com",
-      email: "careers@microsoft.com",
-      phone: "+233 XX XXX XXXX",
-      location: "Greater Accra, Ghana",
-      jobCount: 245,
-      featured: true,
-    },
-    {
-      id: "2",
-      name: "Adidas",
-      logoUrl: "https://logo.clearbit.com/adidas.com",
-      description: "Adidas is a German multinational corporation, founded and headquartered in Herzogenaurach, Germany, that designs and manufactures shoes, clothing and accessories.",
-      industry: "Retail & Fashion",
-      employees: "1001-5000",
-      founded: "1949",
-      website: "https://adidas.com",
-      email: "careers@adidas.com",
-      phone: "+233 XX XXX XXXX",
-      location: "Greater Accra, Ghana",
-      jobCount: 89,
-      featured: false,
-    },
-    {
-      id: "3",
-      name: "Google",
-      logoUrl: "https://logo.clearbit.com/google.com",
-      description: "Google's mission is to organize the world's information and make it universally accessible and useful.",
-      industry: "Technology",
-      employees: "5001-10000",
-      founded: "2008",
-      website: "https://google.com",
-      email: "careers@google.com",
-      phone: "+233 XX XXX XXXX",
-      location: "Greater Accra, Ghana",
-      jobCount: 156,
-      featured: false,
-    },
-    {
-      id: "4",
-      name: "Apple",
-      logoUrl: "https://logo.clearbit.com/apple.com",
-      description: "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software, and online services.",
-      industry: "Technology",
-      employees: "5001-10000",
-      founded: "1976",
-      website: "https://apple.com",
-      email: "careers@apple.com",
-      phone: "+233 XX XXX XXXX",
-      location: "Greater Accra, Ghana",
-      jobCount: 342,
-      featured: false,
-    },
-    {
-      id: "5",
-      name: "Amazon",
-      logoUrl: "https://logo.clearbit.com/amazon.com",
-      description: "Amazon is committed to being Earth's most customer-centric company, where people can find and discover anything they might want to buy online.",
-      industry: "E-commerce & Cloud",
-      employees: "10000+",
-      founded: "1994",
-      website: "https://amazon.com",
-      email: "careers@amazon.com",
-      phone: "+233 XX XXX XXXX",
-      location: "Greater Accra, Ghana",
-      jobCount: 678,
-      featured: false,
-    },
-  ];
-
   const loadCompanies = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('companies' as any)
+      const { data, error } = await (supabase as any)
+        .from('companies')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error("Error loading companies:", error);
-        toast.error("Failed to load companies");
-        setCompanies(getMockCompanies());
+        toast.error(`Failed to load companies: ${error.message || 'Unknown error'}`);
+        setCompanies([]);
         return;
       }
 
-      if (data && data.length > 0) {
-        const transformed: Company[] = data.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          logoUrl: item.logo_url,
-          description: item.description || "",
-          industry: item.industry || "",
-          employees: item.employees || "",
-          founded: item.founded || "",
-          website: item.website || "",
-          email: item.email || "",
-          phone: item.phone || "",
-          location: item.location || "",
-          jobCount: item.job_count || 0,
-          featured: item.featured || false,
-          created_at: item.created_at,
-          updated_at: item.updated_at,
-        }));
-        setCompanies(transformed);
+      if (data) {
+        // Get job counts for each company
+        const companiesWithJobs = await Promise.all(
+          data.map(async (item: any) => {
+            const { count } = await (supabase as any)
+              .from('jobs')
+              .select('*', { count: 'exact', head: true })
+              .eq('company', item.name)
+              .eq('verified', true);
+
+            return {
+              id: item.id,
+              name: item.name,
+              logoUrl: item.logo_url,
+              description: item.description || "",
+              industry: item.industry || "",
+              employees: item.employees || "",
+              founded: item.founded || "",
+              website: item.website || "",
+              email: item.email || "",
+              phone: item.phone || "",
+              location: item.location || "",
+              jobCount: count || 0,
+              featured: item.featured || false,
+              created_at: item.created_at,
+              updated_at: item.updated_at,
+            };
+          })
+        );
+        setCompanies(companiesWithJobs);
       } else {
-        // No data from database, use mock data
-        setCompanies(getMockCompanies());
+        setCompanies([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast.error("Failed to load companies");
-      setCompanies(getMockCompanies());
+      toast.error(`Failed to load companies: ${error.message || 'Unknown error'}`);
+      setCompanies([]);
     } finally {
       setLoading(false);
     }
@@ -3225,8 +3164,8 @@ const CompanyManager = () => {
     try {
       // If marking as featured, unfeature all other companies
       if (companyData.featured) {
-        const { error: unfeatureError } = await supabase
-          .from('companies' as any)
+        const { error: unfeatureError } = await (supabase as any)
+          .from('companies')
           .update({ featured: false })
           .neq('id', companyId || '');
         if (unfeatureError) throw unfeatureError;
@@ -3247,15 +3186,15 @@ const CompanyManager = () => {
       };
 
       if (companyId) {
-        const { error } = await supabase
-          .from('companies' as any)
+        const { error } = await (supabase as any)
+          .from('companies')
           .update(payload)
           .eq('id', companyId);
         if (error) throw error;
         toast.success("Company updated successfully");
       } else {
-        const { error } = await supabase
-          .from('companies' as any)
+        const { error } = await (supabase as any)
+          .from('companies')
           .insert([payload]);
         if (error) throw error;
         toast.success("Company created successfully");
@@ -3275,18 +3214,39 @@ const CompanyManager = () => {
 
   const handleDelete = async (companyId: string) => {
     try {
-      const { error } = await supabase
-        .from('companies' as any)
+      // First, delete all jobs associated with this company
+      const { error: jobsError } = await (supabase as any)
+        .from('jobs')
+        .delete()
+        .eq('company_id', companyId);
+
+      if (jobsError) {
+        console.warn("Error deleting associated jobs:", jobsError);
+        // Continue anyway - might be jobs without company_id
+      }
+
+      // Then delete the company
+      const { error } = await (supabase as any)
+        .from('companies')
         .delete()
         .eq('id', companyId);
-      if (error) throw error;
+
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
+
       toast.success("Company deleted successfully");
-      await loadCompanies();
+      
+      // Close modal first
       setDeleteModalOpen(false);
       setCompanyToDelete(null);
+      
+      // Then reload companies
+      await loadCompanies();
     } catch (error: any) {
       console.error("Error deleting company:", error);
-      toast.error(error.message || "Failed to delete company");
+      toast.error(error.message || "Failed to delete company. Please check console for details.");
     }
   };
 

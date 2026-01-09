@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -26,61 +26,7 @@ import {
   Globe2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const nssPrograms = [
-  {
-    id: "nss-1",
-    title: "Teaching Service",
-    description: "Serve as a teacher in public schools across Ghana. Make a difference in education while fulfilling your national service obligation.",
-    duration: "12 months",
-    locations: ["All Regions", "Urban & Rural"],
-    requirements: ["Education degree", "Teaching certification preferred"],
-    benefits: ["Teaching experience", "Professional development", "Community impact"],
-    icon: <GraduationCap className="w-8 h-8" />,
-    color: "bg-blue-50 border-blue-200",
-    textColor: "text-blue-900",
-    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "nss-2",
-    title: "Health Service",
-    description: "Work in healthcare facilities, supporting medical professionals and serving communities. Ideal for health sciences graduates.",
-    duration: "12 months",
-    locations: ["Hospitals", "Clinics", "Health Centers"],
-    requirements: ["Health sciences degree", "Professional registration"],
-    benefits: ["Clinical experience", "Professional network", "Healthcare exposure"],
-    icon: <Shield className="w-8 h-8" />,
-    color: "bg-red-50 border-red-200",
-    textColor: "text-red-900",
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "nss-3",
-    title: "Public Administration",
-    description: "Serve in government ministries, departments, and agencies. Gain insight into public service and governance.",
-    duration: "12 months",
-    locations: ["Government Offices", "District Assemblies"],
-    requirements: ["Any degree", "Interest in public service"],
-    benefits: ["Government experience", "Policy exposure", "Administrative skills"],
-    icon: <Building2 className="w-8 h-8" />,
-    color: "bg-emerald-50 border-emerald-200",
-    textColor: "text-emerald-900",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "nss-4",
-    title: "Private Sector",
-    description: "Complete your service in private companies and organizations. Apply your skills in corporate environments.",
-    duration: "12 months",
-    locations: ["Corporate Offices", "Private Companies"],
-    requirements: ["Relevant degree", "Company approval"],
-    benefits: ["Corporate experience", "Industry exposure", "Career opportunities"],
-    icon: <Briefcase className="w-8 h-8" />,
-    color: "bg-purple-50 border-purple-200",
-    textColor: "text-purple-900",
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const nssBenefits = [
   {
@@ -159,6 +105,35 @@ const cardVariants = {
 
 const NationalServiceSupport = () => {
   const navigate = useNavigate();
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPrograms();
+  }, []);
+
+  const loadPrograms = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from('nss_programs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error loading NSS programs:", error);
+        setPrograms([]);
+        return;
+      }
+
+      setPrograms(data || []);
+    } catch (error) {
+      console.error("Error:", error);
+      setPrograms([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -341,14 +316,23 @@ const NationalServiceSupport = () => {
             </p>
           </motion.div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-          >
-            {nssPrograms.map((program, index) => {
+          {loading ? (
+            <div className="text-center py-12">
+              <Spinner />
+            </div>
+          ) : programs.length === 0 ? (
+            <div className="text-center py-12 text-slate-600">
+              No programs available at the moment.
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              {programs.map((program, index) => {
               // Determine accent color based on program type
               const accentColor = 
                 program.id === "nss-1" ? "#3b82f6" : // Blue for Teaching
@@ -372,7 +356,7 @@ const NationalServiceSupport = () => {
                     {/* Image Section */}
                     <div className="relative h-32 overflow-hidden bg-slate-100">
                       <motion.img
-                        src={program.image}
+                        src={program.image_url || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&auto=format&fit=crop'}
                         alt={program.title}
                         className="w-full h-full object-cover"
                         whileHover={{ scale: 1.05 }}
@@ -449,8 +433,9 @@ const NationalServiceSupport = () => {
                   </div>
                 </motion.div>
               );
-            })}
-          </motion.div>
+              })}
+            </motion.div>
+          )}
         </div>
       </section>
 

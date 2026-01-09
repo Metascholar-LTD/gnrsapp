@@ -143,8 +143,8 @@ const NationalServiceSupportManager = () => {
 
       if (error) {
         console.error("Error loading NSS programs:", error);
-        toast.error("Failed to load NSS programs");
-        setPrograms(getMockPrograms());
+        toast.error(`Failed to load NSS programs: ${error.message || 'Unknown error'}`);
+        setPrograms([]);
         return;
       }
 
@@ -162,13 +162,13 @@ const NationalServiceSupportManager = () => {
           skillsExperience: item.skills_experience || [],
           skillsTechnical: item.skills_technical || [],
           behavioralAttributes: item.behavioral_attributes || [],
-          skills: item.skills || [],
+          skills: Array.isArray(item.skills) ? item.skills : [],
           cultureParagraphs: item.culture_paragraphs || [],
           opportunityParagraphs: item.opportunity_paragraphs || [],
           duration: item.duration,
-          locations: item.locations || [],
-          requirements: item.requirements || [],
-          benefits: item.benefits || [],
+          locations: Array.isArray(item.locations) ? item.locations : [],
+          requirements: Array.isArray(item.requirements) ? item.requirements : [],
+          benefits: Array.isArray(item.benefits) ? item.benefits : [],
           icon: item.icon,
           color: item.color,
           textColor: item.text_color,
@@ -179,45 +179,16 @@ const NationalServiceSupportManager = () => {
         }));
         setPrograms(transformed);
       } else {
-        setPrograms(getMockPrograms());
+        setPrograms([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast.error("Failed to load NSS programs");
-      setPrograms(getMockPrograms());
+      toast.error(`Failed to load NSS programs: ${error.message || 'Unknown error'}`);
+      setPrograms([]);
     } finally {
       setLoading(false);
     }
   };
-
-  const getMockPrograms = (): NSSProgram[] => [
-    {
-      id: "1",
-      title: "Teaching Service",
-      description: "Serve as a teacher in public schools across Ghana...",
-      duration: "12 months",
-      locations: ["All Regions", "Urban & Rural"],
-      requirements: ["Education degree", "Teaching certification preferred"],
-      benefits: ["Teaching experience", "Professional development", "Community impact"],
-      icon: "GraduationCap",
-      color: "bg-blue-50 border-blue-200",
-      textColor: "text-blue-900",
-      imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&auto=format&fit=crop",
-    },
-    {
-      id: "2",
-      title: "Health Service",
-      description: "Work in healthcare facilities, supporting medical professionals...",
-      duration: "12 months",
-      locations: ["Hospitals", "Clinics", "Health Centers"],
-      requirements: ["Health sciences degree", "Professional registration"],
-      benefits: ["Clinical experience", "Professional network", "Healthcare exposure"],
-      icon: "Shield",
-      color: "bg-red-50 border-red-200",
-      textColor: "text-red-900",
-      imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&auto=format&fit=crop",
-    },
-  ];
 
   const filteredPrograms = useMemo(() => {
     let filtered = programs;
@@ -311,18 +282,21 @@ const NationalServiceSupportManager = () => {
 
   const handleDelete = async (programId: string) => {
     try {
-      const { error } = await supabase
-        .from('nss_programs' as any)
+      const { error } = await (supabase as any)
+        .from('nss_programs')
         .delete()
         .eq('id', programId);
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
       toast.success("NSS program deleted successfully");
-      await loadPrograms();
       setDeleteModalOpen(false);
       setProgramToDelete(null);
+      await loadPrograms();
     } catch (error: any) {
       console.error("Error deleting NSS program:", error);
-      toast.error(error.message || "Failed to delete NSS program");
+      toast.error(error.message || "Failed to delete NSS program. Please check console for details.");
     }
   };
 

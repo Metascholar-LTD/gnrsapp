@@ -244,106 +244,69 @@ const VerifiedJobListingsManager = () => {
   const loadJobs = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('jobs' as any)
+      const { data, error } = await (supabase as any)
+        .from('jobs')
         .select('*')
-        .eq('verified', true)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error("Error loading jobs:", error);
-        toast.error("Failed to load jobs");
-        // Use mock data for now
-        setJobs(getMockJobs());
+        toast.error(`Failed to load jobs: ${error.message || 'Unknown error'}`);
+        setJobs([]);
         return;
       }
 
       if (data) {
-        const transformed: Job[] = data.map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          company: item.company,
-          companyLogo: item.company_logo,
-          description: item.description,
-          descriptionParagraphs: item.description_paragraphs || [],
-          impactParagraphs: item.impact_paragraphs || [],
-          impactHighlights: item.impact_highlights || [],
-          fieldOpsGroups: item.field_ops_groups || [],
-          skillsFormalQualifications: item.skills_formal_qualifications || [],
-          skillsAdditionalKnowledge: item.skills_additional_knowledge || [],
-          skillsExperience: item.skills_experience || [],
-          skillsTechnical: item.skills_technical || [],
-          behavioralAttributes: item.behavioral_attributes || [],
-          skills: item.skills || [],
-          cultureParagraphs: item.culture_paragraphs || [],
-          opportunityParagraphs: item.opportunity_paragraphs || [],
-          jobCategory: item.job_category || "",
-          industry: item.industry || "",
-          educationLevel: item.education_level || "Bachelor",
-          experienceLevel: item.experience_level || "2 to 5 years",
-          contractType: item.contract_type || "Permanent contract",
-          region: item.region || "Greater Accra",
-          city: item.city || "",
-          date: item.date || new Date().toISOString().split('T')[0],
-          verified: item.verified || false,
-          featured: item.featured || false,
-          salary: item.salary,
-          imageUrl: item.image_url,
-          applicationUrl: item.application_url,
-          created_at: item.created_at,
-          updated_at: item.updated_at,
-        }));
+        console.log("📥 LOADED FROM DB:", data);
+        const transformed: Job[] = data.map((item: any) => {
+          console.log("📦 RAW ITEM:", item);
+          return {
+            id: item.id,
+            title: item.title,
+            company: item.company,
+            companyLogo: item.company_logo,
+            description: item.description || "",
+            descriptionParagraphs: item.description_paragraphs || [],
+            impactParagraphs: item.impact_paragraphs || [],
+            impactHighlights: item.impact_highlights || [],
+            fieldOpsGroups: item.field_ops_groups || [],
+            skillsFormalQualifications: item.skills_formal_qualifications || [],
+            skillsAdditionalKnowledge: item.skills_additional_knowledge || [],
+            skillsExperience: item.skills_experience || [],
+            skillsTechnical: item.skills_technical || [],
+            behavioralAttributes: item.behavioral_attributes || [],
+            skills: Array.isArray(item.skills) ? item.skills : [],
+            cultureParagraphs: item.culture_paragraphs || [],
+            opportunityParagraphs: item.opportunity_paragraphs || [],
+            jobCategory: item.job_category || "",
+            industry: item.industry || "",
+            educationLevel: item.education_level || "Bachelor",
+            experienceLevel: item.experience_level || "2 to 5 years",
+            contractType: item.contract_type || "Permanent contract",
+            region: item.region || "Greater Accra",
+            city: item.city || "",
+            date: item.date || new Date().toISOString().split('T')[0],
+            verified: item.verified || false,
+            featured: item.featured || false,
+            salary: item.salary,
+            imageUrl: item.image_url,
+            applicationUrl: item.application_url,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+          };
+        });
         setJobs(transformed);
       } else {
-        setJobs(getMockJobs());
+        setJobs([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast.error("Failed to load jobs");
-      setJobs(getMockJobs());
+      toast.error(`Failed to load jobs: ${error.message || 'Unknown error'}`);
+      setJobs([]);
     } finally {
       setLoading(false);
     }
   };
-
-  const getMockJobs = (): Job[] => [
-    {
-      id: "1",
-      title: "Marketing Manager- Accra",
-      company: "WESTERN GOVERNORS UNIVERSITY",
-      companyLogo: "https://logo.clearbit.com/wgu.edu",
-      description: "Western Governors University (WGU) is seeking an experienced and innovative Marketing Manager...",
-      jobCategory: "Marketing, communication",
-      industry: "Education, training",
-      educationLevel: "Master",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "East Legon",
-      skills: ["Marketing", "Strategy", "Communication"],
-      date: "19.11.2025",
-      verified: true,
-      featured: true,
-    },
-    {
-      id: "2",
-      title: "Software Engineer",
-      company: "Microsoft",
-      companyLogo: "https://logo.clearbit.com/microsoft.com",
-      description: "Microsoft is seeking a talented Software Engineer to join our development team...",
-      jobCategory: "IT, new technologies",
-      industry: "IT, software engineering, Internet",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["C#", ".NET", "Azure", "Software Development"],
-      date: "20.11.2025",
-      verified: true,
-      featured: false,
-    },
-  ];
 
   const filteredJobs = useMemo(() => {
     let filtered = jobs;
@@ -441,20 +404,37 @@ const VerifiedJobListingsManager = () => {
         date: new Date().toISOString().split('T')[0],
       };
 
-      if (jobId) {
-        const { error } = await supabase
-          .from('jobs' as any)
-          .update(jobPayload)
-          .eq('id', jobId);
+      console.log("💾 ADMIN SAVE - Job Payload:", jobPayload);
+      console.log("💾 ADMIN SAVE - Impact Paragraphs:", jobPayload.impact_paragraphs);
+      console.log("💾 ADMIN SAVE - Impact Highlights:", jobPayload.impact_highlights);
+      console.log("💾 ADMIN SAVE - Field Ops Groups:", jobPayload.field_ops_groups);
+      console.log("💾 ADMIN SAVE - Culture Paragraphs:", jobPayload.culture_paragraphs);
+      console.log("💾 ADMIN SAVE - Opportunity Paragraphs:", jobPayload.opportunity_paragraphs);
 
-        if (error) throw error;
+      if (jobId) {
+        const { data, error } = await (supabase as any)
+          .from('jobs')
+          .update(jobPayload)
+          .eq('id', jobId)
+          .select();
+
+        if (error) {
+          console.error("❌ SAVE ERROR:", error);
+          throw error;
+        }
+        console.log("✅ SAVED TO DB:", data);
         toast.success("Job updated successfully");
       } else {
-        const { error } = await supabase
-          .from('jobs' as any)
-          .insert([jobPayload]);
+        const { data, error } = await (supabase as any)
+          .from('jobs')
+          .insert([jobPayload])
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error("❌ SAVE ERROR:", error);
+          throw error;
+        }
+        console.log("✅ SAVED TO DB:", data);
         toast.success("Job created successfully");
       }
 
@@ -472,19 +452,27 @@ const VerifiedJobListingsManager = () => {
 
   const handleDelete = async (jobId: string) => {
     try {
-      const { error } = await supabase
-        .from('jobs' as any)
+      const { error } = await (supabase as any)
+        .from('jobs')
         .delete()
         .eq('id', jobId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
+
       toast.success("Job deleted successfully");
-      await loadJobs();
+      
+      // Close modal first
       setDeleteModalOpen(false);
       setJobToDelete(null);
+      
+      // Then reload jobs
+      await loadJobs();
     } catch (error: any) {
       console.error("Error deleting job:", error);
-      toast.error(error.message || "Failed to delete job");
+      toast.error(error.message || "Failed to delete job. Please check console for details.");
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -27,84 +27,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const graduatePrograms = [
-  {
-    id: "grad-1",
-    title: "Management Trainee Program",
-    company: "First National Bank",
-    location: "Accra, Greater Accra",
-    type: "Full-time",
-    duration: "18 months",
-    salary: "Competitive",
-    posted: "3 days ago",
-    description: "Join our prestigious management trainee program designed for fresh graduates. Receive comprehensive training, mentorship, and fast-track career development opportunities.",
-    requirements: [
-      "First Class or Second Class Upper degree",
-      "Strong leadership potential",
-      "Excellent communication skills",
-      "Age: 25-28 years",
-    ],
-    benefits: [
-      "Comprehensive training program",
-      "Mentorship from senior executives",
-      "Career progression opportunities",
-      "Competitive salary and benefits",
-    ],
-    skills: ["Leadership", "Analytical Thinking", "Communication", "Problem Solving"],
-    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "grad-2",
-    title: "Graduate Engineering Program",
-    company: "Ghana Engineering Corporation",
-    location: "Kumasi, Ashanti",
-    type: "Full-time",
-    duration: "24 months",
-    salary: "GHS 3,500 - 4,500",
-    posted: "1 week ago",
-    description: "Launch your engineering career with our structured graduate program. Work on real projects, develop technical expertise, and build a strong professional foundation.",
-    requirements: [
-      "Engineering degree (Civil, Mechanical, Electrical)",
-      "Minimum 2:1 classification",
-      "Professional registration preferred",
-      "Strong technical skills",
-    ],
-    benefits: [
-      "Hands-on project experience",
-      "Professional development",
-      "Technical training",
-      "Industry certifications",
-    ],
-    skills: ["Engineering", "Project Management", "Technical Design", "CAD"],
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "grad-3",
-    title: "Graduate Analyst Program",
-    company: "Tech Solutions Ghana",
-    location: "Accra, Greater Accra",
-    type: "Full-time",
-    duration: "12 months",
-    salary: "GHS 2,800 - 3,500",
-    posted: "2 weeks ago",
-    description: "Perfect for fresh graduates interested in data analysis, business intelligence, and technology. Develop analytical skills and work with cutting-edge tools.",
-    requirements: [
-      "Degree in IT, Mathematics, Statistics, or related field",
-      "Strong analytical skills",
-      "Proficiency in Excel and SQL",
-      "Problem-solving mindset",
-    ],
-    benefits: [
-      "Data analytics training",
-      "Exposure to modern tools",
-      "Career mentorship",
-      "Growth opportunities",
-    ],
-    skills: ["Data Analysis", "SQL", "Excel", "Python", "Business Intelligence"],
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const advantages = [
   {
@@ -157,6 +80,35 @@ const cardVariants = {
 const GraduateRecruitment = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPrograms();
+  }, []);
+
+  const loadPrograms = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from('graduate_programs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error loading graduate programs:", error);
+        setPrograms([]);
+        return;
+      }
+
+      setPrograms(data || []);
+    } catch (error) {
+      console.error("Error:", error);
+      setPrograms([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -319,14 +271,23 @@ const GraduateRecruitment = () => {
           </motion.div>
 
           {/* Program Cards - Matching global scholarship page design */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-          >
-            {graduatePrograms.map((program, index) => (
+          {loading ? (
+            <div className="text-center py-12">
+              <Spinner />
+            </div>
+          ) : programs.length === 0 ? (
+            <div className="text-center py-12 text-slate-600">
+              No graduate programs available at the moment.
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              {programs.map((program, index) => (
               <motion.div
                 key={program.id}
                 variants={cardVariants}
@@ -346,7 +307,7 @@ const GraduateRecruitment = () => {
                   {/* Image Section */}
                   <div className="relative h-32 overflow-hidden bg-slate-100">
                     <motion.img
-                      src={program.image}
+                      src={program.image_url || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&auto=format&fit=crop'}
                       alt={program.title}
                       className="w-full h-full object-cover"
                       whileHover={{ scale: 1.05 }}
@@ -438,8 +399,9 @@ const GraduateRecruitment = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </motion.div>
+          )}
 
           {/* CTA Section */}
           <motion.div

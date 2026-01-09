@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
@@ -26,51 +26,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const featuredInternships = [
-  {
-    id: "int-1",
-    title: "Software Development Intern",
-    company: "Tech Solutions Ghana",
-    location: "Accra, Greater Accra",
-    duration: "3-6 months",
-    type: "Full-time",
-    stipend: "GHS 1,200/month",
-    posted: "2 days ago",
-    description: "Join our dynamic team to develop innovative software solutions. Work on real projects, learn from experienced developers, and build your portfolio.",
-    skills: ["JavaScript", "React", "Node.js", "Git"],
-    requirements: ["Computer Science student", "Basic programming knowledge", "Portfolio preferred"],
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "int-2",
-    title: "Marketing Communications Intern",
-    company: "Digital Marketing Agency",
-    location: "Kumasi, Ashanti",
-    duration: "4 months",
-    type: "Part-time",
-    stipend: "GHS 800/month",
-    posted: "5 days ago",
-    description: "Gain hands-on experience in digital marketing, content creation, and social media management. Perfect for marketing and communications students.",
-    skills: ["Social Media", "Content Writing", "Analytics", "Design"],
-    requirements: ["Marketing/Communications student", "Creative mindset", "Social media savvy"],
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop",
-  },
-  {
-    id: "int-3",
-    title: "Finance & Accounting Intern",
-    company: "First National Bank",
-    location: "Accra, Greater Accra",
-    duration: "6 months",
-    type: "Full-time",
-    stipend: "GHS 1,500/month",
-    posted: "1 week ago",
-    description: "Work alongside finance professionals, assist with financial analysis, and learn banking operations. Ideal for finance and accounting majors.",
-    skills: ["Excel", "Financial Analysis", "Accounting", "Reporting"],
-    requirements: ["Finance/Accounting student", "Strong analytical skills", "Attention to detail"],
-    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const benefits = [
   {
@@ -98,6 +54,35 @@ const benefits = [
 const InternshipListings = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [internships, setInternships] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadInternships();
+  }, []);
+
+  const loadInternships = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from('internships')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error loading internships:", error);
+        setInternships([]);
+        return;
+      }
+
+      setInternships(data || []);
+    } catch (error) {
+      console.error("Error:", error);
+      setInternships([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -263,7 +248,16 @@ const InternshipListings = () => {
 
           {/* Internship Cards - Compact & Neat */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {featuredInternships.map((internship, index) => (
+            {loading ? (
+              <div className="col-span-full text-center py-12">
+                <Spinner />
+              </div>
+            ) : internships.length === 0 ? (
+              <div className="col-span-full text-center py-12 text-slate-600">
+                No internships available at the moment.
+              </div>
+            ) : (
+              internships.map((internship, index) => (
               <motion.div
                 key={internship.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -276,7 +270,7 @@ const InternshipListings = () => {
                 {/* Image Section - Compact */}
                 <div className="relative w-full h-40 overflow-hidden bg-slate-100">
                   <img
-                    src={internship.image}
+                    src={internship.image_url || 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&auto=format&fit=crop'}
                     alt={internship.title}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
@@ -335,7 +329,8 @@ const InternshipListings = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* CTA Section */}
