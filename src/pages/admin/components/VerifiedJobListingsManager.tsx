@@ -94,7 +94,6 @@ const VerifiedJobListingsManager = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     region: "",

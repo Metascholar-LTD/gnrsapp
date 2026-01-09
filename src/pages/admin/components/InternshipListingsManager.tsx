@@ -89,7 +89,6 @@ const InternshipListingsManager = () => {
   const [internshipToDelete, setInternshipToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
   const [activeFormTab, setActiveFormTab] = useState("description");
   const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
