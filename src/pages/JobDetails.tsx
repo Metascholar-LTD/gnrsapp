@@ -52,6 +52,7 @@ interface Job {
   cultureParagraphs?: string[];
   opportunityParagraphs?: string[];
   date: string;
+  applicationUrl?: string;
 }
 
 const JobDetails = () => {
@@ -109,6 +110,7 @@ const JobDetails = () => {
               region: data.region || "Greater Accra",
               city: data.city || "",
               date: data.date ? new Date(data.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+              applicationUrl: data.application_url || "",
             };
             console.log("🔍 USER VIEW - TRANSFORMED:", transformed);
             console.log("🔍 impactParagraphs:", transformed.impactParagraphs);
@@ -139,6 +141,18 @@ const JobDetails = () => {
       setTimeout(() => setCopiedLink(false), 2000);
     }
     setShowShareMenu(false);
+  };
+
+  const handleApply = () => {
+    if (!job?.applicationUrl) return;
+    
+    // Normalize URL - add https:// if no protocol is present
+    let url = job.applicationUrl.trim();
+    if (!url.match(/^https?:\/\//i)) {
+      url = `https://${url}`;
+    }
+    
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   // Use company logo or a default job-related image
@@ -440,6 +454,9 @@ const JobDetails = () => {
                   <Button
                     size="lg"
                     className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-lg px-8 py-6 shadow-xl"
+                    onClick={handleApply}
+                    disabled={!job?.applicationUrl}
+                    title={job?.applicationUrl ? 'Apply for this position' : 'Application link not available'}
                   >
                     Apply Now
                     <ExternalLink className="ml-2 w-5 h-5" />
@@ -640,7 +657,12 @@ const JobDetails = () => {
                     Share your CV with us and open the door to an exciting career opportunity
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3">
-                      <Button className="w-full h-12 text-base font-semibold bg-white text-slate-900 hover:bg-slate-100 shadow-lg">
+                      <Button 
+                        className="w-full h-12 text-base font-semibold bg-white text-slate-900 hover:bg-slate-100 shadow-lg"
+                        onClick={handleApply}
+                        disabled={!job?.applicationUrl}
+                        title={job?.applicationUrl ? 'Apply for this position' : 'Application link not available'}
+                      >
                         Apply Now
                       </Button>
                       <Button
