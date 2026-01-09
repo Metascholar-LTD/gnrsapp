@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -7,6 +7,7 @@ import { Spinner } from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Search,
   X,
@@ -53,6 +54,8 @@ const AllJobs = () => {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(
     (state as { company?: string })?.company || null
   );
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
   const [checkedCategories, setCheckedCategories] = useState<Record<number, boolean>>({
     6: true, // Marketing, communication
     11: true, // Sales
@@ -64,6 +67,50 @@ const AllJobs = () => {
   const [checkedJobTypes, setCheckedJobTypes] = useState<Record<number, boolean>>({});
   const [checkedRegions, setCheckedRegions] = useState<Record<number, boolean>>({});
   const [checkedExperienceLevels, setCheckedExperienceLevels] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    loadJobs();
+  }, []);
+
+  const loadJobs = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from('jobs')
+        .select('*')
+        .eq('verified', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error loading jobs:", error);
+        setJobs([]);
+        return;
+      }
+
+      if (data) {
+        const transformed: Job[] = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          company: item.company,
+          companyLogo: item.company_logo,
+          description: item.description || "",
+          educationLevel: item.education_level || "Bachelor",
+          experienceLevel: item.experience_level || "2 to 5 years",
+          contractType: item.contract_type || "Permanent contract",
+          region: item.region || "Greater Accra",
+          city: item.city || "",
+          skills: Array.isArray(item.skills) ? item.skills : [],
+          date: item.date ? new Date(item.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+        }));
+        setJobs(transformed);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const jobCategories = [
     { name: "Accounting, controlling, finance", count: 2, checked: false },
@@ -243,427 +290,6 @@ const AllJobs = () => {
     
     return filters;
   };
-
-  // Mock job data
-  const jobs: Job[] = [
-    // WESTERN GOVERNORS UNIVERSITY Jobs
-    {
-      id: "wgu-1",
-      title: "Marketing Manager- Accra",
-      company: "WESTERN GOVERNORS UNIVERSITY",
-      companyLogo: "https://logo.clearbit.com/wgu.edu",
-      description: "Western Governors University (WGU) is seeking an experienced and innovative Marketing Manager to lead the development and execution of marketing strategies that promote the university's mission and offerings. This remote position plays a pivotal role in enhancing WGU's brand presence, driving student enrollment, and supporting the university's growth in Ghana and across Africa.",
-      educationLevel: "Master",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "East Legon",
-      skills: ["Marketing", "Strategy", "Digital Marketing", "Brand Management", "Communication"],
-      date: "19.11.2025",
-    },
-    {
-      id: "wgu-2",
-      title: "Student Success Coordinator",
-      company: "WESTERN GOVERNORS UNIVERSITY",
-      companyLogo: "https://logo.clearbit.com/wgu.edu",
-      description: "Join WGU as a Student Success Coordinator to support and guide students throughout their educational journey. You'll work closely with students to ensure they achieve their academic goals and have a positive learning experience.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Student Services", "Counseling", "Education", "Communication"],
-      date: "18.11.2025",
-    },
-    {
-      id: "wgu-3",
-      title: "IT Support Specialist",
-      company: "WESTERN GOVERNORS UNIVERSITY",
-      companyLogo: "https://logo.clearbit.com/wgu.edu",
-      description: "WGU is looking for an IT Support Specialist to provide technical assistance to students and staff, ensuring smooth operation of our online learning platform and systems.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["IT Support", "Technical Troubleshooting", "Customer Service"],
-      date: "17.11.2025",
-    },
-    // Microsoft Jobs
-    {
-      id: "ms-1",
-      title: "Software Engineer",
-      company: "Microsoft",
-      companyLogo: "https://logo.clearbit.com/microsoft.com",
-      description: "Microsoft is seeking a talented Software Engineer to join our development team. You'll work on cutting-edge cloud technologies and help build solutions that empower millions of users worldwide.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["C#", ".NET", "Azure", "Software Development", "Cloud Computing"],
-      date: "20.11.2025",
-    },
-    {
-      id: "ms-2",
-      title: "Cloud Solutions Architect",
-      company: "Microsoft",
-      companyLogo: "https://logo.clearbit.com/microsoft.com",
-      description: "Join Microsoft as a Cloud Solutions Architect and help businesses transform their operations using Azure cloud services. You'll design scalable solutions and work with enterprise clients.",
-      educationLevel: "Master",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Azure", "Cloud Architecture", "Solution Design", "Enterprise Solutions"],
-      date: "19.11.2025",
-    },
-    {
-      id: "ms-3",
-      title: "Product Manager",
-      company: "Microsoft",
-      companyLogo: "https://logo.clearbit.com/microsoft.com",
-      description: "Microsoft is looking for a Product Manager to drive product strategy and development for our enterprise software solutions in the African market.",
-      educationLevel: "Master",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Product Management", "Strategy", "Agile", "Business Analysis"],
-      date: "18.11.2025",
-    },
-    // Adidas Jobs
-    {
-      id: "adidas-1",
-      title: "Retail Store Manager",
-      company: "Adidas",
-      companyLogo: "https://logo.clearbit.com/adidas.com",
-      description: "Adidas is seeking an experienced Retail Store Manager to lead our flagship store in Accra. You'll be responsible for driving sales, managing staff, and ensuring exceptional customer experience.",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Retail Management", "Sales", "Team Leadership", "Customer Service"],
-      date: "20.11.2025",
-    },
-    {
-      id: "adidas-2",
-      title: "Marketing Coordinator",
-      company: "Adidas",
-      companyLogo: "https://logo.clearbit.com/adidas.com",
-      description: "Join Adidas as a Marketing Coordinator to support marketing campaigns and brand initiatives across Ghana. You'll work on digital marketing, events, and brand partnerships.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Marketing", "Digital Marketing", "Brand Management", "Events"],
-      date: "19.11.2025",
-    },
-    {
-      id: "adidas-3",
-      title: "Supply Chain Analyst",
-      company: "Adidas",
-      companyLogo: "https://logo.clearbit.com/adidas.com",
-      description: "Adidas is looking for a Supply Chain Analyst to optimize our logistics and distribution operations in West Africa.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Tema",
-      skills: ["Supply Chain", "Logistics", "Data Analysis", "Operations"],
-      date: "18.11.2025",
-    },
-    // Nike Jobs
-    {
-      id: "nike-1",
-      title: "Brand Marketing Manager",
-      company: "Nike",
-      companyLogo: "https://logo.clearbit.com/nike.com",
-      description: "Nike is seeking a Brand Marketing Manager to develop and execute marketing strategies that connect with athletes and sports enthusiasts across Ghana.",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Brand Marketing", "Sports Marketing", "Digital Marketing", "Strategy"],
-      date: "20.11.2025",
-    },
-    {
-      id: "nike-2",
-      title: "Retail Operations Specialist",
-      company: "Nike",
-      companyLogo: "https://logo.clearbit.com/nike.com",
-      description: "Join Nike as a Retail Operations Specialist to ensure smooth operations across our retail locations and optimize the customer shopping experience.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Retail Operations", "Operations Management", "Process Improvement"],
-      date: "19.11.2025",
-    },
-    // Apple Jobs
-    {
-      id: "apple-1",
-      title: "iOS Developer",
-      company: "Apple",
-      companyLogo: "https://logo.clearbit.com/apple.com",
-      description: "Apple is looking for an iOS Developer to create innovative mobile applications. You'll work with cutting-edge technologies and help build apps that millions of users love.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["iOS Development", "Swift", "Objective-C", "Mobile Development"],
-      date: "20.11.2025",
-    },
-    {
-      id: "apple-2",
-      title: "Customer Experience Specialist",
-      company: "Apple",
-      companyLogo: "https://logo.clearbit.com/apple.com",
-      description: "Join Apple as a Customer Experience Specialist to provide exceptional support to customers and help them get the most out of their Apple products.",
-      educationLevel: "High school",
-      experienceLevel: "Less than 2 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Customer Service", "Technical Support", "Communication"],
-      date: "19.11.2025",
-    },
-    {
-      id: "apple-3",
-      title: "Sales Manager",
-      company: "Apple",
-      companyLogo: "https://logo.clearbit.com/apple.com",
-      description: "Apple is seeking a Sales Manager to lead our sales team and drive revenue growth in the Ghana market.",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Sales Management", "Team Leadership", "Business Development"],
-      date: "18.11.2025",
-    },
-    // Google Jobs
-    {
-      id: "google-1",
-      title: "Software Engineer - Backend",
-      company: "Google",
-      companyLogo: "https://logo.clearbit.com/google.com",
-      description: "Google is looking for a Backend Software Engineer to build scalable systems and services that power Google's products used by billions of people.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Backend Development", "Python", "Java", "Distributed Systems"],
-      date: "20.11.2025",
-    },
-    {
-      id: "google-2",
-      title: "Product Marketing Manager",
-      company: "Google",
-      companyLogo: "https://logo.clearbit.com/google.com",
-      description: "Join Google as a Product Marketing Manager to drive product adoption and market growth for Google's suite of products in Africa.",
-      educationLevel: "Master",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Product Marketing", "Go-to-Market Strategy", "Analytics"],
-      date: "19.11.2025",
-    },
-    {
-      id: "google-3",
-      title: "UX Designer",
-      company: "Google",
-      companyLogo: "https://logo.clearbit.com/google.com",
-      description: "Google is seeking a UX Designer to create intuitive and beautiful user experiences for our products. You'll work closely with engineers and product managers.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["UX Design", "UI Design", "User Research", "Prototyping"],
-      date: "18.11.2025",
-    },
-    // Amazon Jobs
-    {
-      id: "amazon-1",
-      title: "Software Development Engineer",
-      company: "Amazon",
-      companyLogo: "https://logo.clearbit.com/amazon.com",
-      description: "Amazon is looking for a Software Development Engineer to build and maintain systems that power our e-commerce platform serving customers across Africa.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Software Development", "Java", "AWS", "System Design"],
-      date: "20.11.2025",
-    },
-    {
-      id: "amazon-2",
-      title: "Operations Manager",
-      company: "Amazon",
-      companyLogo: "https://logo.clearbit.com/amazon.com",
-      description: "Join Amazon as an Operations Manager to oversee fulfillment center operations and ensure efficient delivery of orders to customers.",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Tema",
-      skills: ["Operations Management", "Logistics", "Process Optimization"],
-      date: "19.11.2025",
-    },
-    {
-      id: "amazon-3",
-      title: "Business Development Manager",
-      company: "Amazon",
-      companyLogo: "https://logo.clearbit.com/amazon.com",
-      description: "Amazon is seeking a Business Development Manager to identify and develop partnerships with sellers and businesses in Ghana.",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Business Development", "Partnerships", "Sales", "Negotiation"],
-      date: "18.11.2025",
-    },
-    // Meta Jobs
-    {
-      id: "meta-1",
-      title: "Frontend Engineer",
-      company: "Meta",
-      companyLogo: "https://logo.clearbit.com/meta.com",
-      description: "Meta is looking for a Frontend Engineer to build user interfaces for our social media platforms. You'll work with React and modern web technologies.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["React", "JavaScript", "TypeScript", "Frontend Development"],
-      date: "20.11.2025",
-    },
-    {
-      id: "meta-2",
-      title: "Data Scientist",
-      company: "Meta",
-      companyLogo: "https://logo.clearbit.com/meta.com",
-      description: "Join Meta as a Data Scientist to analyze user behavior, build machine learning models, and provide insights that drive product decisions.",
-      educationLevel: "Master",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Data Science", "Machine Learning", "Python", "Statistics"],
-      date: "19.11.2025",
-    },
-    // Tesla Jobs
-    {
-      id: "tesla-1",
-      title: "Electrical Engineer",
-      company: "Tesla",
-      companyLogo: "https://logo.clearbit.com/tesla.com",
-      description: "Tesla is seeking an Electrical Engineer to work on electric vehicle charging infrastructure and energy solutions in Ghana.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Electrical Engineering", "Power Systems", "Renewable Energy"],
-      date: "20.11.2025",
-    },
-    {
-      id: "tesla-2",
-      title: "Sales Advisor",
-      company: "Tesla",
-      companyLogo: "https://logo.clearbit.com/tesla.com",
-      description: "Join Tesla as a Sales Advisor to help customers discover and purchase our electric vehicles and energy products.",
-      educationLevel: "Bachelor",
-      experienceLevel: "Less than 2 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Sales", "Customer Service", "Product Knowledge"],
-      date: "19.11.2025",
-    },
-    // Netflix Jobs
-    {
-      id: "netflix-1",
-      title: "Content Acquisition Manager",
-      company: "Netflix",
-      companyLogo: "https://logo.clearbit.com/netflix.com",
-      description: "Netflix is looking for a Content Acquisition Manager to identify and acquire local content for our streaming platform in Africa.",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Content Acquisition", "Media", "Negotiation", "Entertainment Industry"],
-      date: "20.11.2025",
-    },
-    {
-      id: "netflix-2",
-      title: "Marketing Manager",
-      company: "Netflix",
-      companyLogo: "https://logo.clearbit.com/netflix.com",
-      description: "Join Netflix as a Marketing Manager to develop and execute marketing campaigns that grow our subscriber base in Ghana.",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "Accra",
-      skills: ["Marketing", "Digital Marketing", "Campaign Management", "Brand Marketing"],
-      date: "19.11.2025",
-    },
-    // Additional companies from existing data
-    {
-      id: "finance-1",
-      title: "Accounts and Finance Analyst",
-      company: "Finance Corp",
-      companyLogo: "https://cdn.simpleicons.org/visa/1A1F71",
-      description: "We are looking for an Accounts and Finance Analyst to join our client's team. The ideal candidate will be responsible for financial analysis, budgeting, and reporting.",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "East Legon",
-      skills: ["Accounting", "Budgeting", "Controlling", "Finance", "Financial Statements", "Internal Control", "Investment", "Risk Management"],
-      date: "19.11.2025",
-    },
-    {
-      id: "tech-1",
-      title: "Business Information Analyst",
-      company: "Tech Solutions",
-      companyLogo: "https://cdn.simpleicons.org/google/4285F4",
-      description: "We are looking for a Business Information Analyst to join our client's team. The role involves analyzing business data and providing insights to support decision-making.",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "East Legon",
-      skills: ["Communication", "Marketing", "Marketing Communication"],
-      date: "19.11.2025",
-    },
-    {
-      id: "consulting-1",
-      title: "Business Consultant",
-      company: "Consulting Group",
-      companyLogo: "https://cdn.simpleicons.org/accenture/A100FF",
-      description: "We are looking for an experienced Business Consultant to provide strategic advice and solutions to our clients.",
-      educationLevel: "Master",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "East Legon",
-      skills: ["Strategy", "Consulting", "Business Analysis", "Project Management"],
-      date: "19.11.2025",
-    },
-  ];
 
   // Get active filters based on current selections
   const activeFilters = getActiveFilters();
@@ -1233,11 +859,21 @@ const AllJobs = () => {
                 {/* Job Count */}
                 <div className="mb-6">
                   <p className="text-lg font-semibold text-slate-900">
-                    {filteredJobs.length} Job ads found
+                    {loading ? "Loading..." : `${filteredJobs.length} Job ads found`}
                   </p>
                 </div>
 
                 {/* Job Listings */}
+                {loading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <Spinner />
+                  </div>
+                ) : filteredJobs.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Building2 className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-600">No jobs found matching your criteria.</p>
+                  </div>
+                ) : (
                 <div className="space-y-6">
                   {filteredJobs.map((job, index) => (
                     <motion.div
@@ -1352,6 +988,7 @@ const AllJobs = () => {
                     </motion.div>
                   ))}
                 </div>
+                )}
               </motion.div>
             </main>
           </div>

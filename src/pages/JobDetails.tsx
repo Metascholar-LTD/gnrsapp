@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DestinationCard } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   Building2,
@@ -33,12 +34,23 @@ interface Job {
   company: string;
   companyLogo?: string;
   description: string;
+  descriptionParagraphs?: string[];
+  impactParagraphs?: string[];
+  impactHighlights?: string[];
+  fieldOpsGroups?: Array<{ title: string; items: string[] }>;
+  skillsFormalQualifications?: string[];
+  skillsAdditionalKnowledge?: string[];
+  skillsExperience?: string[];
+  skillsTechnical?: string[];
+  behavioralAttributes?: string[];
   educationLevel: string;
   experienceLevel: string;
   contractType: string;
   region: string;
   city: string;
   skills: string[];
+  cultureParagraphs?: string[];
+  opportunityParagraphs?: string[];
   date: string;
 }
 
@@ -47,11 +59,78 @@ const JobDetails = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { state } = useLocation();
   const { id } = useParams();
 
-  const job = (state as { job?: Job })?.job;
+  useEffect(() => {
+    const loadJob = async () => {
+      // First check if job is in state (from navigation)
+      const stateJob = (state as { job?: Job })?.job;
+      if (stateJob) {
+        setJob(stateJob);
+        setLoading(false);
+        return;
+      }
+
+      // If not in state, fetch from Supabase by ID
+      if (id) {
+        setLoading(true);
+        try {
+          const { data, error } = await (supabase as any)
+            .from('jobs')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+          if (error) {
+            console.error("Error loading job:", error);
+            setLoading(false);
+            return;
+          }
+
+          if (data) {
+            const transformed: Job = {
+              id: data.id,
+              title: data.title,
+              company: data.company,
+              companyLogo: data.company_logo,
+              description: data.description || "",
+              descriptionParagraphs: data.description_paragraphs || [],
+              impactParagraphs: data.impact_paragraphs || [],
+              impactHighlights: data.impact_highlights || [],
+              fieldOpsGroups: data.field_ops_groups || [],
+              skillsFormalQualifications: data.skills_formal_qualifications || [],
+              skillsAdditionalKnowledge: data.skills_additional_knowledge || [],
+              skillsExperience: data.skills_experience || [],
+              skillsTechnical: data.skills_technical || [],
+              behavioralAttributes: data.behavioral_attributes || [],
+              skills: Array.isArray(data.skills) ? data.skills : [],
+              cultureParagraphs: data.culture_paragraphs || [],
+              opportunityParagraphs: data.opportunity_paragraphs || [],
+              educationLevel: data.education_level || "Bachelor",
+              experienceLevel: data.experience_level || "2 to 5 years",
+              contractType: data.contract_type || "Permanent contract",
+              region: data.region || "Greater Accra",
+              city: data.city || "",
+              date: data.date ? new Date(data.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+            };
+            setJob(transformed);
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    loadJob();
+  }, [id, state]);
 
   const goBack = () => navigate("/jobs/all");
 
@@ -67,6 +146,24 @@ const JobDetails = () => {
 
   // Use company logo or a default job-related image
   const heroImageUrl = job?.companyLogo || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=60";
+
+  if (loading) {
+    return (
+      <>
+        <InitScripts />
+        <Spinner />
+        <Navigation />
+        <main className="min-h-screen bg-slate-50 pt-28 pb-20">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-center items-center py-20">
+              <Spinner />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (!job) {
     return (
@@ -114,135 +211,36 @@ const JobDetails = () => {
     </ul>
   );
 
-  const descriptionParagraphs = [
-    job.description,
-    "Newmont is the world’s leading gold company and a producer of copper, silver, zinc and lead. Our world-class portfolio of assets, prospects and talent spans Africa, Australia, Latin America & Caribbean, North America and Papua New Guinea. We are the only gold producer listed in the S&P 500 Index and we are widely recognized for principled environmental, social and governance practices.",
-    "At Newmont, people create the value in the metals we mine and are ambassadors in the communities where they live and work. Together we foster an environment where everyone belongs, thrives and is valued while we deliver results.",
-    "Our Africa operations employ approximately 5,900 employees and contractors, with the majority working at the Ahafo Mine. We offer opportunity, growth and the benefits of a global company, making Newmont a great place to build a career.",
-    "Our Akyem and Ahafo mines have made significant sustainable community investments, including Development Funds that contribute US$1 per ounce of gold sold and 1% of net pre-tax annual profit to host communities.",
-    "Join us and unearth your potential in a global company that is shaping the future of the mining industry.",
-  ];
+  const descriptionParagraphs = job?.descriptionParagraphs && job.descriptionParagraphs.length > 0
+    ? job.descriptionParagraphs
+    : [job?.description || ""];
 
-  const impactParagraphs = [
-    "To contribute to and participate in providing a detailed survey and evaluation service through the use of scientific survey tools and equipment.",
-    "To retain optimum mining levels of the ore body and maintain the longevity of a continuous ore supply.",
-  ];
-
-  const impactHighlights = [
-    "Deliver trusted survey data that powers safe, efficient mining decisions.",
-    "Safeguard ore supply by keeping mining levels and boundaries precise.",
-    "Partner closely with Surveyors, Geologists and Mine Engineers to keep information accurate, accessible and actionable.",
-  ];
-
-  const fieldOperationGroups = [
-    {
-      title: "Health, Safety and Environment",
-      items: [
-        "Deliver on prescribed outcomes by applying Newmont’s Health, Safety and Environment systems, policies and protocols.",
-        "Ensure that safety standards are adhered to across every survey activity.",
-        "Attend monthly safety inspections and meetings to maintain visibility on critical risks.",
-      ],
-    },
-    {
-      title: "Survey Data Calculation & Aggregation",
-      items: [
-        "Compile data from various sources to generate maps.",
-        "Collect, measure, record and calculate survey data from instrumentation and channel inputs into designated systems.",
-        "Check spatial data to verify integrity and accuracy before quality assurance/quality control release.",
-        "Plot survey results emerging from spatial data sets.",
-        "Work with Surveyors, Geologists and Mine Engineers to ensure reliable data capture and usage.",
-      ],
-    },
-    {
-      title: "Survey Execution",
-      items: [
-        "Assist Surveyors in the field to conduct survey work across the mine.",
-        "Undertake routine surveys to measure movements in and out of mining pits and stockpiles.",
-        "Support other field work requirements and operate or adjust equipment on job sites.",
-        "Establish, operate and adjust equipment at surveying job sites.",
-        "Insert flagging around pegs and tape blasted material by defining polygon boundaries.",
-        "Control pit and bench limits, batter profiles and highwall integrity checks.",
-        "Assist with pit and waste dump limits by determining line definitions and examining problem areas.",
-        "Operate field GPS, total station, handheld GPS and leveling equipment to capture as-built data.",
-        "Inspect, adjust and monitor survey and leveling equipment to guarantee accuracy.",
-        "Maintain and calibrate surveying instruments to enable continuous and accurate operations.",
-        "Prepare topographic maps, aerial photo mosaics and other custom land-survey products as required.",
-        "Conduct quality assurance checks on surveys and provide recommendations on technical issues encountered.",
-        "Commit to scheduled training and play an active role in ongoing professional development.",
-        "Operate light vehicles safely and ensure they are stocked with survey gear.",
-      ],
-    },
-    {
-      title: "Survey Planning & Preparation",
-      items: [
-        "Assist in planning open-pit field surveys and set up reference points as benchmarks.",
-        "Contribute to detailed drawings, charts and mine plans.",
-        "Help schedule routine maintenance and respond to equipment variances.",
-        "Lay out blast patterns, drill pick-ups and ore-control polygons.",
-        "Assemble and disassemble markings, stakes and other signifiers at predetermined survey locations.",
-      ],
-    },
-    {
-      title: "Survey Outcome Reporting",
-      items: [
-        "Compile survey notes and reports for review by the Surveyor.",
-        "Deliver report outcomes and recommendations that inform final decision-making.",
-      ],
-    },
-  ];
+  const impactParagraphs = job?.impactParagraphs || [];
+  const impactHighlights = job?.impactHighlights || [];
+  const fieldOperationGroups = job?.fieldOpsGroups || [];
+  const cultureParagraphs = job?.cultureParagraphs || [];
+  const opportunityParagraphs = job?.opportunityParagraphs || [];
 
   const skillsData = [
     {
       title: "Formal Qualifications",
-      items: [
-        "Senior Secondary School Certificate Examination (SSCE) or West African Secondary School Certificate Examination (WASSCE).",
-        "Certificate of completion in survey-related training.",
-        "Valid Ghanaian driving license (minimum license B).",
-      ],
+      items: job?.skillsFormalQualifications || [],
     },
     {
       title: "Additional Knowledge",
-      items: ["Planning and scheduling fundamentals.", "Work management processes."],
+      items: job?.skillsAdditionalKnowledge || [],
     },
     {
       title: "Experience",
-      items: [
-        "2-3 years’ experience in mine surveying within an open-pit mining environment.",
-        "Exposure to mine development, construction, engineering surveys and exploration surveys.",
-      ],
+      items: job?.skillsExperience || [],
     },
     {
       title: "Technical Skills",
-      items: [
-        "Strong proficiency with survey equipment, systems and software.",
-        "Technical troubleshooting and fault finding capability.",
-        "Analytical and problem-solving skills with excellent communication.",
-        "Computer literacy across MS Office, MS Project and GIS/ArcGIS.",
-        "Data analysis, report writing and 3D visualization skills.",
-        "Understanding of mine operations and survey functions.",
-      ],
+      items: job?.skillsTechnical || [],
     },
   ];
 
-  const behavioralAttributes = [
-    "Accuracy",
-    "Analytical mindset",
-    "Detail focused",
-    "Quality oriented",
-    "Reliable",
-    "Safety conscious",
-    "Team player",
-  ];
-
-  const cultureParagraphs = [
-    "The position is located at the Ahafo North Mine site. We understand no candidate will meet every single desired qualification, so if your experience looks a little different and you believe you can bring value, we want to learn more about you.",
-    "Our business success comes from the accomplishments and well-being of our employees and contractors. We aim to build a workplace culture that allows every person to thrive, contribute and grow while feeling proud to work at Newmont.",
-  ];
-
-  const opportunityParagraphs = [
-    "Newmont recruits, hires, places and promotes qualified applicants without regard to gender, race, nationality, ethnic or social origin, religion, disability, age, sexual orientation or any other characteristic protected by law. Females are encouraged to apply.",
-    "We never ask applicants to pay money or provide sensitive personal data outside our secure online portal. If you receive such a request, do not respond and report it immediately to it.sec@newmont.com.",
-  ];
+  const behavioralAttributes = job?.behavioralAttributes || [];
 
   const renderTabContent = () => {
     switch (activeNav) {

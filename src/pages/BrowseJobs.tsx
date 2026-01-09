@@ -8,8 +8,9 @@ import { ArrowRight, Search, Briefcase, MapPin, Building2, Sparkles, Layers, Fac
 import { motion } from "framer-motion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import AnimatedSelect from "@/components/ui/animated-select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 // Job Categories Data
 const JOB_CATEGORIES = [
@@ -93,54 +94,70 @@ const JobFilterCard = ({
   );
 };
 
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  companyLogo?: string;
+  description: string;
+  educationLevel: string;
+  experienceLevel: string;
+  contractType: string;
+  region: string;
+  city: string;
+  skills: string[];
+  date: string;
+}
+
 const BrowseJobs = () => {
   const navigate = useNavigate();
-  
-  // Job data for Recently Added Jobs section
-  const recentJobs = [
-    {
-      id: "recent-1",
-      title: "Marketing Manager- Accra",
-      company: "WESTERN GOVERNORS UNIVERSITY",
-      companyLogo: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=200&h=200&fit=crop&auto=format",
-      description: "Western Governors University (WGU) is seeking an experienced and innovative Marketing Manager to lead the development and execution of marketing strategies that promote the university's mission and offerings. This remote position plays a pivotal role in enhancing WGU's brand presence, driving...",
-      educationLevel: "Bachelor",
-      experienceLevel: "5 to 10 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "East Legon",
-      skills: ["Marketing", "Strategy", "Communication"],
-      date: "19.11.2025",
-    },
-    {
-      id: "recent-2",
-      title: "Field Network Technician- Da...",
-      company: "COLI LINK GHANA LIMITED",
-      companyLogo: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&h=200&fit=crop&auto=format",
-      description: "We are looking for a Field Network Technician. Responsibilities: Survey, Install and Setup Wi-Fi connection for customers of the company. Troubleshoot connectivity and hardware issues of customers of the company. Submit Field Technical Report on jobs daily. Respond promptly to reports forwarded",
-      educationLevel: "HND",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "East Legon",
-      skills: ["Networking", "Technical Support", "Wi-Fi"],
-      date: "19.11.2025",
-    },
-    {
-      id: "recent-3",
-      title: "Operations and Project Assist...",
-      company: "N.C.",
-      companyLogo: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&h=200&fit=crop&auto=format",
-      description: "Operations & Project Assistant (Ghana) Help us bring calm and clarity to the world - starting in Ghana. We're building something that matters: a global method to help people reduce stress, prevent burnout, and take back control of their mental well-being. Our first pilot starts in Ghana - and...",
-      educationLevel: "Bachelor",
-      experienceLevel: "2 to 5 years",
-      contractType: "Permanent contract",
-      region: "Greater Accra",
-      city: "East Legon",
-      skills: ["Operations", "Project Management", "Administration"],
-      date: "21.10.2025",
-    },
-  ];
+  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadRecentJobs();
+  }, []);
+
+  const loadRecentJobs = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from('jobs')
+        .select('*')
+        .eq('verified', true)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (error) {
+        console.error("Error loading recent jobs:", error);
+        setRecentJobs([]);
+        return;
+      }
+
+      if (data) {
+        const transformed: Job[] = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          company: item.company,
+          companyLogo: item.company_logo,
+          description: item.description || "",
+          educationLevel: item.education_level || "Bachelor",
+          experienceLevel: item.experience_level || "2 to 5 years",
+          contractType: item.contract_type || "Permanent contract",
+          region: item.region || "Greater Accra",
+          city: item.city || "",
+          skills: Array.isArray(item.skills) ? item.skills : [],
+          date: item.date ? new Date(item.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+        }));
+        setRecentJobs(transformed);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setRecentJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   return (
     <>

@@ -56,7 +56,7 @@ const AdminJobsHub = () => {
   const tabs = [
     {
       id: "verified-jobs",
-      label: "Verified Job Listings",
+      label: "Job listing",
       icon: CheckCircle2,
       description: "Manage verified and featured job listings"
     },

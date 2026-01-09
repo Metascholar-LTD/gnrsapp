@@ -848,7 +848,7 @@ const VerifiedJobListingsManager = () => {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="text-xl font-bold text-slate-900">Verified Job Listings</h3>
+          <h3 className="text-xl font-bold text-slate-900">Job listing</h3>
           <p className="text-sm text-slate-600 mt-1">
             Manage verified and featured job listings ({filteredJobs.length} jobs)
           </p>
