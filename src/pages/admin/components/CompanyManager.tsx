@@ -390,13 +390,6 @@ interface Job {
           date: new Date().toISOString().split('T')[0],
         };
   
-        console.log("💾 ADMIN SAVE (Company Manager) - Job Payload:", jobPayload);
-        console.log("💾 ADMIN SAVE - Impact Paragraphs:", jobPayload.impact_paragraphs);
-        console.log("💾 ADMIN SAVE - Impact Highlights:", jobPayload.impact_highlights);
-        console.log("💾 ADMIN SAVE - Field Ops Groups:", jobPayload.field_ops_groups);
-        console.log("💾 ADMIN SAVE - Culture Paragraphs:", jobPayload.culture_paragraphs);
-        console.log("💾 ADMIN SAVE - Opportunity Paragraphs:", jobPayload.opportunity_paragraphs);
-  
         if (jobId) {
           const { error } = await supabase
             .from('jobs' as any)

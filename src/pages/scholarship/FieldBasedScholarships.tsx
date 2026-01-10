@@ -215,9 +215,7 @@ const FieldBasedScholarships = () => {
               const element = document.getElementById('scholarships-section');
               element?.scrollIntoView({ behavior: 'smooth' });
             }}
-            onGridImageHover={(index) => {
-              console.log(`Field image ${index} hovered`);
-            }}
+            onGridImageHover={() => {}}
             onGridImageClick={(index) => {
               const element = document.getElementById('scholarships-section');
               element?.scrollIntoView({ behavior: 'smooth' });

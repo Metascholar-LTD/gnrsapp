@@ -41,7 +41,7 @@ const LearningPath = () => (
       { label: "Industry-aligned goals", value: "48%" },
     ]}
     heroActions={
-      <HeroButton onClick={() => console.log("Design my roadmap")}>Design my roadmap</HeroButton>
+      <HeroButton onClick={() => {}}>Design my roadmap</HeroButton>
     }
   >
     <div className="space-y-16">

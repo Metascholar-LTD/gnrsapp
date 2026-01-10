@@ -41,7 +41,7 @@ const MyResources = () => (
       { label: "Storage provided", value: "15GB" },
     ]}
     heroActions={
-      <HeroButton onClick={() => console.log("Organise my library")}>Organise my library</HeroButton>
+      <HeroButton onClick={() => {}}>Organise my library</HeroButton>
     }
   >
     <div className="space-y-16">

@@ -50,7 +50,7 @@ const TimetableBuilder = () => (
       { label: "Shared planners", value: "2,360" },
     ]}
     heroActions={
-      <HeroButton onClick={() => console.log("Launch builder")}>Launch builder</HeroButton>
+      <HeroButton onClick={() => {}}>Launch builder</HeroButton>
     }
   >
     <div className="space-y-16">

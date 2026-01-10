@@ -51,8 +51,8 @@ const AlumniConnect = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Become a mentor")}>Become a mentor</HeroButton>
-        <HeroButton onClick={() => console.log("Submit alumni story")}>Submit alumni story</HeroButton>
+        <HeroButton onClick={() => {}}>Become a mentor</HeroButton>
+        <HeroButton onClick={() => {}}>Submit alumni story</HeroButton>
       </>
     }
   >

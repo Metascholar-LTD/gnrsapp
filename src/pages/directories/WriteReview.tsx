@@ -56,7 +56,6 @@ const WriteReview: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission here
-    console.log('Review submitted', { rating, visitMonth, visitGroup, reviewText, reviewTitle, selectedPhotos, certified });
   };
 
   const isolatedStyles = `

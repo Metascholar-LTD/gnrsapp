@@ -69,7 +69,7 @@ const InternshipGuidance = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Refer a company")}>Refer a company</HeroButton>
+        <HeroButton onClick={() => {}}>Refer a company</HeroButton>
       </>
     }
   >

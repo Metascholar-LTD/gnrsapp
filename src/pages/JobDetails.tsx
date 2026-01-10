@@ -85,7 +85,6 @@ const JobDetails = () => {
           }
 
           if (data) {
-            console.log("🔍 USER VIEW - RAW DB DATA:", data);
             const transformed: Job = {
               id: data.id,
               title: data.title,
@@ -112,10 +111,6 @@ const JobDetails = () => {
               date: data.date ? new Date(data.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
               applicationUrl: data.application_url || "",
             };
-            console.log("🔍 USER VIEW - TRANSFORMED:", transformed);
-            console.log("🔍 impactParagraphs:", transformed.impactParagraphs);
-            console.log("🔍 fieldOpsGroups:", transformed.fieldOpsGroups);
-            console.log("🔍 cultureParagraphs:", transformed.cultureParagraphs);
             setJob(transformed);
           }
         } catch (error) {
@@ -266,8 +261,6 @@ const JobDetails = () => {
           </section>
         );
       case "impact":
-        console.log("🎯 Impact Tab - impactParagraphs:", impactParagraphs);
-        console.log("🎯 Impact Tab - impactHighlights:", impactHighlights);
         return (
           <section className="space-y-5">
             {impactParagraphs.length > 0 ? (
@@ -290,7 +283,6 @@ const JobDetails = () => {
           </section>
         );
       case "field-ops":
-        console.log("🏗️ Field Ops Tab - fieldOperationGroups:", fieldOperationGroups);
         return (
           <section className="space-y-5">
             {fieldOperationGroups.length > 0 ? (
@@ -313,10 +305,6 @@ const JobDetails = () => {
           </section>
         );
       case "skills":
-        console.log("📚 Skills Tab - skillsData:", skillsData);
-        console.log("📚 Skills Tab - behavioralAttributes:", behavioralAttributes);
-        console.log("📚 Skills Tab - skills:", job.skills);
-        
         const hasSkillsData = skillsData.some(block => block.items && block.items.length > 0);
         const hasBehavioralAttributes = behavioralAttributes && behavioralAttributes.length > 0;
         const hasKeySkills = job.skills && job.skills.length > 0;
@@ -364,9 +352,6 @@ const JobDetails = () => {
         );
       case "culture":
       default:
-        console.log("🏢 Culture Tab - cultureParagraphs:", cultureParagraphs);
-        console.log("🏢 Culture Tab - opportunityParagraphs:", opportunityParagraphs);
-        
         const hasCultureContent = cultureParagraphs && cultureParagraphs.length > 0;
         const hasOpportunityContent = opportunityParagraphs && opportunityParagraphs.length > 0;
         

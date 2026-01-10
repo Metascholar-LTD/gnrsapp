@@ -257,9 +257,7 @@ const VerifiedJobListingsManager = () => {
       }
 
       if (data) {
-        console.log("📥 LOADED FROM DB:", data);
         const transformed: Job[] = data.map((item: any) => {
-          console.log("📦 RAW ITEM:", item);
           return {
             id: item.id,
             title: item.title,
@@ -404,13 +402,6 @@ const VerifiedJobListingsManager = () => {
         date: new Date().toISOString().split('T')[0],
       };
 
-      console.log("💾 ADMIN SAVE - Job Payload:", jobPayload);
-      console.log("💾 ADMIN SAVE - Impact Paragraphs:", jobPayload.impact_paragraphs);
-      console.log("💾 ADMIN SAVE - Impact Highlights:", jobPayload.impact_highlights);
-      console.log("💾 ADMIN SAVE - Field Ops Groups:", jobPayload.field_ops_groups);
-      console.log("💾 ADMIN SAVE - Culture Paragraphs:", jobPayload.culture_paragraphs);
-      console.log("💾 ADMIN SAVE - Opportunity Paragraphs:", jobPayload.opportunity_paragraphs);
-
       if (jobId) {
         const { data, error } = await (supabase as any)
           .from('jobs')
@@ -422,7 +413,6 @@ const VerifiedJobListingsManager = () => {
           console.error("❌ SAVE ERROR:", error);
           throw error;
         }
-        console.log("✅ SAVED TO DB:", data);
         toast.success("Job updated successfully");
       } else {
         const { data, error } = await (supabase as any)
@@ -434,7 +424,6 @@ const VerifiedJobListingsManager = () => {
           console.error("❌ SAVE ERROR:", error);
           throw error;
         }
-        console.log("✅ SAVED TO DB:", data);
         toast.success("Job created successfully");
       }
 

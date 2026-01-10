@@ -8,7 +8,6 @@ export const Footer = () => {
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle newsletter subscription
-    console.log("Newsletter subscription:", email);
     setEmail("");
   };
 

@@ -69,8 +69,8 @@ const DepartmentalResources = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Launch departmental portal")}>Launch departmental portal</HeroButton>
-        <HeroButton onClick={() => console.log("Submit new resource")}>Submit new resource</HeroButton>
+        <HeroButton onClick={() => {}}>Launch departmental portal</HeroButton>
+        <HeroButton onClick={() => {}}>Submit new resource</HeroButton>
       </>
     }
   >

@@ -106,11 +106,8 @@ const ShsBeceQuestions = () => {
         throw error;
       }
 
-      console.log("Fetched SHS/BECE questions:", data?.length || 0, "items");
-      
       if (data) {
         const transformed = data.map(transformFromSupabase);
-        console.log("Transformed SHS/BECE questions:", transformed.length, "items");
         setExamPapers(transformed);
       } else {
         setExamPapers([]);

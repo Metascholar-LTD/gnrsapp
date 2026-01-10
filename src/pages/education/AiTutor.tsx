@@ -50,7 +50,7 @@ const AiTutor = () => (
       { label: "Languages supported", value: "7" },
     ]}
     heroActions={
-      <HeroButton onClick={() => console.log("Launch tutor workspace")}>Launch tutor workspace</HeroButton>
+      <HeroButton onClick={() => {}}>Launch tutor workspace</HeroButton>
     }
   >
     <div className="space-y-16">

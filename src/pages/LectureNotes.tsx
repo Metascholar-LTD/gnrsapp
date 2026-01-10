@@ -2382,7 +2382,6 @@ const LectureNotes = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    console.log('Download:', note.id);
                                   }}
                                   className="group relative inline-block text-xs font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700"
                                   style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
@@ -2768,7 +2767,6 @@ const LectureNotes = () => {
                         className="lecture-notes-recommended-bookmark"
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('Bookmark:', note.id);
                         }}
                         title="Save"
                       >

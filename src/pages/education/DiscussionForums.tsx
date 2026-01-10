@@ -50,7 +50,7 @@ const DiscussionForums = () => (
       { label: "Average response time", value: "23 mins" },
     ]}
     heroActions={
-      <HeroButton onClick={() => console.log("Join a featured discussion")}>Join a featured discussion</HeroButton>
+      <HeroButton onClick={() => {}}>Join a featured discussion</HeroButton>
     }
   >
     <div className="space-y-16">

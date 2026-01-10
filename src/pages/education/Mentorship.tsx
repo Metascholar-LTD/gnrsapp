@@ -52,8 +52,8 @@ const Mentorship = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Apply as mentee")}>Apply as mentee</HeroButton>
-        <HeroButton onClick={() => console.log("Volunteer as mentor")}>Volunteer as mentor</HeroButton>
+        <HeroButton onClick={() => {}}>Apply as mentee</HeroButton>
+        <HeroButton onClick={() => {}}>Volunteer as mentor</HeroButton>
       </>
     }
   >

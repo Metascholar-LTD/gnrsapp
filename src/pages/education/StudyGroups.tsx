@@ -50,8 +50,8 @@ const StudyGroups = () => (
     ]}
     heroActions={
       <>
-        <HeroButton onClick={() => console.log("Create a group")}>Create a group</HeroButton>
-        <HeroButton onClick={() => console.log("Find an open slot")}>Find an open slot</HeroButton>
+        <HeroButton onClick={() => {}}>Create a group</HeroButton>
+        <HeroButton onClick={() => {}}>Find an open slot</HeroButton>
       </>
     }
   >

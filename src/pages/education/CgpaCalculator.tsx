@@ -157,8 +157,8 @@ const CgpaCalculator = () => {
       ]}
       heroActions={
         <>
-          <HeroButton onClick={() => console.log("Export summary")}>Export summary</HeroButton>
-          <HeroButton onClick={() => console.log("Sync with advisor")}>Sync with advisor</HeroButton>
+          <HeroButton onClick={() => {}}>Export summary</HeroButton>
+          <HeroButton onClick={() => {}}>Sync with advisor</HeroButton>
         </>
       }
     >

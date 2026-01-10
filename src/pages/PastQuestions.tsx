@@ -138,11 +138,8 @@ const PastQuestions = () => {
         throw error;
       }
 
-      console.log("Fetched past questions:", data?.length || 0, "items");
-      
       if (data) {
         const transformed = data.map(transformFromSupabase);
-        console.log("Transformed past questions:", transformed.length, "items");
         setExamPapers(transformed);
       } else {
         setExamPapers([]);

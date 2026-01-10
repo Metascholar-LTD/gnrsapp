@@ -50,7 +50,7 @@ const CourseRecommendations = () => (
       { label: "Drop rate reduction", value: "31%" },
     ]}
     heroActions={
-      <HeroButton onClick={() => console.log("Build my personalised plan")}>Build my personalised plan</HeroButton>
+      <HeroButton onClick={() => {}}>Build my personalised plan</HeroButton>
     }
   >
     <div className="space-y-16">

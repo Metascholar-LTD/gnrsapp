@@ -41,7 +41,7 @@ const AcademicNotifications = () => (
       { label: "Advisor interventions", value: "98% within 24h" },
     ]}
     heroActions={
-      <HeroButton onClick={() => console.log("Personalise notifications")}>Personalise notifications</HeroButton>
+      <HeroButton onClick={() => {}}>Personalise notifications</HeroButton>
     }
   >
     <div className="space-y-16">

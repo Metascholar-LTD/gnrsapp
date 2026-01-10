@@ -227,7 +227,8 @@ const ListFacility: React.FC = () => {
       return;
     }
 
-    console.log('Facility submitted', {
+    // Facility submitted
+    const facilityData = {
       facilityName,
       about,
       facilityType,
@@ -248,7 +249,7 @@ const ListFacility: React.FC = () => {
       operationalHours,
       images,
       additionalInfo
-    });
+    };
 
     alert('Form submitted successfully!');
   };

@@ -109,9 +109,7 @@ const GetFundScholarships = () => {
               const el = document.getElementById("getfund-applications");
               el?.scrollIntoView({ behavior: "smooth" });
             }}
-            onGridImageHover={(index) => {
-              console.log(`GETFund hero image ${index} hovered`);
-            }}
+            onGridImageHover={() => {}}
             onGridImageClick={() => {
               const el = document.getElementById("getfund-applications");
               el?.scrollIntoView({ behavior: "smooth" });

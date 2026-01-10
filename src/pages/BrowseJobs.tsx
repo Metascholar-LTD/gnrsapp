@@ -85,7 +85,6 @@ const JobFilterCard = ({
             id={title.toLowerCase().replace(/\s+/g, '-')}
             onChange={(value) => {
               setSelectedValue(value);
-              console.log(`Selected ${title}:`, value);
             }}
           />
         </div>

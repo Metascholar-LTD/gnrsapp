@@ -235,9 +235,7 @@ const ScholarshipHub = () => {
               const element = document.getElementById('scholarships-section');
               element?.scrollIntoView({ behavior: 'smooth' });
             }}
-            onGridImageHover={(index) => {
-              console.log(`Scholarship image ${index} hovered`);
-            }}
+            onGridImageHover={() => {}}
             onGridImageClick={(index) => {
               const element = document.getElementById('scholarships-section');
               element?.scrollIntoView({ behavior: 'smooth' });
