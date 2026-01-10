@@ -263,6 +263,28 @@ const AllJobs = () => {
 
   // Filter jobs based on active filters
   const filteredJobs = jobs.filter((job) => {
+    // Filter by tab selection (All Jobs, Management Jobs, IT Jobs, Sales Jobs)
+    if (selectedFilter && selectedFilter !== "all-jobs" && selectedFilter !== "all") {
+      const jobCategoryLower = (job.job_category || "").toLowerCase();
+      
+      if (selectedFilter === "management-jobs") {
+        // Match "Management" in job_category
+        if (!jobCategoryLower.includes("management")) {
+          return false;
+        }
+      } else if (selectedFilter === "it-jobs") {
+        // Match "IT" or "new technologies" in job_category
+        if (!jobCategoryLower.includes("it") && !jobCategoryLower.includes("new technologies")) {
+          return false;
+        }
+      } else if (selectedFilter === "sales-jobs") {
+        // Match "Sales" in job_category
+        if (!jobCategoryLower.includes("sales")) {
+          return false;
+        }
+      }
+    }
+    
     // Filter by job category if any are selected
     const hasCategoryFilter = Object.values(checkedCategories).some(checked => checked);
     if (hasCategoryFilter && jobCategories.length > 0) {
@@ -840,7 +862,7 @@ const AllJobs = () => {
                 {/* Filter Pills */}
                 <div className="flex flex-wrap gap-3 mb-6">
                   {["All Jobs", "Management Jobs", "IT Jobs", "Sales Jobs"].map((filter) => {
-                    const filterKey = filter.toLowerCase().replace(" ", "-");
+                    const filterKey = filter.toLowerCase().replace(/\s+/g, "-");
                     return (
                       <Button
                         key={filter}
