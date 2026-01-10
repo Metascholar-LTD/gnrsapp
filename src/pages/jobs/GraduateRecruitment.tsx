@@ -293,7 +293,7 @@ const GraduateRecruitment = () => {
                 variants={cardVariants}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 className="group cursor-pointer"
-                onClick={() => navigate(`/jobs/${program.id}`, { state: { job: program } })}
+                onClick={() => navigate(`/jobs/graduate-recruitment/${program.id}`)}
               >
                 {/* Compact Card Style - Matching global scholarship page design */}
                 <div className="relative w-full overflow-hidden rounded-2xl border-2 bg-white shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
@@ -374,7 +374,7 @@ const GraduateRecruitment = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/jobs/${program.id}`, { state: { job: program } });
+                          navigate(`/jobs/graduate-recruitment/${program.id}`);
                         }}
                         className="group relative inline-block text-xs font-semibold text-[#bd9f67] transition-colors duration-300 hover:text-[#a88a59]"
                         style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}

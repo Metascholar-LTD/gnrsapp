@@ -344,6 +344,7 @@ const YouthEmploymentAgency = () => {
                 variants={cardVariants}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 className="group cursor-pointer"
+                onClick={() => navigate(`/jobs/yea-jobs/${program.id}`)}
               >
                 {/* Compact Card Style - Matching global scholarship page design */}
                 <div className="relative w-full overflow-hidden rounded-2xl border-2 bg-white shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
@@ -414,24 +415,28 @@ const YouthEmploymentAgency = () => {
                     {/* Action Button - Matching global scholarship page style */}
                     <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-end">
                       <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/jobs/yea-jobs/${program.id}`);
+                        }}
                         className="group relative inline-block text-xs font-semibold text-[#bd9f67] transition-colors duration-300 hover:text-[#a88a59]"
                         style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                       >
-                        <motion.span
-                          className="relative inline-block pb-0.5 flex items-center gap-1"
-                          whileHover={{ x: 2 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                        >
-                          <ArrowRight className="w-3.5 h-3.5" />
-                          View Details
-                          <span
-                            className="absolute bottom-0 left-0 h-[1px] bg-[#bd9f67] transition-all duration-300 group-hover:bg-[#a88a59]"
-                            style={{
-                              width: 'calc(100% + 8px)',
-                              clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
-                            }}
-                          />
-                        </motion.span>
+                          <motion.span
+                            className="relative inline-block pb-0.5 flex items-center gap-1"
+                            whileHover={{ x: 2 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                          >
+                            <ArrowRight className="w-3.5 h-3.5" />
+                            View Details
+                            <span
+                              className="absolute bottom-0 left-0 h-[1px] bg-[#bd9f67] transition-all duration-300 group-hover:bg-[#a88a59]"
+                              style={{
+                                width: 'calc(100% + 8px)',
+                                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                              }}
+                            />
+                          </motion.span>
                       </button>
                     </div>
                   </div>

@@ -25,9 +25,13 @@ import AllJobs from "./pages/AllJobs";
 import JobDetails from "./pages/JobDetails";
 import CompanyDetails from "./pages/CompanyDetails";
 import InternshipListings from "./pages/jobs/InternshipListings";
+import InternshipDetail from "./pages/jobs/InternshipDetail";
 import NationalServiceSupport from "./pages/jobs/NationalServiceSupport";
+import NSSProgramDetail from "./pages/jobs/NSSProgramDetail";
 import GraduateRecruitment from "./pages/jobs/GraduateRecruitment";
+import GraduateProgramDetail from "./pages/jobs/GraduateProgramDetail";
 import YouthEmploymentAgency from "./pages/jobs/YouthEmploymentAgency";
+import YEAProgramDetail from "./pages/jobs/YEAProgramDetail";
 import ShsBeceQuestions from "./pages/education/ShsBeceQuestions";
 import Ebooks from "./pages/education/Ebooks";
 import CourseRecommendations from "./pages/education/CourseRecommendations";
@@ -150,9 +154,13 @@ const App = () => (
           <Route path="/jobs/browse" element={<BrowseJobs />} />
           <Route path="/jobs/all" element={<AllJobs />} />
           <Route path="/jobs/internships" element={<InternshipListings />} />
+          <Route path="/jobs/internships/:id" element={<InternshipDetail />} />
           <Route path="/jobs/nss" element={<NationalServiceSupport />} />
+          <Route path="/jobs/nss/:id" element={<NSSProgramDetail />} />
           <Route path="/jobs/graduate-recruitment" element={<GraduateRecruitment />} />
+          <Route path="/jobs/graduate-recruitment/:id" element={<GraduateProgramDetail />} />
           <Route path="/jobs/yea-jobs" element={<YouthEmploymentAgency />} />
+          <Route path="/jobs/yea-jobs/:id" element={<YEAProgramDetail />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/companies/:name" element={<CompanyDetails />} />
           {/* Skilled Workers Directory */}

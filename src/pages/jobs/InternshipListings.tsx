@@ -265,7 +265,7 @@ const InternshipListings = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="group bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                onClick={() => navigate(`/jobs/${internship.id}`, { state: { job: internship } })}
+                onClick={() => navigate(`/jobs/internships/${internship.id}`)}
               >
                 {/* Image Section - Compact */}
                 <div className="relative w-full h-40 overflow-hidden bg-slate-100">
