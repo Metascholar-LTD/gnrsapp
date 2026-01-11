@@ -115,6 +115,12 @@ const AdminSidebar = () => {
       ],
     },
     {
+      header: "Users",
+      items: [
+        { icon: "users", label: "All Users", path: "/admin/users" },
+      ],
+    },
+    {
       header: "",
       items: [
         { icon: "log-out", label: "Log Out", path: "/admin/logout" },

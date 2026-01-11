@@ -102,6 +102,7 @@ import AdminUniversities from "./pages/admin/AdminUniversities";
 import AdminTrialQuestionManage from "./pages/admin/components/AdminTrialQuestionManage";
 import AdminJobsHub from "./pages/admin/AdminJobsHub";
 import CompanyManager from "./pages/admin/components/CompanyManager";
+import AdminUsersList from "./pages/admin/AdminUsersList";
 
 const queryClient = new QueryClient();
 
@@ -241,6 +242,7 @@ const App = () => (
             <Route path="charts" element={<AdminDashboard />} />
             <Route path="maps" element={<AdminDashboard />} />
             <Route path="info/faqs" element={<AdminFAQsPage />} />
+            <Route path="users" element={<AdminUsersList />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
