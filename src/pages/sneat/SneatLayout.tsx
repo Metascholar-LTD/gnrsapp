@@ -7,35 +7,83 @@ import './sneat-styles.css';
 const SneatLayout: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuCollapsed, setMenuCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
 
+  // Check if mobile on mount and handle responsive behavior
   useEffect(() => {
-    // Load Sneat JS
+    const checkMobile = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 1200); // Bootstrap XL breakpoint
+      
+      // Auto-collapse on tablets and below
+      if (width < 1200) {
+        setMenuCollapsed(true);
+      } else if (width >= 1200 && width < 1600) {
+        // Medium desktop - collapsed by default
+        setMenuCollapsed(true);
+      } else {
+        // Large desktop - expanded by default
+        setMenuCollapsed(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Load only essential Sneat JS (excluding menu.js to prevent conflicts with React)
     const scripts = [
       '/sneat-assets/vendor/js/helpers.js',
       '/sneat-assets/js/config.js',
       '/sneat-assets/vendor/libs/jquery/jquery.js',
       '/sneat-assets/vendor/libs/popper/popper.js',
       '/sneat-assets/vendor/js/bootstrap.js',
-      '/sneat-assets/vendor/js/menu.js',
-      '/sneat-assets/js/main.js',
+      // NOTE: menu.js is excluded - we handle menu behavior in React
     ];
 
     const loadedScripts: HTMLScriptElement[] = [];
+    let scriptsLoaded = 0;
 
-    scripts.forEach(src => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = false;
-      document.body.appendChild(script);
-      loadedScripts.push(script);
-    });
+    const loadScript = (src: string) => {
+      return new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = false;
+        script.onload = () => resolve();
+        script.onerror = () => reject();
+        document.body.appendChild(script);
+        loadedScripts.push(script);
+      });
+    };
+
+    // Load scripts sequentially
+    const loadScripts = async () => {
+      for (const src of scripts) {
+        try {
+          await loadScript(src);
+        } catch (e) {
+          console.warn(`Failed to load script: ${src}`);
+        }
+      }
+    };
+
+    loadScripts();
 
     return () => {
       // Cleanup scripts
       loadedScripts.forEach(script => {
         if (script.parentNode) {
-          script.parentNode.removeChild(script);
+          try {
+            script.parentNode.removeChild(script);
+          } catch (e) {
+            // Ignore removal errors
+          }
         }
       });
     };
@@ -63,7 +111,7 @@ const SneatLayout: React.FC = () => {
     <div className={`layout-wrapper layout-content-navbar ${menuCollapsed ? 'layout-menu-collapsed' : ''}`}>
       <div className="layout-container">
         {/* Menu */}
-        <aside id="layout-menu" className="layout-menu menu-vertical menu bg-menu-theme">
+        <aside id="layout-menu" className={`layout-menu menu-vertical menu bg-menu-theme ${menuOpen ? 'show' : ''}`}>
           <div className="app-brand demo">
             <Link to="/userprofile" className="app-brand-link">
               <span className="app-brand-logo demo">
@@ -257,7 +305,10 @@ const SneatLayout: React.FC = () => {
       </div>
 
       {/* Overlay */}
-      <div className="layout-overlay layout-menu-toggle"></div>
+      <div 
+        className={`layout-overlay layout-menu-toggle ${menuOpen ? 'show' : ''}`}
+        onClick={() => setMenuOpen(false)}
+      ></div>
     </div>
   );
 };

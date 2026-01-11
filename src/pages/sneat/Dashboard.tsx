@@ -1,18 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 const Dashboard: React.FC = () => {
-  useEffect(() => {
-    // Load ApexCharts for dashboard
-    const script = document.createElement('script');
-    script.src = '/sneat-assets/vendor/libs/apex-charts/apexcharts.js';
-    script.async = true;
-    script.onload = () => {
-      const dashScript = document.createElement('script');
-      dashScript.src = '/sneat-assets/js/dashboards-analytics.js';
-      document.body.appendChild(dashScript);
-    };
-    document.body.appendChild(script);
-  }, []);
+  // Note: Chart functionality can be added later using React chart libraries
+  // like recharts, chart.js, or ApexCharts React wrapper if needed
 
   return (
     <>
