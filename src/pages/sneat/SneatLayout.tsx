@@ -514,6 +514,34 @@ const SneatLayout: React.FC = () => {
             align-items: center !important;
             justify-content: flex-start !important;
             text-align: left !important;
+            gap: 0.75rem !important;
+            margin: 0 !important;
+          }
+
+          /* Ensure icon is properly aligned on mobile */
+          .layout-wrapper .layout-menu .menu-item .menu-link .menu-icon {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 1.5rem !important;
+            height: 1.5rem !important;
+            min-width: 1.5rem !important;
+            min-height: 1.5rem !important;
+            flex-shrink: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          /* Ensure menu item text is properly aligned on mobile */
+          .layout-wrapper .layout-menu .menu-item .menu-link div[data-i18n],
+          .layout-wrapper .layout-menu .menu-item .menu-link span {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.5 !important;
+            flex: 1 !important;
           }
 
           .layout-wrapper .layout-menu .app-brand-text,
@@ -547,6 +575,88 @@ const SneatLayout: React.FC = () => {
 
         /* Tablets (576px - 1199px) */
         @media (min-width: 576px) and (max-width: 1199.98px) {
+          /* Ensure wrapper doesn't constrain fixed sidebar */
+          .layout-wrapper {
+            position: relative !important;
+            overflow: visible !important;
+            width: 100% !important;
+            height: 100% !important;
+          }
+
+          /* Ensure menu item names are visible on tablet */
+          .layout-wrapper .layout-menu .menu-item div[data-i18n],
+          .layout-wrapper .layout-menu .menu-item .menu-link span {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.5 !important;
+            flex: 1 !important;
+          }
+
+          .layout-wrapper .layout-menu .menu-item .menu-link {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 0.75rem !important;
+            padding: 0.75rem 1.5rem !important;
+            margin: 0 !important;
+          }
+
+          /* Ensure icon is properly aligned on tablet */
+          .layout-wrapper .layout-menu .menu-item .menu-link .menu-icon {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 1.5rem !important;
+            height: 1.5rem !important;
+            min-width: 1.5rem !important;
+            min-height: 1.5rem !important;
+            flex-shrink: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          /* Fix overlay blocking sidebar toggle */
+          .layout-wrapper .layout-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            z-index: 1000 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out !important;
+          }
+
+          .layout-wrapper .layout-overlay.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+          }
+
+          /* Ensure navbar toggle is above overlay */
+          .layout-wrapper .navbar {
+            z-index: 1002 !important;
+            position: relative !important;
+          }
+
+          .layout-wrapper .navbar .layout-menu-toggle {
+            z-index: 1003 !important;
+            position: relative !important;
+          }
+
+          .layout-wrapper .navbar .layout-menu-toggle a {
+            z-index: 1004 !important;
+            position: relative !important;
+            pointer-events: auto !important;
+          }
+
           .layout-wrapper .layout-menu {
             position: fixed !important;
             top: 0 !important;
@@ -562,6 +672,14 @@ const SneatLayout: React.FC = () => {
             left: 0 !important;
           }
 
+          /* Ensure container doesn't constrain the fixed sidebar */
+          .layout-wrapper .layout-container {
+            position: relative !important;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
           .layout-wrapper .layout-page {
             padding: 0 !important;
             margin: 0 !important;
@@ -569,10 +687,47 @@ const SneatLayout: React.FC = () => {
             max-width: 100vw !important;
             left: 0 !important;
             right: 0 !important;
+            position: relative !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .layout-menu {
+            width: 260px !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .layout-page {
+            padding-left: 0 !important;
+            width: 100vw !important;
           }
 
           .layout-wrapper .menu-toggle-desktop {
             display: none !important;
+          }
+
+          /* Ensure sidebar brand text (Sneat) is visible on tablet */
+          .layout-wrapper .layout-menu .app-brand-text {
+            display: inline-block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+          }
+
+          .layout-wrapper .layout-menu .app-brand {
+            display: flex !important;
+            align-items: center !important;
+            flex-direction: row !important;
+          }
+
+          .layout-wrapper .layout-menu .app-brand-link {
+            display: flex !important;
+            align-items: center !important;
+            flex-direction: row !important;
+            width: 100% !important;
+          }
+
+          /* Ensure menu headers are visible on tablet */
+          .layout-wrapper .layout-menu .menu-header {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
           }
         }
 
