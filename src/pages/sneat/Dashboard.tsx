@@ -1,4 +1,161 @@
-import React from 'react';
+import React, { useState } from 'react';
+import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import { Button } from '@/components/ui/button';
+
+dayjs.extend(isoWeek);
+dayjs.extend(localizedFormat);
+
+// WeekCalendar Component
+const WeekCalendar: React.FC = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const startOfCurrentWeek = dayjs(selectedDate).startOf('week');
+
+  const daysOfWeek = Array.from({ length: 7 }, (_, index) =>
+    startOfCurrentWeek.add(index, 'day')
+  );
+
+  const daysOfWeekLetters = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+  const handlePrevMonth = () => {
+    const newDate = dayjs(selectedDate).subtract(1, 'month');
+    setSelectedDate(newDate.toDate());
+  };
+
+  const handleNextMonth = () => {
+    const newDate = dayjs(selectedDate).add(1, 'month');
+    setSelectedDate(newDate.toDate());
+  };
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#FFFFFF',
+        borderRadius: '0.75rem',
+        padding: '1.25rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.5rem',
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <button
+          onClick={handlePrevMonth}
+          style={{
+            border: 'none',
+            backgroundColor: 'transparent',
+            cursor: 'pointer',
+            padding: '0.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#54577A',
+          }}
+        >
+          <span style={{ fontSize: '1rem' }}>‹</span>
+        </button>
+        <div
+          style={{
+            fontSize: '1rem',
+            fontWeight: 600,
+            color: '#141522',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+          }}
+        >
+          {dayjs(selectedDate).format('MMMM YYYY')}
+        </div>
+        <button
+          onClick={handleNextMonth}
+          style={{
+            border: 'none',
+            backgroundColor: 'transparent',
+            cursor: 'pointer',
+            padding: '0.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#54577A',
+          }}
+        >
+          <span style={{ fontSize: '1rem' }}>›</span>
+        </button>
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        {daysOfWeek.map((day, index) => {
+          const isToday = day.isSame(new Date(), 'day');
+          return (
+            <div
+              key={day.format('YYYY-MM-DD')}
+              onClick={() => setSelectedDate(day.toDate())}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '40px',
+                padding: '0.75rem 0',
+                gap: '1.25rem',
+                borderRadius: '1rem',
+                backgroundColor: isToday ? '#141522' : '#FFFFFF',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '0.875rem',
+                  color: isToday ? '#FFFFFF' : '#141522',
+                  fontWeight: 500,
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
+                {daysOfWeekLetters[index]}
+              </div>
+              <div
+                style={{
+                  height: '32px',
+                  width: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  backgroundColor: isToday ? '#546FFF' : '#F5F5F7',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    color: isToday ? '#FFFFFF' : '#141522',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  }}
+                >
+                  {day.format('D')}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const Dashboard: React.FC = () => {
   // Note: Chart functionality can be added later using React chart libraries
@@ -17,7 +174,19 @@ const Dashboard: React.FC = () => {
                   <p className="mb-4">
                     Your dashboard is ready. Check your analytics and performance metrics below.
                   </p>
-                  <a href="#" className="btn btn-sm btn-outline-primary">View Details</a>
+                  <Button 
+                    variant="default" 
+                    size="default"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Add your navigation logic here
+                    }}
+                    style={{
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    }}
+                  >
+                    View Details
+                  </Button>
                 </div>
               </div>
               <div className="col-sm-5 text-center text-sm-left">
@@ -34,36 +203,47 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Cards Row - Revenue, Sales, Payments, Transactions */}
+      {/* Revenue, Sales and Calendar Row */}
+      <div className="row mb-4">
+        <div className="col-lg-6 col-md-12 mb-4 mb-lg-0">
+          <div className="row g-3">
+            <div className="col-md-6 col-sm-6">
+              <div className="card h-100">
+                <div className="card-body">
+                  <div className="card-title d-flex align-items-start justify-content-between">
+                    <div className="avatar flex-shrink-0">
+                      <img src="/sneat-assets/img/icons/unicons/chart-success.png" alt="chart success" className="rounded" />
+                    </div>
+                  </div>
+                  <span className="fw-semibold d-block mb-1">Revenue</span>
+                  <h3 className="card-title mb-2">$12,628</h3>
+                  <small className="text-success fw-semibold"><i className="bx bx-up-arrow-alt"></i> +72.80%</small>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-sm-6">
+              <div className="card h-100">
+                <div className="card-body">
+                  <div className="card-title d-flex align-items-start justify-content-between">
+                    <div className="avatar flex-shrink-0">
+                      <img src="/sneat-assets/img/icons/unicons/wallet-info.png" alt="wallet" className="rounded" />
+                    </div>
+                  </div>
+                  <span>Sales</span>
+                  <h3 className="card-title text-nowrap mb-1">$4,679</h3>
+                  <small className="text-success fw-semibold"><i className="bx bx-up-arrow-alt"></i> +28.42%</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-lg-6 col-md-12">
+          <WeekCalendar />
+        </div>
+      </div>
+
+      {/* Stats Cards Row - Payments, Transactions */}
       <div className="row">
-        <div className="col-lg-3 col-md-6 col-sm-6 mb-4">
-          <div className="card">
-            <div className="card-body">
-              <div className="card-title d-flex align-items-start justify-content-between">
-                <div className="avatar flex-shrink-0">
-                  <img src="/sneat-assets/img/icons/unicons/chart-success.png" alt="chart success" className="rounded" />
-                </div>
-              </div>
-              <span className="fw-semibold d-block mb-1">Revenue</span>
-              <h3 className="card-title mb-2">$12,628</h3>
-              <small className="text-success fw-semibold"><i className="bx bx-up-arrow-alt"></i> +72.80%</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-3 col-md-6 col-sm-6 mb-4">
-          <div className="card">
-            <div className="card-body">
-              <div className="card-title d-flex align-items-start justify-content-between">
-                <div className="avatar flex-shrink-0">
-                  <img src="/sneat-assets/img/icons/unicons/wallet-info.png" alt="wallet" className="rounded" />
-                </div>
-              </div>
-              <span>Sales</span>
-              <h3 className="card-title text-nowrap mb-1">$4,679</h3>
-              <small className="text-success fw-semibold"><i className="bx bx-up-arrow-alt"></i> +28.42%</small>
-            </div>
-          </div>
-        </div>
         <div className="col-lg-3 col-md-6 col-sm-6 mb-4">
           <div className="card">
             <div className="card-body">
