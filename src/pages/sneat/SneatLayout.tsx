@@ -214,17 +214,22 @@ const SneatLayout: React.FC = () => {
           background-color: #f5f5f9 !important;
         }
 
-        /* Menu toggle button styling - in header, positioned outside sidebar */
+        /* Menu toggle button styling - match PastQuestions/LectureNotes pattern */
         .layout-wrapper .app-brand {
           position: relative !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
         }
 
         .layout-wrapper .menu-toggle-desktop {
-          position: absolute !important;
-          right: -12px !important;
-          top: 50% !important;
-          transform: translateY(-50%) !important;
-          z-index: 1050 !important;
+          margin-left: auto !important;
+          margin-right: 0.5rem !important;
+          flex-shrink: 0 !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .menu-toggle-desktop {
+          margin: 0 auto !important;
         }
 
         .layout-wrapper .menu-toggle-desktop .btn {
@@ -336,6 +341,12 @@ const SneatLayout: React.FC = () => {
           align-items: center !important;
           padding: 1.25rem 1rem !important;
           width: 100% !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .app-brand-link {
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
         }
 
         .layout-wrapper.layout-menu-collapsed .app-brand-logo {
