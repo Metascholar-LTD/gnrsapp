@@ -161,6 +161,46 @@
   padding: 0 !important;
 }
 
+/* Add thin, well-designed divider lines between sections in collapsed state */
+/* Divider after Dashboard (before Learning section) */
+.layout-menu-collapsed .menu-inner > .menu-item:first-of-type .menu-link {
+  position: relative !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.layout-menu-collapsed .menu-inner > .menu-item:first-of-type .menu-link::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -0.5rem !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 50% !important;
+  max-width: 40px !important;
+  height: 1px !important;
+  background-color: #e4e6ef !important;
+  opacity: 0.8 !important;
+}
+
+/* Divider before first item of each section (after hidden menu-header) */
+.layout-menu-collapsed .menu-header + .menu-item .menu-link {
+  position: relative !important;
+  margin-top: 0.75rem !important;
+  padding-top: 0.875rem !important;
+}
+
+.layout-menu-collapsed .menu-header + .menu-item .menu-link::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 50% !important;
+  max-width: 40px !important;
+  height: 1px !important;
+  background-color: #e4e6ef !important;
+  opacity: 0.8 !important;
+}
+
 /* Expanded menu state - Fixed layout */
 .layout-wrapper:not(.layout-menu-collapsed) .layout-menu {
   width: 260px !important;
