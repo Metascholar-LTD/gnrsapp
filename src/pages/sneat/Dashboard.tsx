@@ -274,29 +274,6 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Charts Row */}
-      <div className="row">
-        <div className="col-12 col-lg-8 order-2 order-md-3 order-lg-2 mb-4">
-          <div className="card">
-            <div className="row row-bordered g-0">
-              <div className="col-md-8">
-                <h5 className="card-header m-0 me-2 pb-3">Total Revenue</h5>
-                <div id="totalRevenueChart" className="px-2"></div>
-              </div>
-              <div className="col-md-4">
-                <div className="card-body">
-                  <div className="text-center">
-                    <h6 className="mb-1">Growth Report</h6>
-                  </div>
-                </div>
-                <div id="growthChart"></div>
-                <div className="text-center fw-semibold pt-3 mb-2">62% Company Growth</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
 
       <div className="row">
         <div className="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">

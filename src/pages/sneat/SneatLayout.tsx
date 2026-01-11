@@ -703,7 +703,7 @@ const SneatLayout: React.FC = () => {
             display: none !important;
           }
 
-          /* Ensure sidebar brand text (Sneat) is visible on tablet */
+          /* Ensure sidebar brand text (Sneat) is visible on tablet - match desktop spacing */
           .layout-wrapper .layout-menu .app-brand-text {
             display: inline-block !important;
             opacity: 1 !important;
@@ -720,7 +720,8 @@ const SneatLayout: React.FC = () => {
             display: flex !important;
             align-items: center !important;
             flex-direction: row !important;
-            width: 100% !important;
+            width: auto !important;
+            gap: 0.5rem !important;
           }
 
           /* Ensure menu headers are visible on tablet */
