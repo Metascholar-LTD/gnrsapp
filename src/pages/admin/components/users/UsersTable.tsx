@@ -20,6 +20,7 @@ import DashboardMenu from './DashboardMenu';
 interface UsersTableProps {
   apiRef: RefObject<GridApiCommunity | null>;
   filterButtonEl: HTMLButtonElement | null;
+  paginationModel: { page: number; pageSize: number };
 }
 
 const getStatusChipColor = (value: User['status']): ChipOwnProps['color'] => {
@@ -35,7 +36,7 @@ const getStatusChipColor = (value: User['status']): ChipOwnProps['color'] => {
   }
 };
 
-const UsersTable = ({ apiRef, filterButtonEl }: UsersTableProps) => {
+const UsersTable = ({ apiRef, filterButtonEl, paginationModel }: UsersTableProps) => {
   const columns: GridColDef<User>[] = useMemo(
     () => [
       {
@@ -173,14 +174,9 @@ const UsersTable = ({ apiRef, filterButtonEl }: UsersTableProps) => {
         rows={users}
         apiRef={apiRef}
         columns={columns}
-        pageSizeOptions={[8]}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 8,
-            },
-          },
-        }}
+        paginationModel={paginationModel}
+        pageSizeOptions={[]}
+        hideFooter
         checkboxSelection
         sx={{
           '& .MuiDataGrid-columnHeaders': {
