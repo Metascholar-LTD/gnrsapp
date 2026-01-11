@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Icon } from '@iconify/react';
 
 const SidebarMenu: React.FC = () => {
   const location = useLocation();
@@ -10,7 +11,7 @@ const SidebarMenu: React.FC = () => {
       {/* Dashboard */}
       <li className={`menu-item ${isActive('/userprofile') ? 'active' : ''}`}>
         <Link to="/userprofile" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-home-circle"></i>
+          <Icon icon="hugeicons:grid-view" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Dashboard">Dashboard</div>
         </Link>
       </li>
@@ -23,7 +24,7 @@ const SidebarMenu: React.FC = () => {
       {/* My Courses */}
       <li className="menu-item">
         <Link to="/userprofile/courses" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-book-open"></i>
+          <Icon icon="hugeicons:book-open-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="My Courses">My Courses</div>
         </Link>
       </li>
@@ -31,7 +32,7 @@ const SidebarMenu: React.FC = () => {
       {/* Past Questions */}
       <li className="menu-item">
         <Link to="/userprofile/past-questions" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-file"></i>
+          <Icon icon="hugeicons:file-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Past Questions">Past Questions</div>
         </Link>
       </li>
@@ -39,7 +40,7 @@ const SidebarMenu: React.FC = () => {
       {/* Saved Questions */}
       <li className="menu-item">
         <Link to="/userprofile/saved-questions" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-bookmark"></i>
+          <Icon icon="hugeicons:bookmark-02" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Saved Questions">Saved Questions</div>
         </Link>
       </li>
@@ -52,7 +53,7 @@ const SidebarMenu: React.FC = () => {
       {/* Job Board */}
       <li className="menu-item">
         <a href="#" className="menu-link menu-toggle">
-          <i className="menu-icon tf-icons bx bx-briefcase"></i>
+          <Icon icon="hugeicons:briefcase-02" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Jobs">Jobs</div>
         </a>
         <ul className="menu-sub">
@@ -82,7 +83,7 @@ const SidebarMenu: React.FC = () => {
       {/* Scholarships */}
       <li className="menu-item">
         <a href="#" className="menu-link menu-toggle">
-          <i className="menu-icon tf-icons bx bx-trophy"></i>
+          <Icon icon="hugeicons:school-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Scholarships">Scholarships</div>
         </a>
         <ul className="menu-sub">
@@ -112,7 +113,7 @@ const SidebarMenu: React.FC = () => {
       {/* Networking Hub */}
       <li className="menu-item">
         <Link to="/userprofile/networking" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-group"></i>
+          <Icon icon="mynaui:user-hexagon" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Networking Hub">Networking Hub</div>
         </Link>
       </li>
@@ -120,7 +121,7 @@ const SidebarMenu: React.FC = () => {
       {/* Mentorship Program */}
       <li className="menu-item">
         <a href="#" className="menu-link menu-toggle">
-          <i className="menu-icon tf-icons bx bx-user-voice"></i>
+          <Icon icon="hugeicons:user-group" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Mentorship">Mentorship</div>
         </a>
         <ul className="menu-sub">
@@ -145,7 +146,7 @@ const SidebarMenu: React.FC = () => {
       {/* Messages */}
       <li className="menu-item">
         <Link to="/userprofile/messages" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-chat"></i>
+          <Icon icon="mage:message-dots" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Messages">Messages</div>
           <span className="badge bg-danger rounded-pill ms-auto">5</span>
         </Link>
@@ -159,7 +160,7 @@ const SidebarMenu: React.FC = () => {
       {/* My Services */}
       <li className="menu-item">
         <a href="#" className="menu-link menu-toggle">
-          <i className="menu-icon tf-icons bx bx-store"></i>
+          <Icon icon="hugeicons:store-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="My Services">My Services</div>
         </a>
         <ul className="menu-sub">
@@ -184,7 +185,7 @@ const SidebarMenu: React.FC = () => {
       {/* Performance Analytics */}
       <li className="menu-item">
         <Link to="/userprofile/analytics" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+          <Icon icon="hugeicons:chart-03" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Analytics">Performance Analytics</div>
         </Link>
       </li>
@@ -192,7 +193,7 @@ const SidebarMenu: React.FC = () => {
       {/* Nearby Map */}
       <li className="menu-item">
         <Link to="/userprofile/nearby-map" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-map"></i>
+          <Icon icon="hugeicons:location-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Nearby Map">Nearby Clients & Jobs</div>
         </Link>
       </li>
@@ -200,7 +201,7 @@ const SidebarMenu: React.FC = () => {
       {/* Ratings & Reviews */}
       <li className="menu-item">
         <Link to="/userprofile/ratings" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-star"></i>
+          <Icon icon="hugeicons:star" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Ratings">Ratings & Reviews</div>
         </Link>
       </li>
@@ -213,7 +214,7 @@ const SidebarMenu: React.FC = () => {
       {/* My Profile */}
       <li className="menu-item">
         <Link to="/userprofile/profile" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-user"></i>
+          <Icon icon="hugeicons:user-circle" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="My Profile">My Profile</div>
         </Link>
       </li>
@@ -221,7 +222,7 @@ const SidebarMenu: React.FC = () => {
       {/* Subscription */}
       <li className="menu-item">
         <a href="#" className="menu-link menu-toggle">
-          <i className="menu-icon tf-icons bx bx-credit-card"></i>
+          <Icon icon="hugeicons:wallet-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Subscription">Subscription</div>
         </a>
         <ul className="menu-sub">
@@ -246,7 +247,7 @@ const SidebarMenu: React.FC = () => {
       {/* Settings */}
       <li className="menu-item">
         <a href="#" className="menu-link menu-toggle">
-          <i className="menu-icon tf-icons bx bx-cog"></i>
+          <Icon icon="hugeicons:settings-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Settings">Settings</div>
         </a>
         <ul className="menu-sub">
@@ -276,7 +277,7 @@ const SidebarMenu: React.FC = () => {
       {/* Help & Support */}
       <li className="menu-item">
         <Link to="/userprofile/support" className="menu-link">
-          <i className="menu-icon tf-icons bx bx-help-circle"></i>
+          <Icon icon="hugeicons:help-circle" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Support">Help & Support</div>
         </Link>
       </li>

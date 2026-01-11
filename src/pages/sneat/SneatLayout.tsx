@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Icon } from '@iconify/react';
 import NotificationMenu from './components/NotificationMenu';
 import SidebarMenu from './SidebarMenu';
 
@@ -116,6 +117,73 @@ const SneatLayout: React.FC = () => {
         @import url('/sneat-assets/vendor/css/theme-default.css');
         @import url('/sneat-assets/css/demo.css');
         @import url('simplebar-react/dist/simplebar.min.css');
+
+        /* Apply Plus Jakarta Sans font from dnx - SCOPED to layout-wrapper */
+        .layout-wrapper,
+        .layout-wrapper * {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        /* Iconify icon styling for sidebar - match dnx */
+        .layout-wrapper .menu-icon {
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 1.5rem !important;
+          height: 1.5rem !important;
+          min-width: 1.5rem !important;
+          min-height: 1.5rem !important;
+          color: #54577A !important;
+          transition: color 0.2s ease !important;
+          flex-shrink: 0 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+
+        /* Ensure all menu links have icons visible */
+        .layout-wrapper .menu-link .menu-icon {
+          opacity: 1 !important;
+          visibility: visible !important;
+          display: inline-flex !important;
+        }
+
+        .layout-wrapper .menu-item.active .menu-icon {
+          color: #141522 !important;
+        }
+
+        .layout-wrapper .menu-item:hover .menu-icon {
+          color: #141522 !important;
+        }
+
+        /* dnx sidebar menu item styling - exact match */
+        .layout-wrapper .menu-item .menu-link div[data-i18n],
+        .layout-wrapper .menu-item .menu-link span {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.875rem !important;
+          font-weight: 700 !important;
+          color: #54577A !important;
+        }
+
+        /* dnx menu header styling */
+        .layout-wrapper .menu-header .menu-header-text {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.75rem !important;
+          font-weight: 600 !important;
+          color: #8E92BC !important;
+        }
+
+        /* Active menu item - match dnx */
+        .layout-wrapper .menu-item.active .menu-link div[data-i18n],
+        .layout-wrapper .menu-item.active .menu-link span {
+          color: #141522 !important;
+          font-weight: 700 !important;
+        }
+
+        /* Hover state */
+        .layout-wrapper .menu-item .menu-link:hover div[data-i18n],
+        .layout-wrapper .menu-item .menu-link:hover span {
+          color: #141522 !important;
+        }
 
         /* Ensure proper background colors - SCOPED */
         .layout-wrapper .layout-menu {
@@ -669,7 +737,7 @@ const SneatLayout: React.FC = () => {
             </Link>
 
             <a href="#" className="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none" onClick={(e) => { e.preventDefault(); setMenuOpen(!menuOpen); }}>
-              <i className="bx bx-chevron-left bx-sm align-middle"></i>
+              <Icon icon="iconamoon:arrow-left-2-duotone" style={{ fontSize: '1.25rem' }} />
             </a>
           </div>
 
@@ -701,10 +769,10 @@ const SneatLayout: React.FC = () => {
                 cursor: 'pointer'
               }}
             >
-              <i 
-                className={`bx ${menuCollapsed ? 'bx-chevron-right' : 'bx-chevron-left'}`} 
+              <Icon 
+                icon={menuCollapsed ? 'iconamoon:arrow-right-2-duotone' : 'iconamoon:arrow-left-2-duotone'} 
                 style={{ fontSize: '18px', lineHeight: 1, color: '#697a8d' }}
-              ></i>
+              />
             </button>
           </div>
 
@@ -720,7 +788,7 @@ const SneatLayout: React.FC = () => {
           <nav className="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
             <div className="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
               <a className="nav-item nav-link px-0 me-xl-4" href="#" onClick={(e) => { e.preventDefault(); setMenuOpen(!menuOpen); }}>
-                <i className="bx bx-menu bx-sm"></i>
+                <Icon icon="hugeicons:menu-01" style={{ fontSize: '1.5rem' }} />
               </a>
             </div>
 
@@ -728,7 +796,7 @@ const SneatLayout: React.FC = () => {
               {/* Search */}
               <div className="navbar-nav align-items-center">
                 <div className="nav-item d-flex align-items-center">
-                  <i className="bx bx-search fs-4 lh-0"></i>
+                  <Icon icon="hugeicons:search-01" style={{ fontSize: '1.5rem', marginRight: '0.5rem', color: '#697a8d' }} />
                   <input type="text" className="form-control border-0 shadow-none" placeholder="Search..." aria-label="Search..." />
                 </div>
               </div>
