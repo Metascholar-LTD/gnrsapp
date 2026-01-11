@@ -998,20 +998,20 @@ const SneatLayout: React.FC = () => {
                     </li>
                     <li>
                       <Link className="dropdown-item" to="/userprofile/account-settings/account">
-                        <i className="bx bx-user me-2"></i>
+                        <Icon icon="hugeicons:user-circle" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">My Profile</span>
                       </Link>
                     </li>
                     <li>
                       <a className="dropdown-item" href="#">
-                        <i className="bx bx-cog me-2"></i>
+                        <Icon icon="hugeicons:settings-01" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">Settings</span>
                       </a>
                     </li>
                     <li>
                       <a className="dropdown-item" href="#">
                         <span className="d-flex align-items-center align-middle">
-                          <i className="flex-shrink-0 bx bx-credit-card me-2"></i>
+                          <Icon icon="hugeicons:wallet-01" style={{ fontSize: '1rem', marginRight: '0.5rem', flexShrink: 0 }} />
                           <span className="flex-grow-1 align-middle">Billing</span>
                           <span className="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
                         </span>
@@ -1022,7 +1022,7 @@ const SneatLayout: React.FC = () => {
                     </li>
                     <li>
                       <Link className="dropdown-item" to="/join">
-                        <i className="bx bx-power-off me-2"></i>
+                        <Icon icon="hugeicons:logout-01" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">Log Out</span>
                       </Link>
                     </li>
