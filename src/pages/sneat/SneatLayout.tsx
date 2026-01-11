@@ -200,6 +200,10 @@ const SneatLayout: React.FC = () => {
           margin-bottom: 0 !important;
         }
 
+        .layout-wrapper .app-brand-text {
+          text-transform: uppercase !important;
+        }
+
         .layout-wrapper .card {
           background-color: #fff !important;
           box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
@@ -210,9 +214,17 @@ const SneatLayout: React.FC = () => {
           background-color: #f5f5f9 !important;
         }
 
-        /* Menu toggle button styling */
+        /* Menu toggle button styling - in header, positioned outside sidebar */
+        .layout-wrapper .app-brand {
+          position: relative !important;
+        }
+
         .layout-wrapper .menu-toggle-desktop {
-          position: relative;
+          position: absolute !important;
+          right: -12px !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          z-index: 1050 !important;
         }
 
         .layout-wrapper .menu-toggle-desktop .btn {
@@ -244,8 +256,12 @@ const SneatLayout: React.FC = () => {
         /* Collapsed menu state */
         .layout-wrapper.layout-menu-collapsed .layout-menu {
           width: 80px !important;
-          overflow-x: hidden !important;
+          overflow-x: visible !important;
           overflow-y: auto !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .app-brand {
+          overflow: visible !important;
         }
 
         /* Custom thin scrollbar for collapsed menu */
@@ -298,8 +314,9 @@ const SneatLayout: React.FC = () => {
           display: flex !important;
           justify-content: center !important;
           align-items: center !important;
-          padding: 0.75rem 1.5rem !important;
+          padding: 0.75rem 1rem !important;
           width: 100% !important;
+          margin: 0 auto !important;
         }
 
         /* Keep icons visible and perfectly centered */
@@ -317,7 +334,7 @@ const SneatLayout: React.FC = () => {
           display: flex !important;
           justify-content: center !important;
           align-items: center !important;
-          padding: 1.25rem 1.5rem !important;
+          padding: 1.25rem 1rem !important;
           width: 100% !important;
         }
 
@@ -889,47 +906,25 @@ const SneatLayout: React.FC = () => {
                   </g>
                 </svg>
               </span>
-              <span className="app-brand-text demo menu-text fw-bolder ms-2">Sneat</span>
+              <span className="app-brand-text demo menu-text fw-bolder ms-2">GNRS</span>
             </Link>
+
+            {/* Desktop Menu Toggle Button - In Header */}
+            <div className="menu-toggle-desktop d-none d-xl-block">
+              <button 
+                className="btn btn-sm" 
+                onClick={toggleMenuCollapse}
+              >
+                <Icon 
+                  icon={menuCollapsed ? 'iconamoon:arrow-right-2-duotone' : 'iconamoon:arrow-left-2-duotone'} 
+                  style={{ fontSize: '18px', lineHeight: 1, color: '#697a8d' }}
+                />
+              </button>
+            </div>
 
             <a href="#" className="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none" onClick={(e) => { e.preventDefault(); setMenuOpen(!menuOpen); }}>
               <Icon icon="iconamoon:arrow-left-2-duotone" style={{ fontSize: '1.25rem' }} />
             </a>
-          </div>
-
-          {/* Desktop Menu Toggle Button */}
-          <div 
-            className="menu-toggle-desktop d-none d-xl-block" 
-            style={{ 
-              position: 'absolute', 
-              right: '-12px', 
-              top: '50%', 
-              transform: 'translateY(-50%)',
-              zIndex: 1050 
-            }}
-          >
-            <button 
-              className="btn btn-sm" 
-              onClick={toggleMenuCollapse}
-              style={{ 
-                background: '#fff', 
-                border: '1px solid #d9dee3', 
-                borderRadius: '50%', 
-                width: '28px', 
-                height: '28px', 
-                padding: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0.125rem 0.25rem rgba(161, 172, 184, 0.4)',
-                cursor: 'pointer'
-              }}
-            >
-              <Icon 
-                icon={menuCollapsed ? 'iconamoon:arrow-right-2-duotone' : 'iconamoon:arrow-left-2-duotone'} 
-                style={{ fontSize: '18px', lineHeight: 1, color: '#697a8d' }}
-              />
-            </button>
           </div>
 
           <div className="menu-inner-shadow"></div>
