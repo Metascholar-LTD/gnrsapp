@@ -103,6 +103,7 @@ import AdminTrialQuestionManage from "./pages/admin/components/AdminTrialQuestio
 import AdminJobsHub from "./pages/admin/AdminJobsHub";
 import CompanyManager from "./pages/admin/components/CompanyManager";
 import AdminUsersList from "./pages/admin/AdminUsersList";
+import AdminAuth from "./pages/admin/AdminAuth";
 import SneatLayout from "./pages/sneat/SneatLayout";
 import Dashboard from "./pages/sneat/Dashboard";
 import AccountSettings from "./pages/sneat/pages/AccountSettings";
@@ -208,6 +209,9 @@ const App = () => (
           <Route path="/info/financial-secure" element={<FinancialSecure />} />
           {/* Auth Routes */}
           <Route path="/join" element={<Join />} />
+          {/* Admin Auth Routes - Standalone (not in AdminLayout) */}
+          <Route path="/admin/sign-in" element={<AdminAuth />} />
+          <Route path="/admin/sign-up" element={<AdminAuth />} />
           {/* Resume Builder Routes */}
           <Route path="/jobs/cv-builder" element={<ResumeBuilderIndex />} />
           <Route path="/jobs/cv-builder/builder" element={<ResumeBuilderBuilder />} />
@@ -220,8 +224,6 @@ const App = () => (
             <Route index element={<AdminDashboard />} />
             <Route path="home" element={<AdminHomePage />} />
             <Route path="profile" element={<AdminDashboard />} />
-            <Route path="sign-in" element={<AdminDashboard />} />
-            <Route path="sign-up" element={<AdminDashboard />} />
             <Route path="blank" element={<AdminDashboard />} />
             <Route path="news" element={<AdminDashboard />} />
             <Route path="jobs" element={<AdminJobsHub />} />

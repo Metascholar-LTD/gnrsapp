@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import React from "react";
 import feather from "feather-icons";
@@ -19,6 +19,15 @@ interface SidebarSection {
 
 const AdminSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    // TODO: Clear any authentication state/tokens here
+    // localStorage.removeItem('adminToken');
+    // sessionStorage.clear();
+    navigate('/admin/sign-in');
+  };
 
   useEffect(() => {
     // Initialize sidebar scroll and collapse after component mounts
@@ -162,14 +171,21 @@ const AdminSidebar = () => {
                     <li
                       className={`sidebar-item ${isActive(item.path) ? "active" : ""}`}
                     >
-                      <Link className="sidebar-link" to={item.path}>
-                        {item.label === "Hotels" ? (
-                          <Hotel className="align-middle" size={16} />
-                        ) : (
+                      {isLogOut ? (
+                        <a className="sidebar-link" href="#" onClick={handleLogout}>
                           <i className="align-middle" data-feather={getValidIconName(item.icon)}></i>
-                        )}
-                        <span className="align-middle">{item.label}</span>
-                      </Link>
+                          <span className="align-middle">{item.label}</span>
+                        </a>
+                      ) : (
+                        <Link className="sidebar-link" to={item.path}>
+                          {item.label === "Hotels" ? (
+                            <Hotel className="align-middle" size={16} />
+                          ) : (
+                            <i className="align-middle" data-feather={getValidIconName(item.icon)}></i>
+                          )}
+                          <span className="align-middle">{item.label}</span>
+                        </Link>
+                      )}
                     </li>
                   </React.Fragment>
                 );

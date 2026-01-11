@@ -1,7 +1,17 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import feather from "feather-icons";
 
 const AdminNavbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    // TODO: Clear any authentication state/tokens here
+    // localStorage.removeItem('adminToken');
+    // sessionStorage.clear();
+    navigate('/admin/sign-in');
+  };
   useEffect(() => {
     // Replace feather icons after render using safe replacement
     const timer = setTimeout(() => {
@@ -216,7 +226,8 @@ const AdminNavbar = () => {
                 Help Center
               </a>
               <div className="dropdown-divider"></div>
-              <a className="dropdown-item" href="#">
+              <a className="dropdown-item" href="#" onClick={handleLogout}>
+                <i className="align-middle me-1" data-feather="log-out"></i>{" "}
                 Log out
               </a>
             </div>
