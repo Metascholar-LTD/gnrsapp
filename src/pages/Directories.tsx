@@ -1,26 +1,75 @@
 import React from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
-import { StaggeredMenu } from '@/components/ui/StaggeredMenu';
 import { Link } from 'react-router-dom';
+import { 
+  Database, 
+  Building2, 
+  GraduationCap, 
+  School, 
+  UtensilsCrossed, 
+  Hospital, 
+  Landmark, 
+  ShoppingBag, 
+  MapPin 
+} from 'lucide-react';
 
 const Directories: React.FC = () => {
-  const menuItems = [
-    { label: 'Datasets', ariaLabel: 'Browse datasets', link: '/directories/datasets' },
-    { label: 'Hotels', ariaLabel: 'Browse hotels in Ghana', link: '/directories/hotels' },
-    { label: 'Universities', ariaLabel: 'Browse tertiary universities', link: '/directories/universities' },
-    { label: 'Senior High Schools', ariaLabel: 'Browse SHS schools', link: '/directories/shs' },
-    { label: 'Restaurants', ariaLabel: 'Browse restaurants', link: '/directories/restaurants' },
-    { label: 'Hospitals', ariaLabel: 'Browse hospitals', link: '/directories/hospitals' },
-    { label: 'Banks', ariaLabel: 'Browse banks', link: '/directories/banks' },
-    { label: 'Shopping Malls', ariaLabel: 'Browse shopping malls', link: '/directories/malls' },
-    { label: 'Tourist Sites', ariaLabel: 'Browse tourist attractions', link: '/directories/tourist-sites' },
-  ];
-
-  const socialItems = [
-    { label: 'Facebook', link: 'https://facebook.com' },
-    { label: 'Twitter', link: 'https://twitter.com' },
-    { label: 'Instagram', link: 'https://instagram.com' },
+  const directoryItems = [
+    { 
+      label: 'Datasets', 
+      icon: Database, 
+      link: '/directories/datasets',
+      color: '#3B82F6'
+    },
+    { 
+      label: 'Hotels', 
+      icon: Building2, 
+      link: '/directories/hotels',
+      color: '#8B5CF6'
+    },
+    { 
+      label: 'Universities', 
+      icon: GraduationCap, 
+      link: '/directories/universities',
+      color: '#10B981'
+    },
+    { 
+      label: 'Senior High Schools', 
+      icon: School, 
+      link: '/directories/shs',
+      color: '#F59E0B'
+    },
+    { 
+      label: 'Restaurants', 
+      icon: UtensilsCrossed, 
+      link: '/directories/restaurants',
+      color: '#EF4444'
+    },
+    { 
+      label: 'Hospitals', 
+      icon: Hospital, 
+      link: '/directories/hospitals',
+      color: '#EC4899'
+    },
+    { 
+      label: 'Banks', 
+      icon: Landmark, 
+      link: '/directories/banks',
+      color: '#06B6D4'
+    },
+    { 
+      label: 'Shopping Malls', 
+      icon: ShoppingBag, 
+      link: '/directories/malls',
+      color: '#6366F1'
+    },
+    { 
+      label: 'Tourist Sites', 
+      icon: MapPin, 
+      link: '/directories/tourist-sites',
+      color: '#14B8A6'
+    },
   ];
 
   const isolatedStyles = `
@@ -63,28 +112,97 @@ const Directories: React.FC = () => {
       line-height: 1.6;
     }
 
-    .directories-preview-section {
-      background: white;
-      border-radius: 1rem;
-      padding: 2rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    .directories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
       margin-top: 2rem;
     }
 
-    .directories-preview-title {
-      font-size: 1.5rem;
+    .directory-box {
+      background: white;
+      border: 1px solid hsl(220 13% 91%);
+      border-radius: 0.75rem;
+      padding: 1.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .directory-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease;
+    }
+
+    .directory-box:hover {
+      border-color: currentColor;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .directory-box:hover::before {
+      transform: scaleX(1);
+    }
+
+    .directory-box-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      background: currentColor;
+      color: white;
+      transition: transform 0.2s ease;
+    }
+
+    .directory-box:hover .directory-box-icon {
+      transform: scale(1.1);
+    }
+
+    .directory-box-label {
+      font-size: 1rem;
       font-weight: 600;
       color: hsl(220 30% 15%);
-      margin: 0 0 1rem 0;
+      text-align: center;
+      margin: 0;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     }
 
-    .directories-preview-text {
-      font-size: 1rem;
-      color: hsl(220 20% 40%);
-      line-height: 1.6;
-      margin: 0;
+    .directory-box:hover .directory-box-label {
+      color: currentColor;
+    }
+
+    .directory-box-number {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: currentColor;
+      opacity: 0.4;
+      transition: opacity 0.2s ease;
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .directory-box:hover .directory-box-number {
+      opacity: 1;
     }
 
     /* Mobile: 0px - 767px */
@@ -104,6 +222,30 @@ const Directories: React.FC = () => {
       .directories-subtitle {
         font-size: 1.125rem;
       }
+
+      .directories-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+      }
+
+      .directory-box {
+        padding: 1.5rem 1rem;
+      }
+
+      .directory-box-icon {
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .directory-box-label {
+        font-size: 0.875rem;
+      }
+
+      .directory-box-number {
+        top: 0.75rem;
+        right: 0.75rem;
+        font-size: 0.75rem;
+      }
     }
 
     /* Tablet: 768px - 1199px */
@@ -114,6 +256,11 @@ const Directories: React.FC = () => {
 
       .directories-main-content {
         padding: 1.5rem;
+      }
+
+      .directories-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.25rem;
       }
     }
 
@@ -146,21 +293,6 @@ const Directories: React.FC = () => {
       <Navigation />
       
       <div className="directories-content-wrapper">
-        <StaggeredMenu
-          position="left"
-          items={menuItems}
-          socialItems={socialItems}
-          displaySocials={true}
-          displayItemNumbering={true}
-          menuButtonColor="#2563eb"
-          openMenuButtonColor="#1d4ed8"
-          changeMenuColorOnOpen={true}
-          colors={['#2563eb', '#1d4ed8']}
-          accentColor="#2563eb"
-          isFixed={false}
-          closeOnClickAway={true}
-        />
-        
         <div className="directories-main-content">
           <div className="directories-header">
             <h1 className="directories-title">Ghana Directories</h1>
@@ -170,13 +302,26 @@ const Directories: React.FC = () => {
             </p>
           </div>
 
-          <div className="directories-preview-section">
-            <h2 className="directories-preview-title">Welcome to Ghana Directories</h2>
-            <p className="directories-preview-text">
-              This page will house comprehensive directories of various establishments and locations across Ghana. 
-              Use the menu button in the top right corner to explore different categories. More content will be 
-              added soon including detailed listings, locations, contact information, and more.
-            </p>
+          <div className="directories-grid">
+            {directoryItems.map((item, index) => {
+              const Icon = item.icon;
+              const number = String(index + 1).padStart(2, '0');
+              return (
+                <Link
+                  key={item.label}
+                  to={item.link}
+                  className="directory-box"
+                  style={{ color: item.color }}
+                  aria-label={item.label}
+                >
+                  <span className="directory-box-number">{number}</span>
+                  <div className="directory-box-icon">
+                    <Icon size={20} />
+                  </div>
+                  <p className="directory-box-label">{item.label}</p>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
