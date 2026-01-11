@@ -103,6 +103,10 @@ import AdminTrialQuestionManage from "./pages/admin/components/AdminTrialQuestio
 import AdminJobsHub from "./pages/admin/AdminJobsHub";
 import CompanyManager from "./pages/admin/components/CompanyManager";
 import AdminUsersList from "./pages/admin/AdminUsersList";
+import SneatLayout from "./pages/sneat/SneatLayout";
+import Dashboard from "./pages/sneat/Dashboard";
+import AccountSettings from "./pages/sneat/pages/AccountSettings";
+import { GenericPage, CardsPage, TablesPage, IconsPage, FormsBasicInputs, FormLayouts, ErrorPage, MaintenancePage } from "./pages/sneat/pages/SimplePages";
 
 const queryClient = new QueryClient();
 
@@ -244,6 +248,68 @@ const App = () => (
             <Route path="info/faqs" element={<AdminFAQsPage />} />
             <Route path="users" element={<AdminUsersList />} />
           </Route>
+
+          {/* Sneat User Profile Routes */}
+          <Route path="/userprofile" element={<SneatLayout />}>
+            <Route index element={<Dashboard />} />
+            
+            {/* Account Settings */}
+            <Route path="account-settings/account" element={<AccountSettings />} />
+            <Route path="account-settings/notifications" element={<AccountSettings />} />
+            <Route path="account-settings/connections" element={<AccountSettings />} />
+            
+            {/* Layout Pages */}
+            <Route path="layouts/without-menu" element={<GenericPage title="Without Menu" description="Layout without menu sidebar" />} />
+            <Route path="layouts/without-navbar" element={<GenericPage title="Without Navbar" description="Layout without top navbar" />} />
+            <Route path="layouts/container" element={<GenericPage title="Container Layout" />} />
+            <Route path="layouts/fluid" element={<GenericPage title="Fluid Layout" />} />
+            <Route path="layouts/blank" element={<GenericPage title="Blank Layout" />} />
+            
+            {/* Cards */}
+            <Route path="cards" element={<CardsPage />} />
+            
+            {/* UI Components */}
+            <Route path="ui/accordion" element={<GenericPage title="Accordion" description="Bootstrap accordion components" />} />
+            <Route path="ui/alerts" element={<GenericPage title="Alerts" description="Bootstrap alert components" />} />
+            <Route path="ui/badges" element={<GenericPage title="Badges" description="Bootstrap badge components" />} />
+            <Route path="ui/buttons" element={<GenericPage title="Buttons" description="Bootstrap button components" />} />
+            <Route path="ui/carousel" element={<GenericPage title="Carousel" description="Bootstrap carousel components" />} />
+            <Route path="ui/collapse" element={<GenericPage title="Collapse" description="Bootstrap collapse components" />} />
+            <Route path="ui/dropdowns" element={<GenericPage title="Dropdowns" description="Bootstrap dropdown components" />} />
+            <Route path="ui/footer" element={<GenericPage title="Footer" description="Footer components" />} />
+            <Route path="ui/list-groups" element={<GenericPage title="List Groups" description="Bootstrap list group components" />} />
+            <Route path="ui/modals" element={<GenericPage title="Modals" description="Bootstrap modal components" />} />
+            <Route path="ui/navbar" element={<GenericPage title="Navbar" description="Bootstrap navbar components" />} />
+            <Route path="ui/offcanvas" element={<GenericPage title="Offcanvas" description="Bootstrap offcanvas components" />} />
+            <Route path="ui/pagination-breadcrumbs" element={<GenericPage title="Pagination & Breadcrumbs" />} />
+            <Route path="ui/progress" element={<GenericPage title="Progress" description="Bootstrap progress bars" />} />
+            <Route path="ui/spinners" element={<GenericPage title="Spinners" description="Bootstrap spinner components" />} />
+            <Route path="ui/tabs-pills" element={<GenericPage title="Tabs & Pills" description="Bootstrap tabs and pills" />} />
+            <Route path="ui/toasts" element={<GenericPage title="Toasts" description="Bootstrap toast components" />} />
+            <Route path="ui/tooltips-popovers" element={<GenericPage title="Tooltips & Popovers" />} />
+            <Route path="ui/typography" element={<GenericPage title="Typography" description="Typography styles and examples" />} />
+            
+            {/* Extended UI */}
+            <Route path="extended-ui/perfect-scrollbar" element={<GenericPage title="Perfect Scrollbar" />} />
+            <Route path="extended-ui/text-divider" element={<GenericPage title="Text Divider" />} />
+            
+            {/* Icons */}
+            <Route path="icons" element={<IconsPage />} />
+            
+            {/* Forms */}
+            <Route path="forms/basic-inputs" element={<FormsBasicInputs />} />
+            <Route path="forms/input-groups" element={<GenericPage title="Input Groups" description="Bootstrap input group components" />} />
+            <Route path="form-layouts/vertical" element={<FormLayouts layout="vertical" />} />
+            <Route path="form-layouts/horizontal" element={<FormLayouts layout="horizontal" />} />
+            
+            {/* Tables */}
+            <Route path="tables" element={<TablesPage />} />
+            
+            {/* Misc */}
+            <Route path="misc/error" element={<ErrorPage />} />
+            <Route path="misc/maintenance" element={<MaintenancePage />} />
+          </Route>
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

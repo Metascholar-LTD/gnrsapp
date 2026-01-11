@@ -1,0 +1,252 @@
+/* Import Sneat CSS files */
+@import url('/sneat-assets/vendor/fonts/boxicons.css');
+@import url('/sneat-assets/vendor/css/core.css');
+@import url('/sneat-assets/vendor/css/theme-default.css');
+@import url('/sneat-assets/css/demo.css');
+
+/* Import simplebar CSS for notification panel */
+@import 'simplebar-react/dist/simplebar.min.css';
+
+/* Ensure proper background colors */
+.layout-menu {
+  background-color: #fff !important;
+  box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
+}
+
+/* Sticky logo at top */
+.app-brand.demo {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background-color: #fff !important;
+  margin-bottom: 0 !important;
+}
+
+.card {
+  background-color: #fff !important;
+  box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
+  border: none !important;
+}
+
+.content-wrapper {
+  background-color: #f5f5f9 !important;
+}
+
+/* Menu toggle button styling */
+.menu-toggle-desktop {
+  position: relative;
+}
+
+.menu-toggle-desktop .btn {
+  background: #fff !important;
+  border: 1px solid #d9dee3 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.menu-toggle-desktop .btn:hover {
+  background: #f5f5f9 !important;
+  transform: scale(1.1);
+}
+
+.menu-toggle-desktop .btn i {
+  font-size: 16px !important;
+  line-height: 1 !important;
+  color: #697a8d !important;
+}
+
+/* Collapsed menu state */
+.layout-menu-collapsed .layout-menu {
+  width: 80px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* Custom thin scrollbar for collapsed menu */
+.layout-menu-collapsed .layout-menu::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.layout-menu-collapsed .layout-menu::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.layout-menu-collapsed .layout-menu::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1) !important;
+  border-radius: 10px !important;
+}
+
+.layout-menu-collapsed .layout-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.layout-menu-collapsed .layout-page {
+  padding-left: 80px !important;
+}
+
+/* Hide text elements in collapsed state */
+.layout-menu-collapsed .app-brand-text {
+  display: none !important;
+}
+
+.layout-menu-collapsed .menu-item div[data-i18n] {
+  display: none !important;
+}
+
+.layout-menu-collapsed .menu-header {
+  display: none !important;
+}
+
+.layout-menu-collapsed .menu-sub {
+  display: none !important;
+}
+
+/* Constrain menu items to sidebar width */
+.layout-menu-collapsed .menu-item {
+  display: block !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+.layout-menu-collapsed .menu-link {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 0.75rem 1.5rem !important;
+  width: 100% !important;
+}
+
+/* Keep icons visible and perfectly centered */
+.layout-menu-collapsed .menu-icon {
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  font-size: 1.5rem !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+.layout-menu-collapsed .app-brand {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 1.25rem 1.5rem !important;
+  width: 100% !important;
+}
+
+.layout-menu-collapsed .app-brand-logo {
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Hide chevrons for menu toggles */
+.layout-menu-collapsed .menu-toggle::after {
+  display: none !important;
+}
+
+/* Force menu inner to respect width */
+.layout-menu-collapsed .menu-inner {
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+/* Expanded menu state - Fixed layout */
+.layout-wrapper:not(.layout-menu-collapsed) .layout-menu {
+  width: 260px !important;
+}
+
+.layout-wrapper:not(.layout-menu-collapsed) .layout-page {
+  padding-left: 260px !important;
+}
+
+/* Remove any max-width constraints on content */
+.layout-page {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.container-xxl {
+  max-width: 100% !important;
+  padding-right: 1.5rem !important;
+  padding-left: 1.5rem !important;
+}
+
+/* Smooth transitions */
+.layout-menu {
+  transition: width 0.3s ease-in-out !important;
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  z-index: 1000 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* Thin scrollbar for expanded menu */
+.layout-menu::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.layout-menu::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.layout-menu::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08) !important;
+  border-radius: 10px !important;
+}
+
+.layout-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15) !important;
+}
+
+.layout-page {
+  transition: padding-left 0.3s ease-in-out !important;
+  margin-left: 0 !important;
+}
+
+/* Prevent menu items from wrapping */
+.menu-item {
+  white-space: nowrap !important;
+}
+
+/* Fix menu sub items */
+.layout-menu-collapsed .menu-item.open .menu-sub {
+  display: none !important;
+}
+
+/* Menu inner container */
+.menu-inner {
+  display: block !important;
+}
+
+/* Ensure menu items are visible */
+.layout-menu-collapsed .menu-inner .menu-item {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Active menu item in collapsed state */
+.layout-menu-collapsed .menu-item.active .menu-link {
+  background-color: rgba(105, 108, 255, 0.16) !important;
+}
+
+/* Tooltip on hover for collapsed items */
+.layout-menu-collapsed .menu-item:hover .menu-link {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* All notification styling is now handled inline using MUI sx prop to match Aurora's approach */
