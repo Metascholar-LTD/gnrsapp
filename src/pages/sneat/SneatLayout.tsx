@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import NotificationMenu from './components/NotificationMenu';
 import SidebarMenu from './SidebarMenu';
-import './sneat-styles.css';
 
 const SneatLayout: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -108,7 +107,525 @@ const SneatLayout: React.FC = () => {
   };
 
   return (
-    <div className={`layout-wrapper layout-content-navbar ${menuCollapsed ? 'layout-menu-collapsed' : ''}`}>
+    <>
+      {/* Scoped Sneat Styles - Only apply within this layout */}
+      <style>{`
+        /* Import Sneat CSS files - Scoped to .layout-wrapper */
+        @import url('/sneat-assets/vendor/fonts/boxicons.css');
+        @import url('/sneat-assets/vendor/css/core.css');
+        @import url('/sneat-assets/vendor/css/theme-default.css');
+        @import url('/sneat-assets/css/demo.css');
+        @import url('simplebar-react/dist/simplebar.min.css');
+
+        /* Ensure proper background colors - SCOPED */
+        .layout-wrapper .layout-menu {
+          background-color: #fff !important;
+          box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
+        }
+
+        /* Sticky logo at top */
+        .layout-wrapper .app-brand.demo {
+          position: sticky !important;
+          top: 0 !important;
+          z-index: 10 !important;
+          background-color: #fff !important;
+          margin-bottom: 0 !important;
+        }
+
+        .layout-wrapper .card {
+          background-color: #fff !important;
+          box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
+          border: none !important;
+        }
+
+        .layout-wrapper .content-wrapper {
+          background-color: #f5f5f9 !important;
+        }
+
+        /* Menu toggle button styling */
+        .layout-wrapper .menu-toggle-desktop {
+          position: relative;
+        }
+
+        .layout-wrapper .menu-toggle-desktop .btn {
+          background: #fff !important;
+          border: 1px solid #d9dee3 !important;
+          border-radius: 50% !important;
+          width: 24px !important;
+          height: 24px !important;
+          padding: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
+          cursor: pointer !important;
+          transition: all 0.2s ease-in-out !important;
+        }
+
+        .layout-wrapper .menu-toggle-desktop .btn:hover {
+          background: #f5f5f9 !important;
+          transform: scale(1.1);
+        }
+
+        .layout-wrapper .menu-toggle-desktop .btn i {
+          font-size: 16px !important;
+          line-height: 1 !important;
+          color: #697a8d !important;
+        }
+
+        /* Collapsed menu state */
+        .layout-wrapper.layout-menu-collapsed .layout-menu {
+          width: 80px !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+        }
+
+        /* Custom thin scrollbar for collapsed menu */
+        .layout-wrapper.layout-menu-collapsed .layout-menu::-webkit-scrollbar {
+          width: 4px !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .layout-menu::-webkit-scrollbar-track {
+          background: transparent !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .layout-menu::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.1) !important;
+          border-radius: 10px !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .layout-menu::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .layout-page {
+          padding-left: 80px !important;
+        }
+
+        /* Hide text elements in collapsed state */
+        .layout-wrapper.layout-menu-collapsed .app-brand-text {
+          display: none !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .menu-item div[data-i18n] {
+          display: none !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .menu-header {
+          display: none !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .menu-sub {
+          display: none !important;
+        }
+
+        /* Constrain menu items to sidebar width */
+        .layout-wrapper.layout-menu-collapsed .menu-item {
+          display: block !important;
+          width: 100% !important;
+          overflow: hidden !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .menu-link {
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          padding: 0.75rem 1.5rem !important;
+          width: 100% !important;
+        }
+
+        /* Keep icons visible and perfectly centered */
+        .layout-wrapper.layout-menu-collapsed .menu-icon {
+          margin: 0 auto !important;
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          font-size: 1.5rem !important;
+          width: 1.5rem !important;
+          height: 1.5rem !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .app-brand {
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          padding: 1.25rem 1.5rem !important;
+          width: 100% !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .app-brand-logo {
+          margin: 0 auto !important;
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+        }
+
+        /* Hide chevrons for menu toggles */
+        .layout-wrapper.layout-menu-collapsed .menu-toggle::after {
+          display: none !important;
+        }
+
+        /* Force menu inner to respect width */
+        .layout-wrapper.layout-menu-collapsed .menu-inner {
+          width: 100% !important;
+          padding: 0 !important;
+        }
+
+        /* Add thin divider lines between sections in collapsed state */
+        .layout-wrapper.layout-menu-collapsed .menu-inner > .menu-item:first-of-type .menu-link {
+          position: relative !important;
+          margin-bottom: 0.5rem !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .menu-inner > .menu-item:first-of-type .menu-link::after {
+          content: '' !important;
+          position: absolute !important;
+          bottom: -0.5rem !important;
+          left: 50% !important;
+          transform: translateX(-50%) !important;
+          width: 50% !important;
+          max-width: 40px !important;
+          height: 1px !important;
+          background-color: #e4e6ef !important;
+          opacity: 0.8 !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .menu-header + .menu-item .menu-link {
+          position: relative !important;
+          margin-top: 0.75rem !important;
+          padding-top: 0.875rem !important;
+        }
+
+        .layout-wrapper.layout-menu-collapsed .menu-header + .menu-item .menu-link::before {
+          content: '' !important;
+          position: absolute !important;
+          top: 0 !important;
+          left: 50% !important;
+          transform: translateX(-50%) !important;
+          width: 50% !important;
+          max-width: 40px !important;
+          height: 1px !important;
+          background-color: #e4e6ef !important;
+          opacity: 0.8 !important;
+        }
+
+        /* Expanded menu state - Fixed layout */
+        .layout-wrapper:not(.layout-menu-collapsed) .layout-menu {
+          width: 260px !important;
+        }
+
+        .layout-wrapper:not(.layout-menu-collapsed) .layout-page {
+          padding-left: 260px !important;
+        }
+
+        /* Remove any max-width constraints on content */
+        .layout-wrapper .layout-page {
+          width: 100% !important;
+          max-width: none !important;
+        }
+
+        .layout-wrapper .container-xxl {
+          max-width: 100% !important;
+          padding-right: 1.5rem !important;
+          padding-left: 1.5rem !important;
+        }
+
+        /* Smooth transitions */
+        .layout-wrapper .layout-menu {
+          transition: width 0.3s ease-in-out !important;
+          position: fixed !important;
+          top: 0 !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          z-index: 1000 !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          box-sizing: border-box !important;
+        }
+
+        /* Thin scrollbar for expanded menu */
+        .layout-wrapper .layout-menu::-webkit-scrollbar {
+          width: 6px !important;
+        }
+
+        .layout-wrapper .layout-menu::-webkit-scrollbar-track {
+          background: transparent !important;
+        }
+
+        .layout-wrapper .layout-menu::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.08) !important;
+          border-radius: 10px !important;
+        }
+
+        .layout-wrapper .layout-menu::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .layout-wrapper .layout-page {
+          transition: padding-left 0.3s ease-in-out !important;
+          margin-left: 0 !important;
+        }
+
+        /* Prevent menu items from wrapping */
+        .layout-wrapper .menu-item {
+          white-space: nowrap !important;
+        }
+
+        /* Fix menu sub items */
+        .layout-wrapper.layout-menu-collapsed .menu-item.open .menu-sub {
+          display: none !important;
+        }
+
+        /* Menu inner container */
+        .layout-wrapper .menu-inner {
+          display: block !important;
+        }
+
+        /* Ensure menu items are visible */
+        .layout-wrapper.layout-menu-collapsed .menu-inner .menu-item {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+
+        /* Active menu item in collapsed state */
+        .layout-wrapper.layout-menu-collapsed .menu-item.active .menu-link {
+          background-color: rgba(105, 108, 255, 0.16) !important;
+        }
+
+        /* Tooltip on hover for collapsed items */
+        .layout-wrapper.layout-menu-collapsed .menu-item:hover .menu-link {
+          background-color: rgba(0, 0, 0, 0.04) !important;
+        }
+
+        /* RESPONSIVE BREAKPOINTS */
+        
+        /* Mobile devices (< 576px) */
+        @media (max-width: 575.98px) {
+          .layout-wrapper .layout-menu {
+            position: fixed !important;
+            top: 0 !important;
+            left: -260px !important;
+            width: 260px !important;
+            height: 100vh !important;
+            z-index: 1001 !important;
+            transition: left 0.3s ease-in-out !important;
+            transform: none !important;
+          }
+
+          .layout-wrapper .layout-menu.show {
+            left: 0 !important;
+          }
+
+          .layout-wrapper .layout-page {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            left: 0 !important;
+            right: 0 !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .layout-menu {
+            width: 260px !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .layout-page {
+            padding-left: 0 !important;
+            width: 100vw !important;
+          }
+
+          .layout-wrapper .menu-toggle-desktop {
+            display: none !important;
+          }
+
+          .layout-wrapper .layout-menu .menu-item .menu-link {
+            width: 100% !important;
+            padding: 0.75rem 1.5rem !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
+          }
+
+          .layout-wrapper .layout-menu .app-brand-text,
+          .layout-wrapper .layout-menu .menu-header,
+          .layout-wrapper .layout-menu .menu-text {
+            display: block !important;
+            opacity: 1 !important;
+            text-align: left !important;
+          }
+
+          .layout-wrapper .layout-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            z-index: 1000 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out !important;
+          }
+
+          .layout-wrapper .layout-overlay.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+          }
+        }
+
+        /* Tablets (576px - 1199px) */
+        @media (min-width: 576px) and (max-width: 1199.98px) {
+          .layout-wrapper .layout-menu {
+            position: fixed !important;
+            top: 0 !important;
+            left: -260px !important;
+            width: 260px !important;
+            height: 100vh !important;
+            z-index: 1001 !important;
+            transition: left 0.3s ease-in-out !important;
+            transform: none !important;
+          }
+
+          .layout-wrapper .layout-menu.show {
+            left: 0 !important;
+          }
+
+          .layout-wrapper .layout-page {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            left: 0 !important;
+            right: 0 !important;
+          }
+
+          .layout-wrapper .menu-toggle-desktop {
+            display: none !important;
+          }
+        }
+
+        /* Small Desktop (1200px - 1599px) */
+        @media (min-width: 1200px) and (max-width: 1599.98px) {
+          .layout-wrapper .layout-menu {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 260px !important;
+            height: 100vh !important;
+            transform: none !important;
+          }
+
+          .layout-wrapper .layout-page {
+            padding-left: 260px !important;
+            margin-left: 0 !important;
+            width: calc(100% - 260px) !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .layout-menu {
+            width: 80px !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .layout-page {
+            padding-left: 80px !important;
+            width: calc(100% - 80px) !important;
+          }
+        }
+
+        /* Large Desktop (>= 1600px) */
+        @media (min-width: 1600px) {
+          .layout-wrapper .layout-menu {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 260px !important;
+            height: 100vh !important;
+            transform: none !important;
+          }
+
+          .layout-wrapper .layout-page {
+            padding-left: 260px !important;
+            margin-left: 0 !important;
+            width: calc(100% - 260px) !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .layout-menu {
+            width: 80px !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .layout-page {
+            padding-left: 80px !important;
+            width: calc(100% - 80px) !important;
+          }
+        }
+
+        /* Ensure sidebar is always visible on desktop */
+        @media (min-width: 1200px) {
+          .layout-wrapper .layout-menu {
+            left: 0 !important;
+            position: fixed !important;
+            transform: none !important;
+          }
+
+          .layout-wrapper .layout-overlay {
+            display: none !important;
+          }
+
+          .layout-wrapper:not(.layout-menu-collapsed) .menu-item .menu-link div[data-i18n],
+          .layout-wrapper:not(.layout-menu-collapsed) .menu-item .menu-link span,
+          .layout-wrapper:not(.layout-menu-collapsed) .app-brand-text,
+          .layout-wrapper:not(.layout-menu-collapsed) .menu-header {
+            display: block !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .app-brand-text,
+          .layout-wrapper.layout-menu-collapsed .menu-item div[data-i18n],
+          .layout-wrapper.layout-menu-collapsed .menu-item .menu-link span,
+          .layout-wrapper.layout-menu-collapsed .menu-header,
+          .layout-wrapper.layout-menu-collapsed .menu-sub {
+            display: none !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .menu-link {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+          }
+
+          .layout-wrapper.layout-menu-collapsed .menu-icon {
+            margin: 0 auto !important;
+            display: flex !important;
+          }
+        }
+
+        /* Fix for mobile menu toggle */
+        @media (max-width: 1199.98px) {
+          .layout-wrapper .layout-menu-toggle {
+            display: block !important;
+          }
+
+          .layout-wrapper .navbar .layout-menu-toggle {
+            display: flex !important;
+          }
+        }
+
+        /* Ensure proper z-index stacking */
+        .layout-wrapper .layout-menu {
+          z-index: 1001 !important;
+        }
+
+        .layout-wrapper .layout-overlay {
+          z-index: 1000 !important;
+        }
+
+        .layout-wrapper .layout-page {
+          z-index: 1 !important;
+        }
+      `}</style>
+      <div className={`layout-wrapper layout-content-navbar ${menuCollapsed ? 'layout-menu-collapsed' : ''}`}>
       <div className="layout-container">
         {/* Menu */}
         <aside id="layout-menu" className={`layout-menu menu-vertical menu bg-menu-theme ${menuOpen ? 'show' : ''}`}>
@@ -310,6 +827,7 @@ const SneatLayout: React.FC = () => {
         onClick={() => setMenuOpen(false)}
       ></div>
     </div>
+    </>
   );
 };
 
