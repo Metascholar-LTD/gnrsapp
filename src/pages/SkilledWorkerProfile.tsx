@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -24,7 +24,11 @@ import {
   Shield,
   TrendingUp,
   PenTool,
-  X
+  X,
+  Video,
+  ChevronLeft,
+  ChevronRight,
+  Play
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -406,6 +410,264 @@ const isolatedStyles = `
 
   .swp-portfolio-item:hover img {
     transform: scale(1.05);
+  }
+
+  .swp-portfolio-view-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.625rem 1.25rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  }
+
+  .swp-portfolio-view-more:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Portfolio Modal */
+  .swp-portfolio-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .swp-portfolio-modal {
+    background: white;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .swp-portfolio-modal-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid hsl(40 20% 88%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #111827;
+    color: white;
+  }
+
+  .swp-portfolio-modal-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .swp-portfolio-modal-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .swp-portfolio-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .swp-portfolio-modal-tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #f9fafb;
+    border-bottom: 1px solid hsl(40 20% 88%);
+  }
+
+  .swp-portfolio-modal-tab {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .swp-portfolio-modal-tab:hover {
+    background: white;
+    color: #374151;
+  }
+
+  .swp-portfolio-modal-tab.active {
+    background: white;
+    color: #3b82f6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .swp-portfolio-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    position: relative;
+  }
+
+  .swp-portfolio-modal-viewer {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .swp-portfolio-modal-viewer img,
+  .swp-portfolio-modal-viewer video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .swp-portfolio-modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+
+  .swp-portfolio-modal-nav:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  .swp-portfolio-modal-nav.prev {
+    left: 1rem;
+  }
+
+  .swp-portfolio-modal-nav.next {
+    right: 1rem;
+  }
+
+  .swp-portfolio-modal-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .swp-portfolio-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    background: #f9fafb;
+    border-radius: 0.75rem;
+  }
+
+  .swp-portfolio-modal-thumb {
+    aspect-ratio: 1;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .swp-portfolio-modal-thumb:hover {
+    border-color: #3b82f6;
+    transform: scale(1.05);
+  }
+
+  .swp-portfolio-modal-thumb.active {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+
+  .swp-portfolio-modal-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .swp-portfolio-modal-thumb-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .swp-portfolio-modal-counter {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.75rem;
   }
 
   /* Reviews */
@@ -943,8 +1205,58 @@ export const SkilledWorkerProfile = () => {
   const [reviewText, setReviewText] = useState('');
   const [reviewerName, setReviewerName] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+  const [portfolioActiveTab, setPortfolioActiveTab] = useState<'images' | 'videos'>('images');
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   const worker = getWorkerData(id || 'electrician');
+  
+  // Separate images and videos from portfolio
+  const portfolioImages = worker.portfolio || [];
+  const portfolioVideos: string[] = []; // Add video URLs here if needed
+  
+  const handlePortfolioItemClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setPortfolioActiveTab('images');
+    setShowPortfolioModal(true);
+  };
+  
+  const handleViewMorePortfolio = () => {
+    setSelectedImageIndex(0);
+    setPortfolioActiveTab('images');
+    setShowPortfolioModal(true);
+  };
+  
+  const navigatePortfolio = (direction: 'prev' | 'next') => {
+    const items = portfolioActiveTab === 'images' ? portfolioImages : portfolioVideos;
+    if (direction === 'prev') {
+      setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : items.length - 1));
+    } else {
+      setSelectedImageIndex((prev) => (prev < items.length - 1 ? prev + 1 : 0));
+    }
+  };
+
+  // Keyboard navigation for portfolio modal
+  useEffect(() => {
+    if (!showPortfolioModal) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowPortfolioModal(false);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const items = portfolioActiveTab === 'images' ? portfolioImages : portfolioVideos;
+        setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : items.length - 1));
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const items = portfolioActiveTab === 'images' ? portfolioImages : portfolioVideos;
+        setSelectedImageIndex((prev) => (prev < items.length - 1 ? prev + 1 : 0));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showPortfolioModal, portfolioActiveTab, selectedImageIndex, portfolioImages, portfolioVideos]);
 
   const scrollToReviews = () => {
     const reviewsSection = document.getElementById('swp-reviews-section');
@@ -1148,12 +1460,25 @@ export const SkilledWorkerProfile = () => {
                 Portfolio
               </h2>
               <div id="swp-portfolio-grid">
-                {worker.portfolio.map((image: string, index: number) => (
-                  <div key={index} className="swp-portfolio-item">
+                {portfolioImages.slice(0, 6).map((image: string, index: number) => (
+                  <div 
+                    key={index} 
+                    className="swp-portfolio-item"
+                    onClick={() => handlePortfolioItemClick(index)}
+                  >
                     <img src={image} alt={`Portfolio ${index + 1}`} />
                   </div>
                 ))}
               </div>
+              {portfolioImages.length > 6 && (
+                <button 
+                  className="swp-portfolio-view-more"
+                  onClick={handleViewMorePortfolio}
+                >
+                  <ImageIcon size={16} />
+                  View More ({portfolioImages.length - 6} more)
+                </button>
+              )}
             </motion.section>
 
             {/* Reviews Section */}
@@ -1361,10 +1686,6 @@ export const SkilledWorkerProfile = () => {
                 </div>
               </div>
 
-              <button className="swp-btn swp-btn-primary" style={{ width: '100%', marginTop: '1rem', background: 'rgba(255, 255, 255, 0.1)', border: '2px solid rgba(255, 255, 255, 0.2)' }}>
-                <Calendar className="swp-btn-icon" />
-                Book Appointment
-              </button>
             </motion.div>
 
             {/* Stats Cards */}
@@ -1398,6 +1719,130 @@ export const SkilledWorkerProfile = () => {
         </div>
         </div>
       </div>
+
+      {/* Portfolio Modal */}
+      {showPortfolioModal && (
+        <div 
+          className="swp-portfolio-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPortfolioModal(false);
+            }
+          }}
+        >
+          <div className="swp-portfolio-modal">
+            <div className="swp-portfolio-modal-header">
+              <h3 className="swp-portfolio-modal-title">
+                <ImageIcon size={20} />
+                Portfolio Gallery
+              </h3>
+              <button 
+                className="swp-portfolio-modal-close"
+                onClick={() => setShowPortfolioModal(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="swp-portfolio-modal-tabs">
+              <button
+                className={`swp-portfolio-modal-tab ${portfolioActiveTab === 'images' ? 'active' : ''}`}
+                onClick={() => {
+                  setPortfolioActiveTab('images');
+                  setSelectedImageIndex(0);
+                }}
+              >
+                <ImageIcon size={16} />
+                Images ({portfolioImages.length})
+              </button>
+              <button
+                className={`swp-portfolio-modal-tab ${portfolioActiveTab === 'videos' ? 'active' : ''}`}
+                onClick={() => {
+                  setPortfolioActiveTab('videos');
+                  setSelectedImageIndex(0);
+                }}
+              >
+                <Video size={16} />
+                Videos ({portfolioVideos.length})
+              </button>
+            </div>
+
+            <div className="swp-portfolio-modal-content">
+              {(portfolioActiveTab === 'images' ? portfolioImages : portfolioVideos).length > 0 ? (
+                <>
+                  <div className="swp-portfolio-modal-viewer">
+                    {portfolioActiveTab === 'images' ? (
+                      <img 
+                        src={portfolioImages[selectedImageIndex]} 
+                        alt={`Portfolio image ${selectedImageIndex + 1}`}
+                      />
+                    ) : (
+                      <video 
+                        src={portfolioVideos[selectedImageIndex]} 
+                        controls
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    )}
+                    
+                    {(portfolioActiveTab === 'images' ? portfolioImages : portfolioVideos).length > 1 && (
+                      <>
+                        <button
+                          className="swp-portfolio-modal-nav prev"
+                          onClick={() => navigatePortfolio('prev')}
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                        <button
+                          className="swp-portfolio-modal-nav next"
+                          onClick={() => navigatePortfolio('next')}
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="swp-portfolio-modal-counter">
+                    {selectedImageIndex + 1} / {(portfolioActiveTab === 'images' ? portfolioImages : portfolioVideos).length}
+                  </div>
+
+                  {(portfolioActiveTab === 'images' ? portfolioImages : portfolioVideos).length > 1 && (
+                    <div className="swp-portfolio-modal-grid">
+                      {(portfolioActiveTab === 'images' ? portfolioImages : portfolioVideos).map((item: string, index: number) => (
+                        <div
+                          key={index}
+                          className={`swp-portfolio-modal-thumb ${selectedImageIndex === index ? 'active' : ''}`}
+                          onClick={() => setSelectedImageIndex(index)}
+                        >
+                          {portfolioActiveTab === 'images' ? (
+                            <img src={item} alt={`Thumbnail ${index + 1}`} />
+                          ) : (
+                            <>
+                              <img src={item} alt={`Video thumbnail ${index + 1}`} />
+                              <div className="swp-portfolio-modal-thumb-video">
+                                <Play size={14} fill="white" />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '3rem', 
+                  color: '#6b7280' 
+                }}>
+                  <ImageIcon size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                  <p>No {portfolioActiveTab} available</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
