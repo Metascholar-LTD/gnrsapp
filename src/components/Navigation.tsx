@@ -240,8 +240,7 @@ export const Navigation = React.memo(() => {
         workers: [
           { title: 'Profile Management', items: [
             { to: '/skilled-workers/create-profile', label: 'Create Professional Profile', icon: 'fa-user-plus' },
-            { to: '/skilled-workers/upload-samples', label: 'Upload Work Samples', icon: 'fa-upload' },
-            { to: '/skilled-workers/pricing', label: 'Pricing', icon: 'fa-dollar-sign' }
+            { to: '/skilled-workers/upload-samples', label: 'Upload Work Samples', icon: 'fa-upload' }
           ]}
         ]
       },
