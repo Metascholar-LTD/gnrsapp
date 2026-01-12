@@ -12,6 +12,7 @@ import {
   Mail, 
   Calendar,
   CheckCircle,
+  CheckCircle2,
   Award,
   Briefcase,
   Clock,
@@ -21,7 +22,9 @@ import {
   Image as ImageIcon,
   User,
   Shield,
-  TrendingUp
+  TrendingUp,
+  PenTool,
+  X
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -452,6 +455,198 @@ const isolatedStyles = `
     margin: 0;
   }
 
+  /* Review Form */
+  .swp-review-form {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    border: 1px solid hsl(40 20% 88%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .swp-review-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .swp-review-form-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: hsl(220 30% 15%);
+    margin: 0;
+  }
+
+  .swp-review-form-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(220 15% 45%);
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+  }
+
+  .swp-review-form-close:hover {
+    background: hsl(40 33% 96%);
+    color: hsl(220 30% 15%);
+  }
+
+  .swp-review-form-rating {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+    justify-content: center;
+  }
+
+  .swp-review-form-star {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    color: #d1d5db;
+  }
+
+  .swp-review-form-star:hover {
+    transform: scale(1.1);
+  }
+
+  .swp-review-form-star.active {
+    color: #fbbf24;
+    fill: #fbbf24;
+  }
+
+  .swp-review-form-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid hsl(40 20% 88%);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-family: inherit;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s;
+    background: white;
+  }
+
+  .swp-review-form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .swp-review-form-textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid hsl(40 20% 88%);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-family: inherit;
+    margin-bottom: 0.75rem;
+    resize: vertical;
+    min-height: 80px;
+    transition: all 0.2s;
+    background: white;
+  }
+
+  .swp-review-form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .swp-review-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .swp-review-form-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .swp-review-form-btn-cancel {
+    background: hsl(40 33% 96%);
+    color: hsl(220 30% 15%);
+  }
+
+  .swp-review-form-btn-cancel:hover {
+    background: hsl(40 20% 90%);
+  }
+
+  .swp-review-form-btn-submit {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  }
+
+  .swp-review-form-btn-submit:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  }
+
+  .swp-review-form-btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .swp-review-form-anonymous {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: hsl(40 33% 96%);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .swp-review-form-anonymous:hover {
+    background: hsl(40 20% 90%);
+  }
+
+  .swp-review-form-checkbox {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    accent-color: #3b82f6;
+  }
+
+  .swp-review-form-checkbox-label {
+    font-size: 0.8125rem;
+    color: hsl(220 30% 15%);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .swp-review-form-checkbox-label-icon {
+    width: 14px;
+    height: 14px;
+    color: hsl(220 15% 45%);
+  }
+
+  .swp-review-form-input:disabled {
+    background: hsl(40 33% 96%);
+    color: hsl(220 15% 45%);
+    cursor: not-allowed;
+  }
+
   /* Right Column - Sidebar */
   #swp-right-column {
     display: flex;
@@ -701,7 +896,7 @@ const getWorkerData = (id: string) => {
       yearsExperience: experience,
       responseTime: `${1 + (seed % 4)} hours`
     },
-    badges: ['Licensed', 'Insured', 'Verified', 'Top Rated']
+    badges: ['Licensed', 'Insured', 'Verified']
   };
 
   // Special cases for specific worker types with actual names
@@ -743,8 +938,40 @@ export const SkilledWorkerProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewerName, setReviewerName] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   
   const worker = getWorkerData(id || 'electrician');
+
+  const scrollToReviews = () => {
+    const reviewsSection = document.getElementById('swp-reviews-section');
+    if (reviewsSection) {
+      reviewsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => setShowReviewForm(true), 500);
+    }
+  };
+
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation: if not anonymous, name is required
+    if (!isAnonymous && !reviewerName.trim()) {
+      return;
+    }
+    
+    // In a real app, this would submit to API
+    const finalName = isAnonymous ? 'Anonymous' : reviewerName.trim();
+    alert(`Review submitted by ${finalName}! (This is a demo)`);
+    
+    setShowReviewForm(false);
+    setReviewRating(0);
+    setReviewText('');
+    setReviewerName('');
+    setIsAnonymous(false);
+  };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }).map((_, i) => (
@@ -798,12 +1025,19 @@ export const SkilledWorkerProfile = () => {
                 <p id="swp-title">{worker.title}</p>
               </div>
               <div id="swp-action-buttons">
-              <button
-                className="swp-btn swp-btn-secondary"
-                onClick={() => setIsFavorite(!isFavorite)}
-              >
-                <Heart className="swp-btn-icon" fill={isFavorite ? '#2563eb' : 'none'} />
-              </button>
+                <button 
+                  className="swp-btn swp-btn-primary"
+                  onClick={scrollToReviews}
+                >
+                  <PenTool className="swp-btn-icon" />
+                  Leave a Review
+                </button>
+                <button
+                  className="swp-btn swp-btn-secondary"
+                  onClick={() => setIsFavorite(!isFavorite)}
+                >
+                  <Heart className="swp-btn-icon" fill={isFavorite ? '#2563eb' : 'none'} />
+                </button>
                 <button className="swp-btn swp-btn-secondary">
                   <Share2 className="swp-btn-icon" />
                 </button>
@@ -826,12 +1060,28 @@ export const SkilledWorkerProfile = () => {
             </div>
 
             <div id="swp-badges">
-              {worker.badges.map((badge: string, index: number) => (
-                <span key={index} className="swp-badge">
-                  <Shield className="swp-badge-icon" />
-                  {badge}
-                </span>
-              ))}
+              {worker.badges.map((badge: string, index: number) => {
+                // Get the appropriate icon based on badge name
+                const getBadgeIcon = (badgeName: string) => {
+                  const name = badgeName.toLowerCase();
+                  if (name.includes("licensed")) {
+                    return <Award className="swp-badge-icon" />;
+                  } else if (name.includes("insured")) {
+                    return <Shield className="swp-badge-icon" />;
+                  } else if (name.includes("verified")) {
+                    return <CheckCircle2 className="swp-badge-icon" />;
+                  }
+                  // Default icon
+                  return <Shield className="swp-badge-icon" />;
+                };
+                
+                return (
+                  <span key={index} className="swp-badge">
+                    {getBadgeIcon(badge)}
+                    {badge}
+                  </span>
+                );
+              })}
             </div>
 
             <div id="swp-action-buttons" style={{ marginTop: '1.5rem' }}>
@@ -908,6 +1158,7 @@ export const SkilledWorkerProfile = () => {
 
             {/* Reviews Section */}
             <motion.section
+              id="swp-reviews-section"
               className="swp-section"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -938,6 +1189,140 @@ export const SkilledWorkerProfile = () => {
                   <p className="swp-review-text">{review.text}</p>
                 </div>
               ))}
+
+              {/* Leave a Review Form */}
+              {!showReviewForm ? (
+                <div className="swp-review" style={{ 
+                  background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+                  border: '2px dashed #3b82f6',
+                  padding: '1.5rem',
+                  textAlign: 'center'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '1rem', 
+                    fontWeight: 600, 
+                    color: '#111827', 
+                    margin: '0 0 0.5rem 0' 
+                  }}>
+                    Share Your Experience
+                  </h3>
+                  <p style={{ 
+                    fontSize: '0.8125rem', 
+                    color: '#6b7280', 
+                    margin: '0 0 1rem 0',
+                    lineHeight: '1.5'
+                  }}>
+                    Help others by leaving a review about your experience with {worker.name}
+                  </p>
+                  <button 
+                    className="swp-btn swp-btn-primary"
+                    onClick={() => setShowReviewForm(true)}
+                    style={{ 
+                      minWidth: '160px',
+                      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                    }}
+                  >
+                    <PenTool className="swp-btn-icon" />
+                    Write a Review
+                  </button>
+                </div>
+              ) : (
+                <div className="swp-review-form">
+                  <div className="swp-review-form-header">
+                    <h3 className="swp-review-form-title">Write a Review</h3>
+                    <button 
+                      className="swp-review-form-close"
+                      onClick={() => {
+                        setShowReviewForm(false);
+                        setReviewRating(0);
+                        setReviewText('');
+                        setReviewerName('');
+                      }}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  
+                  <form onSubmit={handleSubmitReview}>
+                    <div className="swp-review-form-rating">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`swp-review-form-star ${reviewRating >= star ? 'active' : ''}`}
+                          onClick={() => setReviewRating(star)}
+                        />
+                      ))}
+                    </div>
+                    
+                    <div 
+                      className="swp-review-form-anonymous"
+                      onClick={() => setIsAnonymous(!isAnonymous)}
+                    >
+                      <input
+                        type="checkbox"
+                        className="swp-review-form-checkbox"
+                        checked={isAnonymous}
+                        onChange={(e) => setIsAnonymous(e.target.checked)}
+                        id="anonymous-toggle"
+                      />
+                      <label 
+                        className="swp-review-form-checkbox-label" 
+                        htmlFor="anonymous-toggle"
+                      >
+                        <User className="swp-review-form-checkbox-label-icon" />
+                        Post as Anonymous
+                      </label>
+                    </div>
+                    
+                    <input
+                      type="text"
+                      className="swp-review-form-input"
+                      placeholder={isAnonymous ? "Anonymous" : "Your name *"}
+                      value={reviewerName}
+                      onChange={(e) => setReviewerName(e.target.value)}
+                      disabled={isAnonymous}
+                      required={!isAnonymous}
+                    />
+                    
+                    <textarea
+                      className="swp-review-form-textarea"
+                      placeholder="Share your experience..."
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      required
+                      rows={3}
+                    />
+                    
+                    <div className="swp-review-form-actions">
+                      <button
+                        type="button"
+                        className="swp-review-form-btn swp-review-form-btn-cancel"
+                        onClick={() => {
+                          setShowReviewForm(false);
+                          setReviewRating(0);
+                          setReviewText('');
+                          setReviewerName('');
+                          setIsAnonymous(false);
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="swp-review-form-btn swp-review-form-btn-submit"
+                        disabled={
+                          !reviewText.trim() || 
+                          reviewRating === 0 || 
+                          (!isAnonymous && !reviewerName.trim())
+                        }
+                      >
+                        <CheckCircle size={14} />
+                        Submit Review
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
             </motion.section>
           </div>
 

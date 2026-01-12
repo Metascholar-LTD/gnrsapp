@@ -43,6 +43,15 @@ import {
   Shirt,
   CheckCircle
 } from "lucide-react";
+import {
+  AddWorkerModal,
+  EditWorkerModal,
+  ViewWorkerModal,
+  ApprovalModal,
+  AddCategoryModal,
+  EditCategoryModal,
+  DeleteConfirmModal
+} from "./components/SkilledWorkersModals";
 
 const AdminSkilledWorkers = () => {
   const location = useLocation();
@@ -52,6 +61,18 @@ const AdminSkilledWorkers = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const spacerRef = useRef<HTMLDivElement>(null);
+
+  // Modal states
+  const [showAddWorker, setShowAddWorker] = useState(false);
+  const [showEditWorker, setShowEditWorker] = useState(false);
+  const [showViewWorker, setShowViewWorker] = useState(false);
+  const [showApproval, setShowApproval] = useState(false);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [showEditCategory, setShowEditCategory] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState<any>(null);
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "worker" | "category"; id: number; name: string } | null>(null);
 
   // Set active tab based on route
   useEffect(() => {
@@ -244,6 +265,66 @@ const AdminSkilledWorkers = () => {
     const matchesCategory = categoryFilter === "all" || worker.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
   });
+
+  // Modal handlers
+  const handleViewWorker = (worker: any) => {
+    setSelectedWorker(worker);
+    setShowViewWorker(true);
+  };
+
+  const handleEditWorker = (worker: any) => {
+    setSelectedWorker(worker);
+    setShowEditWorker(true);
+  };
+
+  const handleDeleteWorker = (worker: any) => {
+    setDeleteTarget({ type: "worker", id: worker.id, name: worker.name });
+    setShowDeleteConfirm(true);
+  };
+
+  const handleApproveReject = (worker: any) => {
+    setSelectedWorker(worker);
+    setShowApproval(true);
+  };
+
+  const handleEditCategory = (category: any) => {
+    setSelectedCategory(category);
+    setShowEditCategory(true);
+  };
+
+  const handleDeleteCategory = (category: any) => {
+    setDeleteTarget({ type: "category", id: category.id, name: category.name });
+    setShowDeleteConfirm(true);
+  };
+
+  const handleSaveWorker = (worker: any) => {
+    console.log("Saving worker:", worker);
+    // Add API call here
+  };
+
+  const handleSaveCategory = (category: any) => {
+    console.log("Saving category:", category);
+    // Add API call here
+  };
+
+  const handleApprove = (id: number) => {
+    console.log("Approving worker:", id);
+    // Add API call here
+  };
+
+  const handleReject = (id: number, reason: string) => {
+    console.log("Rejecting worker:", id, "Reason:", reason);
+    // Add API call here
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget) {
+      console.log(`Deleting ${deleteTarget.type}:`, deleteTarget.id);
+      // Add API call here
+    }
+    setShowDeleteConfirm(false);
+    setDeleteTarget(null);
+  };
 
   const isolatedStyles = `
     #asw-wrapper {
@@ -1000,7 +1081,7 @@ const AdminSkilledWorkers = () => {
           More Filters
         </button>
 
-        <button className="asw-btn asw-btn-primary">
+        <button className="asw-btn asw-btn-primary" onClick={() => setShowAddWorker(true)}>
           <Plus className="asw-btn-icon" />
           Add Worker
         </button>
@@ -1076,13 +1157,13 @@ const AdminSkilledWorkers = () => {
                 </td>
                 <td>
                   <div className="asw-actions">
-                    <button className="asw-action-btn view" title="View Details">
+                    <button className="asw-action-btn view" title="View Details" onClick={() => handleViewWorker(worker)}>
                       <Eye className="asw-action-icon" />
                     </button>
-                    <button className="asw-action-btn edit" title="Edit Worker">
+                    <button className="asw-action-btn edit" title="Edit Worker" onClick={() => handleEditWorker(worker)}>
                       <Edit2 className="asw-action-icon" />
                     </button>
-                    <button className="asw-action-btn delete" title="Delete Worker">
+                    <button className="asw-action-btn delete" title="Delete Worker" onClick={() => handleDeleteWorker(worker)}>
                       <Trash2 className="asw-action-icon" />
                     </button>
                   </div>
@@ -1109,7 +1190,7 @@ const AdminSkilledWorkers = () => {
         <h3 style={{ margin: 0, fontSize: "1.125rem", fontWeight: 600, color: "#111827", flex: 1 }}>
           All Categories ({categories.length})
         </h3>
-        <button className="asw-btn asw-btn-primary">
+        <button className="asw-btn asw-btn-primary" onClick={() => setShowAddCategory(true)}>
           <Plus className="asw-btn-icon" />
           Add Category
         </button>
@@ -1134,10 +1215,10 @@ const AdminSkilledWorkers = () => {
                   <Eye className="asw-btn-icon" />
                   View
                 </button>
-                <button className="asw-action-btn edit">
+                <button className="asw-action-btn edit" title="Edit Category" onClick={() => handleEditCategory(category)}>
                   <Edit2 className="asw-action-icon" />
                 </button>
-                <button className="asw-action-btn delete">
+                <button className="asw-action-btn delete" title="Delete Category" onClick={() => handleDeleteCategory(category)}>
                   <Trash2 className="asw-action-icon" />
                 </button>
               </div>
@@ -1251,19 +1332,21 @@ const AdminSkilledWorkers = () => {
                   </td>
                   <td>
                     <div className="asw-actions">
-                      <button className="asw-action-btn view" title="View Details">
+                      <button className="asw-action-btn view" title="View Details" onClick={() => handleViewWorker(worker)}>
                         <Eye className="asw-action-icon" />
                       </button>
-                      <button 
-                        className="asw-action-btn edit" 
+                      <button
+                        className="asw-action-btn edit"
                         title="Approve Worker"
                         style={{ background: "#dcfce7", borderColor: "#10b981", color: "#10b981" }}
+                        onClick={() => handleApproveReject(worker)}
                       >
                         <CheckCircle2 className="asw-action-icon" />
                       </button>
-                      <button 
-                        className="asw-action-btn delete" 
+                      <button
+                        className="asw-action-btn delete"
                         title="Reject Worker"
+                        onClick={() => handleApproveReject(worker)}
                       >
                         <XCircle className="asw-action-icon" />
                       </button>
@@ -1384,6 +1467,50 @@ const AdminSkilledWorkers = () => {
         {activeTab === "categories" && renderCategories()}
         {activeTab === "analytics" && renderAnalytics()}
       </div>
+
+      {/* Modals */}
+      <AddWorkerModal
+        isOpen={showAddWorker}
+        onClose={() => setShowAddWorker(false)}
+        onSave={handleSaveWorker}
+      />
+      <EditWorkerModal
+        isOpen={showEditWorker}
+        onClose={() => setShowEditWorker(false)}
+        onSave={handleSaveWorker}
+        worker={selectedWorker}
+      />
+      <ViewWorkerModal
+        isOpen={showViewWorker}
+        onClose={() => setShowViewWorker(false)}
+        worker={selectedWorker}
+      />
+      <ApprovalModal
+        isOpen={showApproval}
+        onClose={() => setShowApproval(false)}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        worker={selectedWorker}
+      />
+      <AddCategoryModal
+        isOpen={showAddCategory}
+        onClose={() => setShowAddCategory(false)}
+        onSave={handleSaveCategory}
+      />
+      <EditCategoryModal
+        isOpen={showEditCategory}
+        onClose={() => setShowEditCategory(false)}
+        onSave={handleSaveCategory}
+        category={selectedCategory}
+      />
+      <DeleteConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleConfirmDelete}
+        title={`Delete ${deleteTarget?.type === 'worker' ? 'Worker' : 'Category'}`}
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        type={deleteTarget?.type}
+      />
     </div>
   );
 };

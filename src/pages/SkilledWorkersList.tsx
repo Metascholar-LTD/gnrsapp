@@ -432,7 +432,7 @@ export const SkilledWorkersList = () => {
         yearsExperience: worker.experience,
         responseTime: `${1 + (seed % 4)} hours`
       },
-      badges: ['Licensed', 'Insured', 'Verified', 'Top Rated']
+      badges: ['Licensed', 'Insured', 'Verified']
     };
   };
 
