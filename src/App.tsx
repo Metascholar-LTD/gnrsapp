@@ -104,6 +104,7 @@ import AdminJobsHub from "./pages/admin/AdminJobsHub";
 import CompanyManager from "./pages/admin/components/CompanyManager";
 import AdminUsersList from "./pages/admin/AdminUsersList";
 import AdminAuth from "./pages/admin/AdminAuth";
+import AdminSkilledWorkers from "./pages/admin/AdminSkilledWorkers";
 import SneatLayout from "./pages/sneat/SneatLayout";
 import Dashboard from "./pages/sneat/Dashboard";
 import AccountSettings from "./pages/sneat/pages/AccountSettings";
@@ -238,7 +239,10 @@ const App = () => (
             <Route path="education/trial-questions/:id/manage" element={<AdminTrialQuestionManage />} />
             <Route path="directories" element={<AdminDashboard />} />
             <Route path="directories/universities" element={<AdminUniversities />} />
-            <Route path="skilled-workers" element={<AdminDashboard />} />
+            <Route path="skilled-workers" element={<AdminSkilledWorkers />} />
+            <Route path="skilled-workers/categories" element={<AdminSkilledWorkers />} />
+            <Route path="skilled-workers/profiles" element={<AdminSkilledWorkers />} />
+            <Route path="skilled-workers/approval" element={<AdminSkilledWorkers />} />
             <Route path="scholarships" element={<AdminScholarshipHub />} />
             <Route path="ui-buttons" element={<AdminDashboard />} />
             <Route path="ui-forms" element={<AdminDashboard />} />
