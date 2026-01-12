@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import Chart from "chart.js";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   Users,
   UserCheck,
@@ -66,6 +68,27 @@ const getInitials = (name: string): string => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
+// Helper function to get category icon
+const getCategoryIcon = (name: string) => {
+  const lower = name.toLowerCase();
+  if (lower.includes('electric') || lower.includes('electrical')) return Zap;
+  if (lower.includes('carpenter') || lower.includes('wood') || lower.includes('furniture')) return Hammer;
+  if (lower.includes('plumb')) return Droplet;
+  if (lower.includes('mason') || lower.includes('brick')) return Building2;
+  if (lower.includes('weld')) return Flame;
+  if (lower.includes('paint')) return Paintbrush;
+  if (lower.includes('tailor') || lower.includes('seamstress') || lower.includes('upholster')) return Scissors;
+  if (lower.includes('barber')) return Scissors;
+  if (lower.includes('hair')) return User;
+  if (lower.includes('auto') || lower.includes('mechanic') || lower.includes('tire') || lower.includes('diesel') || lower.includes('truck')) return Car;
+  if (lower.includes('cater') || lower.includes('chef') || lower.includes('cake') || lower.includes('food')) return ChefHat;
+  if (lower.includes('clean') || lower.includes('janitor')) return Sparkles;
+  if (lower.includes('ac') || lower.includes('hvac') || lower.includes('heating') || lower.includes('refrigeration') || lower.includes('elevator') || lower.includes('appliance') || lower.includes('locksmith') || lower.includes('security') || lower.includes('power tool')) return Wrench;
+  if (lower.includes('construction') || lower.includes('contractor') || lower.includes('roof') || lower.includes('floor') || lower.includes('tile') || lower.includes('window') || lower.includes('fence') || lower.includes('landscape') || lower.includes('solar') || lower.includes('steel') || lower.includes('iron') || lower.includes('concrete') || lower.includes('drywall') || lower.includes('glazier') || lower.includes('crane') || lower.includes('surveyor') || lower.includes('asphalt') || lower.includes('architectural') || lower.includes('civil') || lower.includes('interior')) return Building2;
+  if (lower.includes('makeup') || lower.includes('nail') || lower.includes('jewel')) return Sparkles;
+  return Briefcase;
+};
+
 const AdminSkilledWorkers = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
@@ -95,7 +118,12 @@ const AdminSkilledWorkers = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: "worker" | "category"; id: number; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "worker" | "category"; id: string; name: string } | null>(null);
+  
+  // Data states
+  const [workers, setWorkers] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Set active tab based on route
   useEffect(() => {
@@ -137,6 +165,109 @@ const AdminSkilledWorkers = () => {
 
     return () => {};
   }, []);
+
+  // Load data from Supabase
+  useEffect(() => {
+    loadWorkers();
+    loadCategories();
+  }, []);
+
+  const loadWorkers = async () => {
+    setLoading(true);
+    try {
+      // Load workers with services and portfolio
+      const { data: workersData, error: workersError } = await supabase
+        .from('skilled_workers' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (workersError) throw workersError;
+
+      if (workersData) {
+        // Load services and portfolio for each worker
+        const workersWithData = await Promise.all(
+          workersData.map(async (worker: any) => {
+            const { data: services } = await supabase
+              .from('worker_services' as any)
+              .select('*')
+              .eq('worker_id', worker.id)
+              .order('display_order', { ascending: true });
+
+            const { data: portfolio } = await supabase
+              .from('worker_portfolio' as any)
+              .select('*')
+              .eq('worker_id', worker.id)
+              .order('display_order', { ascending: true });
+
+            return {
+              ...worker,
+              id: worker.id,
+              services: services?.map((s: any) => ({ name: s.service_name, price: s.service_price })) || [],
+              portfolio: portfolio?.map((p: any) => p.media_url) || [],
+              reviews: worker.reviews_count || 0,
+              joinedDate: worker.joined_date || worker.created_at?.split('T')[0],
+              completedJobs: worker.completed_jobs || 0,
+              yearsExperience: worker.years_experience,
+              responseTime: worker.response_time,
+              badges: Array.isArray(worker.badges) ? worker.badges : [],
+              profilePicture: worker.profile_picture
+            };
+          })
+        );
+
+        setWorkers(workersWithData);
+      }
+    } catch (error: any) {
+      console.error('Error loading workers:', error);
+      toast.error('Failed to load workers');
+      setWorkers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const { data: categoriesData, error } = await supabase
+        .from('worker_categories' as any)
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      if (categoriesData) {
+        // Get worker count for each category
+        const categoriesWithCounts = await Promise.all(
+          categoriesData.map(async (cat: any) => {
+            const { count } = await supabase
+              .from('skilled_workers' as any)
+              .select('*', { count: 'exact', head: true })
+              .eq('category', cat.name)
+              .eq('status', 'active');
+
+            const Icon = getCategoryIcon(cat.name);
+            return {
+              id: cat.id,
+              name: cat.name,
+              count: count || 0,
+              description: cat.description,
+              type_of_work: cat.type_of_work,
+              icon: Icon,
+              color: "#1f2937",
+              bgColor: "#f3f4f6",
+              status: "active" as const
+            };
+          })
+        );
+
+        setCategories(categoriesWithCounts);
+      }
+    } catch (error: any) {
+      console.error('Error loading categories:', error);
+      toast.error('Failed to load categories');
+      setCategories([]);
+    }
+  };
 
   // Initialize charts when analytics or overview tab is active
   useEffect(() => {
@@ -531,13 +662,13 @@ const AdminSkilledWorkers = () => {
     };
   }, [activeTab]);
 
-  // Mock statistics data
+  // Calculate statistics from real data
   const stats = [
     {
       id: 1,
       label: "Total Workers",
-      value: "1,247",
-      change: "+12.5%",
+      value: workers.length.toLocaleString(),
+      change: "+0%",
       trend: "up",
       icon: Users,
       color: "#3b82f6",
@@ -546,8 +677,8 @@ const AdminSkilledWorkers = () => {
     {
       id: 2,
       label: "Verified Workers",
-      value: "892",
-      change: "+8.2%",
+      value: workers.filter(w => w.verified).length.toLocaleString(),
+      change: "+0%",
       trend: "up",
       icon: UserCheck,
       color: "#10b981",
@@ -556,8 +687,8 @@ const AdminSkilledWorkers = () => {
     {
       id: 3,
       label: "Pending Reviews",
-      value: "34",
-      change: "-5.3%",
+      value: workers.filter(w => w.status === 'pending').length.toLocaleString(),
+      change: "+0%",
       trend: "down",
       icon: Clock,
       color: "#f59e0b",
@@ -566,8 +697,8 @@ const AdminSkilledWorkers = () => {
     {
       id: 4,
       label: "Active Categories",
-      value: "12",
-      change: "+2",
+      value: categories.filter(c => c.count > 0).length.toLocaleString(),
+      change: "+0",
       trend: "up",
       icon: Tag,
       color: "#8b5cf6",
@@ -575,138 +706,7 @@ const AdminSkilledWorkers = () => {
     }
   ];
 
-  // Mock workers data
-  const workers = [
-    {
-      id: 1,
-      name: "Kwame Mensah",
-      category: "Electrician",
-      location: "Accra, Greater Accra",
-      rating: 4.8,
-      reviews: 156,
-      phone: "+233 24 123 4567",
-      email: "kwame.mensah@example.com",
-      verified: true,
-      status: "active",
-      joinedDate: "2024-01-15",
-      completedJobs: 245,
-      profilePicture: undefined as string | undefined
-    },
-    {
-      id: 2,
-      name: "Ama Serwaa",
-      category: "Tailor",
-      location: "Kumasi, Ashanti",
-      rating: 4.9,
-      reviews: 203,
-      phone: "+233 24 234 5678",
-      email: "ama.serwaa@example.com",
-      verified: true,
-      status: "active",
-      joinedDate: "2024-02-10",
-      completedJobs: 312
-    },
-    {
-      id: 3,
-      name: "Kofi Boateng",
-      category: "Carpenter",
-      location: "Cape Coast, Central",
-      rating: 4.7,
-      reviews: 98,
-      phone: "+233 24 345 6789",
-      email: "kofi.boateng@example.com",
-      verified: false,
-      status: "pending",
-      joinedDate: "2024-03-05",
-      completedJobs: 67
-    },
-    {
-      id: 4,
-      name: "Efua Osei",
-      category: "Hairdresser",
-      location: "Takoradi, Western",
-      rating: 4.6,
-      reviews: 142,
-      phone: "+233 24 456 7890",
-      email: "efua.osei@example.com",
-      verified: true,
-      status: "active",
-      joinedDate: "2024-01-20",
-      completedJobs: 189
-    },
-    {
-      id: 5,
-      name: "Yaw Asante",
-      category: "Plumber",
-      location: "Accra, Greater Accra",
-      rating: 4.5,
-      reviews: 87,
-      phone: "+233 24 567 8901",
-      email: "yaw.asante@example.com",
-      verified: true,
-      status: "active",
-      joinedDate: "2024-02-15",
-      completedJobs: 134
-    }
-  ];
-
-  // All categories from browse page with icons
-  const getCategoryIcon = (name: string) => {
-    const lower = name.toLowerCase();
-    if (lower.includes('electric') || lower.includes('electrical')) return Zap;
-    if (lower.includes('carpenter') || lower.includes('wood') || lower.includes('furniture')) return Hammer;
-    if (lower.includes('plumb')) return Droplet;
-    if (lower.includes('mason') || lower.includes('brick')) return Building2;
-    if (lower.includes('weld')) return Flame;
-    if (lower.includes('paint')) return Paintbrush;
-    if (lower.includes('tailor') || lower.includes('seamstress') || lower.includes('upholster')) return Scissors;
-    if (lower.includes('barber')) return Scissors;
-    if (lower.includes('hair')) return User;
-    if (lower.includes('auto') || lower.includes('mechanic') || lower.includes('tire') || lower.includes('diesel') || lower.includes('truck')) return Car;
-    if (lower.includes('cater') || lower.includes('chef') || lower.includes('cake') || lower.includes('food')) return ChefHat;
-    if (lower.includes('clean') || lower.includes('janitor')) return Sparkles;
-    if (lower.includes('ac') || lower.includes('hvac') || lower.includes('heating') || lower.includes('refrigeration') || lower.includes('elevator') || lower.includes('appliance') || lower.includes('locksmith') || lower.includes('security') || lower.includes('power tool')) return Wrench;
-    if (lower.includes('construction') || lower.includes('contractor') || lower.includes('roof') || lower.includes('floor') || lower.includes('tile') || lower.includes('window') || lower.includes('fence') || lower.includes('landscape') || lower.includes('solar') || lower.includes('steel') || lower.includes('iron') || lower.includes('concrete') || lower.includes('drywall') || lower.includes('glazier') || lower.includes('crane') || lower.includes('surveyor') || lower.includes('asphalt') || lower.includes('architectural') || lower.includes('civil') || lower.includes('interior')) return Building2;
-    if (lower.includes('makeup') || lower.includes('nail') || lower.includes('jewel')) return Sparkles;
-    return Briefcase;
-  };
-
-  // All categories from browse page
-  const allCategoryNames = [
-    '3D Printing Specialist', '3D Modeling Expert',
-    'AC Repair Technician', 'Appliance Repair Specialist', 'Auto Body Repair Expert', 'Auto Electrician', 'Auto Mechanic', 'Auto Parts Specialist', 'Architectural Drafter', 'Asphalt Paving Contractor',
-    'Barber', 'Bricklayer', 'Building Inspector', 'Building Maintenance Worker',
-    'Cake Baker & Designer', 'Carpenter', 'Caterer', 'Chef', 'Civil Engineer', 'Cleaner', 'Commercial Painter', 'Concrete Finisher', 'Construction Manager', 'Crane Operator',
-    'Diesel Mechanic', 'Drywall Installer',
-    'Electrician', 'Elevator Technician', 'Event Caterer',
-    'Fence Installer', 'Flooring Installer', 'Furniture Maker',
-    'General Contractor', 'Glazier',
-    'Hairdresser', 'Hair Stylist', 'Heating Technician', 'HVAC Technician',
-    'Interior Designer', 'Ironworker',
-    'Janitor', 'Jeweler',
-    'Landscaper', 'Locksmith',
-    'Mason', 'Makeup Artist', 'Mechanic', 'Metal Fabricator', 'Mobile Mechanic',
-    'Nail Technician',
-    'Painter', 'Plumber', 'Plumbing Contractor', 'Power Tool Repair',
-    'Refrigeration Technician', 'Roofer',
-    'Seamstress', 'Security System Installer', 'Sheet Metal Worker', 'Shoe Repair Specialist', 'Solar Panel Installer', 'Steel Worker', 'Surveyor',
-    'Tailor', 'Tile Installer', 'Tire Specialist', 'Truck Mechanic',
-    'Upholsterer',
-    'Welder', 'Window Installer', 'Woodworker'
-  ];
-
-  const categories = allCategoryNames.map((name, index) => {
-    const Icon = getCategoryIcon(name);
-    return {
-      id: index + 1,
-      name: name,
-      count: Math.floor(Math.random() * 200) + 20, // Random count for demo
-      icon: Icon,
-      color: "#1f2937",
-      bgColor: "#f3f4f6",
-      status: "active" as const
-    };
-  });
+  // Workers and categories are now loaded from Supabase via loadWorkers() and loadCategories()
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Users },
@@ -761,44 +761,260 @@ const AdminSkilledWorkers = () => {
     setShowDeleteConfirm(true);
   };
 
-  const handleSaveWorker = (worker: any) => {
-    // Add API call here
-  };
+  const handleSaveWorker = async (worker: any) => {
+    try {
+      const isEdit = !!worker.id;
+      
+      // Prepare worker data for Supabase
+      const workerData: any = {
+        name: worker.name,
+        type_of_work: worker.typeOfWork || null,
+        category: worker.category,
+        location: worker.location,
+        phone: worker.phone,
+        email: worker.email,
+        about: worker.about || null,
+        years_experience: worker.yearsExperience ? parseInt(worker.yearsExperience) : null,
+        response_time: worker.responseTime || null,
+        verified: worker.verified || false,
+        status: worker.status || 'pending',
+        profile_picture: worker.profilePicture || null,
+        badges: worker.badges || [],
+        joined_date: worker.joinedDate || new Date().toISOString().split('T')[0]
+      };
 
-  const handleSaveCategory = (category: any) => {
-    // Add API call here
-  };
+      let workerId: string;
 
-  const handleApprove = (id: number) => {
-    // Update worker status to 'active' and set approval timestamp
-    // This will be connected to Supabase
-    const now = new Date().toISOString();
-    // TODO: Add API call to update worker with:
-    // - status: 'active'
-    // - approvedAt: now
-    // - approvedBy: current admin user ID
-    // - rejectionReason: null (clear if exists)
-    console.log('Approving worker:', id, 'at', now);
-  };
+      if (isEdit) {
+        // Update existing worker
+        const { data, error } = await supabase
+          .from('skilled_workers' as any)
+          .update(workerData)
+          .eq('id', worker.id)
+          .select()
+          .single();
 
-  const handleReject = (id: number, reason: string) => {
-    // Update worker status to 'inactive' and store rejection reason
-    // This will be connected to Supabase
-    const now = new Date().toISOString();
-    // TODO: Add API call to update worker with:
-    // - status: 'inactive'
-    // - rejectedAt: now
-    // - rejectedBy: current admin user ID
-    // - rejectionReason: reason
-    console.log('Rejecting worker:', id, 'reason:', reason, 'at', now);
-  };
+        if (error) throw error;
+        workerId = worker.id;
+      } else {
+        // Create new worker
+        const { data, error } = await supabase
+          .from('skilled_workers' as any)
+          .insert(workerData)
+          .select()
+          .single();
 
-  const handleConfirmDelete = () => {
-    if (deleteTarget) {
-      // Add API call here
+        if (error) throw error;
+        workerId = (data as any).id;
+      }
+
+      // Save services
+      if (worker.services && worker.services.length > 0) {
+        // Delete existing services
+        await supabase
+          .from('worker_services' as any)
+          .delete()
+          .eq('worker_id', workerId);
+
+        // Insert new services
+        const servicesData = worker.services.map((s: any, index: number) => ({
+          worker_id: workerId,
+          service_name: s.name,
+          service_price: s.price,
+          display_order: index
+        }));
+
+        const { error: servicesError } = await supabase
+          .from('worker_services' as any)
+          .insert(servicesData);
+
+        if (servicesError) throw servicesError;
+      }
+
+      // Save portfolio
+      if (worker.portfolio && worker.portfolio.length > 0) {
+        // Delete existing portfolio
+        await supabase
+          .from('worker_portfolio' as any)
+          .delete()
+          .eq('worker_id', workerId);
+
+        // Insert new portfolio items
+        const portfolioData = worker.portfolio.map((url: string, index: number) => ({
+          worker_id: workerId,
+          media_url: url,
+          media_type: url.startsWith('data:video') || url.includes('.mp4') || url.includes('.webm') ? 'video' : 'image',
+          display_order: index
+        }));
+
+        const { error: portfolioError } = await supabase
+          .from('worker_portfolio' as any)
+          .insert(portfolioData);
+
+        if (portfolioError) throw portfolioError;
+      }
+
+      toast.success(isEdit ? 'Worker updated successfully' : 'Worker created successfully');
+      await loadWorkers();
+      setShowAddWorker(false);
+      setShowEditWorker(false);
+    } catch (error: any) {
+      console.error('Error saving worker:', error);
+      toast.error(`Failed to save worker: ${error.message}`);
     }
-    setShowDeleteConfirm(false);
-    setDeleteTarget(null);
+  };
+
+  const handleSaveCategory = async (category: any) => {
+    try {
+      const isEdit = !!category.id;
+      
+      const categoryData: any = {
+        name: category.name,
+        description: category.description || null
+      };
+
+      if (isEdit) {
+        const { error } = await supabase
+          .from('worker_categories' as any)
+          .update(categoryData)
+          .eq('id', category.id);
+
+        if (error) throw error;
+        toast.success('Category updated successfully');
+      } else {
+        // For new categories, we need type_of_work - default to first work type
+        const { data: workTypes } = await supabase
+          .from('work_types' as any)
+          .select('id')
+          .neq('id', 'all')
+          .order('display_order')
+          .limit(1)
+          .single();
+
+        categoryData.type_of_work = (workTypes as any)?.id || 'skilled-trades';
+
+        const { error } = await supabase
+          .from('worker_categories' as any)
+          .insert(categoryData);
+
+        if (error) throw error;
+        toast.success('Category created successfully');
+      }
+
+      await loadCategories();
+      setShowAddCategory(false);
+      setShowEditCategory(false);
+    } catch (error: any) {
+      console.error('Error saving category:', error);
+      toast.error(`Failed to save category: ${error.message}`);
+    }
+  };
+
+  const handleApprove = async (id: string | number) => {
+    const workerId = typeof id === 'number' ? id.toString() : id;
+    try {
+      const now = new Date().toISOString();
+      
+      const { error } = await supabase
+        .from('skilled_workers' as any)
+        .update({
+          status: 'active',
+          approved_at: now,
+          approved_by: 'admin', // Replace with actual admin ID when auth is set up
+          rejection_reason: null,
+          rejected_at: null,
+          rejected_by: null
+        })
+        .eq('id', workerId);
+
+      if (error) throw error;
+
+      // Log approval in audit table
+      await supabase
+        .from('worker_approvals' as any)
+        .insert({
+          worker_id: id,
+          action: 'approve',
+          admin_id: 'admin' // Replace with actual admin ID when auth is set up
+        });
+
+      toast.success('Worker approved successfully');
+      await loadWorkers();
+      setShowApproval(false);
+    } catch (error: any) {
+      console.error('Error approving worker:', error);
+      toast.error(`Failed to approve worker: ${error.message}`);
+    }
+  };
+
+  const handleReject = async (id: string | number, reason: string) => {
+    const workerId = typeof id === 'number' ? id.toString() : id;
+    try {
+      const now = new Date().toISOString();
+      
+      const { error } = await supabase
+        .from('skilled_workers' as any)
+        .update({
+          status: 'inactive',
+          rejected_at: now,
+          rejected_by: 'admin', // Replace with actual admin ID when auth is set up
+          rejection_reason: reason,
+          approved_at: null,
+          approved_by: null
+        })
+        .eq('id', workerId);
+
+      if (error) throw error;
+
+      // Log rejection in audit table
+      await supabase
+        .from('worker_approvals' as any)
+        .insert({
+          worker_id: id,
+          action: 'reject',
+          reason: reason,
+          admin_id: 'admin' // Replace with actual admin ID when auth is set up
+        });
+
+      toast.success('Worker rejected successfully');
+      await loadWorkers();
+      setShowRejectConfirm(false);
+    } catch (error: any) {
+      console.error('Error rejecting worker:', error);
+      toast.error(`Failed to reject worker: ${error.message}`);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      if (deleteTarget.type === 'worker') {
+        const { error } = await supabase
+          .from('skilled_workers' as any)
+          .delete()
+          .eq('id', deleteTarget.id);
+
+        if (error) throw error;
+        toast.success('Worker deleted successfully');
+        await loadWorkers();
+      } else {
+        const { error } = await supabase
+          .from('worker_categories' as any)
+          .delete()
+          .eq('id', deleteTarget.id);
+
+        if (error) throw error;
+        toast.success('Category deleted successfully');
+        await loadCategories();
+      }
+
+      setShowDeleteConfirm(false);
+      setDeleteTarget(null);
+    } catch (error: any) {
+      console.error('Error deleting:', error);
+      toast.error(`Failed to delete: ${error.message}`);
+    }
   };
 
   const isolatedStyles = `
@@ -1866,40 +2082,20 @@ const AdminSkilledWorkers = () => {
   );
 
   const renderApproval = () => {
-    // Mock pending workers awaiting approval
-    const pendingWorkers = [
-      {
-        id: 1,
-        name: "John Doe",
-        category: "Electrician",
-        location: "Accra, Greater Accra",
-        phone: "+233 24 123 4567",
-        email: "john.doe@example.com",
-        submittedDate: "2024-01-20",
-        status: "pending",
-        profilePicture: undefined as string | undefined
-      },
-      {
-        id: 2,
-        name: "Jane Smith",
-        category: "Carpenter",
-        location: "Kumasi, Ashanti",
-        phone: "+233 24 234 5678",
-        email: "jane.smith@example.com",
-        submittedDate: "2024-01-19",
-        status: "pending"
-      },
-      {
-        id: 3,
-        name: "Mike Johnson",
-        category: "Plumber",
-        location: "Cape Coast, Central",
-        phone: "+233 24 345 6789",
-        email: "mike.johnson@example.com",
-        submittedDate: "2024-01-18",
-        status: "pending"
-      }
-    ];
+    // Get pending workers from real data
+    const pendingWorkers = workers
+      .filter(w => w.status === 'pending')
+      .map(w => ({
+        id: w.id,
+        name: w.name,
+        category: w.category,
+        location: w.location,
+        phone: w.phone,
+        email: w.email,
+        submittedDate: w.joinedDate || w.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+        status: w.status,
+        profilePicture: w.profilePicture
+      }));
 
     return (
       <div>
