@@ -21,8 +21,44 @@ import {
   TrendingUp,
   Info,
   FileText,
-  Plus
+  Plus,
+  Tag
 } from "lucide-react";
+
+// All categories from browse page
+const ALL_CATEGORIES = [
+  '3D Printing Specialist', '3D Modeling Expert',
+  'AC Repair Technician', 'Appliance Repair Specialist', 'Auto Body Repair Expert', 'Auto Electrician', 'Auto Mechanic', 'Auto Parts Specialist', 'Architectural Drafter', 'Asphalt Paving Contractor',
+  'Barber', 'Bricklayer', 'Building Inspector', 'Building Maintenance Worker',
+  'Cake Baker & Designer', 'Carpenter', 'Caterer', 'Chef', 'Civil Engineer', 'Cleaner', 'Commercial Painter', 'Concrete Finisher', 'Construction Manager', 'Crane Operator',
+  'Diesel Mechanic', 'Drywall Installer',
+  'Electrician', 'Elevator Technician', 'Event Caterer',
+  'Fence Installer', 'Flooring Installer', 'Furniture Maker',
+  'General Contractor', 'Glazier',
+  'Hairdresser', 'Hair Stylist', 'Heating Technician', 'HVAC Technician',
+  'Interior Designer', 'Ironworker',
+  'Janitor', 'Jeweler',
+  'Landscaper', 'Locksmith',
+  'Mason', 'Makeup Artist', 'Mechanic', 'Metal Fabricator', 'Mobile Mechanic',
+  'Nail Technician',
+  'Painter', 'Plumber', 'Plumbing Contractor', 'Power Tool Repair',
+  'Refrigeration Technician', 'Roofer',
+  'Seamstress', 'Security System Installer', 'Sheet Metal Worker', 'Shoe Repair Specialist', 'Solar Panel Installer', 'Steel Worker', 'Surveyor',
+  'Tailor', 'Tile Installer', 'Tire Specialist', 'Truck Mechanic',
+  'Upholsterer',
+  'Welder', 'Window Installer', 'Woodworker'
+];
+
+const WORK_TYPES = [
+  { value: '', label: 'Select type of work' },
+  { value: 'skilled-trades', label: 'Skilled Trades' },
+  { value: 'personal-services', label: 'Personal Services' },
+  { value: 'construction', label: 'Construction & Building' },
+  { value: 'automotive', label: 'Automotive Services' },
+  { value: 'beauty', label: 'Beauty & Personal Care' },
+  { value: 'food', label: 'Food & Catering' },
+  { value: 'maintenance', label: 'Maintenance & Repair' },
+];
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -31,6 +67,7 @@ import {
 interface Worker {
   id: number;
   name: string;
+  typeOfWork?: string;
   category: string;
   location: string;
   rating?: number;
@@ -77,6 +114,12 @@ interface ViewWorkerModalProps extends ModalProps {
 interface ApprovalModalProps extends ModalProps {
   onApprove: (id: number) => void;
   onReject: (id: number, reason: string) => void;
+  worker: Worker | null;
+  mode?: "approve" | "reject" | "both";
+}
+
+interface RejectConfirmModalProps extends ModalProps {
+  onConfirm: (id: number, reason: string) => void;
   worker: Worker | null;
 }
 
@@ -705,6 +748,7 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
   const [activeTab, setActiveTab] = useState("overview");
   const [formData, setFormData] = useState({
     name: "",
+    typeOfWork: "",
     category: "",
     location: "",
     phone: "",
@@ -727,6 +771,7 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
     // Reset form
     setFormData({
       name: "",
+      typeOfWork: "",
       category: "",
       location: "",
       phone: "",
@@ -821,6 +866,23 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
 
                     <div className="swm-form-group">
                       <label className="swm-form-label">
+                        <Tag size={16} />
+                        Type of Work *
+                      </label>
+                      <select
+                        className="swm-form-select"
+                        required
+                        value={formData.typeOfWork}
+                        onChange={(e) => setFormData({ ...formData, typeOfWork: e.target.value })}
+                      >
+                        {WORK_TYPES.map(type => (
+                          <option key={type.value} value={type.value}>{type.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="swm-form-group">
+                      <label className="swm-form-label">
                         <Briefcase size={16} />
                         Category *
                       </label>
@@ -831,18 +893,9 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       >
                         <option value="">Select category</option>
-                        <option value="Electrician">Electrician</option>
-                        <option value="Carpenter">Carpenter</option>
-                        <option value="Plumber">Plumber</option>
-                        <option value="Mason">Mason</option>
-                        <option value="Welder">Welder</option>
-                        <option value="Painter">Painter</option>
-                        <option value="Tailor">Tailor</option>
-                        <option value="Barber">Barber</option>
-                        <option value="Hairdresser">Hairdresser</option>
-                        <option value="Auto Mechanic">Auto Mechanic</option>
-                        <option value="Caterer">Caterer</option>
-                        <option value="Cleaner">Cleaner</option>
+                        {ALL_CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -1089,6 +1142,7 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
   const [activeTab, setActiveTab] = useState("overview");
   const [formData, setFormData] = useState({
     name: worker?.name || "",
+    typeOfWork: worker?.typeOfWork || "",
     category: worker?.category || "",
     location: worker?.location || "",
     phone: worker?.phone || "",
@@ -1188,6 +1242,23 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
 
                     <div className="swm-form-group">
                       <label className="swm-form-label">
+                        <Tag size={16} />
+                        Type of Work *
+                      </label>
+                      <select
+                        className="swm-form-select"
+                        required
+                        value={formData.typeOfWork}
+                        onChange={(e) => setFormData({ ...formData, typeOfWork: e.target.value })}
+                      >
+                        {WORK_TYPES.map(type => (
+                          <option key={type.value} value={type.value}>{type.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="swm-form-group">
+                      <label className="swm-form-label">
                         <Briefcase size={16} />
                         Category *
                       </label>
@@ -1197,18 +1268,10 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
                         value={formData.category}
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       >
-                        <option value="Electrician">Electrician</option>
-                        <option value="Carpenter">Carpenter</option>
-                        <option value="Plumber">Plumber</option>
-                        <option value="Mason">Mason</option>
-                        <option value="Welder">Welder</option>
-                        <option value="Painter">Painter</option>
-                        <option value="Tailor">Tailor</option>
-                        <option value="Barber">Barber</option>
-                        <option value="Hairdresser">Hairdresser</option>
-                        <option value="Auto Mechanic">Auto Mechanic</option>
-                        <option value="Caterer">Caterer</option>
-                        <option value="Cleaner">Cleaner</option>
+                        <option value="">Select category</option>
+                        {ALL_CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -1750,22 +1813,13 @@ export const ApprovalModal = ({
   onApprove,
   onReject,
   worker,
+  mode = "approve",
 }: ApprovalModalProps) => {
-  const [action, setAction] = useState<"approve" | "reject" | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
-
   if (!isOpen || !worker) return null;
 
   const handleApprove = () => {
     if (worker.id) {
       onApprove(worker.id);
-      onClose();
-    }
-  };
-
-  const handleReject = () => {
-    if (worker.id && rejectReason.trim()) {
-      onReject(worker.id, rejectReason);
       onClose();
     }
   };
@@ -1778,7 +1832,7 @@ export const ApprovalModal = ({
           <div className="swm-modal-header">
             <h2 className="swm-modal-title">
               <CheckCircle size={24} />
-              Worker Approval
+              Approve Worker
             </h2>
             <button className="swm-close-btn" onClick={onClose}>
               <X size={20} />
@@ -1786,108 +1840,132 @@ export const ApprovalModal = ({
           </div>
 
           <div className="swm-modal-body">
-            {!action && (
-              <>
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem" }}>
-                    {worker.name}
-                  </h3>
-                  <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>
-                    {worker.category} • {worker.location}
-                  </p>
-                </div>
-                <p style={{ color: "#374151", marginBottom: "1.5rem" }}>
-                  Would you like to approve or reject this worker's application?
-                </p>
-                <div style={{ display: "flex", gap: "1rem" }}>
-                  <button
-                    className="swm-btn swm-btn-success"
-                    style={{ flex: 1 }}
-                    onClick={() => setAction("approve")}
-                  >
-                    <CheckCircle size={16} />
-                    Approve
-                  </button>
-                  <button
-                    className="swm-btn swm-btn-danger"
-                    style={{ flex: 1 }}
-                    onClick={() => setAction("reject")}
-                  >
-                    <XCircle size={16} />
-                    Reject
-                  </button>
-                </div>
-              </>
-            )}
+            <div style={{ marginBottom: "1.5rem" }}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem" }}>
+                {worker.name}
+              </h3>
+              <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>
+                {worker.category} • {worker.location}
+              </p>
+            </div>
+            <p style={{ color: "#374151", marginBottom: "1.5rem" }}>
+              Are you sure you want to approve <strong>{worker.name}</strong>? This will make
+              their profile visible to clients.
+            </p>
+            <div className="swm-modal-footer">
+              <button
+                className="swm-btn swm-btn-secondary"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                className="swm-btn swm-btn-success"
+                onClick={handleApprove}
+              >
+                <CheckCircle size={16} />
+                Yes, Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
-            {action === "approve" && (
-              <>
-                <p style={{ color: "#374151", marginBottom: "1.5rem" }}>
-                  Are you sure you want to approve <strong>{worker.name}</strong>? This will make
-                  their profile visible to clients.
-                </p>
-                <div style={{ display: "flex", gap: "1rem" }}>
-                  <button
-                    className="swm-btn swm-btn-secondary"
-                    style={{ flex: 1 }}
-                    onClick={() => setAction(null)}
-                  >
-                    Back
-                  </button>
-                  <button
-                    className="swm-btn swm-btn-success"
-                    style={{ flex: 1 }}
-                    onClick={handleApprove}
-                  >
-                    <CheckCircle size={16} />
-                    Confirm Approval
-                  </button>
-                </div>
-              </>
-            )}
+export const RejectConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  worker,
+}: RejectConfirmModalProps) => {
+  const [rejectReason, setRejectReason] = useState("");
 
-            {action === "reject" && (
-              <>
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <label
-                    style={{
-                      fontSize: "0.875rem",
-                      fontWeight: 600,
-                      color: "#374151",
-                      marginBottom: "0.5rem",
-                      display: "block",
-                    }}
-                  >
-                    Rejection Reason *
-                  </label>
-                  <textarea
-                    className="swm-form-textarea"
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                    placeholder="Please provide a reason for rejection..."
-                    style={{ minHeight: "120px" }}
-                  />
-                </div>
-                <div style={{ display: "flex", gap: "1rem" }}>
-                  <button
-                    className="swm-btn swm-btn-secondary"
-                    style={{ flex: 1 }}
-                    onClick={() => setAction(null)}
-                  >
-                    Back
-                  </button>
-                  <button
-                    className="swm-btn swm-btn-danger"
-                    style={{ flex: 1 }}
-                    onClick={handleReject}
-                    disabled={!rejectReason.trim()}
-                  >
-                    <XCircle size={16} />
-                    Confirm Rejection
-                  </button>
-                </div>
-              </>
-            )}
+  if (!isOpen || !worker) return null;
+
+  const handleConfirm = () => {
+    if (worker.id && rejectReason.trim()) {
+      onConfirm(worker.id, rejectReason);
+      setRejectReason("");
+      onClose();
+    }
+  };
+
+  return (
+    <>
+      <style>{modalStyles}</style>
+      <div className="swm-modal-overlay" onClick={onClose}>
+        <div className="swm-modal-content sm" onClick={(e) => e.stopPropagation()}>
+          <div className="swm-modal-header">
+            <h2 className="swm-modal-title">
+              <XCircle size={24} />
+              Reject Worker
+            </h2>
+            <button className="swm-close-btn" onClick={onClose}>
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="swm-modal-body">
+            <div style={{ marginBottom: "1.5rem" }}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem" }}>
+                {worker.name}
+              </h3>
+              <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>
+                {worker.category} • {worker.location}
+              </p>
+            </div>
+            <p style={{ color: "#374151", marginBottom: "1.5rem" }}>
+              Are you sure you want to reject <strong>{worker.name}</strong>'s application?
+            </p>
+            <div style={{ 
+              height: "1px", 
+              background: "linear-gradient(to right, transparent, #e5e7eb, transparent)",
+              margin: "1.5rem 0",
+              width: "100%"
+            }}></div>
+            <div style={{ marginBottom: "1.5rem" }}>
+              <label
+                style={{
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  color: "#374151",
+                  marginBottom: "0.5rem",
+                  display: "block",
+                }}
+              >
+                Rejection Reason *
+              </label>
+              <textarea
+                className="swm-form-textarea"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Please provide a reason for rejection..."
+                style={{ 
+                  minHeight: "120px",
+                  width: "100%",
+                  resize: "vertical"
+                }}
+                required
+              />
+            </div>
+            <div className="swm-modal-footer">
+              <button
+                className="swm-btn swm-btn-secondary"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                className="swm-btn swm-btn-danger"
+                onClick={handleConfirm}
+                disabled={!rejectReason.trim()}
+              >
+                <XCircle size={16} />
+                Yes, Reject
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -233,7 +233,6 @@ export const Navigation = React.memo(() => {
         discover: [
           { title: 'Search & Browse', items: [
             { to: '/skilled-workers', label: 'Skilled Workers & Artisans', icon: 'fa-map-marker-alt' },
-            { to: '/skilled-workers', label: 'Verified Workers', icon: 'fa-check-circle' },
             { to: '/skilled-workers', label: 'Service Requests', icon: 'fa-calendar-check' }
           ]}
         ],

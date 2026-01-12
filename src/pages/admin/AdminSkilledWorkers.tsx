@@ -41,13 +41,16 @@ import {
   Wind,
   Package,
   Shirt,
-  CheckCircle
+  CheckCircle,
+  Grid3x3,
+  List
 } from "lucide-react";
 import {
   AddWorkerModal,
   EditWorkerModal,
   ViewWorkerModal,
   ApprovalModal,
+  RejectConfirmModal,
   AddCategoryModal,
   EditCategoryModal,
   DeleteConfirmModal
@@ -59,6 +62,7 @@ const AdminSkilledWorkers = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [categoryViewMode, setCategoryViewMode] = useState<"grid" | "list">("grid");
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const spacerRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +71,7 @@ const AdminSkilledWorkers = () => {
   const [showEditWorker, setShowEditWorker] = useState(false);
   const [showViewWorker, setShowViewWorker] = useState(false);
   const [showApproval, setShowApproval] = useState(false);
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [showEditCategory, setShowEditCategory] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -233,21 +238,63 @@ const AdminSkilledWorkers = () => {
     }
   ];
 
-  // Mock categories data with Lucide icons
-  const categories = [
-    { id: 1, name: "Electricians", count: 156, icon: Zap, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 2, name: "Carpenters", count: 134, icon: Hammer, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 3, name: "Plumbers", count: 128, icon: Droplet, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 4, name: "Masons", count: 98, icon: Building2, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 5, name: "Welders", count: 87, icon: Flame, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 6, name: "Painters", count: 112, icon: Paintbrush, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 7, name: "Tailors", count: 145, icon: Scissors, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 8, name: "Barbers", count: 103, icon: Scissors, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 9, name: "Hairdressers", count: 167, icon: User, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 10, name: "Auto Mechanics", count: 142, icon: Car, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 11, name: "Caterers", count: 89, icon: ChefHat, color: "#1f2937", bgColor: "#f3f4f6", status: "active" },
-    { id: 12, name: "Cleaners", count: 134, icon: Sparkles, color: "#1f2937", bgColor: "#f3f4f6", status: "active" }
+  // All categories from browse page with icons
+  const getCategoryIcon = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes('electric') || lower.includes('electrical')) return Zap;
+    if (lower.includes('carpenter') || lower.includes('wood') || lower.includes('furniture')) return Hammer;
+    if (lower.includes('plumb')) return Droplet;
+    if (lower.includes('mason') || lower.includes('brick')) return Building2;
+    if (lower.includes('weld')) return Flame;
+    if (lower.includes('paint')) return Paintbrush;
+    if (lower.includes('tailor') || lower.includes('seamstress') || lower.includes('upholster')) return Scissors;
+    if (lower.includes('barber')) return Scissors;
+    if (lower.includes('hair')) return User;
+    if (lower.includes('auto') || lower.includes('mechanic') || lower.includes('tire') || lower.includes('diesel') || lower.includes('truck')) return Car;
+    if (lower.includes('cater') || lower.includes('chef') || lower.includes('cake') || lower.includes('food')) return ChefHat;
+    if (lower.includes('clean') || lower.includes('janitor')) return Sparkles;
+    if (lower.includes('ac') || lower.includes('hvac') || lower.includes('heating') || lower.includes('refrigeration') || lower.includes('elevator') || lower.includes('appliance') || lower.includes('locksmith') || lower.includes('security') || lower.includes('power tool')) return Wrench;
+    if (lower.includes('construction') || lower.includes('contractor') || lower.includes('roof') || lower.includes('floor') || lower.includes('tile') || lower.includes('window') || lower.includes('fence') || lower.includes('landscape') || lower.includes('solar') || lower.includes('steel') || lower.includes('iron') || lower.includes('concrete') || lower.includes('drywall') || lower.includes('glazier') || lower.includes('crane') || lower.includes('surveyor') || lower.includes('asphalt') || lower.includes('architectural') || lower.includes('civil') || lower.includes('interior')) return Building2;
+    if (lower.includes('makeup') || lower.includes('nail') || lower.includes('jewel')) return Sparkles;
+    return Briefcase;
+  };
+
+  // All categories from browse page
+  const allCategoryNames = [
+    '3D Printing Specialist', '3D Modeling Expert',
+    'AC Repair Technician', 'Appliance Repair Specialist', 'Auto Body Repair Expert', 'Auto Electrician', 'Auto Mechanic', 'Auto Parts Specialist', 'Architectural Drafter', 'Asphalt Paving Contractor',
+    'Barber', 'Bricklayer', 'Building Inspector', 'Building Maintenance Worker',
+    'Cake Baker & Designer', 'Carpenter', 'Caterer', 'Chef', 'Civil Engineer', 'Cleaner', 'Commercial Painter', 'Concrete Finisher', 'Construction Manager', 'Crane Operator',
+    'Diesel Mechanic', 'Drywall Installer',
+    'Electrician', 'Elevator Technician', 'Event Caterer',
+    'Fence Installer', 'Flooring Installer', 'Furniture Maker',
+    'General Contractor', 'Glazier',
+    'Hairdresser', 'Hair Stylist', 'Heating Technician', 'HVAC Technician',
+    'Interior Designer', 'Ironworker',
+    'Janitor', 'Jeweler',
+    'Landscaper', 'Locksmith',
+    'Mason', 'Makeup Artist', 'Mechanic', 'Metal Fabricator', 'Mobile Mechanic',
+    'Nail Technician',
+    'Painter', 'Plumber', 'Plumbing Contractor', 'Power Tool Repair',
+    'Refrigeration Technician', 'Roofer',
+    'Seamstress', 'Security System Installer', 'Sheet Metal Worker', 'Shoe Repair Specialist', 'Solar Panel Installer', 'Steel Worker', 'Surveyor',
+    'Tailor', 'Tile Installer', 'Tire Specialist', 'Truck Mechanic',
+    'Upholsterer',
+    'Welder', 'Window Installer', 'Woodworker'
   ];
+
+  const categories = allCategoryNames.map((name, index) => {
+    const Icon = getCategoryIcon(name);
+    return {
+      id: index + 1,
+      name: name,
+      count: Math.floor(Math.random() * 200) + 20, // Random count for demo
+      icon: Icon,
+      color: "#1f2937",
+      bgColor: "#f3f4f6",
+      status: "active" as const
+    };
+  });
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Users },
@@ -282,9 +329,14 @@ const AdminSkilledWorkers = () => {
     setShowDeleteConfirm(true);
   };
 
-  const handleApproveReject = (worker: any) => {
+  const handleApproveClick = (worker: any) => {
     setSelectedWorker(worker);
     setShowApproval(true);
+  };
+
+  const handleRejectClick = (worker: any) => {
+    setSelectedWorker(worker);
+    setShowRejectConfirm(true);
   };
 
   const handleEditCategory = (category: any) => {
@@ -298,28 +350,23 @@ const AdminSkilledWorkers = () => {
   };
 
   const handleSaveWorker = (worker: any) => {
-    console.log("Saving worker:", worker);
     // Add API call here
   };
 
   const handleSaveCategory = (category: any) => {
-    console.log("Saving category:", category);
     // Add API call here
   };
 
   const handleApprove = (id: number) => {
-    console.log("Approving worker:", id);
     // Add API call here
   };
 
   const handleReject = (id: number, reason: string) => {
-    console.log("Rejecting worker:", id, "Reason:", reason);
     // Add API call here
   };
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
-      console.log(`Deleting ${deleteTarget.type}:`, deleteTarget.id);
       // Add API call here
     }
     setShowDeleteConfirm(false);
@@ -810,6 +857,8 @@ const AdminSkilledWorkers = () => {
       cursor: pointer;
       transition: all 0.2s;
       padding: 0;
+      position: relative;
+      z-index: 1;
     }
 
     .asw-action-btn:hover {
@@ -848,6 +897,12 @@ const AdminSkilledWorkers = () => {
       gap: 1.25rem;
     }
 
+    #asw-categories-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
     .asw-category-card {
       background: white;
       border: 1px solid #e5e7eb;
@@ -863,6 +918,13 @@ const AdminSkilledWorkers = () => {
       transform: translateY(-2px);
     }
 
+    .asw-category-card.list-view {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+    }
+
     .asw-category-header {
       display: flex;
       align-items: center;
@@ -870,13 +932,9 @@ const AdminSkilledWorkers = () => {
       margin-bottom: 1rem;
     }
 
-    .asw-category-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .asw-category-card.list-view .asw-category-header {
+      margin-bottom: 0;
+      flex: 1;
     }
 
     .asw-category-info {
@@ -890,10 +948,20 @@ const AdminSkilledWorkers = () => {
       margin: 0 0 0.25rem 0;
     }
 
+    .asw-category-card.list-view .asw-category-name {
+      margin: 0;
+      font-size: 0.9375rem;
+    }
+
     .asw-category-count {
       font-size: 0.875rem;
       color: #6b7280;
       margin: 0;
+    }
+
+    .asw-category-card.list-view .asw-category-count {
+      font-size: 0.8125rem;
+      margin-left: 0.75rem;
     }
 
     .asw-category-actions {
@@ -901,6 +969,44 @@ const AdminSkilledWorkers = () => {
       gap: 0.5rem;
       padding-top: 1rem;
       border-top: 1px solid #f3f4f6;
+    }
+
+    .asw-category-card.list-view .asw-category-actions {
+      padding-top: 0;
+      border-top: none;
+      margin-left: 1rem;
+    }
+
+    .asw-view-toggle {
+      display: flex;
+      gap: 0.5rem;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.25rem;
+    }
+
+    .asw-view-toggle-btn {
+      padding: 0.5rem;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      transition: all 0.2s;
+    }
+
+    .asw-view-toggle-btn:hover {
+      background: #f9fafb;
+      color: #374151;
+    }
+
+    .asw-view-toggle-btn.active {
+      background: #3b82f6;
+      color: white;
     }
 
     /* Analytics */
@@ -1190,21 +1296,35 @@ const AdminSkilledWorkers = () => {
         <h3 style={{ margin: 0, fontSize: "1.125rem", fontWeight: 600, color: "#111827", flex: 1 }}>
           All Categories ({categories.length})
         </h3>
-        <button className="asw-btn asw-btn-primary" onClick={() => setShowAddCategory(true)}>
-          <Plus className="asw-btn-icon" />
-          Add Category
-        </button>
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <div className="asw-view-toggle">
+            <button
+              className={`asw-view-toggle-btn ${categoryViewMode === "grid" ? "active" : ""}`}
+              onClick={() => setCategoryViewMode("grid")}
+              title="Grid View"
+            >
+              <Grid3x3 size={18} />
+            </button>
+            <button
+              className={`asw-view-toggle-btn ${categoryViewMode === "list" ? "active" : ""}`}
+              onClick={() => setCategoryViewMode("list")}
+              title="List View"
+            >
+              <List size={18} />
+            </button>
+          </div>
+          <button className="asw-btn asw-btn-primary" onClick={() => setShowAddCategory(true)}>
+            <Plus className="asw-btn-icon" />
+            Add Category
+          </button>
+        </div>
       </div>
 
-      <div id="asw-categories-grid">
-        {categories.map(category => {
-          const IconComponent = category.icon;
-          return (
+      {categoryViewMode === "grid" ? (
+        <div id="asw-categories-grid">
+          {categories.map(category => (
             <div key={category.id} className="asw-category-card">
               <div className="asw-category-header">
-                <div className="asw-category-icon" style={{ background: category.bgColor }}>
-                  <IconComponent size={24} style={{ color: category.color }} />
-                </div>
                 <div className="asw-category-info">
                   <h4 className="asw-category-name">{category.name}</h4>
                   <p className="asw-category-count">{category.count} workers</p>
@@ -1223,9 +1343,52 @@ const AdminSkilledWorkers = () => {
                 </button>
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div id="asw-table-container">
+          <table id="asw-table">
+            <thead>
+              <tr>
+                <th>Category Name</th>
+                <th>Workers</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map(category => (
+                <tr key={category.id}>
+                  <td>
+                    <div style={{ fontWeight: 600, color: "#111827" }}>{category.name}</div>
+                  </td>
+                  <td>
+                    <span style={{ color: "#3b82f6", fontWeight: 600 }}>{category.count}</span>
+                  </td>
+                  <td>
+                    <span className={`asw-status-badge ${category.status || "active"}`}>
+                      {category.status || "Active"}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="asw-actions">
+                      <button className="asw-action-btn view" title="View Category">
+                        <Eye className="asw-action-icon" />
+                      </button>
+                      <button className="asw-action-btn edit" title="Edit Category" onClick={() => handleEditCategory(category)}>
+                        <Edit2 className="asw-action-icon" />
+                      </button>
+                      <button className="asw-action-btn delete" title="Delete Category" onClick={() => handleDeleteCategory(category)}>
+                        <Trash2 className="asw-action-icon" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 
@@ -1339,14 +1502,15 @@ const AdminSkilledWorkers = () => {
                         className="asw-action-btn edit"
                         title="Approve Worker"
                         style={{ background: "#dcfce7", borderColor: "#10b981", color: "#10b981" }}
-                        onClick={() => handleApproveReject(worker)}
+                        onClick={() => handleApproveClick(worker)}
                       >
                         <CheckCircle2 className="asw-action-icon" />
                       </button>
                       <button
+                        type="button"
                         className="asw-action-btn delete"
                         title="Reject Worker"
-                        onClick={() => handleApproveReject(worker)}
+                        onClick={() => handleRejectClick(worker)}
                       >
                         <XCircle className="asw-action-icon" />
                       </button>
@@ -1490,6 +1654,16 @@ const AdminSkilledWorkers = () => {
         onClose={() => setShowApproval(false)}
         onApprove={handleApprove}
         onReject={handleReject}
+        worker={selectedWorker}
+        mode="approve"
+      />
+      <RejectConfirmModal
+        isOpen={showRejectConfirm}
+        onClose={() => {
+          setShowRejectConfirm(false);
+          setSelectedWorker(null);
+        }}
+        onConfirm={handleReject}
         worker={selectedWorker}
       />
       <AddCategoryModal
