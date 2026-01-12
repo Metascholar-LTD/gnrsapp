@@ -2920,8 +2920,8 @@ const LocalJobGigs = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="ljg-upcoming-header">
-                <h2 className="ljg-upcoming-title">Upcoming Gigs</h2>
+               <div className="ljg-upcoming-header">
+                 <h2 className="ljg-upcoming-title">Most Worked Gigs</h2>
                 <div className="ljg-upcoming-nav">
                   <button
                     className={`ljg-upcoming-nav-btn ${isUpcomingSlideBegin ? 'disabled' : ''}`}
