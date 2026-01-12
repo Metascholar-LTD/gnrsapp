@@ -10,10 +10,7 @@ import {
   Star, 
   MapPin, 
   CheckCircle,
-  Search,
-  Filter,
-  Grid,
-  List as ListIcon
+  Search
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -102,7 +99,7 @@ const isolatedStyles = `
     #swl-filters {
       flex-direction: row;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
     }
   }
 
@@ -137,38 +134,6 @@ const isolatedStyles = `
     outline: none;
     border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
-
-  #swl-view-toggle {
-    display: flex;
-    gap: 0.5rem;
-    background-color: hsl(40 33% 96%);
-    padding: 0.25rem;
-    border-radius: 0.5rem;
-    border: 1px solid hsl(40 20% 88%);
-  }
-
-  .swl-view-button {
-    padding: 0.5rem;
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-radius: 0.375rem;
-    color: hsl(220 15% 45%);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .swl-view-button.active {
-    background-color: #2563eb;
-    color: #ffffff;
-  }
-
-  .swl-view-icon {
-    width: 18px;
-    height: 18px;
   }
 
   /* Workers Grid */
@@ -408,7 +373,6 @@ export const SkilledWorkersList = () => {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
@@ -520,21 +484,6 @@ export const SkilledWorkersList = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
-          
-          <div id="swl-view-toggle">
-            <button
-              className={`swl-view-button ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="swl-view-icon" />
-            </button>
-            <button
-              className={`swl-view-button ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              <ListIcon className="swl-view-icon" />
-            </button>
           </div>
         </div>
 

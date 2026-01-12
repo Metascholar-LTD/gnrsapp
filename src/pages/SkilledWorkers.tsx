@@ -1440,11 +1440,8 @@ const SkilledWorkers = () => {
   }, [searchParams]);
 
   const handleCategoryClick = (categoryId: string) => {
-    if (selectedCategory === categoryId) {
-      setSelectedCategory(null);
-    } else {
-      setSelectedCategory(categoryId);
-    }
+    // Navigate to the category listing page
+    navigate(`/skilled-workers/category/${categoryId}`);
   };
 
   return (
