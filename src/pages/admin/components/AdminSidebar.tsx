@@ -98,6 +98,7 @@ const AdminSidebar = () => {
       header: "Hands & Skills",
       items: [
         { icon: "users", label: "Skilled Workers", path: "/admin/skilled-workers" },
+        { icon: "briefcase", label: "Local Job Gigs", path: "/admin/local-job-gigs" },
       ],
     },
     {

@@ -62,6 +62,7 @@ import SkilledWorkersBrowse from "./pages/SkilledWorkersBrowse";
 import SkilledWorkersJoin from "./pages/SkilledWorkersJoin";
 import { SkilledWorkerProfile } from "./pages/SkilledWorkerProfile";
 import { SkilledWorkersList } from "./pages/SkilledWorkersList";
+import LocalJobGigs from "./pages/LocalJobGigs";
 import Directories from "./pages/Directories";
 import Hotels from "./pages/directories/Hotels";
 import HotelView from "./pages/directories/HotelView";
@@ -176,6 +177,9 @@ const App = () => (
           <Route path="/skilled-workers/join" element={<SkilledWorkersJoin />} />
           <Route path="/skilled-workers/category/:category" element={<SkilledWorkersList />} />
           <Route path="/skilled-workers/profile/:id" element={<SkilledWorkerProfile />} />
+          {/* Local Job Gigs */}
+          <Route path="/local-job-gigs" element={<LocalJobGigs />} />
+          <Route path="/local-job-gigs/:id" element={<LocalJobGigs />} />
           {/* Directories Routes */}
           <Route path="/directories" element={<Directories />} />
           <Route path="/directories/hotels" element={<Hotels />} />

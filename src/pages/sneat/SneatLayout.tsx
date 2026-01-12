@@ -467,7 +467,17 @@ const SneatLayout: React.FC = () => {
           white-space: nowrap !important;
         }
 
-        /* Fix menu sub items */
+        /* Menu sub items - show when parent has open class or menu-sub has show class */
+        .layout-wrapper .menu-item .menu-sub {
+          display: none !important;
+        }
+        
+        .layout-wrapper .menu-item.open .menu-sub,
+        .layout-wrapper .menu-sub.show {
+          display: block !important;
+        }
+
+        /* Fix menu sub items in collapsed state */
         .layout-wrapper.layout-menu-collapsed .menu-item.open .menu-sub {
           display: none !important;
         }

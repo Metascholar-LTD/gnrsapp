@@ -1785,7 +1785,11 @@ const AdminSkilledWorkers = () => {
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             {workers.slice(0, 5).map(worker => (
               <div key={worker.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem", background: "#f9fafb", borderRadius: "8px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "#e5e7eb" }}></div>
+                {worker.profilePicture ? (
+                  <img src={worker.profilePicture} alt={worker.name} className="asw-worker-avatar" />
+                ) : (
+                  <div className="asw-worker-avatar">{getInitials(worker.name)}</div>
+                )}
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#111827", marginBottom: "0.125rem" }}>{worker.name}</div>
                   <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{worker.category} • {worker.location}</div>

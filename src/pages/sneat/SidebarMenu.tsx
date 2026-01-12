@@ -1,10 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 
 const SidebarMenu: React.FC = () => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
+  
+  // State to track which menu items are open
+  const [openMenus, setOpenMenus] = useState<Set<string>>(new Set());
+  
+  // Auto-expand menu if current path matches a submenu item
+  useEffect(() => {
+    const path = location.pathname;
+    const menusToOpen = new Set<string>();
+    
+    if (path.startsWith('/userprofile/jobs/')) {
+      menusToOpen.add('jobs');
+    }
+    if (path.startsWith('/userprofile/scholarships/')) {
+      menusToOpen.add('scholarships');
+    }
+    if (path.startsWith('/userprofile/mentorship/')) {
+      menusToOpen.add('mentorship');
+    }
+    if (path.startsWith('/userprofile/services/')) {
+      menusToOpen.add('services');
+    }
+    if (path.startsWith('/userprofile/subscription/')) {
+      menusToOpen.add('subscription');
+    }
+    if (path.startsWith('/userprofile/settings/')) {
+      menusToOpen.add('settings');
+    }
+    
+    setOpenMenus(menusToOpen);
+  }, [location.pathname]);
+  
+  const toggleMenu = (menuKey: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setOpenMenus(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(menuKey)) {
+        newSet.delete(menuKey);
+      } else {
+        newSet.add(menuKey);
+      }
+      return newSet;
+    });
+  };
+  
+  const isMenuOpen = (menuKey: string) => openMenus.has(menuKey);
 
   return (
     <ul className="menu-inner py-1">
@@ -51,42 +96,32 @@ const SidebarMenu: React.FC = () => {
       </li>
 
       {/* Job Board */}
-      <li className="menu-item">
-        <a href="#" className="menu-link menu-toggle">
+      <li className={`menu-item ${isMenuOpen('jobs') ? 'open' : ''}`}>
+        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('jobs', e)}>
           <Icon icon="hugeicons:briefcase-02" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Jobs">Jobs</div>
         </a>
-        <ul className="menu-sub">
+        <ul className={`menu-sub ${isMenuOpen('jobs') ? 'show' : ''}`}>
           <li className="menu-item">
-            <Link to="/userprofile/jobs/browse" className="menu-link">
-              <div data-i18n="Browse Jobs">Browse Jobs</div>
+            <Link to="/userprofile/jobs/my-jobs" className="menu-link">
+              <div data-i18n="My Jobs">My Jobs</div>
             </Link>
           </li>
           <li className="menu-item">
-            <Link to="/userprofile/jobs/alerts" className="menu-link">
-              <div data-i18n="Job Alerts">Job Alerts</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/jobs/applications" className="menu-link">
-              <div data-i18n="My Applications">My Applications</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/jobs/preferences" className="menu-link">
-              <div data-i18n="Career Preferences">Career Preferences</div>
+            <Link to="/userprofile/jobs/service-requests" className="menu-link">
+              <div data-i18n="Service Requests">Service Requests</div>
             </Link>
           </li>
         </ul>
       </li>
 
       {/* Scholarships */}
-      <li className="menu-item">
-        <a href="#" className="menu-link menu-toggle">
+      <li className={`menu-item ${isMenuOpen('scholarships') ? 'open' : ''}`}>
+        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('scholarships', e)}>
           <Icon icon="hugeicons:school-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Scholarships">Scholarships</div>
         </a>
-        <ul className="menu-sub">
+        <ul className={`menu-sub ${isMenuOpen('scholarships') ? 'show' : ''}`}>
           <li className="menu-item">
             <Link to="/userprofile/scholarships/browse" className="menu-link">
               <div data-i18n="Browse Scholarships">Browse Scholarships</div>
@@ -119,12 +154,12 @@ const SidebarMenu: React.FC = () => {
       </li>
 
       {/* Mentorship Program */}
-      <li className="menu-item">
-        <a href="#" className="menu-link menu-toggle">
+      <li className={`menu-item ${isMenuOpen('mentorship') ? 'open' : ''}`}>
+        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('mentorship', e)}>
           <Icon icon="hugeicons:user-group" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Mentorship">Mentorship</div>
         </a>
-        <ul className="menu-sub">
+        <ul className={`menu-sub ${isMenuOpen('mentorship') ? 'show' : ''}`}>
           <li className="menu-item">
             <Link to="/userprofile/mentorship/find-mentor" className="menu-link">
               <div data-i18n="Find a Mentor">Find a Mentor</div>
@@ -158,12 +193,12 @@ const SidebarMenu: React.FC = () => {
       </li>
 
       {/* My Services */}
-      <li className="menu-item">
-        <a href="#" className="menu-link menu-toggle">
+      <li className={`menu-item ${isMenuOpen('services') ? 'open' : ''}`}>
+        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('services', e)}>
           <Icon icon="hugeicons:store-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="My Services">My Services</div>
         </a>
-        <ul className="menu-sub">
+        <ul className={`menu-sub ${isMenuOpen('services') ? 'show' : ''}`}>
           <li className="menu-item">
             <Link to="/userprofile/services/manage" className="menu-link">
               <div data-i18n="Manage Services">Manage Services</div>
@@ -220,12 +255,12 @@ const SidebarMenu: React.FC = () => {
       </li>
 
       {/* Subscription */}
-      <li className="menu-item">
-        <a href="#" className="menu-link menu-toggle">
+      <li className={`menu-item ${isMenuOpen('subscription') ? 'open' : ''}`}>
+        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('subscription', e)}>
           <Icon icon="hugeicons:wallet-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Subscription">Subscription</div>
         </a>
-        <ul className="menu-sub">
+        <ul className={`menu-sub ${isMenuOpen('subscription') ? 'show' : ''}`}>
           <li className="menu-item">
             <Link to="/userprofile/subscription/current" className="menu-link">
               <div data-i18n="Current Plan">Current Plan</div>
@@ -245,12 +280,12 @@ const SidebarMenu: React.FC = () => {
       </li>
 
       {/* Settings */}
-      <li className="menu-item">
-        <a href="#" className="menu-link menu-toggle">
+      <li className={`menu-item ${isMenuOpen('settings') ? 'open' : ''}`}>
+        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('settings', e)}>
           <Icon icon="hugeicons:settings-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Settings">Settings</div>
         </a>
-        <ul className="menu-sub">
+        <ul className={`menu-sub ${isMenuOpen('settings') ? 'show' : ''}`}>
           <li className="menu-item">
             <Link to="/userprofile/settings/account" className="menu-link">
               <div data-i18n="Account Settings">Account Settings</div>
