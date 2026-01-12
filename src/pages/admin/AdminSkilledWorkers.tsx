@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import Chart from "chart.js";
 import {
   Users,
   UserCheck,
@@ -56,6 +57,15 @@ import {
   DeleteConfirmModal
 } from "./components/SkilledWorkersModals";
 
+// Helper function to get initials from name
+const getInitials = (name: string): string => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
 const AdminSkilledWorkers = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
@@ -65,6 +75,14 @@ const AdminSkilledWorkers = () => {
   const [categoryViewMode, setCategoryViewMode] = useState<"grid" | "list">("grid");
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const spacerRef = useRef<HTMLDivElement>(null);
+  
+  // Chart refs
+  const growthChartRef = useRef<HTMLCanvasElement>(null);
+  const overviewChartRef = useRef<HTMLCanvasElement>(null);
+  const categoryChartRef = useRef<HTMLCanvasElement>(null);
+  const locationChartRef = useRef<HTMLCanvasElement>(null);
+  const ratingChartRef = useRef<HTMLCanvasElement>(null);
+  const statusChartRef = useRef<HTMLCanvasElement>(null);
 
   // Modal states
   const [showAddWorker, setShowAddWorker] = useState(false);
@@ -119,6 +137,399 @@ const AdminSkilledWorkers = () => {
 
     return () => {};
   }, []);
+
+  // Initialize charts when analytics or overview tab is active
+  useEffect(() => {
+    if (activeTab !== "analytics" && activeTab !== "overview") return;
+
+    const chartInstances: Chart[] = [];
+
+    // Overview Activity Chart (Worker Growth)
+    if (overviewChartRef.current && activeTab === "overview") {
+      const ctx = overviewChartRef.current.getContext("2d");
+      if (ctx) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, "rgba(59, 130, 246, 0.3)");
+        gradient.addColorStop(1, "rgba(59, 130, 246, 0.05)");
+
+        const chart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            datasets: [{
+              label: "New Workers",
+              data: [12, 19, 15, 25, 22, 30, 28, 35, 32, 40, 38, 45],
+              borderColor: "#3b82f6",
+              backgroundColor: gradient,
+              borderWidth: 3,
+              fill: true,
+              lineTension: 0.4,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: "#3b82f6",
+              pointBorderColor: "#ffffff",
+              pointBorderWidth: 2,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              display: false
+            } as any,
+            tooltips: {
+              backgroundColor: "#1f2937",
+              xPadding: 12,
+              yPadding: 12,
+              titleFontSize: 14,
+              titleFontStyle: "600",
+              bodyFontSize: 13,
+              cornerRadius: 8,
+              displayColors: false,
+            },
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true,
+                  fontColor: "#6b7280",
+                  fontSize: 11
+                },
+                gridLines: {
+                  color: "#f3f4f6",
+                  drawBorder: false,
+                }
+              }],
+              xAxes: [{
+                gridLines: {
+                  display: false,
+                },
+                ticks: {
+                  fontColor: "#6b7280",
+                  fontSize: 11
+                }
+              }]
+            }
+          }
+        });
+        chartInstances.push(chart);
+      }
+    }
+
+    // Worker Growth Line Chart (Analytics)
+    if (growthChartRef.current && activeTab === "analytics") {
+      const ctx = growthChartRef.current.getContext("2d");
+      if (ctx) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, "rgba(59, 130, 246, 0.3)");
+        gradient.addColorStop(1, "rgba(59, 130, 246, 0.05)");
+
+        const chart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            datasets: [{
+              label: "New Workers",
+              data: [12, 19, 15, 25, 22, 30, 28, 35, 32, 40, 38, 45],
+              borderColor: "#3b82f6",
+              backgroundColor: gradient,
+              borderWidth: 3,
+              fill: true,
+              lineTension: 0.4,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: "#3b82f6",
+              pointBorderColor: "#ffffff",
+              pointBorderWidth: 2,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              display: false
+            } as any,
+            tooltips: {
+              backgroundColor: "#1f2937",
+              xPadding: 12,
+              yPadding: 12,
+              titleFontSize: 14,
+              titleFontStyle: "600",
+              bodyFontSize: 13,
+              cornerRadius: 8,
+              displayColors: false,
+            },
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true,
+                  fontColor: "#6b7280",
+                  fontSize: 11
+                },
+                gridLines: {
+                  color: "#f3f4f6",
+                  drawBorder: false,
+                }
+              }],
+              xAxes: [{
+                gridLines: {
+                  display: false,
+                },
+                ticks: {
+                  fontColor: "#6b7280",
+                  fontSize: 11
+                }
+              }]
+            }
+          }
+        });
+        chartInstances.push(chart);
+      }
+    }
+
+    // Category Distribution Doughnut Chart
+    if (categoryChartRef.current && activeTab === "analytics") {
+      const ctx = categoryChartRef.current.getContext("2d");
+      if (ctx) {
+        const chart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Electrician", "Carpenter", "Plumber", "Mason", "Welder", "Painter", "Others"],
+            datasets: [{
+              data: [18, 15, 12, 10, 8, 7, 30],
+              backgroundColor: [
+                "#3b82f6",
+                "#10b981",
+                "#f59e0b",
+                "#ef4444",
+                "#8b5cf6",
+                "#ec4899",
+                "#6b7280"
+              ],
+              borderWidth: 0,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              position: "right",
+              labels: {
+                padding: 15,
+                usePointStyle: true,
+                fontSize: 12,
+                fontColor: "#374151"
+              }
+            },
+            tooltips: {
+              backgroundColor: "#1f2937",
+              xPadding: 12,
+              yPadding: 12,
+              titleFontSize: 14,
+              titleFontStyle: "600",
+              bodyFontSize: 13,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(tooltipItem: any, data: any) {
+                  const label = data.labels[tooltipItem.index] || '';
+                  const value = data.datasets[0].data[tooltipItem.index];
+                  const total = data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        });
+        chartInstances.push(chart);
+      }
+    }
+
+    // Location Distribution Bar Chart
+    if (locationChartRef.current && activeTab === "analytics") {
+      const ctx = locationChartRef.current.getContext("2d");
+      if (ctx) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, "#3b82f6");
+        gradient.addColorStop(1, "#1d4ed8");
+
+        const chart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["Accra", "Kumasi", "Tamale", "Takoradi", "Cape Coast", "Sunyani"],
+            datasets: [{
+              label: "Workers",
+              data: [45, 32, 18, 15, 12, 8],
+              backgroundColor: gradient,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              display: false
+            } as any,
+            tooltips: {
+              backgroundColor: "#1f2937",
+              xPadding: 12,
+              yPadding: 12,
+              titleFontSize: 14,
+              titleFontStyle: "600",
+              bodyFontSize: 13,
+              cornerRadius: 8,
+              displayColors: false,
+            },
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true,
+                  fontColor: "#6b7280",
+                  fontSize: 11,
+                  stepSize: 10
+                },
+                gridLines: {
+                  color: "#f3f4f6",
+                  drawBorder: false,
+                }
+              }],
+              xAxes: [{
+                gridLines: {
+                  display: false,
+                },
+                ticks: {
+                  fontColor: "#6b7280",
+                  fontSize: 11
+                }
+              }]
+            }
+          }
+        });
+        chartInstances.push(chart);
+      }
+    }
+
+    // Rating Distribution Bar Chart
+    if (ratingChartRef.current && activeTab === "analytics") {
+      const ctx = ratingChartRef.current.getContext("2d");
+      if (ctx) {
+        const chart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["1 Star", "2 Stars", "3 Stars", "4 Stars", "5 Stars"],
+            datasets: [{
+              label: "Workers",
+              data: [2, 5, 12, 35, 46],
+              backgroundColor: [
+                "#ef4444",
+                "#f59e0b",
+                "#eab308",
+                "#84cc16",
+                "#10b981"
+              ],
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              display: false
+            } as any,
+            tooltips: {
+              backgroundColor: "#1f2937",
+              xPadding: 12,
+              yPadding: 12,
+              titleFontSize: 14,
+              titleFontStyle: "600",
+              bodyFontSize: 13,
+              cornerRadius: 8,
+              displayColors: false,
+            },
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true,
+                  fontColor: "#6b7280",
+                  fontSize: 11,
+                  stepSize: 10
+                },
+                gridLines: {
+                  color: "#f3f4f6",
+                  drawBorder: false,
+                }
+              }],
+              xAxes: [{
+                gridLines: {
+                  display: false,
+                },
+                ticks: {
+                  fontColor: "#6b7280",
+                  fontSize: 11
+                }
+              }]
+            }
+          }
+        });
+        chartInstances.push(chart);
+      }
+    }
+
+    // Status Distribution Pie Chart
+    if (statusChartRef.current && activeTab === "analytics") {
+      const ctx = statusChartRef.current.getContext("2d");
+      if (ctx) {
+        const chart = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Active", "Pending", "Inactive"],
+            datasets: [{
+              data: [75, 15, 10],
+              backgroundColor: [
+                "#10b981",
+                "#f59e0b",
+                "#ef4444"
+              ],
+              borderWidth: 0,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              position: "right",
+              labels: {
+                padding: 15,
+                usePointStyle: true,
+                fontSize: 12,
+                fontColor: "#374151"
+              }
+            },
+            tooltips: {
+              backgroundColor: "#1f2937",
+              xPadding: 12,
+              yPadding: 12,
+              titleFontSize: 14,
+              titleFontStyle: "600",
+              bodyFontSize: 13,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(tooltipItem: any, data: any) {
+                  const label = data.labels[tooltipItem.index] || '';
+                  const value = data.datasets[0].data[tooltipItem.index];
+                  const total = data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        });
+        chartInstances.push(chart);
+      }
+    }
+
+    return () => {
+      chartInstances.forEach(chart => chart.destroy());
+    };
+  }, [activeTab]);
 
   // Mock statistics data
   const stats = [
@@ -178,7 +589,8 @@ const AdminSkilledWorkers = () => {
       verified: true,
       status: "active",
       joinedDate: "2024-01-15",
-      completedJobs: 245
+      completedJobs: 245,
+      profilePicture: undefined as string | undefined
     },
     {
       id: 2,
@@ -754,8 +1166,21 @@ const AdminSkilledWorkers = () => {
       height: 40px;
       border-radius: 8px;
       object-fit: cover;
-      background: #e5e7eb;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 700;
+    }
+
+    .asw-worker-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      object-fit: cover;
     }
 
     .asw-worker-info {
@@ -1012,7 +1437,7 @@ const AdminSkilledWorkers = () => {
     /* Analytics */
     #asw-analytics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;
     }
 
@@ -1022,24 +1447,45 @@ const AdminSkilledWorkers = () => {
       border-radius: 12px;
       padding: 1.5rem;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+    }
+
+    .asw-analytics-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .asw-chart-card-full {
+      grid-column: 1 / -1;
+    }
+
+    .asw-chart-header {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f3f4f6;
     }
 
     .asw-analytics-title {
       font-size: 1.125rem;
       font-weight: 600;
       color: #111827;
-      margin: 0 0 1rem 0;
+      margin: 0 0 0.25rem 0;
     }
 
-    .asw-analytics-placeholder {
-      height: 200px;
-      background: #f9fafb;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #9ca3af;
+    .asw-chart-subtitle {
       font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .asw-chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    .asw-chart-card-full .asw-chart-container {
+      height: 350px;
     }
 
     /* Responsive */
@@ -1083,6 +1529,10 @@ const AdminSkilledWorkers = () => {
       }
 
       #asw-categories-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #asw-analytics-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -1138,9 +1588,12 @@ const AdminSkilledWorkers = () => {
       </div>
 
       <div className="asw-analytics-card">
-        <h4 className="asw-analytics-title">Activity Chart</h4>
-        <div className="asw-analytics-placeholder">
-          Chart showing worker registrations over time
+        <div className="asw-chart-header">
+          <h4 className="asw-analytics-title">Worker Growth Trend</h4>
+          <p className="asw-chart-subtitle">Monthly registration statistics</p>
+        </div>
+        <div className="asw-chart-container">
+          <canvas ref={overviewChartRef}></canvas>
         </div>
       </div>
     </div>
@@ -1211,7 +1664,11 @@ const AdminSkilledWorkers = () => {
               <tr key={worker.id}>
                 <td>
                   <div className="asw-worker-cell">
-                    <div className="asw-worker-avatar"></div>
+                    {worker.profilePicture ? (
+                      <img src={worker.profilePicture} alt={worker.name} className="asw-worker-avatar" />
+                    ) : (
+                      <div className="asw-worker-avatar">{getInitials(worker.name)}</div>
+                    )}
                     <div className="asw-worker-info">
                       <p className="asw-worker-name">
                         {worker.name}
@@ -1403,7 +1860,8 @@ const AdminSkilledWorkers = () => {
         phone: "+233 24 123 4567",
         email: "john.doe@example.com",
         submittedDate: "2024-01-20",
-        status: "pending"
+        status: "pending",
+        profilePicture: undefined as string | undefined
       },
       {
         id: 2,
@@ -1462,7 +1920,11 @@ const AdminSkilledWorkers = () => {
                 <tr key={worker.id}>
                   <td>
                     <div className="asw-worker-cell">
-                      <div className="asw-worker-avatar"></div>
+                      {worker.profilePicture ? (
+                        <img src={worker.profilePicture} alt={worker.name} className="asw-worker-avatar" />
+                      ) : (
+                        <div className="asw-worker-avatar">{getInitials(worker.name)}</div>
+                      )}
                       <div className="asw-worker-info">
                         <p className="asw-worker-name">{worker.name}</p>
                         <p className="asw-worker-category">Awaiting approval</p>
@@ -1534,32 +1996,46 @@ const AdminSkilledWorkers = () => {
   };
 
   const renderAnalytics = () => (
-    <div id="asw-analytics-grid">
-      <div className="asw-analytics-card">
-        <h4 className="asw-analytics-title">Worker Growth</h4>
-        <div className="asw-analytics-placeholder">
-          Line chart showing worker registration trends
+    <div>
+      <div id="asw-analytics-grid">
+        <div className="asw-analytics-card">
+          <div className="asw-chart-header">
+            <h4 className="asw-analytics-title">Category Distribution</h4>
+            <p className="asw-chart-subtitle">Workers by category</p>
+          </div>
+          <div className="asw-chart-container">
+            <canvas ref={categoryChartRef}></canvas>
+          </div>
         </div>
-      </div>
 
-      <div className="asw-analytics-card">
-        <h4 className="asw-analytics-title">Category Distribution</h4>
-        <div className="asw-analytics-placeholder">
-          Pie chart showing workers per category
+        <div className="asw-analytics-card">
+          <div className="asw-chart-header">
+            <h4 className="asw-analytics-title">Location Distribution</h4>
+            <p className="asw-chart-subtitle">Workers by region</p>
+          </div>
+          <div className="asw-chart-container">
+            <canvas ref={locationChartRef}></canvas>
+          </div>
         </div>
-      </div>
 
-      <div className="asw-analytics-card">
-        <h4 className="asw-analytics-title">Location Distribution</h4>
-        <div className="asw-analytics-placeholder">
-          Bar chart showing workers per region
+        <div className="asw-analytics-card">
+          <div className="asw-chart-header">
+            <h4 className="asw-analytics-title">Rating Distribution</h4>
+            <p className="asw-chart-subtitle">Workers by rating</p>
+          </div>
+          <div className="asw-chart-container">
+            <canvas ref={ratingChartRef}></canvas>
+          </div>
         </div>
-      </div>
 
-      <div className="asw-analytics-card">
-        <h4 className="asw-analytics-title">Rating Distribution</h4>
-        <div className="asw-analytics-placeholder">
-          Bar chart showing rating distribution
+        <div className="asw-analytics-card">
+          <div className="asw-chart-header">
+            <h4 className="asw-analytics-title">Status Overview</h4>
+            <p className="asw-chart-subtitle">Worker status breakdown</p>
+          </div>
+          <div className="asw-chart-container">
+            <canvas ref={statusChartRef}></canvas>
+          </div>
         </div>
       </div>
     </div>

@@ -84,7 +84,17 @@ interface Worker {
   yearsExperience?: number;
   responseTime?: string;
   badges?: string[];
+  profilePicture?: string;
 }
+
+// Helper function to get initials from name
+const getInitials = (name: string): string => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 interface Category {
   id: number;
@@ -231,6 +241,38 @@ const modalStyles = `
     font-size: 0.875rem;
     color: #d1d5db;
     opacity: 0.9;
+  }
+
+  .swm-modal-header-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .swm-modal-profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+  }
+
+  .swm-modal-profile-initials {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
   }
 
   .swm-close-btn {
@@ -381,6 +423,88 @@ const modalStyles = `
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  /* Profile Picture Upload */
+  .swm-profile-picture-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .swm-profile-picture-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+    flex-shrink: 0;
+  }
+
+  .swm-profile-picture-initials {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border: 2px solid #e5e7eb;
+    flex-shrink: 0;
+  }
+
+  .swm-profile-picture-upload-area {
+    flex: 1;
+    border: 2px dashed #d1d5db;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .swm-profile-picture-upload-area:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  .swm-profile-picture-upload-area input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .swm-profile-picture-upload-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .swm-profile-picture-remove {
+    padding: 0.5rem 0.75rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .swm-profile-picture-remove:hover {
+    background: #dc2626;
   }
 
   /* Buttons */
@@ -758,6 +882,7 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
     verified: false,
     services: [] as Array<{ name: string; price: string }>,
     portfolio: [] as string[],
+    profilePicture: "",
   });
 
   const [newService, setNewService] = useState({ name: "", price: "" });
@@ -817,7 +942,6 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
           <div className="swm-modal-header">
             <div>
               <h2 className="swm-modal-title">
-                <User size={24} />
                 Add New Worker
               </h2>
               <p className="swm-modal-subtitle">Create a new worker profile</p>
@@ -974,6 +1098,55 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
                     </div>
 
                     <div className="swm-form-group full-width">
+                      <label className="swm-form-label">
+                        <User size={16} />
+                        Profile Picture
+                      </label>
+                      <div className="swm-profile-picture-section">
+                        {formData.profilePicture ? (
+                          <img 
+                            src={formData.profilePicture} 
+                            alt="Profile" 
+                            className="swm-profile-picture-preview"
+                          />
+                        ) : (
+                          <div className="swm-profile-picture-initials">
+                            {formData.name ? getInitials(formData.name) : "?"}
+                          </div>
+                        )}
+                        <div className="swm-profile-picture-upload-area">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setFormData({ ...formData, profilePicture: reader.result as string });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                          <p className="swm-profile-picture-upload-text">
+                            {formData.profilePicture ? "Click to change picture" : "Click to upload profile picture"}
+                          </p>
+                        </div>
+                        {formData.profilePicture && (
+                          <button
+                            type="button"
+                            className="swm-profile-picture-remove"
+                            onClick={() => setFormData({ ...formData, profilePicture: "" })}
+                          >
+                            <X size={14} />
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="swm-form-group full-width">
                       <div className="swm-form-checkbox-group">
                         <input
                           className="swm-form-checkbox"
@@ -996,7 +1169,6 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
                 <div className="swm-tab-content">
                   <div className="swm-detail-section">
                     <h3 className="swm-detail-section-title">
-                      <DollarSign size={20} />
                       Add New Service
                     </h3>
                     <div className="swm-service-input-row">
@@ -1028,7 +1200,6 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
                   {formData.services.length > 0 && (
                     <div className="swm-detail-section">
                       <h3 className="swm-detail-section-title">
-                        <Briefcase size={20} />
                         Services ({formData.services.length})
                       </h3>
                       <div className="swm-services-grid">
@@ -1054,7 +1225,6 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
 
                   {formData.services.length === 0 && (
                     <div className="swm-empty-state">
-                      <Briefcase size={48} />
                       <p>No services added yet</p>
                       <p className="swm-empty-state-subtitle">Add services and pricing information above</p>
                     </div>
@@ -1066,7 +1236,6 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
                 <div className="swm-tab-content">
                   <div className="swm-detail-section">
                     <h3 className="swm-detail-section-title">
-                      <ImageIcon size={20} />
                       Upload Portfolio Images
                     </h3>
                     <div className="swm-upload-area">
@@ -1079,7 +1248,6 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
                   {formData.portfolio.length > 0 && (
                     <div className="swm-detail-section">
                       <h3 className="swm-detail-section-title">
-                        <ImageIcon size={20} />
                         Portfolio Images ({formData.portfolio.length})
                       </h3>
                       <div className="swm-portfolio-grid">
@@ -1109,7 +1277,6 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
 
                   {formData.portfolio.length === 0 && (
                     <div className="swm-empty-state">
-                      <ImageIcon size={48} />
                       <p>No portfolio images added yet</p>
                       <p className="swm-empty-state-subtitle">Upload images to showcase the worker's work</p>
                     </div>
@@ -1152,6 +1319,7 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
     verified: worker?.verified || false,
     services: worker?.services || [],
     portfolio: worker?.portfolio || [],
+    profilePicture: worker?.profilePicture || "",
   });
 
   const [newService, setNewService] = useState({ name: "", price: "" });
@@ -1195,7 +1363,6 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
           <div className="swm-modal-header">
             <div>
               <h2 className="swm-modal-title">
-                <User size={24} />
                 Edit Worker
               </h2>
               <p className="swm-modal-subtitle">{worker.name}</p>
@@ -1344,6 +1511,55 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
                     </div>
 
                     <div className="swm-form-group full-width">
+                      <label className="swm-form-label">
+                        <User size={16} />
+                        Profile Picture
+                      </label>
+                      <div className="swm-profile-picture-section">
+                        {formData.profilePicture ? (
+                          <img 
+                            src={formData.profilePicture} 
+                            alt="Profile" 
+                            className="swm-profile-picture-preview"
+                          />
+                        ) : (
+                          <div className="swm-profile-picture-initials">
+                            {formData.name ? getInitials(formData.name) : "?"}
+                          </div>
+                        )}
+                        <div className="swm-profile-picture-upload-area">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setFormData({ ...formData, profilePicture: reader.result as string });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                          <p className="swm-profile-picture-upload-text">
+                            {formData.profilePicture ? "Click to change picture" : "Click to upload profile picture"}
+                          </p>
+                        </div>
+                        {formData.profilePicture && (
+                          <button
+                            type="button"
+                            className="swm-profile-picture-remove"
+                            onClick={() => setFormData({ ...formData, profilePicture: "" })}
+                          >
+                            <X size={14} />
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="swm-form-group full-width">
                       <div className="swm-form-checkbox-group">
                         <input
                           className="swm-form-checkbox"
@@ -1366,7 +1582,6 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
                 <div className="swm-tab-content">
                   <div className="swm-detail-section">
                     <h3 className="swm-detail-section-title">
-                      <DollarSign size={20} />
                       Add New Service
                     </h3>
                     <div className="swm-service-input-row">
@@ -1397,7 +1612,6 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
 
                   <div className="swm-detail-section">
                     <h3 className="swm-detail-section-title">
-                      <Briefcase size={20} />
                       Services List ({formData.services.length})
                     </h3>
                     {formData.services.length > 0 ? (
@@ -1429,7 +1643,6 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
                 <div className="swm-tab-content">
                   <div className="swm-detail-section">
                     <h3 className="swm-detail-section-title">
-                      <ImageIcon size={20} />
                       Upload Portfolio Images
                     </h3>
                     <div className="swm-upload-area">
@@ -1440,7 +1653,6 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
 
                   <div className="swm-detail-section">
                     <h3 className="swm-detail-section-title">
-                      <ImageIcon size={20} />
                       Current Portfolio ({formData.portfolio.length} images)
                     </h3>
                     {formData.portfolio.length > 0 ? (
@@ -1521,12 +1733,18 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
       <div className="swm-modal-overlay" onClick={onClose}>
         <div className="swm-modal-content xl" onClick={(e) => e.stopPropagation()}>
           <div className="swm-modal-header">
-            <div>
-              <h2 className="swm-modal-title">
-                <User size={24} />
-                {worker.name}
-              </h2>
-              <p className="swm-modal-subtitle">{worker.category} • {worker.location}</p>
+            <div className="swm-modal-header-profile">
+              {worker.profilePicture ? (
+                <img src={worker.profilePicture} alt={worker.name} className="swm-modal-profile-avatar" />
+              ) : (
+                <div className="swm-modal-profile-initials">{getInitials(worker.name)}</div>
+              )}
+              <div>
+                <h2 className="swm-modal-title">
+                  {worker.name}
+                </h2>
+                <p className="swm-modal-subtitle">{worker.category} • {worker.location}</p>
+              </div>
             </div>
             <button className="swm-close-btn" onClick={onClose}>
               <X size={20} />
@@ -1554,7 +1772,6 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
               <div className="swm-tab-content">
                 <div className="swm-detail-section">
                   <h3 className="swm-detail-section-title">
-                    <User size={20} />
                     Personal Information
                   </h3>
                   <div className="swm-detail-row">
@@ -1596,7 +1813,6 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
 
                 <div className="swm-detail-section">
                   <h3 className="swm-detail-section-title">
-                    <TrendingUp size={20} />
                     Performance & Status
                   </h3>
                   <div className="swm-detail-row">
@@ -1668,7 +1884,6 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
 
                 <div className="swm-detail-section">
                   <h3 className="swm-detail-section-title">
-                    <MessageSquare size={20} />
                     About
                   </h3>
                   <p style={{ color: "#374151", lineHeight: "1.6", margin: 0 }}>
@@ -1679,7 +1894,6 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
                 {worker.badges && worker.badges.length > 0 && (
                   <div className="swm-detail-section">
                     <h3 className="swm-detail-section-title">
-                      <Award size={20} />
                       Badges
                     </h3>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -1715,7 +1929,6 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
               <div className="swm-tab-content">
                 <div className="swm-detail-section">
                   <h3 className="swm-detail-section-title">
-                    <DollarSign size={20} />
                     Services & Pricing
                   </h3>
                   {worker.services && worker.services.length > 0 ? (
@@ -1740,7 +1953,6 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
               <div className="swm-tab-content">
                 <div className="swm-detail-section">
                   <h3 className="swm-detail-section-title">
-                    <ImageIcon size={20} />
                     Portfolio Gallery
                   </h3>
                   {worker.portfolio && worker.portfolio.length > 0 ? (
@@ -1764,7 +1976,6 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
               <div className="swm-tab-content">
                 <div className="swm-detail-section">
                   <h3 className="swm-detail-section-title">
-                    <Star size={20} />
                     Customer Reviews ({worker.reviews || 0})
                   </h3>
                   <div className="swm-review">
@@ -1831,7 +2042,6 @@ export const ApprovalModal = ({
         <div className="swm-modal-content sm" onClick={(e) => e.stopPropagation()}>
           <div className="swm-modal-header">
             <h2 className="swm-modal-title">
-              <CheckCircle size={24} />
               Approve Worker
             </h2>
             <button className="swm-close-btn" onClick={onClose}>
@@ -1899,7 +2109,6 @@ export const RejectConfirmModal = ({
         <div className="swm-modal-content sm" onClick={(e) => e.stopPropagation()}>
           <div className="swm-modal-header">
             <h2 className="swm-modal-title">
-              <XCircle size={24} />
               Reject Worker
             </h2>
             <button className="swm-close-btn" onClick={onClose}>
@@ -1999,7 +2208,6 @@ export const AddCategoryModal = ({ isOpen, onClose, onSave }: AddCategoryModalPr
         <div className="swm-modal-content sm" onClick={(e) => e.stopPropagation()}>
           <div className="swm-modal-header">
             <h2 className="swm-modal-title">
-              <Briefcase size={24} />
               Add New Category
             </h2>
             <button className="swm-close-btn" onClick={onClose}>
@@ -2073,7 +2281,6 @@ export const EditCategoryModal = ({ isOpen, onClose, onSave, category }: EditCat
         <div className="swm-modal-content sm" onClick={(e) => e.stopPropagation()}>
           <div className="swm-modal-header">
             <h2 className="swm-modal-title">
-              <Briefcase size={24} />
               Edit Category
             </h2>
             <button className="swm-close-btn" onClick={onClose}>
@@ -2142,7 +2349,6 @@ export const DeleteConfirmModal = ({
         <div className="swm-modal-content sm" onClick={(e) => e.stopPropagation()}>
           <div className="swm-modal-header">
             <h2 className="swm-modal-title">
-              <XCircle size={24} />
               {title}
             </h2>
             <button className="swm-close-btn" onClick={onClose}>
