@@ -4,6 +4,8 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
 import { Spinner } from "@/components/Spinner";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { 
   ArrowLeft, 
   Star, 
@@ -1209,11 +1211,148 @@ export const SkilledWorkerProfile = () => {
   const [portfolioActiveTab, setPortfolioActiveTab] = useState<'images' | 'videos'>('images');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
-  const worker = getWorkerData(id || 'electrician');
+  // Worker data state
+  const [worker, setWorker] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Load worker data from Supabase
+  useEffect(() => {
+    if (id) {
+      loadWorkerData(id);
+    }
+  }, [id]);
+
+  const loadWorkerData = async (workerId: string) => {
+    setLoading(true);
+    try {
+      // Try to load by UUID first, then by slug
+      let workerData: any = null;
+      
+      // Check if it's a UUID
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workerId);
+      
+      if (isUUID) {
+        // Load by UUID
+        const { data, error } = await supabase
+          .from('skilled_workers' as any)
+          .select('*')
+          .eq('id', workerId)
+          .eq('status', 'active')
+          .single();
+        
+        if (error) throw error;
+        workerData = data;
+      } else {
+        // Try to find by name slug (convert slug back to name)
+        const nameFromSlug = workerId.split('-').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+        
+        const { data, error } = await supabase
+          .from('skilled_workers' as any)
+          .select('*')
+          .ilike('name', `%${nameFromSlug}%`)
+          .eq('status', 'active')
+          .limit(1)
+          .single();
+        
+        if (error) throw error;
+        workerData = data;
+      }
+
+      if (!workerData) {
+        toast.error('Worker not found');
+        navigate('/skilled-workers');
+        return;
+      }
+
+      // Load services
+      const { data: servicesData } = await supabase
+        .from('worker_services' as any)
+        .select('*')
+        .eq('worker_id', workerData.id)
+        .order('display_order', { ascending: true });
+
+      // Load portfolio
+      const { data: portfolioData } = await supabase
+        .from('worker_portfolio' as any)
+        .select('*')
+        .eq('worker_id', workerData.id)
+        .order('display_order', { ascending: true });
+
+      // Load reviews
+      const { data: reviewsData } = await supabase
+        .from('worker_reviews' as any)
+        .select('*')
+        .eq('worker_id', workerData.id)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      // Transform worker data
+      const transformedWorker = {
+        id: workerData.id,
+        name: workerData.name,
+        title: `${workerData.category} Professional`,
+        avatar: workerData.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(workerData.name)}&size=200&background=d97706&color=fff`,
+        rating: parseFloat(workerData.rating) || 0,
+        reviewCount: workerData.reviews_count || 0,
+        location: workerData.location,
+        phone: workerData.phone,
+        email: workerData.email,
+        verified: workerData.verified || false,
+        about: workerData.about || '',
+        services: servicesData?.map((s: any) => ({ name: s.service_name, price: s.service_price })) || [],
+        portfolio: portfolioData?.map((p: any) => p.media_url) || [],
+        stats: {
+          completedJobs: workerData.completed_jobs || 0,
+          yearsExperience: workerData.years_experience || 0,
+          responseTime: workerData.response_time || 'N/A'
+        },
+        badges: Array.isArray(workerData.badges) ? workerData.badges : []
+      };
+
+      // Transform reviews
+      const transformedReviews = reviewsData?.map((r: any) => ({
+        name: r.reviewer_name,
+        avatar: r.reviewer_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.reviewer_name)}&background=d97706&color=fff`,
+        rating: r.rating,
+        date: formatDate(r.created_at),
+        text: r.review_text
+      })) || [];
+
+      setWorker(transformedWorker);
+      setReviews(transformedReviews);
+    } catch (error: any) {
+      console.error('Error loading worker:', error);
+      toast.error('Failed to load worker profile');
+      navigate('/skilled-workers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+    return `${Math.floor(diffDays / 365)} years ago`;
+  };
   
   // Separate images and videos from portfolio
-  const portfolioImages = worker.portfolio || [];
-  const portfolioVideos: string[] = []; // Add video URLs here if needed
+  const portfolioImages = worker?.portfolio?.filter((url: string) => 
+    !url.startsWith('data:video') && !url.includes('.mp4') && !url.includes('.webm')
+  ) || [];
+  const portfolioVideos = worker?.portfolio?.filter((url: string) => 
+    url.startsWith('data:video') || url.includes('.mp4') || url.includes('.webm')
+  ) || [];
   
   const handlePortfolioItemClick = (index: number) => {
     setSelectedImageIndex(index);
@@ -1266,23 +1405,60 @@ export const SkilledWorkerProfile = () => {
     }
   };
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation: if not anonymous, name is required
     if (!isAnonymous && !reviewerName.trim()) {
+      toast.error('Please enter your name or select anonymous');
+      return;
+    }
+
+    if (!reviewRating || reviewRating === 0) {
+      toast.error('Please select a rating');
+      return;
+    }
+
+    if (!reviewText.trim()) {
+      toast.error('Please enter your review');
+      return;
+    }
+
+    if (!worker?.id) {
+      toast.error('Worker not found');
       return;
     }
     
-    // In a real app, this would submit to API
-    const finalName = isAnonymous ? 'Anonymous' : reviewerName.trim();
-    alert(`Review submitted by ${finalName}! (This is a demo)`);
-    
-    setShowReviewForm(false);
-    setReviewRating(0);
-    setReviewText('');
-    setReviewerName('');
-    setIsAnonymous(false);
+    try {
+      const finalName = isAnonymous ? 'Anonymous' : reviewerName.trim();
+      
+      const { error } = await supabase
+        .from('worker_reviews' as any)
+        .insert({
+          worker_id: worker.id,
+          rating: reviewRating,
+          review_text: reviewText.trim(),
+          reviewer_name: finalName,
+          is_anonymous: isAnonymous,
+          status: 'approved' // Auto-approve for now, can add moderation later
+        });
+
+      if (error) throw error;
+
+      toast.success('Review submitted successfully!');
+      
+      // Reload worker data to get updated rating and reviews
+      await loadWorkerData(worker.id);
+      
+      setShowReviewForm(false);
+      setReviewRating(0);
+      setReviewText('');
+      setReviewerName('');
+      setIsAnonymous(false);
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      toast.error(`Failed to submit review: ${error.message}`);
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -1294,6 +1470,37 @@ export const SkilledWorkerProfile = () => {
       />
     ));
   };
+
+  if (loading) {
+    return (
+      <div id="swp-page-wrapper">
+        <InitScripts />
+        <Spinner />
+        <Navigation />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <div>Loading worker profile...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!worker) {
+    return (
+      <div id="swp-page-wrapper">
+        <InitScripts />
+        <Spinner />
+        <Navigation />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh', flexDirection: 'column', gap: '1rem' }}>
+          <div>Worker not found</div>
+          <button onClick={() => navigate('/skilled-workers')} style={{ padding: '0.5rem 1rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>
+            Go Back
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div id="swp-page-wrapper">
@@ -1322,7 +1529,22 @@ export const SkilledWorkerProfile = () => {
           transition={{ duration: 0.5 }}
         >
           <div id="swp-avatar-wrapper">
-            <img id="swp-avatar" src={worker.avatar} alt={worker.name} />
+            {worker.avatar && !worker.avatar.includes('ui-avatars') ? (
+              <img id="swp-avatar" src={worker.avatar} alt={worker.name} />
+            ) : (
+              <div id="swp-avatar" style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                background: '#d97706', 
+                color: 'white', 
+                fontSize: '3rem', 
+                fontWeight: 'bold',
+                borderRadius: '1rem'
+              }}>
+                {worker.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+              </div>
+            )}
             {worker.verified && (
               <div id="swp-verified-badge">
                 <CheckCircle id="swp-verified-icon" />
@@ -1372,7 +1594,7 @@ export const SkilledWorkerProfile = () => {
             </div>
 
             <div id="swp-badges">
-              {worker.badges.map((badge: string, index: number) => {
+              {(worker.badges || []).map((badge: string, index: number) => {
                 // Get the appropriate icon based on badge name
                 const getBadgeIcon = (badgeName: string) => {
                   const name = badgeName.toLowerCase();
@@ -1439,7 +1661,7 @@ export const SkilledWorkerProfile = () => {
                 Services & Pricing
               </h2>
               <div id="swp-services-grid">
-                {worker.services.map((service: any, index: number) => (
+                {(worker.services || []).map((service: any, index: number) => (
                   <div key={index} className="swp-service-card">
                     <h3 className="swp-service-name">{service.name}</h3>
                     <p className="swp-service-price">{service.price}</p>
@@ -1491,9 +1713,9 @@ export const SkilledWorkerProfile = () => {
             >
               <h2 className="swp-section-title">
                 <Star className="swp-section-icon" />
-                Reviews ({worker.reviewCount})
+                Reviews ({worker.reviewCount || 0})
               </h2>
-              {worker.reviews.map((review: any, index: number) => (
+              {(reviews || []).map((review: any, index: number) => (
                 <div key={index} className="swp-review">
                   <div className="swp-review-header">
                     <div className="swp-reviewer-info">

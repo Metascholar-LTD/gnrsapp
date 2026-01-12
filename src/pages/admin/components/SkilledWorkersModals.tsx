@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   X,
   User,
@@ -191,6 +191,7 @@ const modalStyles = `
     flex-direction: column;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     animation: swm-slideUp 0.3s ease-out;
+    position: relative;
   }
 
   @keyframes swm-slideUp {
@@ -322,6 +323,7 @@ const modalStyles = `
     align-items: center;
     gap: 0.5rem;
     white-space: nowrap;
+    position: relative;
   }
 
   .swm-modal-tab:hover {
@@ -335,11 +337,37 @@ const modalStyles = `
     border-bottom-color: #3b82f6;
   }
 
+  .swm-modal-tab.completed {
+    color: #059669;
+  }
+
+  .swm-tab-badge {
+    background: #10b981;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 0.25rem;
+    transition: all 0.3s ease;
+  }
+
+  .swm-tab-badge.incomplete {
+    background: #d1d5db;
+    color: #6b7280;
+  }
+
   /* Modal Body */
   .swm-modal-body {
     padding: 2rem;
     overflow-y: auto;
     flex: 1;
+    max-height: calc(90vh - 280px);
+    min-height: 200px;
   }
 
   .swm-tab-content {
@@ -349,12 +377,16 @@ const modalStyles = `
   /* Modal Footer */
   .swm-modal-footer {
     padding: 1.5rem 2rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 2px solid #e5e7eb;
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
     background: #f9fafb;
     flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
   /* Form Elements */
@@ -710,6 +742,8 @@ const modalStyles = `
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
   }
 
   .swm-portfolio-item {
@@ -718,12 +752,38 @@ const modalStyles = `
     border-radius: 0.5rem;
     overflow: hidden;
     border: 1px solid #e5e7eb;
+    max-height: 200px;
   }
 
   .swm-portfolio-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Empty State */
+  .swm-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #9ca3af;
+  }
+
+  .swm-empty-state p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  .swm-empty-state-subtitle {
+    margin-top: 0.5rem !important;
+    font-size: 0.75rem !important;
+    color: #d1d5db !important;
+  }
+
+  /* Upload hint text */
+  .swm-upload-hint {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.5rem;
   }
 
   .swm-portfolio-remove {
@@ -895,6 +955,30 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
 
   if (!isOpen) return null;
 
+  // Tab completion validation
+  const isBasicInfoComplete = () => {
+    return !!(
+      formData.name &&
+      formData.typeOfWork &&
+      formData.category &&
+      formData.location &&
+      formData.phone &&
+      formData.email
+    );
+  };
+
+  const isServicesComplete = () => {
+    return formData.services.length > 0;
+  };
+
+  const isPortfolioComplete = () => {
+    return formData.portfolio.length > 0;
+  };
+
+  const canSubmit = () => {
+    return isBasicInfoComplete() && isServicesComplete() && isPortfolioComplete();
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
@@ -937,9 +1021,9 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
   };
 
   const tabs = [
-    { id: "overview", label: "Basic Info", icon: Info },
-    { id: "services", label: "Services & Pricing", icon: DollarSign },
-    { id: "portfolio", label: "Portfolio", icon: ImageIcon },
+    { id: "overview", label: "Basic Info", icon: Info, isComplete: isBasicInfoComplete },
+    { id: "services", label: "Services & Pricing", icon: DollarSign, isComplete: isServicesComplete },
+    { id: "portfolio", label: "Portfolio", icon: ImageIcon, isComplete: isPortfolioComplete },
   ];
 
   return (
@@ -952,7 +1036,7 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
               <h2 className="swm-modal-title">
                 Add New Worker
               </h2>
-              <p className="swm-modal-subtitle">Create a new worker profile</p>
+              <p className="swm-modal-subtitle">Complete all 3 steps to add worker</p>
             </div>
             <button className="swm-close-btn" onClick={onClose}>
               <X size={20} />
@@ -960,17 +1044,21 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
           </div>
 
           <div className="swm-modal-tabs">
-            {tabs.map((tab) => {
+            {tabs.map((tab, index) => {
               const Icon = tab.icon;
+              const isComplete = tab.isComplete();
               return (
                 <button
                   key={tab.id}
                   type="button"
-                  className={`swm-modal-tab ${activeTab === tab.id ? "active" : ""}`}
+                  className={`swm-modal-tab ${activeTab === tab.id ? "active" : ""} ${isComplete ? "completed" : ""}`}
                   onClick={() => setActiveTab(tab.id)}
                 >
                   <Icon size={16} />
                   {tab.label}
+                  <span className={`swm-tab-badge ${isComplete ? "" : "incomplete"}`}>
+                    {index + 1}
+                  </span>
                 </button>
               );
             })}
@@ -1363,9 +1451,18 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
               <button type="button" className="swm-btn swm-btn-secondary" onClick={onClose}>
                 Cancel
               </button>
-              <button type="submit" className="swm-btn swm-btn-primary">
+              <button 
+                type="submit" 
+                className="swm-btn swm-btn-primary" 
+                disabled={!canSubmit()}
+                style={{ 
+                  opacity: canSubmit() ? 1 : 0.5,
+                  cursor: canSubmit() ? 'pointer' : 'not-allowed'
+                }}
+                title={!canSubmit() ? "Please complete all tabs before saving" : ""}
+              >
                 <CheckCircle size={16} />
-                Add Worker
+                Add Worker {!canSubmit() && "(Complete all tabs)"}
               </button>
             </div>
           </form>
@@ -1382,24 +1479,70 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
 export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerModalProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [formData, setFormData] = useState({
-    name: worker?.name || "",
-    typeOfWork: worker?.typeOfWork || "",
-    category: worker?.category || "",
-    location: worker?.location || "",
-    phone: worker?.phone || "",
-    email: worker?.email || "",
-    about: worker?.about || "",
-    yearsExperience: worker?.yearsExperience || "",
-    verified: worker?.verified || false,
-    services: worker?.services || [],
-    portfolio: worker?.portfolio || [],
-    profilePicture: worker?.profilePicture || "",
+    name: "",
+    typeOfWork: "",
+    category: "",
+    location: "",
+    phone: "",
+    email: "",
+    about: "",
+    yearsExperience: "",
+    verified: false,
+    services: [] as Array<{ name: string; price: string }>,
+    portfolio: [] as string[],
+    profilePicture: "",
   });
 
   const [newService, setNewService] = useState({ name: "", price: "" });
   const [isDragging, setIsDragging] = useState(false);
 
+  // Update form data when worker changes
+  useEffect(() => {
+    if (worker && isOpen) {
+      const workerData = worker as any; // Type assertion to handle both camelCase and snake_case
+      setFormData({
+        name: workerData.name || "",
+        typeOfWork: workerData.typeOfWork || workerData.type_of_work || "",
+        category: workerData.category || "",
+        location: workerData.location || "",
+        phone: workerData.phone || "",
+        email: workerData.email || "",
+        about: workerData.about || "",
+        yearsExperience: workerData.yearsExperience || workerData.years_experience || "",
+        verified: workerData.verified || false,
+        services: workerData.services || [],
+        portfolio: workerData.portfolio || [],
+        profilePicture: workerData.profilePicture || workerData.profile_picture || "",
+      });
+      setActiveTab("overview"); // Reset to first tab
+    }
+  }, [worker, isOpen]);
+
   if (!isOpen || !worker) return null;
+
+  // Tab completion validation
+  const isBasicInfoComplete = () => {
+    return !!(
+      formData.name &&
+      formData.typeOfWork &&
+      formData.category &&
+      formData.location &&
+      formData.phone &&
+      formData.email
+    );
+  };
+
+  const isServicesComplete = () => {
+    return formData.services.length > 0;
+  };
+
+  const isPortfolioComplete = () => {
+    return formData.portfolio.length > 0;
+  };
+
+  const canSubmit = () => {
+    return isBasicInfoComplete() && isServicesComplete() && isPortfolioComplete();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1426,9 +1569,9 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
   };
 
   const tabs = [
-    { id: "overview", label: "Basic Info", icon: Info },
-    { id: "services", label: "Services & Pricing", icon: DollarSign },
-    { id: "portfolio", label: "Portfolio", icon: ImageIcon },
+    { id: "overview", label: "Basic Info", icon: Info, isComplete: isBasicInfoComplete },
+    { id: "services", label: "Services & Pricing", icon: DollarSign, isComplete: isServicesComplete },
+    { id: "portfolio", label: "Portfolio", icon: ImageIcon, isComplete: isPortfolioComplete },
   ];
 
   return (
@@ -1441,7 +1584,7 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
               <h2 className="swm-modal-title">
                 Edit Worker
               </h2>
-              <p className="swm-modal-subtitle">{worker.name}</p>
+              <p className="swm-modal-subtitle">{worker.name} - Complete all 3 steps</p>
             </div>
             <button className="swm-close-btn" onClick={onClose}>
               <X size={20} />
@@ -1449,16 +1592,21 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
           </div>
 
           <div className="swm-modal-tabs">
-            {tabs.map((tab) => {
+            {tabs.map((tab, index) => {
               const Icon = tab.icon;
+              const isComplete = tab.isComplete();
               return (
                 <button
                   key={tab.id}
-                  className={`swm-modal-tab ${activeTab === tab.id ? "active" : ""}`}
+                  type="button"
+                  className={`swm-modal-tab ${activeTab === tab.id ? "active" : ""} ${isComplete ? "completed" : ""}`}
                   onClick={() => setActiveTab(tab.id)}
                 >
                   <Icon size={16} />
                   {tab.label}
+                  <span className={`swm-tab-badge ${isComplete ? "" : "incomplete"}`}>
+                    {index + 1}
+                  </span>
                 </button>
               );
             })}
@@ -1834,9 +1982,18 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
               <button type="button" className="swm-btn swm-btn-secondary" onClick={onClose}>
                 Cancel
               </button>
-              <button type="submit" className="swm-btn swm-btn-primary">
+              <button 
+                type="submit" 
+                className="swm-btn swm-btn-primary"
+                disabled={!canSubmit()}
+                style={{ 
+                  opacity: canSubmit() ? 1 : 0.5,
+                  cursor: canSubmit() ? 'pointer' : 'not-allowed'
+                }}
+                title={!canSubmit() ? "Please complete all tabs before saving" : ""}
+              >
                 <CheckCircle size={16} />
-                Save Changes
+                Save Changes {!canSubmit() && "(Complete all tabs)"}
               </button>
             </div>
           </form>

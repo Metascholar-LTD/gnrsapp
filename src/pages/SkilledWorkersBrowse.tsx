@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
 import { Spinner } from "@/components/Spinner";
 import { Search, ChevronDown, X, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const isolatedStyles = `
   #swb-page-wrapper {
@@ -632,134 +633,11 @@ const isolatedStyles = `
 `;
 
 // Comprehensive skilled worker categories organized by type
-const WORK_TYPES = [
-  { id: 'all', label: 'Any type of work' },
-  { id: 'skilled-trades', label: 'Skilled Trades' },
-  { id: 'personal-services', label: 'Personal Services' },
-  { id: 'construction', label: 'Construction & Building' },
-  { id: 'automotive', label: 'Automotive Services' },
-  { id: 'beauty', label: 'Beauty & Personal Care' },
-  { id: 'food', label: 'Food & Catering' },
-  { id: 'maintenance', label: 'Maintenance & Repair' },
-];
-
-// Comprehensive list of skilled worker categories organized alphabetically
-const SKILLED_WORKER_CATEGORIES = [
-  // 0-9
-  { name: '3D Printing Specialist', category: 'skilled-trades' },
-  { name: '3D Modeling Expert', category: 'skilled-trades' },
-  
-  // A
-  { name: 'AC Repair Technician', category: 'maintenance' },
-  { name: 'Appliance Repair Specialist', category: 'maintenance' },
-  { name: 'Auto Body Repair Expert', category: 'automotive' },
-  { name: 'Auto Electrician', category: 'automotive' },
-  { name: 'Auto Mechanic', category: 'automotive' },
-  { name: 'Auto Parts Specialist', category: 'automotive' },
-  { name: 'Architectural Drafter', category: 'construction' },
-  { name: 'Asphalt Paving Contractor', category: 'construction' },
-  
-  // B
-  { name: 'Barber', category: 'beauty' },
-  { name: 'Bricklayer', category: 'construction' },
-  { name: 'Building Inspector', category: 'construction' },
-  { name: 'Building Maintenance Worker', category: 'maintenance' },
-  
-  // C
-  { name: 'Cake Baker & Designer', category: 'food' },
-  { name: 'Carpenter', category: 'skilled-trades' },
-  { name: 'Caterer', category: 'food' },
-  { name: 'Chef', category: 'food' },
-  { name: 'Civil Engineer', category: 'construction' },
-  { name: 'Cleaner', category: 'personal-services' },
-  { name: 'Commercial Painter', category: 'construction' },
-  { name: 'Concrete Finisher', category: 'construction' },
-  { name: 'Construction Manager', category: 'construction' },
-  { name: 'Crane Operator', category: 'construction' },
-  
-  // D
-  { name: 'Diesel Mechanic', category: 'automotive' },
-  { name: 'Drywall Installer', category: 'construction' },
-  
-  // E
-  { name: 'Electrician', category: 'skilled-trades' },
-  { name: 'Elevator Technician', category: 'maintenance' },
-  { name: 'Event Caterer', category: 'food' },
-  
-  // F
-  { name: 'Fence Installer', category: 'construction' },
-  { name: 'Flooring Installer', category: 'construction' },
-  { name: 'Furniture Maker', category: 'skilled-trades' },
-  
-  // G
-  { name: 'General Contractor', category: 'construction' },
-  { name: 'Glazier', category: 'construction' },
-  
-  // H
-  { name: 'Hairdresser', category: 'beauty' },
-  { name: 'Hair Stylist', category: 'beauty' },
-  { name: 'Heating Technician', category: 'maintenance' },
-  { name: 'HVAC Technician', category: 'maintenance' },
-  
-  // I
-  { name: 'Interior Designer', category: 'construction' },
-  { name: 'Ironworker', category: 'construction' },
-  
-  // J
-  { name: 'Janitor', category: 'personal-services' },
-  { name: 'Jeweler', category: 'personal-services' },
-  
-  // L
-  { name: 'Landscaper', category: 'construction' },
-  { name: 'Locksmith', category: 'maintenance' },
-  
-  // M
-  { name: 'Mason', category: 'skilled-trades' },
-  { name: 'Makeup Artist', category: 'beauty' },
-  { name: 'Mechanic', category: 'automotive' },
-  { name: 'Metal Fabricator', category: 'skilled-trades' },
-  { name: 'Mobile Mechanic', category: 'automotive' },
-  
-  // N
-  { name: 'Nail Technician', category: 'beauty' },
-  
-  // P
-  { name: 'Painter', category: 'skilled-trades' },
-  { name: 'Plumber', category: 'skilled-trades' },
-  { name: 'Plumbing Contractor', category: 'construction' },
-  { name: 'Power Tool Repair', category: 'maintenance' },
-  
-  // R
-  { name: 'Refrigeration Technician', category: 'maintenance' },
-  { name: 'Roofer', category: 'construction' },
-  
-  // S
-  { name: 'Seamstress', category: 'personal-services' },
-  { name: 'Security System Installer', category: 'maintenance' },
-  { name: 'Sheet Metal Worker', category: 'skilled-trades' },
-  { name: 'Shoe Repair Specialist', category: 'personal-services' },
-  { name: 'Solar Panel Installer', category: 'construction' },
-  { name: 'Steel Worker', category: 'construction' },
-  { name: 'Surveyor', category: 'construction' },
-  
-  // T
-  { name: 'Tailor', category: 'personal-services' },
-  { name: 'Tile Installer', category: 'construction' },
-  { name: 'Tire Specialist', category: 'automotive' },
-  { name: 'Truck Mechanic', category: 'automotive' },
-  
-  // U
-  { name: 'Upholsterer', category: 'personal-services' },
-  
-  // W
-  { name: 'Welder', category: 'skilled-trades' },
-  { name: 'Window Installer', category: 'construction' },
-  { name: 'Woodworker', category: 'skilled-trades' },
-];
+// Work types and categories are now loaded from Supabase
 
 // Group categories by first letter
-const groupByLetter = (categories: typeof SKILLED_WORKER_CATEGORIES) => {
-  const grouped: Record<string, typeof SKILLED_WORKER_CATEGORIES> = {};
+const groupByLetter = (categories: Array<{ name: string; category: string }>) => {
+  const grouped: Record<string, Array<{ name: string; category: string }>> = {};
   
   categories.forEach(category => {
     const firstLetter = category.name[0].toUpperCase();
@@ -777,10 +655,54 @@ const SkilledWorkersBrowse = () => {
   const [selectedWorkType, setSelectedWorkType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  
+  // Data states
+  const [workTypes, setWorkTypes] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load data from Supabase
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Load work types
+      const { data: workTypesData, error: workTypesError } = await supabase
+        .from('work_types' as any)
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (workTypesError) throw workTypesError;
+
+      // Load categories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('worker_categories' as any)
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (categoriesError) throw categoriesError;
+
+      setWorkTypes(workTypesData || []);
+      setCategories(categoriesData?.map((cat: any) => ({
+        name: cat.name,
+        category: cat.type_of_work
+      })) || []);
+    } catch (error: any) {
+      console.error('Error loading data:', error);
+      // Fallback to empty arrays
+      setWorkTypes([]);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter categories based on work type and search query
   const filteredCategories = useMemo(() => {
-    let filtered = SKILLED_WORKER_CATEGORIES;
+    let filtered = categories;
 
     // Filter by work type
     if (selectedWorkType !== 'all') {
@@ -796,7 +718,7 @@ const SkilledWorkersBrowse = () => {
     }
 
     return filtered;
-  }, [selectedWorkType, searchQuery]);
+  }, [categories, selectedWorkType, searchQuery]);
 
   // Group filtered categories by letter
   const groupedCategories = useMemo(() => {
@@ -810,9 +732,9 @@ const SkilledWorkersBrowse = () => {
 
   // Get selected work type label
   const selectedWorkTypeLabel = useMemo(() => {
-    const type = WORK_TYPES.find(t => t.id === selectedWorkType);
+    const type = workTypes.find(t => t.id === selectedWorkType);
     return type?.label || 'Any type of work';
-  }, [selectedWorkType]);
+  }, [selectedWorkType, workTypes]);
 
   // Handle work type selection
   const handleWorkTypeSelect = (typeId: string) => {
@@ -873,7 +795,7 @@ const SkilledWorkersBrowse = () => {
           </div>
           <h2 id="swb-filter-title">Type of work</h2>
           <ul id="swb-filter-list">
-            {WORK_TYPES.map((type) => (
+            {workTypes.map((type) => (
               <li
                 key={type.id}
                 className={`swb-filter-item ${selectedWorkType === type.id ? 'selected' : ''}`}
@@ -961,7 +883,7 @@ const SkilledWorkersBrowse = () => {
             </button>
           </div>
           <ul id="swb-modal-list">
-            {WORK_TYPES.map((type) => (
+            {workTypes.map((type) => (
               <li
                 key={type.id}
                 className={`swb-modal-item ${selectedWorkType === type.id ? 'selected' : ''}`}

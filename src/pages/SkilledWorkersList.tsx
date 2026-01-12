@@ -1,10 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
 import { Spinner } from "@/components/Spinner";
 import { SkilledWorkerPanel } from "@/components/SkilledWorkerPanel";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { 
   ArrowLeft, 
   Star, 
@@ -338,36 +340,7 @@ const isolatedStyles = `
   }
 `;
 
-// Mock workers data - in real app, this would come from API
-const generateWorkers = (category: string, count: number = 12) => {
-  const categoryName = category.split('-').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ');
-
-  return Array.from({ length: count }, (_, i) => {
-    const names = [
-      'Kwame Mensah', 'Ama Serwaa', 'Kofi Boateng', 'Efua Osei',
-      'Yaw Asante', 'Akosua Adjei', 'Kojo Appiah', 'Adwoa Darko',
-      'Nana Yeboah', 'Maame Owusu', 'Emmanuel Tetteh', 'Gifty Mensah'
-    ];
-    const locations = [
-      'Accra, Greater Accra', 'Kumasi, Ashanti', 'Tamale, Northern',
-      'Cape Coast, Central', 'Takoradi, Western', 'Sunyani, Bono'
-    ];
-    
-    return {
-      id: `${category}-${i + 1}`,
-      name: names[i % names.length],
-      title: `Professional ${categoryName}`,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(names[i % names.length])}&size=200&background=d97706&color=fff`,
-      rating: (4.0 + Math.random() * 1.0).toFixed(1),
-      reviewCount: Math.floor(Math.random() * 200) + 20,
-      location: locations[i % locations.length],
-      verified: Math.random() > 0.3,
-      experience: Math.floor(Math.random() * 15) + 2
-    };
-  });
-};
+// Workers are now loaded from Supabase
 
 export const SkilledWorkersList = () => {
   const { category } = useParams<{ category: string }>();
@@ -375,14 +348,85 @@ export const SkilledWorkersList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [workers, setWorkers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Convert slug to category name
   const categoryName = category 
     ? category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     : 'Skilled Workers';
 
-  const allWorkers = useMemo(() => {
-    return generateWorkers(category || 'worker', 12);
+  // Load workers from Supabase
+  useEffect(() => {
+    loadWorkers();
   }, [category]);
+
+  const loadWorkers = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('skilled_workers' as any)
+        .select('*')
+        .eq('status', 'active')
+        .order('rating', { ascending: false });
+
+      // Filter by category if provided
+      if (category) {
+        // Try to match category name (case-insensitive)
+        query = query.ilike('category', `%${categoryName}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      if (data) {
+        // Transform workers data
+        const transformed = await Promise.all(
+          data.map(async (worker: any) => {
+            // Get worker count for this category
+            const { count } = await supabase
+              .from('skilled_workers' as any)
+              .select('*', { count: 'exact', head: true })
+              .eq('category', worker.category)
+              .eq('status', 'active');
+
+            return {
+              id: worker.id,
+              name: worker.name,
+              title: `${worker.category} Professional`,
+              avatar: worker.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(worker.name)}&size=200&background=d97706&color=fff`,
+              rating: parseFloat(worker.rating) || 0,
+              reviewCount: worker.reviews_count || 0,
+              location: worker.location,
+              verified: worker.verified || false,
+              experience: worker.years_experience || 0,
+              category: worker.category,
+              phone: worker.phone,
+              email: worker.email,
+              about: worker.about || '',
+              stats: {
+                completedJobs: worker.completed_jobs || 0,
+                yearsExperience: worker.years_experience || 0,
+                responseTime: worker.response_time || 'N/A'
+              },
+              badges: Array.isArray(worker.badges) ? worker.badges : []
+            };
+          })
+        );
+
+        setWorkers(transformed);
+      }
+    } catch (error: any) {
+      console.error('Error loading workers:', error);
+      toast.error('Failed to load workers');
+      setWorkers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const allWorkers = workers;
 
   const filteredWorkers = useMemo(() => {
     if (!searchQuery.trim()) return allWorkers;
@@ -407,37 +451,34 @@ export const SkilledWorkersList = () => {
   };
 
   // Get full worker data for panel
-  const getFullWorkerData = (worker: any) => {
-    const categoryName = category 
-      ? category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-      : 'Skilled Worker';
-    
-    const seed = parseInt(worker.id.split('-').pop() || '1') - 1;
-    
-    return {
-      ...worker,
-      about: `With ${worker.experience}+ years of experience in ${categoryName.toLowerCase()}, I provide professional and reliable services. I am committed to delivering high-quality work and ensuring complete customer satisfaction.`,
-      services: [
-        { name: `${categoryName} Consultation`, price: 'GHS 200+' },
-        { name: `Basic ${categoryName} Service`, price: 'GHS 300+' },
-        { name: `Premium ${categoryName} Service`, price: 'GHS 500+' },
-        { name: `${categoryName} Maintenance`, price: 'GHS 150+' },
-        { name: `Emergency ${categoryName}`, price: 'GHS 400+' },
-        { name: `${categoryName} Installation`, price: 'GHS 600+' }
-      ],
-      phone: `+233 24 ${1000000 + (seed % 9000000)}`,
-      email: `${worker.name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-      stats: {
-        completedJobs: 100 + (seed % 500),
-        yearsExperience: worker.experience,
-        responseTime: `${1 + (seed % 4)} hours`
-      },
-      badges: ['Licensed', 'Insured', 'Verified']
-    };
+  const getFullWorkerData = async (worker: any) => {
+    try {
+      // Load services and portfolio
+      const { data: servicesData } = await supabase
+        .from('worker_services' as any)
+        .select('*')
+        .eq('worker_id', worker.id)
+        .order('display_order', { ascending: true });
+
+      const { data: portfolioData } = await supabase
+        .from('worker_portfolio' as any)
+        .select('*')
+        .eq('worker_id', worker.id)
+        .order('display_order', { ascending: true });
+
+      return {
+        ...worker,
+        services: servicesData?.map((s: any) => ({ name: s.service_name, price: s.service_price })) || [],
+        portfolio: portfolioData?.map((p: any) => p.media_url) || []
+      };
+    } catch (error) {
+      console.error('Error loading full worker data:', error);
+      return worker;
+    }
   };
 
-  const handleWorkerClick = (worker: any) => {
-    const fullWorkerData = getFullWorkerData(worker);
+  const handleWorkerClick = async (worker: any) => {
+    const fullWorkerData = await getFullWorkerData(worker);
     setSelectedWorker(fullWorkerData);
     setIsPanelOpen(true);
   };
@@ -446,6 +487,20 @@ export const SkilledWorkersList = () => {
     setIsPanelOpen(false);
     setSelectedWorker(null);
   };
+
+  if (loading) {
+    return (
+      <div id="swl-page-wrapper">
+        <InitScripts />
+        <Spinner />
+        <Navigation />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <div>Loading workers...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div id="swl-page-wrapper">

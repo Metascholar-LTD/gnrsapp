@@ -202,6 +202,7 @@ const AdminSkilledWorkers = () => {
             return {
               ...worker,
               id: worker.id,
+              typeOfWork: worker.type_of_work || "",
               services: services?.map((s: any) => ({ name: s.service_name, price: s.service_price })) || [],
               portfolio: portfolio?.map((p: any) => p.media_url) || [],
               reviews: worker.reviews_count || 0,
@@ -1009,8 +1010,8 @@ const AdminSkilledWorkers = () => {
         await loadCategories();
       }
 
-      setShowDeleteConfirm(false);
-      setDeleteTarget(null);
+    setShowDeleteConfirm(false);
+    setDeleteTarget(null);
     } catch (error: any) {
       console.error('Error deleting:', error);
       toast.error(`Failed to delete: ${error.message}`);
@@ -2002,15 +2003,15 @@ const AdminSkilledWorkers = () => {
               <List size={18} />
             </button>
           </div>
-          <button className="asw-btn asw-btn-primary" onClick={() => setShowAddCategory(true)}>
-            <Plus className="asw-btn-icon" />
-            Add Category
-          </button>
+        <button className="asw-btn asw-btn-primary" onClick={() => setShowAddCategory(true)}>
+          <Plus className="asw-btn-icon" />
+          Add Category
+        </button>
         </div>
       </div>
 
       {categoryViewMode === "grid" ? (
-        <div id="asw-categories-grid">
+      <div id="asw-categories-grid">
           {categories.map(category => (
             <div key={category.id} className="asw-category-card">
               <div className="asw-category-header">
@@ -2033,7 +2034,7 @@ const AdminSkilledWorkers = () => {
               </div>
             </div>
           ))}
-        </div>
+      </div>
       ) : (
         <div id="asw-table-container">
           <table id="asw-table">
@@ -2209,38 +2210,38 @@ const AdminSkilledWorkers = () => {
 
   const renderAnalytics = () => (
     <div>
-      <div id="asw-analytics-grid">
-        <div className="asw-analytics-card">
+    <div id="asw-analytics-grid">
+      <div className="asw-analytics-card">
           <div className="asw-chart-header">
             <h4 className="asw-analytics-title">Category Distribution</h4>
             <p className="asw-chart-subtitle">Workers by category</p>
           </div>
           <div className="asw-chart-container">
             <canvas ref={categoryChartRef}></canvas>
-          </div>
         </div>
+      </div>
 
-        <div className="asw-analytics-card">
+      <div className="asw-analytics-card">
           <div className="asw-chart-header">
             <h4 className="asw-analytics-title">Location Distribution</h4>
             <p className="asw-chart-subtitle">Workers by region</p>
           </div>
           <div className="asw-chart-container">
             <canvas ref={locationChartRef}></canvas>
-          </div>
         </div>
+      </div>
 
-        <div className="asw-analytics-card">
+      <div className="asw-analytics-card">
           <div className="asw-chart-header">
             <h4 className="asw-analytics-title">Rating Distribution</h4>
             <p className="asw-chart-subtitle">Workers by rating</p>
           </div>
           <div className="asw-chart-container">
             <canvas ref={ratingChartRef}></canvas>
-          </div>
         </div>
+      </div>
 
-        <div className="asw-analytics-card">
+      <div className="asw-analytics-card">
           <div className="asw-chart-header">
             <h4 className="asw-analytics-title">Status Overview</h4>
             <p className="asw-chart-subtitle">Worker status breakdown</p>
