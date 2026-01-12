@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { Button } from '@/components/ui/button';
-import { ArrowUp, ArrowDown, BookOpen, Download, Eye } from 'lucide-react';
+import { ArrowUp, ArrowDown, BookOpen, Download, Eye, Database, FileText } from 'lucide-react';
 
 dayjs.extend(isoWeek);
 dayjs.extend(localizedFormat);
@@ -172,6 +172,10 @@ const Dashboard: React.FC = () => {
   const resourcesWeekChartInstanceRef = useRef<any>(null);
   const downloadsWeekChartInstanceRef = useRef<any>(null);
   const viewsWeekChartInstanceRef = useRef<any>(null);
+  const totalRevenueChartRef = useRef<HTMLDivElement>(null);
+  const growthChartRef = useRef<HTMLDivElement>(null);
+  const totalRevenueChartInstanceRef = useRef<any>(null);
+  const growthChartInstanceRef = useRef<any>(null);
 
   // Chart configuration matching sneat-1.0.0 exactly
   const chartConfig = {
@@ -228,16 +232,7 @@ const Dashboard: React.FC = () => {
         const resourcesChartConfig = {
           series: [
             {
-              data: [
-                { x: 0, y: 24 },
-                { x: 1, y: 21 },
-                { x: 2, y: 30 },
-                { x: 3, y: 22 },
-                { x: 4, y: 42 },
-                { x: 5, y: 26 },
-                { x: 6, y: 35 },
-                { x: 7, y: 29 }
-              ]
+              data: [24, 21, 30, 22, 42, 26, 35, 29]
             }
           ],
           chart: {
@@ -246,19 +241,6 @@ const Dashboard: React.FC = () => {
             parentWidthOffset: 0,
             toolbar: {
               show: false
-            },
-            zoom: {
-              enabled: true,
-              type: 'x',
-              autoScaleYaxis: true,
-              allowMouseWheelZoom: true
-            },
-            selection: {
-              enabled: true,
-              xaxis: {
-                min: undefined,
-                max: undefined
-              }
             },
             type: 'area'
           },
@@ -314,23 +296,19 @@ const Dashboard: React.FC = () => {
             }
           },
           xaxis: {
-            type: 'numeric',
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              },
-              formatter: function(val: number) {
-                const labels = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-                return labels[Math.round(val)] || '';
-              }
-            },
+            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
             axisBorder: {
               show: false
             },
             axisTicks: {
               show: false
+            },
+            labels: {
+              show: true,
+              style: {
+                fontSize: '13px',
+                colors: axisColor
+              }
             }
           },
           yaxis: {
@@ -351,16 +329,7 @@ const Dashboard: React.FC = () => {
         const downloadsChartConfig = {
           series: [
             {
-              data: [
-                { x: 0, y: 28 },
-                { x: 1, y: 25 },
-                { x: 2, y: 35 },
-                { x: 3, y: 28 },
-                { x: 4, y: 48 },
-                { x: 5, y: 32 },
-                { x: 6, y: 42 },
-                { x: 7, y: 35 }
-              ]
+              data: [28, 25, 35, 28, 48, 32, 42, 35]
             }
           ],
           chart: {
@@ -369,19 +338,6 @@ const Dashboard: React.FC = () => {
             parentWidthOffset: 0,
             toolbar: {
               show: false
-            },
-            zoom: {
-              enabled: true,
-              type: 'x',
-              autoScaleYaxis: true,
-              allowMouseWheelZoom: true
-            },
-            selection: {
-              enabled: true,
-              xaxis: {
-                min: undefined,
-                max: undefined
-              }
             },
             type: 'area'
           },
@@ -437,23 +393,19 @@ const Dashboard: React.FC = () => {
             }
           },
           xaxis: {
-            type: 'numeric',
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              },
-              formatter: function(val: number) {
-                const labels = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-                return labels[Math.round(val)] || '';
-              }
-            },
+            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
             axisBorder: {
               show: false
             },
             axisTicks: {
               show: false
+            },
+            labels: {
+              show: true,
+              style: {
+                fontSize: '13px',
+                colors: axisColor
+              }
             }
           },
           yaxis: {
@@ -474,16 +426,7 @@ const Dashboard: React.FC = () => {
         const viewsChartConfig = {
           series: [
             {
-              data: [
-                { x: 0, y: 32 },
-                { x: 1, y: 28 },
-                { x: 2, y: 38 },
-                { x: 3, y: 30 },
-                { x: 4, y: 52 },
-                { x: 5, y: 36 },
-                { x: 6, y: 46 },
-                { x: 7, y: 40 }
-              ]
+              data: [32, 28, 38, 30, 52, 36, 46, 40]
             }
           ],
           chart: {
@@ -492,19 +435,6 @@ const Dashboard: React.FC = () => {
             parentWidthOffset: 0,
             toolbar: {
               show: false
-            },
-            zoom: {
-              enabled: true,
-              type: 'x',
-              autoScaleYaxis: true,
-              allowMouseWheelZoom: true
-            },
-            selection: {
-              enabled: true,
-              xaxis: {
-                min: undefined,
-                max: undefined
-              }
             },
             type: 'area'
           },
@@ -560,23 +490,19 @@ const Dashboard: React.FC = () => {
             }
           },
           xaxis: {
-            type: 'numeric',
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              },
-              formatter: function(val: number) {
-                const labels = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-                return labels[Math.round(val)] || '';
-              }
-            },
+            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
             axisBorder: {
               show: false
             },
             axisTicks: {
               show: false
+            },
+            labels: {
+              show: true,
+              style: {
+                fontSize: '13px',
+                colors: axisColor
+              }
             }
           },
           yaxis: {
@@ -789,39 +715,351 @@ const Dashboard: React.FC = () => {
         viewsWeekChartInstanceRef.current = new ApexCharts(viewsWeekChartRef.current, viewsWeekChartConfig);
         viewsWeekChartInstanceRef.current.render();
       }
+
+      // Total Revenue Chart Configuration (exact copy from sneat-1.0.0)
+      if (totalRevenueChartRef.current && !totalRevenueChartInstanceRef.current) {
+        const totalRevenueChartOptions = {
+          series: [
+            {
+              name: '2025',
+              data: [18, 7, 15, 29, 18, 12, 9]
+            },
+            {
+              name: '2024',
+              data: [-13, -18, -9, -14, -5, -17, -15]
+            }
+          ],
+          chart: {
+            height: 300,
+            stacked: true,
+            type: 'bar',
+            toolbar: { show: false }
+          },
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              columnWidth: '33%',
+              borderRadius: 12,
+              startingShape: 'rounded',
+              endingShape: 'rounded'
+            }
+          },
+          colors: [chartConfig.colors.primary, chartConfig.colors.info],
+          dataLabels: {
+            enabled: false
+          },
+          stroke: {
+            curve: 'smooth',
+            width: 6,
+            lineCap: 'round',
+            colors: [cardColor]
+          },
+          legend: {
+            show: true,
+            horizontalAlign: 'left',
+            position: 'top',
+            markers: {
+              height: 8,
+              width: 8,
+              radius: 12,
+              offsetX: -3
+            },
+            labels: {
+              colors: axisColor
+            },
+            itemMargin: {
+              horizontal: 10
+            }
+          },
+          grid: {
+            borderColor: borderColor,
+            padding: {
+              top: 0,
+              bottom: -8,
+              left: 20,
+              right: 20
+            }
+          },
+          xaxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+            labels: {
+              style: {
+                fontSize: '13px',
+                colors: axisColor
+              }
+            },
+            axisTicks: {
+              show: false
+            },
+            axisBorder: {
+              show: false
+            }
+          },
+          yaxis: {
+            labels: {
+              style: {
+                fontSize: '13px',
+                colors: axisColor
+              }
+            }
+          },
+          responsive: [
+            {
+              breakpoint: 1700,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '32%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 1580,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '35%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 1440,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '42%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 1300,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '48%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 1200,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '40%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 1040,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 11,
+                    columnWidth: '48%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 991,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '30%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 840,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '35%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 768,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '28%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 640,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '32%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 576,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '37%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 480,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '45%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 420,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '52%'
+                  }
+                }
+              }
+            },
+            {
+              breakpoint: 380,
+              options: {
+                plotOptions: {
+                  bar: {
+                    borderRadius: 10,
+                    columnWidth: '60%'
+                  }
+                }
+              }
+            }
+          ],
+          states: {
+            hover: {
+              filter: {
+                type: 'none'
+              }
+            },
+            active: {
+              filter: {
+                type: 'none'
+              }
+            }
+          }
+        };
+        totalRevenueChartInstanceRef.current = new ApexCharts(totalRevenueChartRef.current, totalRevenueChartOptions);
+        totalRevenueChartInstanceRef.current.render();
+      }
+
+      // Growth Chart Configuration (exact copy from sneat-1.0.0)
+      if (growthChartRef.current && !growthChartInstanceRef.current) {
+        const growthChartOptions = {
+          series: [78],
+          labels: ['Growth'],
+          chart: {
+            height: 240,
+            type: 'radialBar'
+          },
+          plotOptions: {
+            radialBar: {
+              size: 150,
+              offsetY: 10,
+              startAngle: -150,
+              endAngle: 150,
+              hollow: {
+                size: '55%'
+              },
+              track: {
+                background: cardColor,
+                strokeWidth: '100%'
+              },
+              dataLabels: {
+                name: {
+                  offsetY: 15,
+                  color: headingColor,
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  fontFamily: 'Public Sans'
+                },
+                value: {
+                  offsetY: -25,
+                  color: headingColor,
+                  fontSize: '22px',
+                  fontWeight: '500',
+                  fontFamily: 'Public Sans'
+                }
+              }
+            }
+          },
+          colors: [chartConfig.colors.primary],
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'dark',
+              shadeIntensity: 0.5,
+              gradientToColors: [chartConfig.colors.primary],
+              inverseColors: true,
+              opacityFrom: 1,
+              opacityTo: 0.6,
+              stops: [30, 70, 100]
+            }
+          },
+          stroke: {
+            dashArray: 5
+          },
+          grid: {
+            padding: {
+              top: -35,
+              bottom: -10
+            }
+          },
+          states: {
+            hover: {
+              filter: {
+                type: 'none'
+              }
+            },
+            active: {
+              filter: {
+                type: 'none'
+              }
+            }
+          }
+        };
+        growthChartInstanceRef.current = new ApexCharts(growthChartRef.current, growthChartOptions);
+        growthChartInstanceRef.current.render();
+      }
     };
 
     loadApexCharts();
 
-    // Add event listeners to prevent page scroll when hovering over charts
-    // Wait a bit for charts to render
-    let preventPageScrollHandler: ((e: WheelEvent) => void) | null = null;
-    const timer = setTimeout(() => {
-      preventPageScrollHandler = (e: WheelEvent) => {
-        const target = e.target as HTMLElement;
-        // Check if the event is within any chart container or ApexCharts SVG
-        const chartContainer = target.closest('#resourcesChart, #downloadsChart, #viewsChart');
-        const apexChart = target.closest('.apexcharts-canvas, .apexcharts-svg, .apexcharts-inner');
-        
-        if (chartContainer || apexChart) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      };
-
-      // Add wheel event listener to prevent page scroll (use capture phase)
-      if (preventPageScrollHandler) {
-        document.addEventListener('wheel', preventPageScrollHandler, { passive: false, capture: true });
-      }
-    }, 500);
-
     // Cleanup function
     return () => {
-      clearTimeout(timer);
-      if (preventPageScrollHandler) {
-        document.removeEventListener('wheel', preventPageScrollHandler, { capture: true });
-      }
       if (resourcesChartInstanceRef.current) {
         resourcesChartInstanceRef.current.destroy();
         resourcesChartInstanceRef.current = null;
@@ -845,6 +1083,14 @@ const Dashboard: React.FC = () => {
       if (viewsWeekChartInstanceRef.current) {
         viewsWeekChartInstanceRef.current.destroy();
         viewsWeekChartInstanceRef.current = null;
+      }
+      if (totalRevenueChartInstanceRef.current) {
+        totalRevenueChartInstanceRef.current.destroy();
+        totalRevenueChartInstanceRef.current = null;
+      }
+      if (growthChartInstanceRef.current) {
+        growthChartInstanceRef.current.destroy();
+        growthChartInstanceRef.current = null;
       }
     };
   }, []);
@@ -985,8 +1231,68 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Calendar Row */}
+      {/* Total Resources Section and Calendar Row */}
       <div className="row mb-4">
+        <div className="col-lg-6 col-md-12 mb-4 mb-lg-0">
+          <div className="card h-100">
+            <div className="row row-bordered g-0">
+              <div className="col-md-8">
+                <h5 className="card-header m-0 me-2 pb-3">Total Resources</h5>
+                <div ref={totalRevenueChartRef} id="totalRevenueChart" className="px-2"></div>
+              </div>
+              <div className="col-md-4">
+                <div className="card-body">
+                  <div className="text-center">
+                    <div className="dropdown">
+                      <button
+                        className="btn btn-sm btn-outline-primary dropdown-toggle"
+                        type="button"
+                        id="growthReportId"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                      >
+                        2025
+                      </button>
+                      <div className="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
+                        <a className="dropdown-item" href="javascript:void(0);">2024</a>
+                        <a className="dropdown-item" href="javascript:void(0);">2023</a>
+                        <a className="dropdown-item" href="javascript:void(0);">2022</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div ref={growthChartRef} id="growthChart"></div>
+                <div className="text-center fw-semibold pt-3 mb-2">78% Platform Growth</div>
+
+                <div className="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
+                  <div className="d-flex">
+                    <div className="me-2">
+                      <span className="badge bg-label-primary p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}>
+                        <Database size={16} color="#696cff" />
+                      </span>
+                    </div>
+                    <div className="d-flex flex-column">
+                      <small>2025</small>
+                      <h6 className="mb-0">12.8k</h6>
+                    </div>
+                  </div>
+                  <div className="d-flex">
+                    <div className="me-2">
+                      <span className="badge bg-label-info p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}>
+                        <FileText size={16} color="#03c3ec" />
+                      </span>
+                    </div>
+                    <div className="d-flex flex-column">
+                      <small>2024</small>
+                      <h6 className="mb-0">8.2k</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="col-lg-6 col-md-12">
           <WeekCalendar />
         </div>
@@ -1051,15 +1357,7 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div 
-                    ref={resourcesChartRef} 
-                    id="resourcesChart" 
-                    style={{ padding: '0 1rem' }}
-                    onWheel={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  ></div>
+                  <div ref={resourcesChartRef} id="resourcesChart" style={{ padding: '0 1rem' }}></div>
                   <div className="d-flex justify-content-center pt-4 gap-2">
                     <div className="flex-shrink-0">
                       <div ref={resourcesWeekChartRef} id="resourcesWeekChart"></div>
@@ -1090,15 +1388,7 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div 
-                    ref={downloadsChartRef} 
-                    id="downloadsChart" 
-                    style={{ padding: '0 1rem' }}
-                    onWheel={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  ></div>
+                  <div ref={downloadsChartRef} id="downloadsChart" style={{ padding: '0 1rem' }}></div>
                   <div className="d-flex justify-content-center pt-4 gap-2">
                     <div className="flex-shrink-0">
                       <div ref={downloadsWeekChartRef} id="downloadsWeekChart"></div>
@@ -1129,15 +1419,7 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div 
-                    ref={viewsChartRef} 
-                    id="viewsChart" 
-                    style={{ padding: '0 1rem' }}
-                    onWheel={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  ></div>
+                  <div ref={viewsChartRef} id="viewsChart" style={{ padding: '0 1rem' }}></div>
                   <div className="d-flex justify-content-center pt-4 gap-2">
                     <div className="flex-shrink-0">
                       <div ref={viewsWeekChartRef} id="viewsWeekChart"></div>
