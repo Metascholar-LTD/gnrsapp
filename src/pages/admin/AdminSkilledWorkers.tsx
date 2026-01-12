@@ -770,11 +770,27 @@ const AdminSkilledWorkers = () => {
   };
 
   const handleApprove = (id: number) => {
-    // Add API call here
+    // Update worker status to 'active' and set approval timestamp
+    // This will be connected to Supabase
+    const now = new Date().toISOString();
+    // TODO: Add API call to update worker with:
+    // - status: 'active'
+    // - approvedAt: now
+    // - approvedBy: current admin user ID
+    // - rejectionReason: null (clear if exists)
+    console.log('Approving worker:', id, 'at', now);
   };
 
   const handleReject = (id: number, reason: string) => {
-    // Add API call here
+    // Update worker status to 'inactive' and store rejection reason
+    // This will be connected to Supabase
+    const now = new Date().toISOString();
+    // TODO: Add API call to update worker with:
+    // - status: 'inactive'
+    // - rejectedAt: now
+    // - rejectedBy: current admin user ID
+    // - rejectionReason: reason
+    console.log('Rejecting worker:', id, 'reason:', reason, 'at', now);
   };
 
   const handleConfirmDelete = () => {

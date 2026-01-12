@@ -85,6 +85,11 @@ interface Worker {
   responseTime?: string;
   badges?: string[];
   profilePicture?: string;
+  rejectionReason?: string;
+  approvedAt?: string;
+  rejectedAt?: string;
+  approvedBy?: number;
+  rejectedBy?: number;
 }
 
 // Helper function to get initials from name
@@ -886,6 +891,7 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
   });
 
   const [newService, setNewService] = useState({ name: "", price: "" });
+  const [isDragging, setIsDragging] = useState(false);
 
   if (!isOpen) return null;
 
@@ -906,9 +912,11 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
       verified: false,
       services: [],
       portfolio: [],
+      profilePicture: "",
     });
     setActiveTab("overview");
     setNewService({ name: "", price: "" });
+    setIsDragging(false);
   };
 
   const addService = () => {
@@ -1238,10 +1246,70 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
                     <h3 className="swm-detail-section-title">
                       Upload Portfolio Images
                     </h3>
-                    <div className="swm-upload-area">
+                    <div 
+                      className="swm-upload-area" 
+                      style={{ 
+                        position: "relative",
+                        border: isDragging ? "2px dashed #3b82f6" : "2px dashed #d1d5db",
+                        backgroundColor: isDragging ? "#eff6ff" : "transparent"
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                      }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDragging(false);
+                        const files = Array.from(e.dataTransfer.files);
+                        files.forEach(file => {
+                          if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFormData({
+                                ...formData,
+                                portfolio: [...formData.portfolio, reader.result as string]
+                              });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        });
+                      }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        multiple
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          opacity: 0,
+                          cursor: "pointer"
+                        }}
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          files.forEach(file => {
+                            if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setFormData({
+                                  ...formData,
+                                  portfolio: [...formData.portfolio, reader.result as string]
+                                });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          });
+                          // Reset input
+                          e.target.value = "";
+                        }}
+                      />
                       <Upload className="swm-upload-icon" />
                       <p className="swm-upload-text">Click to upload or drag and drop</p>
-                      <p className="swm-upload-hint">PNG, JPG up to 10MB</p>
+                      <p className="swm-upload-hint">PNG, JPG, MP4 up to 10MB</p>
                     </div>
                   </div>
 
@@ -1253,9 +1321,15 @@ export const AddWorkerModal = ({ isOpen, onClose, onSave }: AddWorkerModalProps)
                       <div className="swm-portfolio-grid">
                         {formData.portfolio.map((image, index) => (
                           <div key={index} className="swm-portfolio-item">
-                            <div className="swm-portfolio-image-placeholder">
-                              <ImageIcon size={24} />
-                            </div>
+                            {image.startsWith('data:video') ? (
+                              <video 
+                                src={image} 
+                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }}
+                                controls
+                              />
+                            ) : (
+                              <img src={image} alt={`Portfolio ${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }} />
+                            )}
                             <button
                               type="button"
                               className="swm-btn-icon swm-portfolio-remove"
@@ -1323,6 +1397,7 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
   });
 
   const [newService, setNewService] = useState({ name: "", price: "" });
+  const [isDragging, setIsDragging] = useState(false);
 
   if (!isOpen || !worker) return null;
 
@@ -1330,6 +1405,7 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
     e.preventDefault();
     onSave({ ...worker, ...formData });
     onClose();
+    setIsDragging(false);
   };
 
   const addService = () => {
@@ -1645,9 +1721,70 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
                     <h3 className="swm-detail-section-title">
                       Upload Portfolio Images
                     </h3>
-                    <div className="swm-upload-area">
+                    <div 
+                      className="swm-upload-area" 
+                      style={{ 
+                        position: "relative",
+                        border: isDragging ? "2px dashed #3b82f6" : "2px dashed #d1d5db",
+                        backgroundColor: isDragging ? "#eff6ff" : "transparent"
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                      }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDragging(false);
+                        const files = Array.from(e.dataTransfer.files);
+                        files.forEach(file => {
+                          if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFormData({
+                                ...formData,
+                                portfolio: [...formData.portfolio, reader.result as string]
+                              });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        });
+                      }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        multiple
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          opacity: 0,
+                          cursor: "pointer"
+                        }}
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          files.forEach(file => {
+                            if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setFormData({
+                                  ...formData,
+                                  portfolio: [...formData.portfolio, reader.result as string]
+                                });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          });
+                          // Reset input
+                          e.target.value = "";
+                        }}
+                      />
                       <Upload className="swm-upload-icon" />
                       <p className="swm-upload-text">Click to upload portfolio images</p>
+                      <p className="swm-upload-hint">PNG, JPG, MP4 up to 10MB</p>
                     </div>
                   </div>
 
@@ -1657,9 +1794,17 @@ export const EditWorkerModal = ({ isOpen, onClose, onSave, worker }: EditWorkerM
                     </h3>
                     {formData.portfolio.length > 0 ? (
                       <div className="swm-portfolio-grid">
-                        {formData.portfolio.map((image, index) => (
+                        {formData.portfolio.map((media, index) => (
                           <div key={index} className="swm-portfolio-item">
-                            <img src={image} alt={`Portfolio ${index + 1}`} />
+                            {media.startsWith('data:video') || media.includes('.mp4') || media.includes('.webm') ? (
+                              <video 
+                                src={media} 
+                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }}
+                                controls
+                              />
+                            ) : (
+                              <img src={media} alt={`Portfolio ${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }} />
+                            )}
                             <button
                               type="button"
                               className="swm-portfolio-remove"
@@ -1957,9 +2102,17 @@ export const ViewWorkerModal = ({ isOpen, onClose, worker }: ViewWorkerModalProp
                   </h3>
                   {worker.portfolio && worker.portfolio.length > 0 ? (
                     <div className="swm-portfolio-grid">
-                      {worker.portfolio.map((image, index) => (
+                      {worker.portfolio.map((media, index) => (
                         <div key={index} className="swm-portfolio-item">
-                          <img src={image} alt={`Portfolio ${index + 1}`} />
+                          {media.startsWith('data:video') || media.includes('.mp4') || media.includes('.webm') ? (
+                            <video 
+                              src={media} 
+                              style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }}
+                              controls
+                            />
+                          ) : (
+                            <img src={media} alt={`Portfolio ${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }} />
+                          )}
                         </div>
                       ))}
                     </div>
