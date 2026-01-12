@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { InitScripts } from "@/components/InitScripts";
 import { Spinner } from "@/components/Spinner";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Briefcase, 
   MapPin, 
@@ -14,7 +15,12 @@ import {
   Users,
   Calendar,
   Star,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  FileText,
+  UserPlus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -1292,6 +1298,586 @@ const isolatedStyles = `
     object-fit: cover;
     display: block;
   }
+
+  /* Featured Workers Section - EXACT COPY of Monthly Mentors */
+  #ljg-featured-workers-section {
+    background-color: #ffffff;
+    padding: 3rem 0;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    #ljg-featured-workers-section {
+      padding: 4rem 0;
+    }
+  }
+
+  #ljg-featured-workers-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    #ljg-featured-workers-inner {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #ljg-featured-workers-inner {
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }
+  }
+
+  .ljg-featured-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+  }
+
+  .ljg-featured-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #141522;
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    line-height: 1.2;
+  }
+
+  .ljg-featured-nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-right: -0.25rem;
+  }
+
+  .ljg-featured-nav-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #54577A;
+    transition: all 0.2s ease;
+    padding: 0.5rem;
+  }
+
+  .ljg-featured-nav-btn:hover:not(.disabled) {
+    color: #141522;
+  }
+
+  .ljg-featured-nav-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .ljg-featured-nav-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ljg-featured-slider {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ljg-featured-slider-track {
+    display: flex;
+    gap: 1.5rem;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  @media (min-width: 640px) {
+    .ljg-featured-slider-track {
+      gap: 1.75rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .ljg-featured-slider-track {
+      gap: 2rem;
+    }
+  }
+
+  /* Card - Horizontal layout with optimal width */
+  .ljg-featured-card {
+    min-width: 320px;
+    width: 320px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    user-select: none;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 640px) {
+    .ljg-featured-card {
+      min-width: 350px;
+      width: 350px;
+    }
+  }
+
+  .ljg-featured-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Top section: HORIZONTAL layout - Avatar, Name/Title, Button all on one line */
+  .ljg-featured-card-main-stack {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  /* Left side: Avatar + Name/Title */
+  .ljg-featured-card-content-stack {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Avatar 48x48 with primary.main background */
+  .ljg-featured-card-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #546FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .ljg-featured-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* CardContent with name and title - LEFT ALIGNED */
+  .ljg-featured-card-content {
+    padding: 0;
+    text-align: left;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ljg-featured-card-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #141522;
+    margin: 0 0 4px 0;
+    text-decoration: none;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    line-height: 1.5;
+    display: block;
+  }
+
+  .ljg-featured-card-name:hover {
+    color: #546FFF;
+    text-decoration: underline;
+  }
+
+  .ljg-featured-card-subtitle {
+    font-size: 0.875rem;
+    color: #54577A;
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    line-height: 1.43;
+    display: block;
+  }
+
+  /* CardActions with Button - on the RIGHT */
+  .ljg-featured-card-actions {
+    padding: 0;
+    margin: 0;
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .ljg-featured-card-button {
+    padding: 6px 16px;
+    background: transparent;
+    border: none;
+    color: #546FFF;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    text-transform: none;
+    min-height: 36px;
+    white-space: nowrap;
+  }
+
+  .ljg-featured-card-button:hover {
+    background-color: rgba(84, 111, 255, 0.04);
+  }
+
+  .ljg-featured-card-button.followed {
+    color: #54577A;
+  }
+
+  .ljg-featured-card-button.followed:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  /* Icon in button - gridicons:plus-small */
+  .ljg-featured-card-button-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 0;
+    pointer-events: none;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* CardContent with stats (reduced margin-top) */
+  .ljg-featured-card-stats-content {
+    padding: 12px 16px 16px 16px;
+    margin-top: 16px;
+  }
+
+  /* Stack alignItems="center" justifyContent="space-between" for stats */
+  .ljg-featured-card-stats {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Stack alignItems="center" spacing={0.875} for Task */
+  .ljg-featured-card-stat-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Stack alignItems="center" spacing={0.5} for Rating */
+  .ljg-featured-card-stat-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Icon - hugeicons:note with text.secondary color */
+  .ljg-featured-card-stat-icon-note {
+    width: 24px;
+    height: 24px;
+    color: #54577A;
+  }
+
+  /* Icon - material-symbols:star-rate-rounded with warning.main color */
+  .ljg-featured-card-stat-icon-star {
+    width: 24px;
+    height: 24px;
+    color: #FFB054;
+    fill: #FFB054;
+  }
+
+  /* Typography for stat values */
+  .ljg-featured-card-stat-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #141522;
+    margin: 0;
+    text-align: center;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    line-height: 1.43;
+  }
+
+  /* Upcoming Gigs Section - Upcoming Task Style */
+  #ljg-upcoming-gigs-section {
+    background-color: #F5F5F7;
+    padding: 3rem 0;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    #ljg-upcoming-gigs-section {
+      padding: 4rem 0;
+    }
+  }
+
+  #ljg-upcoming-gigs-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    #ljg-upcoming-gigs-inner {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #ljg-upcoming-gigs-inner {
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }
+  }
+
+  .ljg-upcoming-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+  }
+
+  .ljg-upcoming-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #141522;
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  @media (min-width: 768px) {
+    .ljg-upcoming-title {
+      font-size: 2rem;
+    }
+  }
+
+  .ljg-upcoming-nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-right: -0.25rem;
+  }
+
+  .ljg-upcoming-nav-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #54577A;
+    transition: all 0.2s ease;
+    padding: 0.5rem;
+  }
+
+  .ljg-upcoming-nav-btn:hover:not(.disabled) {
+    color: #141522;
+  }
+
+  .ljg-upcoming-nav-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .ljg-upcoming-nav-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ljg-upcoming-slider {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ljg-upcoming-slider-track {
+    display: flex;
+    gap: 1.5rem;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  @media (min-width: 1024px) {
+    .ljg-upcoming-slider-track {
+      gap: 1.75rem;
+    }
+  }
+
+  .ljg-upcoming-card {
+    min-width: 280px;
+    width: 280px;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E5E7EB;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    transition: all 0.3s ease;
+  }
+
+  @media (min-width: 640px) {
+    .ljg-upcoming-card {
+      min-width: 300px;
+      width: 300px;
+    }
+  }
+
+  .ljg-upcoming-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .ljg-upcoming-card-image {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ljg-upcoming-card-content {
+    padding: 1.5rem;
+  }
+
+  .ljg-upcoming-card-header {
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .ljg-upcoming-card-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #141522;
+    margin: 0 0 0.25rem 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  .ljg-upcoming-card-category {
+    font-size: 0.875rem;
+    color: #54577A;
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  .ljg-upcoming-card-progress {
+    margin-top: 0.75rem;
+  }
+
+  .ljg-upcoming-card-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .ljg-upcoming-card-progress-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #141522;
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  .ljg-upcoming-card-progress-value {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #546FFF;
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  .ljg-upcoming-card-progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: #EBEDF7;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .ljg-upcoming-card-progress-fill {
+    height: 100%;
+    background-color: #546FFF;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  .ljg-upcoming-card-footer {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ljg-upcoming-card-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .ljg-upcoming-card-time-icon {
+    width: 20px;
+    height: 20px;
+    color: #54577A;
+  }
+
+  .ljg-upcoming-card-time-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #141522;
+    margin: 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  .ljg-upcoming-card-avatars {
+    display: flex;
+    align-items: center;
+    gap: -0.5rem;
+  }
+
+  .ljg-upcoming-card-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    margin-left: -8px;
+    background-color: #546FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.75rem;
+    overflow: hidden;
+  }
+
+  .ljg-upcoming-card-avatar:first-child {
+    margin-left: 0;
+  }
+
+  .ljg-upcoming-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 // Carousel images data for Local Job Gigs
@@ -1325,6 +1911,102 @@ const GIG_CAROUSEL_IMAGES = [
     id: 6,
     url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop',
     alt: 'Cleaning services'
+  }
+];
+
+// Featured Workers will be loaded from Supabase
+
+// Upcoming Gigs Data (Upcoming Task Style)
+const UPCOMING_GIGS = [
+  {
+    id: 'u1',
+    title: 'Creating Mobile App Design',
+    category: 'UI UX Design',
+    thumb: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&h=110&fit=crop',
+    progress: 75,
+    daysLeft: 3,
+    avatars: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop'
+    ]
+  },
+  {
+    id: 'u2',
+    title: 'Creating Perfect Website',
+    category: 'Web Developer',
+    thumb: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=110&fit=crop',
+    progress: 85,
+    daysLeft: 4,
+    avatars: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop'
+    ]
+  },
+  {
+    id: 'u3',
+    title: 'Mobile App Design',
+    category: 'UI UX Design',
+    thumb: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=300&h=110&fit=crop',
+    progress: 65,
+    daysLeft: 3,
+    avatars: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop'
+    ]
+  },
+  {
+    id: 'u4',
+    title: 'Creating Mobile Apps',
+    category: 'Android Developer',
+    thumb: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=300&h=110&fit=crop',
+    progress: 95,
+    daysLeft: 1,
+    avatars: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop'
+    ]
+  },
+  {
+    id: 'u5',
+    title: 'Creating Awesome Mobile Apps',
+    category: 'UI UX Design',
+    thumb: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=300&h=110&fit=crop',
+    progress: 90,
+    daysLeft: 1,
+    avatars: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop'
+    ]
+  },
+  {
+    id: 'u6',
+    title: 'Creating Fresh Website',
+    category: 'Web Developer',
+    thumb: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=110&fit=crop',
+    progress: 85,
+    daysLeft: 2,
+    avatars: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=50&h=50&fit=crop',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop'
+    ]
   }
 ];
 
@@ -1438,6 +2120,16 @@ const LocalJobGigs = () => {
   const locationInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const locationSuggestionsRef = useRef<HTMLDivElement>(null);
+  
+  // Featured Workers Slider State
+  const [featuredSlideIndex, setFeaturedSlideIndex] = useState(0);
+  const featuredSliderRef = useRef<HTMLDivElement>(null);
+  const [featuredWorkers, setFeaturedWorkers] = useState<any[]>([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+  
+  // Upcoming Gigs Slider State
+  const [upcomingSlideIndex, setUpcomingSlideIndex] = useState(0);
+  const upcomingSliderRef = useRef<HTMLDivElement>(null);
 
   // Check if desktop on mount and resize
   useEffect(() => {
@@ -1448,6 +2140,44 @@ const LocalJobGigs = () => {
     checkIsDesktop();
     window.addEventListener('resize', checkIsDesktop);
     return () => window.removeEventListener('resize', checkIsDesktop);
+  }, []);
+
+  // Load Featured Workers from Supabase
+  useEffect(() => {
+    const loadFeaturedWorkers = async () => {
+      setFeaturedLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('skilled_workers' as any)
+          .select('*')
+          .eq('status', 'active')
+          .order('rating', { ascending: false })
+          .limit(8);
+
+        if (error) throw error;
+
+        if (data) {
+          const transformed = data.map((worker: any) => ({
+            id: worker.id,
+            name: worker.name,
+            title: worker.category || 'Professional',
+            avatar: worker.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(worker.name)}&size=200&background=546FFF&color=fff`,
+            task: worker.completed_jobs || 0,
+            rating: parseFloat(worker.rating) || 0,
+            review: worker.reviews_count || 0,
+            followed: false
+          }));
+          setFeaturedWorkers(transformed);
+        }
+      } catch (error: any) {
+        console.error('Error loading featured workers:', error);
+        setFeaturedWorkers([]);
+      } finally {
+        setFeaturedLoading(false);
+      }
+    };
+
+    loadFeaturedWorkers();
   }, []);
 
   // Handle route param - if id exists, show detail view (for mobile/tablet)
@@ -1648,6 +2378,62 @@ const LocalJobGigs = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [selectedGig, isDesktop]);
+
+  // Featured Gigs Slider Functions
+  const [featuredSlidesPerView, setFeaturedSlidesPerView] = useState(1);
+  
+  useEffect(() => {
+    const updateSlidesPerView = () => {
+      if (window.innerWidth > 1440) setFeaturedSlidesPerView(4);
+      else if (window.innerWidth > 1024) setFeaturedSlidesPerView(3);
+      else if (window.innerWidth > 720) setFeaturedSlidesPerView(2);
+      else setFeaturedSlidesPerView(1);
+    };
+    
+    updateSlidesPerView();
+    window.addEventListener('resize', updateSlidesPerView);
+    return () => window.removeEventListener('resize', updateSlidesPerView);
+  }, []);
+
+  const handleFeaturedPrev = () => {
+    setFeaturedSlideIndex(prev => Math.max(0, prev - featuredSlidesPerView));
+  };
+
+  const handleFeaturedNext = () => {
+    const maxIndex = Math.max(0, featuredWorkers.length - featuredSlidesPerView);
+    setFeaturedSlideIndex(prev => Math.min(maxIndex, prev + featuredSlidesPerView));
+  };
+
+  const isFeaturedSlideBegin = featuredSlideIndex === 0;
+  const isFeaturedSlideEnd = featuredSlideIndex >= Math.max(0, featuredWorkers.length - featuredSlidesPerView);
+
+  // Upcoming Gigs Slider Functions
+  const [upcomingSlidesPerView, setUpcomingSlidesPerView] = useState(1);
+  
+  useEffect(() => {
+    const updateSlidesPerView = () => {
+      if (window.innerWidth > 1440) setUpcomingSlidesPerView(4);
+      else if (window.innerWidth > 1024) setUpcomingSlidesPerView(3);
+      else if (window.innerWidth > 720) setUpcomingSlidesPerView(2);
+      else setUpcomingSlidesPerView(1);
+    };
+    
+    updateSlidesPerView();
+    window.addEventListener('resize', updateSlidesPerView);
+    return () => window.removeEventListener('resize', updateSlidesPerView);
+  }, []);
+
+  const handleUpcomingPrev = () => {
+    setUpcomingSlideIndex(prev => Math.max(0, prev - upcomingSlidesPerView));
+  };
+
+  const handleUpcomingNext = () => {
+    const maxIndex = Math.max(0, UPCOMING_GIGS.length - upcomingSlidesPerView);
+    setUpcomingSlideIndex(prev => Math.min(maxIndex, prev + upcomingSlidesPerView));
+  };
+
+  const isUpcomingSlideBegin = upcomingSlideIndex === 0;
+  const isUpcomingSlideEnd = upcomingSlideIndex >= Math.max(0, UPCOMING_GIGS.length - upcomingSlidesPerView);
 
   // If on mobile/tablet and has id param, show only detail view
   const showDetailOnly = !isDesktop && id && selectedGig;
@@ -2003,6 +2789,208 @@ const LocalJobGigs = () => {
               >
                 Search
               </button>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Featured Workers Section - Monthly Mentors Style (EXACT MATCH) */}
+        <div id="ljg-featured-workers-section">
+          <div id="ljg-featured-workers-inner">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="ljg-featured-header">
+                <h2 className="ljg-featured-title">Featured Workers</h2>
+                <div className="ljg-featured-nav">
+                  <button
+                    className={`ljg-featured-nav-btn ${isFeaturedSlideBegin ? 'disabled' : ''}`}
+                    onClick={handleFeaturedPrev}
+                    disabled={isFeaturedSlideBegin}
+                    aria-label="Previous featured workers"
+                  >
+                    <ChevronLeft />
+                  </button>
+                  <button
+                    className={`ljg-featured-nav-btn ${isFeaturedSlideEnd ? 'disabled' : ''}`}
+                    onClick={handleFeaturedNext}
+                    disabled={isFeaturedSlideEnd}
+                    aria-label="Next featured workers"
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+
+              <div className="ljg-featured-slider" ref={featuredSliderRef}>
+                <div
+                  className="ljg-featured-slider-track"
+                  style={{
+                    transform: `translateX(-${featuredSlideIndex * (window.innerWidth > 640 ? 350 + 32 : 320 + 24)}px)`
+                  }}
+                >
+                  {featuredLoading ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: '#54577A' }}>Loading workers...</div>
+                  ) : featuredWorkers.length === 0 ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: '#54577A' }}>No workers available</div>
+                  ) : (
+                    featuredWorkers.map((worker) => (
+                      <div key={worker.id} className="ljg-featured-card">
+                        {/* Top Section: HORIZONTAL - Avatar + Name/Title + Button all on ONE LINE */}
+                        <div className="ljg-featured-card-main-stack">
+                          {/* Left side: Avatar + Name/Title */}
+                          <div className="ljg-featured-card-content-stack">
+                            {/* Avatar 48x48 */}
+                            <div className="ljg-featured-card-avatar">
+                              <img src={worker.avatar} alt={worker.name} />
+                            </div>
+                            {/* CardContent with name and title */}
+                            <div className="ljg-featured-card-content">
+                              <a href="#!" className="ljg-featured-card-name">
+                                {worker.name}
+                              </a>
+                              <p className="ljg-featured-card-subtitle">{worker.title}</p>
+                            </div>
+                          </div>
+
+                          {/* Right side: Follow Button */}
+                          <div className="ljg-featured-card-actions">
+                            <button
+                              className={`ljg-featured-card-button ${worker.followed ? 'followed' : ''}`}
+                              onClick={() => {
+                                // Handle follow/unfollow
+                                console.log('Toggle follow:', worker.id);
+                              }}
+                            >
+                              {!worker.followed && (
+                                <svg className="ljg-featured-card-button-icon" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M18 13h-5v5c0 .55-.45 1-1 1s-1-.45-1-1v-5H6c-.55 0-1-.45-1-1s.45-1 1-1h5V6c0-.55.45-1 1-1s1 .45 1 1v5h5c.55 0 1 .45 1 1s-.45 1-1 1z"/>
+                                </svg>
+                              )}
+                              {worker.followed ? 'Followed' : 'Follow'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* CardContent with stats (mt: 2.75) */}
+                        <div className="ljg-featured-card-stats-content">
+                          {/* Stack: alignItems="center" justifyContent="space-between" */}
+                          <div className="ljg-featured-card-stats">
+                            {/* Stack: alignItems="center" spacing={0.875} */}
+                            <div className="ljg-featured-card-stat-left">
+                              {/* Icon: hugeicons:note - EXACT COPY */}
+                              <svg className="ljg-featured-card-stat-icon-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                              </svg>
+                              <p className="ljg-featured-card-stat-value">{worker.task} Job/Gigs</p>
+                            </div>
+                            {/* Stack: alignItems="center" spacing={0.5} */}
+                            <div className="ljg-featured-card-stat-right">
+                              {/* Icon: material-symbols:star-rate-rounded - EXACT COPY */}
+                              <svg className="ljg-featured-card-stat-icon-star" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
+                              </svg>
+                              <p className="ljg-featured-card-stat-value">
+                                {worker.rating} ({worker.review} Reviews)
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Upcoming Gigs Section - Upcoming Task Style */}
+        <div id="ljg-upcoming-gigs-section">
+          <div id="ljg-upcoming-gigs-inner">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="ljg-upcoming-header">
+                <h2 className="ljg-upcoming-title">Upcoming Gigs</h2>
+                <div className="ljg-upcoming-nav">
+                  <button
+                    className={`ljg-upcoming-nav-btn ${isUpcomingSlideBegin ? 'disabled' : ''}`}
+                    onClick={handleUpcomingPrev}
+                    disabled={isUpcomingSlideBegin}
+                    aria-label="Previous upcoming gigs"
+                  >
+                    <ChevronLeft />
+                  </button>
+                  <button
+                    className={`ljg-upcoming-nav-btn ${isUpcomingSlideEnd ? 'disabled' : ''}`}
+                    onClick={handleUpcomingNext}
+                    disabled={isUpcomingSlideEnd}
+                    aria-label="Next upcoming gigs"
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+
+              <div className="ljg-upcoming-slider" ref={upcomingSliderRef}>
+                <div
+                  className="ljg-upcoming-slider-track"
+                  style={{
+                    transform: `translateX(-${upcomingSlideIndex * 304}px)`
+                  }}
+                >
+                  {UPCOMING_GIGS.map((gig) => (
+                    <div key={gig.id} className="ljg-upcoming-card">
+                      <img
+                        src={gig.thumb}
+                        alt={gig.title}
+                        className="ljg-upcoming-card-image"
+                      />
+                      <div className="ljg-upcoming-card-content">
+                        <div className="ljg-upcoming-card-header">
+                          <h3 className="ljg-upcoming-card-name">{gig.title}</h3>
+                          <p className="ljg-upcoming-card-category">{gig.category}</p>
+                        </div>
+                        <div className="ljg-upcoming-card-progress">
+                          <div className="ljg-upcoming-card-progress-header">
+                            <span className="ljg-upcoming-card-progress-label">Progress</span>
+                            <span className="ljg-upcoming-card-progress-value">{gig.progress}%</span>
+                          </div>
+                          <div className="ljg-upcoming-card-progress-bar">
+                            <div
+                              className="ljg-upcoming-card-progress-fill"
+                              style={{ width: `${gig.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="ljg-upcoming-card-footer">
+                          <div className="ljg-upcoming-card-time">
+                            <Clock className="ljg-upcoming-card-time-icon" />
+                            <span className="ljg-upcoming-card-time-text">{gig.daysLeft} Days Left</span>
+                          </div>
+                          <div className="ljg-upcoming-card-avatars">
+                            {gig.avatars.slice(0, 5).map((avatar, index) => (
+                              <div key={index} className="ljg-upcoming-card-avatar">
+                                <img src={avatar} alt={`Team member ${index + 1}`} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           </div>
         </div>
