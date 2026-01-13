@@ -218,50 +218,6 @@ const isolatedStyles = `
     }
   }
 
-  #ljg-search-section {
-    background-color: #ffffff;
-    position: relative;
-    z-index: 10;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-    width: 100%;
-  }
-  
-  @media (min-width: 640px) {
-    #ljg-search-section {
-      padding-top: 2.5rem;
-      padding-bottom: 2.5rem;
-    }
-  }
-  
-  @media (min-width: 768px) {
-    #ljg-search-section {
-      padding-top: 4rem;
-      padding-bottom: 4rem;
-    }
-  }
-  
-  #ljg-search-inner {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  @media (min-width: 640px) {
-    #ljg-search-inner {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-  }
-  
-  @media (min-width: 1024px) {
-    #ljg-search-inner {
-      padding-left: 4rem;
-      padding-right: 4rem;
-    }
-  }
-
   #ljg-search-box {
     display: flex;
     flex-direction: column;
@@ -285,8 +241,24 @@ const isolatedStyles = `
   }
 
   @media (min-width: 768px) {
+    .ljg-autocomplete-wrapper {
+      min-width: 200px;
+    }
+    
     .ljg-autocomplete-wrapper:not(:last-of-type) {
       border-right: 1px solid rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .ljg-autocomplete-wrapper {
+      min-width: 250px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .ljg-autocomplete-wrapper {
+      min-width: 280px;
     }
   }
 
@@ -294,12 +266,12 @@ const isolatedStyles = `
   .ljg-search-input-container {
     position: relative;
     width: 100%;
-    height: 48px;
+    height: 44px;
   }
 
   @media (min-width: 768px) {
     .ljg-search-input-container {
-      height: 52px;
+      height: 48px;
     }
   }
 
@@ -314,9 +286,23 @@ const isolatedStyles = `
     overflow: visible;
     display: flex;
     align-items: center;
-    padding: 0 1rem;
-    gap: 0.75rem;
+    padding: 0 0.875rem;
+    gap: 0.625rem;
     transition: all 0.2s ease;
+  }
+
+  @media (min-width: 375px) {
+    .ljg-search-input-wrapper {
+      padding: 0 1rem;
+      gap: 0.75rem;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .ljg-search-input-wrapper {
+      padding: 0 1.125rem;
+      gap: 0.75rem;
+    }
   }
 
   @media (min-width: 768px) {
@@ -325,8 +311,17 @@ const isolatedStyles = `
       border: none;
       box-shadow: none;
       background: transparent;
-      padding: 0 1.25rem;
+      padding: 0 1.5rem;
+      gap: 0.875rem;
     }
+  }
+
+  @media (min-width: 1024px) {
+    .ljg-search-input-wrapper {
+      padding: 0 1.75rem;
+      gap: 1rem;
+    }
+  }
 
     .ljg-autocomplete-wrapper:first-child .ljg-search-input-wrapper {
       border-radius: 30px 0 0 30px;
@@ -390,13 +385,37 @@ const isolatedStyles = `
     display: flex;
     align-items: center;
     color: #9ca3af;
-    font-size: 1rem;
+    font-size: 0.625rem;
     pointer-events: none;
     z-index: 1;
     font-family: 'DM Sans', system-ui, sans-serif;
-    line-height: 1.5;
+    line-height: 1.3;
     margin: 0;
     padding: 0;
+  }
+
+  @media (min-width: 375px) {
+    .ljg-placeholder-text {
+      font-size: 0.6875rem;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .ljg-placeholder-text {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .ljg-placeholder-text {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .ljg-placeholder-text {
+      font-size: 0.8125rem;
+    }
   }
 
   .ljg-placeholder-text span {
@@ -410,13 +429,27 @@ const isolatedStyles = `
     background: transparent;
     border: none;
     outline: none;
-    font-size: 1rem;
+    font-size: 0.875rem;
     color: #111827;
     font-family: 'DM Sans', system-ui, sans-serif;
     padding: 0;
-    line-height: 1.5;
+    line-height: 1.4;
     height: 100%;
     display: block;
+  }
+
+  @media (min-width: 640px) {
+    #ljg-search-input,
+    #ljg-location-input {
+      font-size: 0.9375rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    #ljg-search-input,
+    #ljg-location-input {
+      font-size: 1rem;
+    }
   }
 
   #ljg-search-input::placeholder,
@@ -426,13 +459,13 @@ const isolatedStyles = `
 
   /* Search Button - Past Questions Style */
   #ljg-search-button {
-    height: 48px;
-    padding: 0 2rem;
+    height: 44px;
+    padding: 0 1.5rem;
     background-color: #2563eb;
     color: white;
     border: none;
     border-radius: 30px;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -445,13 +478,27 @@ const isolatedStyles = `
     justify-content: center;
   }
 
+  @media (min-width: 375px) {
+    #ljg-search-button {
+      padding: 0 2rem;
+      font-size: 0.9375rem;
+    }
+  }
+
+  @media (min-width: 640px) {
+    #ljg-search-button {
+      font-size: 1rem;
+    }
+  }
+
   @media (min-width: 768px) {
     #ljg-search-button {
       width: auto;
       min-width: 140px;
-      height: 52px;
+      height: 48px;
       border-radius: 0 30px 30px 0;
       padding: 0 2.5rem;
+      font-size: 1rem;
     }
   }
 
@@ -707,11 +754,71 @@ const isolatedStyles = `
 
   #ljg-section-header {
     margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    #ljg-section-header {
+      gap: 1.75rem;
+    }
   }
 
   @media (min-width: 768px) {
     #ljg-section-header {
       margin-bottom: 3rem;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #ljg-section-header {
+      gap: 2.5rem;
+    }
+  }
+
+  #ljg-section-header-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  #ljg-section-header-search {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    #ljg-section-header-search {
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 768px) {
+    #ljg-section-header-search {
+      max-width: 700px;
+      flex-shrink: 0;
+      min-width: 500px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #ljg-section-header-search {
+      max-width: 800px;
+      min-width: 600px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    #ljg-section-header-search {
+      max-width: 900px;
+      min-width: 700px;
     }
   }
 
@@ -2624,190 +2731,6 @@ const LocalJobGigs = () => {
           </div>
         </div>
 
-        {/* Search Section */}
-        <div id="ljg-search-section">
-          <div id="ljg-search-inner">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              id="ljg-search-box"
-            >
-              {/* Job Search Field */}
-              <div className="ljg-autocomplete-wrapper">
-                <div className="ljg-search-input-container">
-                  <motion.div
-                    layoutId="job-search-container"
-                    transition={{
-                      layout: {
-                        duration: 0.5,
-                        type: 'spring',
-                        bounce: 0.2
-                      }
-                    }}
-                    className="ljg-search-input-wrapper"
-                  >
-                    <motion.div layoutId="job-search-icon" className="ljg-search-icon-wrapper">
-                      <Search />
-                    </motion.div>
-                    <div className="ljg-input-field-wrapper">
-                      {!jobQuery && (
-                        <motion.div
-                          layout
-                          className="ljg-placeholder-text"
-                        >
-                          <AnimatePresence mode="popLayout">
-                            <motion.span
-                              layoutId="job-placeholder"
-                              key="job-placeholder"
-                              initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
-                              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                              exit={{ opacity: 0, y: -10, filter: 'blur(5px)' }}
-                              transition={{ duration: 0.2, ease: 'easeOut' }}
-                            >
-                              Job title, keywords, or company
-                            </motion.span>
-                          </AnimatePresence>
-                        </motion.div>
-                      )}
-                      <motion.input
-                        ref={jobInputRef}
-                        layout="position"
-                        id="ljg-search-input"
-                        type="text"
-                        value={jobQuery}
-                        onChange={(e) => setJobQuery(e.target.value)}
-                        onFocus={() => {
-                          if (jobSuggestions.length > 0) {
-                            setShowJobSuggestions(true);
-                          }
-                        }}
-                        onKeyDown={(e) => handleKeyDown(e, 'job')}
-                      />
-                    </div>
-                  </motion.div>
-                </div>
-                {showJobSuggestions && jobSuggestions.length > 0 && (
-                  <motion.div
-                    ref={suggestionsRef}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="ljg-suggestions-dropdown"
-                  >
-                    {jobSuggestions.map((suggestion, index) => (
-                      <div
-                        key={suggestion.id}
-                        className={`ljg-suggestion-item ${activeSuggestionIndex === index ? 'ljg-suggestion-active' : ''}`}
-                        onClick={() => handleJobSuggestionClick(suggestion)}
-                        onMouseEnter={() => setActiveSuggestionIndex(index)}
-                      >
-                        <Search className="ljg-suggestion-icon" />
-                        <span className="ljg-suggestion-text">
-                          {highlightMatch(suggestion.text, jobQuery)}
-                        </span>
-                        <span className="ljg-suggestion-category">{suggestion.category}</span>
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
-              </div>
-              
-              {/* Location Search Field */}
-              <div className="ljg-autocomplete-wrapper">
-                <div className="ljg-search-input-container">
-                  <motion.div
-                    layoutId="location-search-container"
-                    transition={{
-                      layout: {
-                        duration: 0.5,
-                        type: 'spring',
-                        bounce: 0.2
-                      }
-                    }}
-                    className="ljg-search-input-wrapper"
-                  >
-                    <motion.div layoutId="location-search-icon" className="ljg-search-icon-wrapper">
-                      <MapPin />
-                    </motion.div>
-                    <div className="ljg-input-field-wrapper">
-                      {!locationQuery && (
-                        <motion.div
-                          layout
-                          className="ljg-placeholder-text"
-                        >
-                          <AnimatePresence mode="popLayout">
-                            <motion.span
-                              layoutId="location-placeholder"
-                              key="location-placeholder"
-                              initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
-                              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                              exit={{ opacity: 0, y: -10, filter: 'blur(5px)' }}
-                              transition={{ duration: 0.2, ease: 'easeOut' }}
-                            >
-                              City, state, zip code, or "remote"
-                            </motion.span>
-                          </AnimatePresence>
-                        </motion.div>
-                      )}
-                      <motion.input
-                        ref={locationInputRef}
-                        layout="position"
-                        id="ljg-location-input"
-                        type="text"
-                        value={locationQuery}
-                        onChange={(e) => setLocationQuery(e.target.value)}
-                        onFocus={() => {
-                          if (locationSuggestions.length > 0) {
-                            setShowLocationSuggestions(true);
-                          }
-                        }}
-                        onKeyDown={(e) => handleKeyDown(e, 'location')}
-                      />
-                    </div>
-                  </motion.div>
-                </div>
-                {showLocationSuggestions && locationSuggestions.length > 0 && (
-                  <motion.div
-                    ref={locationSuggestionsRef}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="ljg-suggestions-dropdown"
-                  >
-                    {locationSuggestions.map((suggestion, index) => (
-                      <div
-                        key={suggestion.id}
-                        className={`ljg-suggestion-item ${activeLocationIndex === index ? 'ljg-suggestion-active' : ''}`}
-                        onClick={() => handleLocationSuggestionClick(suggestion)}
-                        onMouseEnter={() => setActiveLocationIndex(index)}
-                      >
-                        <MapPin className="ljg-suggestion-icon" />
-                        <span className="ljg-suggestion-text">
-                          {highlightMatch(suggestion.text, locationQuery)}
-                        </span>
-                        <span className="ljg-suggestion-category">{suggestion.category}</span>
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
-              </div>
-              
-              {/* Search Button */}
-              <button
-                id="ljg-search-button"
-                onClick={handleSearch}
-                type="button"
-              >
-                Search
-              </button>
-            </motion.div>
-          </div>
-        </div>
-
         {/* Featured Workers Section - Monthly Mentors Style (EXACT MATCH) */}
         <div id="ljg-featured-workers-section">
           <div id="ljg-featured-workers-inner">
@@ -3025,12 +2948,196 @@ const LocalJobGigs = () => {
               transition={{ duration: 0.6 }}
               id="ljg-section-header"
             >
-              <h2 id="ljg-section-title">
-                Available Gigs
-              </h2>
-              <p id="ljg-section-subtitle">
-                Browse local job opportunities and gigs in your area
-              </p>
+              <div id="ljg-section-header-content">
+                <h2 id="ljg-section-title">
+                  Available Gigs
+                </h2>
+                <p id="ljg-section-subtitle">
+                  Browse local job opportunities and gigs in your area
+                </p>
+              </div>
+              
+              {/* Search Section - Moved here beside the header */}
+              <div id="ljg-section-header-search">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                  id="ljg-search-box"
+                >
+                  {/* Job Search Field */}
+                  <div className="ljg-autocomplete-wrapper">
+                    <div className="ljg-search-input-container">
+                      <motion.div
+                        layoutId="job-search-container"
+                        transition={{
+                          layout: {
+                            duration: 0.5,
+                            type: 'spring',
+                            bounce: 0.2
+                          }
+                        }}
+                        className="ljg-search-input-wrapper"
+                      >
+                        <motion.div layoutId="job-search-icon" className="ljg-search-icon-wrapper">
+                          <Search />
+                        </motion.div>
+                        <div className="ljg-input-field-wrapper">
+                          {!jobQuery && (
+                            <motion.div
+                              layout
+                              className="ljg-placeholder-text"
+                            >
+                              <AnimatePresence mode="popLayout">
+                                <motion.span
+                                  layoutId="job-placeholder"
+                                  key="job-placeholder"
+                                  initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
+                                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                  exit={{ opacity: 0, y: -10, filter: 'blur(5px)' }}
+                                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                                >
+                                  Job title, keywords, company
+                                </motion.span>
+                              </AnimatePresence>
+                            </motion.div>
+                          )}
+                          <motion.input
+                            ref={jobInputRef}
+                            layout="position"
+                            id="ljg-search-input"
+                            type="text"
+                            value={jobQuery}
+                            onChange={(e) => setJobQuery(e.target.value)}
+                            onFocus={() => {
+                              if (jobSuggestions.length > 0) {
+                                setShowJobSuggestions(true);
+                              }
+                            }}
+                            onKeyDown={(e) => handleKeyDown(e, 'job')}
+                          />
+                        </div>
+                      </motion.div>
+                    </div>
+                    {showJobSuggestions && jobSuggestions.length > 0 && (
+                      <motion.div
+                        ref={suggestionsRef}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="ljg-suggestions-dropdown"
+                      >
+                        {jobSuggestions.map((suggestion, index) => (
+                          <div
+                            key={suggestion.id}
+                            className={`ljg-suggestion-item ${activeSuggestionIndex === index ? 'ljg-suggestion-active' : ''}`}
+                            onClick={() => handleJobSuggestionClick(suggestion)}
+                            onMouseEnter={() => setActiveSuggestionIndex(index)}
+                          >
+                            <Search className="ljg-suggestion-icon" />
+                            <span className="ljg-suggestion-text">
+                              {highlightMatch(suggestion.text, jobQuery)}
+                            </span>
+                            <span className="ljg-suggestion-category">{suggestion.category}</span>
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
+                  
+                  {/* Location Search Field */}
+                  <div className="ljg-autocomplete-wrapper">
+                    <div className="ljg-search-input-container">
+                      <motion.div
+                        layoutId="location-search-container"
+                        transition={{
+                          layout: {
+                            duration: 0.5,
+                            type: 'spring',
+                            bounce: 0.2
+                          }
+                        }}
+                        className="ljg-search-input-wrapper"
+                      >
+                        <motion.div layoutId="location-search-icon" className="ljg-search-icon-wrapper">
+                          <MapPin />
+                        </motion.div>
+                        <div className="ljg-input-field-wrapper">
+                          {!locationQuery && (
+                            <motion.div
+                              layout
+                              className="ljg-placeholder-text"
+                            >
+                              <AnimatePresence mode="popLayout">
+                                <motion.span
+                                  layoutId="location-placeholder"
+                                  key="location-placeholder"
+                                  initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
+                                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                  exit={{ opacity: 0, y: -10, filter: 'blur(5px)' }}
+                                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                                >
+                                  City, region, or "remote"
+                                </motion.span>
+                              </AnimatePresence>
+                            </motion.div>
+                          )}
+                          <motion.input
+                            ref={locationInputRef}
+                            layout="position"
+                            id="ljg-location-input"
+                            type="text"
+                            value={locationQuery}
+                            onChange={(e) => setLocationQuery(e.target.value)}
+                            onFocus={() => {
+                              if (locationSuggestions.length > 0) {
+                                setShowLocationSuggestions(true);
+                              }
+                            }}
+                            onKeyDown={(e) => handleKeyDown(e, 'location')}
+                          />
+                        </div>
+                      </motion.div>
+                    </div>
+                    {showLocationSuggestions && locationSuggestions.length > 0 && (
+                      <motion.div
+                        ref={locationSuggestionsRef}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="ljg-suggestions-dropdown"
+                      >
+                        {locationSuggestions.map((suggestion, index) => (
+                          <div
+                            key={suggestion.id}
+                            className={`ljg-suggestion-item ${activeLocationIndex === index ? 'ljg-suggestion-active' : ''}`}
+                            onClick={() => handleLocationSuggestionClick(suggestion)}
+                            onMouseEnter={() => setActiveLocationIndex(index)}
+                          >
+                            <MapPin className="ljg-suggestion-icon" />
+                            <span className="ljg-suggestion-text">
+                              {highlightMatch(suggestion.text, locationQuery)}
+                            </span>
+                            <span className="ljg-suggestion-category">{suggestion.category}</span>
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
+                  
+                  {/* Search Button */}
+                  <button
+                    id="ljg-search-button"
+                    onClick={handleSearch}
+                    type="button"
+                  >
+                    Search
+                  </button>
+                </motion.div>
+              </div>
             </motion.div>
 
             {/* Mobile Overlay Backdrop - Outside layout */}
