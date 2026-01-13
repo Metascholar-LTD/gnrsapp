@@ -20,7 +20,11 @@ import {
   ChevronRight,
   Clock,
   FileText,
-  UserPlus
+  UserPlus,
+  Award,
+  Zap,
+  Layers,
+  Globe
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -1778,72 +1782,77 @@ const isolatedStyles = `
     font-family: 'DM Sans', system-ui, sans-serif;
   }
 
-  .ljg-upcoming-card-progress {
+  .ljg-upcoming-card-info {
     margin-top: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
   }
 
-  .ljg-upcoming-card-progress-header {
+  .ljg-upcoming-card-info-item.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .ljg-upcoming-card-info-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(84, 111, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .ljg-upcoming-card-progress-label {
-    font-size: 0.875rem;
-    font-weight: 500;
+  .ljg-upcoming-card-info-item:hover {
+    background: linear-gradient(135deg, #f0f2ff 0%, #e8ebff 100%);
+    border-color: rgba(84, 111, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(84, 111, 255, 0.1);
+  }
+
+  .ljg-upcoming-card-info-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .ljg-upcoming-card-info-value {
+    font-size: 0.8125rem;
+    font-weight: 600;
     color: #141522;
     margin: 0;
+    line-height: 1.2;
     font-family: 'DM Sans', system-ui, sans-serif;
-  }
-
-  .ljg-upcoming-card-progress-value {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #546FFF;
-    margin: 0;
-    font-family: 'DM Sans', system-ui, sans-serif;
-  }
-
-  .ljg-upcoming-card-progress-bar {
-    width: 100%;
-    height: 6px;
-    background-color: #EBEDF7;
-    border-radius: 3px;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .ljg-upcoming-card-progress-fill {
-    height: 100%;
-    background-color: #546FFF;
-    border-radius: 3px;
-    transition: width 0.3s ease;
+  .ljg-upcoming-card-info-label {
+    font-size: 0.6875rem;
+    color: #54577A;
+    margin: 0;
+    line-height: 1.2;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .ljg-upcoming-card-footer {
     margin-top: 1rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-  }
-
-  .ljg-upcoming-card-time {
-    display: flex;
-    align-items: center;
     gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
-  .ljg-upcoming-card-time-icon {
-    width: 20px;
-    height: 20px;
+  .ljg-upcoming-card-viewed-text {
+    font-size: 0.75rem;
     color: #54577A;
-  }
-
-  .ljg-upcoming-card-time-text {
-    font-size: 0.875rem;
     font-weight: 500;
-    color: #141522;
-    margin: 0;
+    white-space: nowrap;
     font-family: 'DM Sans', system-ui, sans-serif;
   }
 
@@ -1923,8 +1932,9 @@ const UPCOMING_GIGS = [
     title: 'Creating Mobile App Design',
     category: 'UI UX Design',
     thumb: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&h=110&fit=crop',
-    progress: 75,
-    daysLeft: 3,
+    experienceLevel: 'Expert',
+    locationType: 'Remote Job',
+    projectType: 'Complex Gig',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -1938,8 +1948,9 @@ const UPCOMING_GIGS = [
     title: 'Creating Perfect Website',
     category: 'Web Developer',
     thumb: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=110&fit=crop',
-    progress: 85,
-    daysLeft: 4,
+    experienceLevel: 'Intermediate',
+    locationType: 'On-site',
+    projectType: 'Standard project',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -1953,8 +1964,9 @@ const UPCOMING_GIGS = [
     title: 'Mobile App Design',
     category: 'UI UX Design',
     thumb: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=300&h=110&fit=crop',
-    progress: 65,
-    daysLeft: 3,
+    experienceLevel: 'Expert',
+    locationType: 'Hybrid',
+    projectType: 'Complex project',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -1968,8 +1980,9 @@ const UPCOMING_GIGS = [
     title: 'Creating Mobile Apps',
     category: 'Android Developer',
     thumb: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=300&h=110&fit=crop',
-    progress: 95,
-    daysLeft: 1,
+    experienceLevel: 'Expert',
+    locationType: 'Remote Job',
+    projectType: 'Complex project',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -1983,8 +1996,9 @@ const UPCOMING_GIGS = [
     title: 'Creating Awesome Mobile Apps',
     category: 'UI UX Design',
     thumb: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=300&h=110&fit=crop',
-    progress: 90,
-    daysLeft: 1,
+    experienceLevel: 'Advanced',
+    locationType: 'Remote Job',
+    projectType: 'Standard project',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -1998,8 +2012,9 @@ const UPCOMING_GIGS = [
     title: 'Creating Fresh Website',
     category: 'Web Developer',
     thumb: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=110&fit=crop',
-    progress: 85,
-    daysLeft: 2,
+    experienceLevel: 'Intermediate',
+    locationType: 'On-site',
+    projectType: 'Standard project',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -2961,23 +2976,28 @@ const LocalJobGigs = () => {
                           <h3 className="ljg-upcoming-card-name">{gig.title}</h3>
                           <p className="ljg-upcoming-card-category">{gig.category}</p>
                         </div>
-                        <div className="ljg-upcoming-card-progress">
-                          <div className="ljg-upcoming-card-progress-header">
-                            <span className="ljg-upcoming-card-progress-label">Progress</span>
-                            <span className="ljg-upcoming-card-progress-value">{gig.progress}%</span>
+                        <div className="ljg-upcoming-card-info">
+                          <div className="ljg-upcoming-card-info-item">
+                            <div className="ljg-upcoming-card-info-content">
+                              <span className="ljg-upcoming-card-info-value">{gig.experienceLevel}</span>
+                              <span className="ljg-upcoming-card-info-label">Experience Level</span>
+                            </div>
                           </div>
-                          <div className="ljg-upcoming-card-progress-bar">
-                            <div
-                              className="ljg-upcoming-card-progress-fill"
-                              style={{ width: `${gig.progress}%` }}
-                            />
+                          <div className="ljg-upcoming-card-info-item">
+                            <div className="ljg-upcoming-card-info-content">
+                              <span className="ljg-upcoming-card-info-value">{gig.locationType}</span>
+                              <span className="ljg-upcoming-card-info-label">Location</span>
+                            </div>
+                          </div>
+                          <div className="ljg-upcoming-card-info-item">
+                            <div className="ljg-upcoming-card-info-content">
+                              <span className="ljg-upcoming-card-info-value">{gig.projectType}</span>
+                              <span className="ljg-upcoming-card-info-label">Gig Type</span>
+                            </div>
                           </div>
                         </div>
                         <div className="ljg-upcoming-card-footer">
-                          <div className="ljg-upcoming-card-time">
-                            <Clock className="ljg-upcoming-card-time-icon" />
-                            <span className="ljg-upcoming-card-time-text">{gig.daysLeft} Days Left</span>
-                          </div>
+                          <span className="ljg-upcoming-card-viewed-text">Recently viewed by:</span>
                           <div className="ljg-upcoming-card-avatars">
                             {gig.avatars.slice(0, 5).map((avatar, index) => (
                               <div key={index} className="ljg-upcoming-card-avatar">
