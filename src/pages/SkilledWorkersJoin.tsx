@@ -424,9 +424,9 @@ const SkilledWorkersJoin = () => {
             >
               <FeatureCard
                 feature={{
-                  title: "I'm an employer, hiring for a project",
+                  title: "I'm an employer, hiring for a project/Gig",
                   icon: Briefcase,
-                  description: "Post job opportunities and find skilled professionals for your projects. Access a pool of verified talent ready to work."
+                  description: "Post job/Gig opportunities and find skilled professionals for your projects. Access a pool of verified talent ready to work."
                 }}
                 className={cn(
                   "h-full",
@@ -446,7 +446,7 @@ const SkilledWorkersJoin = () => {
             >
               <FeatureCard
                 feature={{
-                  title: "I'm a skilled worker, looking for work",
+                  title: "I'm a skilled worker, looking for work/Gig",
                   icon: User,
                   description: "Showcase your skills and connect with employers. Find opportunities that match your expertise and career goals."
                 }}
