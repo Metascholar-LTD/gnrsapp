@@ -9,7 +9,7 @@ import {
   Eye,
   CheckCircle,
   MapPin,
-  DollarSign,
+  CreditCard,
   Calendar,
   Building2,
   Phone,
@@ -1018,7 +1018,6 @@ const AdminLocalJobGigs = () => {
               <th>Employer</th>
               <th>Location</th>
               <th>Estimated Pay</th>
-              <th>Duration</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -1052,14 +1051,8 @@ const AdminLocalJobGigs = () => {
                 </td>
                 <td>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", fontWeight: 600, color: "#10b981" }}>
-                    <DollarSign style={{ width: "14px", height: "14px" }} />
-                    {gig.payment_amount ? `Estimated: ₦${gig.payment_amount.toLocaleString()}` : "Negotiable"}
-                  </div>
-                </td>
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", color: "#374151" }}>
-                    <Calendar style={{ width: "14px", height: "14px" }} />
-                    {gig.duration || "N/A"}
+                    <CreditCard style={{ width: "14px", height: "14px" }} />
+                    {gig.payment_amount ? `Estimated: GHS ${gig.payment_amount.toLocaleString()}` : "Negotiable"}
                   </div>
                 </td>
                 <td>
@@ -1158,7 +1151,7 @@ const AdminLocalJobGigs = () => {
                   </td>
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", fontWeight: 600, color: "#10b981" }}>
-                      <DollarSign style={{ width: "14px", height: "14px" }} />
+                      <CreditCard style={{ width: "14px", height: "14px" }} />
                       {gig.payment_amount ? `₦${gig.payment_amount.toLocaleString()}` : "Negotiable"}
                     </div>
                   </td>

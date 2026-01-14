@@ -3,7 +3,7 @@ import {
   X,
   Briefcase,
   MapPin,
-  DollarSign,
+  CreditCard,
   Calendar,
   Building2,
   Phone,
@@ -596,6 +596,7 @@ const modalStyles = `
 
 export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -662,7 +663,7 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
 
   const tabs = [
     { id: "overview", label: "Basic Info", icon: Info, isComplete: isBasicInfoComplete },
-    { id: "payment", label: "Payment & Duration", icon: DollarSign, isComplete: isPaymentComplete },
+    { id: "payment", label: "Payment & Duration", icon: CreditCard, isComplete: isPaymentComplete },
   ];
 
   return (
@@ -797,17 +798,47 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
                     </div>
 
                     <div className="lgm-form-group full-width">
-                      <label className="lgm-form-label">
-                        <FileText size={16} />
-                        Requirements
-                      </label>
-                      <textarea
-                        className="lgm-form-textarea"
-                        value={formData.requirements}
-                        onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                        placeholder="List any requirements or qualifications..."
-                        rows={3}
-                      />
+                      <label className="lgm-form-label">Requirements (each point)</label>
+                      {(() => {
+                        const items = formData.requirements ? formData.requirements.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => (
+                              <div key={index} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                <span style={{ width: "1.5rem", height: "1.5rem", borderRadius: "9999px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", color: "#4b5563", flexShrink: 0 }}>
+                                  {index + 1}
+                                </span>
+                                <input type="text" className="lgm-form-input" style={{ flex: 1 }} value={item} placeholder="Enter a requirement"
+                                  onChange={(e) => {
+                                    const next = [...items];
+                                    next[index] = e.target.value;
+                                    setFormData({ ...formData, requirements: next.join("\n") });
+                                  }}
+                                />
+                                <button type="button"
+                                  onClick={() => {
+                                    const next = items.filter((_, i) => i !== index);
+                                    setFormData({ ...formData, requirements: next.join("\n") });
+                                  }}
+                                  style={{ border: "none", background: "transparent", color: "#9ca3af", cursor: "pointer", padding: "0.25rem" }}
+                                  aria-label="Remove requirement"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                            <button type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({ ...formData, requirements: next.join("\n") });
+                              }}
+                              style={{ alignSelf: "flex-start", marginTop: "0.25rem", fontSize: "0.75rem", padding: "0.25rem 0.5rem", borderRadius: "9999px", border: "1px dashed #d1d5db", background: "#f9fafb", color: "#374151", display: "inline-flex", alignItems: "center", gap: "0.25rem", cursor: "pointer" }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span> Add requirement
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="lgm-form-group full-width">
@@ -832,7 +863,7 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
                   <div className="lgm-form-grid">
                     <div className="lgm-form-group">
                       <label className="lgm-form-label">
-                        <DollarSign size={16} />
+                        <CreditCard size={16} />
                         Payment Type *
                       </label>
                       <select
@@ -851,8 +882,8 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
 
                     <div className="lgm-form-group">
                       <label className="lgm-form-label">
-                        <DollarSign size={16} />
-                        Payment Amount (₦)
+                        <CreditCard size={16} />
+                        Payment Amount (GHS)
                       </label>
                       <input
                         className="lgm-form-input"
@@ -862,20 +893,6 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
                         onChange={(e) => setFormData({ ...formData, payment_amount: e.target.value })}
                         placeholder="0.00"
                         disabled={formData.payment_type === 'negotiable'}
-                      />
-                    </div>
-
-                    <div className="lgm-form-group">
-                      <label className="lgm-form-label">
-                        <Clock size={16} />
-                        Duration
-                      </label>
-                      <input
-                        className="lgm-form-input"
-                        type="text"
-                        value={formData.duration}
-                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                        placeholder="e.g., 2 days, 1 week, 3 months"
                       />
                     </div>
 
@@ -931,6 +948,7 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
 
 export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -1009,7 +1027,7 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
 
   const tabs = [
     { id: "overview", label: "Basic Info", icon: Info, isComplete: isBasicInfoComplete },
-    { id: "payment", label: "Payment & Duration", icon: DollarSign, isComplete: isPaymentComplete },
+    { id: "payment", label: "Payment & Duration", icon: CreditCard, isComplete: isPaymentComplete },
   ];
 
   return (
@@ -1138,17 +1156,47 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
                     </div>
 
                     <div className="lgm-form-group full-width">
-                      <label className="lgm-form-label">
-                        <FileText size={16} />
-                        Requirements
-                      </label>
-                      <textarea
-                        className="lgm-form-textarea"
-                        value={formData.requirements}
-                        onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                        placeholder="List any requirements or qualifications..."
-                        rows={3}
-                      />
+                      <label className="lgm-form-label">Requirements (each point)</label>
+                      {(() => {
+                        const items = formData.requirements ? formData.requirements.split("\n") : [""];
+                        return (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {items.map((item, index) => (
+                              <div key={index} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                <span style={{ width: "1.5rem", height: "1.5rem", borderRadius: "9999px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", color: "#4b5563", flexShrink: 0 }}>
+                                  {index + 1}
+                                </span>
+                                <input type="text" className="lgm-form-input" style={{ flex: 1 }} value={item} placeholder="Enter a requirement"
+                                  onChange={(e) => {
+                                    const next = [...items];
+                                    next[index] = e.target.value;
+                                    setFormData({ ...formData, requirements: next.join("\n") });
+                                  }}
+                                />
+                                <button type="button"
+                                  onClick={() => {
+                                    const next = items.filter((_, i) => i !== index);
+                                    setFormData({ ...formData, requirements: next.join("\n") });
+                                  }}
+                                  style={{ border: "none", background: "transparent", color: "#9ca3af", cursor: "pointer", padding: "0.25rem" }}
+                                  aria-label="Remove requirement"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                            <button type="button"
+                              onClick={() => {
+                                const next = [...items, ""];
+                                setFormData({ ...formData, requirements: next.join("\n") });
+                              }}
+                              style={{ alignSelf: "flex-start", marginTop: "0.25rem", fontSize: "0.75rem", padding: "0.25rem 0.5rem", borderRadius: "9999px", border: "1px dashed #d1d5db", background: "#f9fafb", color: "#374151", display: "inline-flex", alignItems: "center", gap: "0.25rem", cursor: "pointer" }}
+                            >
+                              <span style={{ fontSize: "0.9rem" }}>+</span> Add requirement
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="lgm-form-group full-width">
@@ -1173,7 +1221,7 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
                   <div className="lgm-form-grid">
                     <div className="lgm-form-group">
                       <label className="lgm-form-label">
-                        <DollarSign size={16} />
+                        <CreditCard size={16} />
                         Payment Type *
                       </label>
                       <select
@@ -1192,8 +1240,8 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
 
                     <div className="lgm-form-group">
                       <label className="lgm-form-label">
-                        <DollarSign size={16} />
-                        Payment Amount (₦)
+                        <CreditCard size={16} />
+                        Payment Amount (GHS)
                       </label>
                       <input
                         className="lgm-form-input"
@@ -1202,19 +1250,6 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
                         value={formData.payment_amount}
                         onChange={(e) => setFormData({ ...formData, payment_amount: e.target.value })}
                         placeholder="Enter amount or leave empty for negotiable"
-                      />
-                    </div>
-
-                    <div className="lgm-form-group">
-                      <label className="lgm-form-label">
-                        <Clock size={16} />
-                        Duration
-                      </label>
-                      <input
-                        className="lgm-form-input"
-                        type="text"
-                        value={formData.duration}
-                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                       />
                     </div>
 
@@ -1337,20 +1372,13 @@ export const ViewGigModal = ({ isOpen, onClose, gig }: ViewGigModalProps) => {
                   </div>
                   <div className="lgm-detail-row">
                     <span className="lgm-detail-label">
-                      <DollarSign size={16} />
+                      <CreditCard size={16} />
                       Estimated Pay
                     </span>
                     <span className="lgm-detail-value">
-                      {gig.payment_amount ? `₦${gig.payment_amount.toLocaleString()}` : "Negotiable"} 
+                      {gig.payment_amount ? `GHS ${gig.payment_amount.toLocaleString()}` : "Negotiable"} 
                       {gig.payment_type && ` (${gig.payment_type})`}
                     </span>
-                  </div>
-                  <div className="lgm-detail-row">
-                    <span className="lgm-detail-label">
-                      <Clock size={16} />
-                      Duration
-                    </span>
-                    <span className="lgm-detail-value">{gig.duration || "Not specified"}</span>
                   </div>
                   <div className="lgm-detail-row">
                     <span className="lgm-detail-label">
@@ -1411,9 +1439,13 @@ export const ViewGigModal = ({ isOpen, onClose, gig }: ViewGigModalProps) => {
                     <h3 className="lgm-detail-section-title">
                       Requirements
                     </h3>
-                    <p style={{ color: "#374151", lineHeight: "1.6", margin: 0 }}>
-                      {gig.requirements}
-                    </p>
+                    <ul style={{ margin: 0, paddingLeft: "1.5rem", listStyleType: "disc", listStylePosition: "outside" }}>
+                      {gig.requirements.split("\n").filter(Boolean).map((req: string, index: number) => (
+                        <li key={index} style={{ color: "#374151", fontSize: "0.9375rem", lineHeight: "1.7", marginBottom: "0.5rem" }}>
+                          {req}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
 

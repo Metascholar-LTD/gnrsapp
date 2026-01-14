@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { 
   Briefcase, 
   MapPin, 
-  DollarSign,
+  CreditCard,
   Search,
   Filter,
   TrendingUp,
@@ -1054,13 +1054,13 @@ const isolatedStyles = `
     background: white;
     width: 100%;
     height: 100%;
-    padding: 1.5rem;
+    padding: 1rem;
     overflow-y: auto;
   }
 
   @media (min-width: 1024px) {
     #ljg-detail-container {
-      padding: 2rem;
+      padding: 1.25rem;
       border-radius: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
@@ -1170,7 +1170,7 @@ const isolatedStyles = `
   }
 
   #ljg-detail-content {
-    padding: 2rem 2.5rem;
+    padding: 0.75rem 0;
   }
 
   .ljg-detail-section {
@@ -1194,6 +1194,28 @@ const isolatedStyles = `
     font-size: 0.9375rem;
     line-height: 1.7;
     font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  .ljg-detail-list {
+    margin: 0 !important;
+    padding-left: 1.5rem !important;
+    list-style-type: disc !important;
+    list-style-position: outside !important;
+  }
+
+  .ljg-detail-list li {
+    color: #6b7280 !important;
+    font-size: 0.9375rem !important;
+    line-height: 1.7 !important;
+    margin-bottom: 0.5rem !important;
+    font-family: 'DM Sans', system-ui, sans-serif !important;
+    display: list-item !important;
+    list-style-type: disc !important;
+    list-style-position: outside !important;
+  }
+
+  .ljg-detail-list li:last-child {
+    margin-bottom: 0 !important;
   }
 
   .ljg-employer-contact-card {
@@ -2254,7 +2276,8 @@ const SAMPLE_GIGS = [
     posted: '2 hours ago',
     employer_name: 'Community Events Ltd',
     employer_phone: '+233 24 123 4567',
-    employer_email: 'contact@communityevents.gh'
+    employer_email: 'contact@communityevents.gh',
+    requirements: 'Ability to work in a team\nPhysical stamina for setup and breakdown\nAvailable for the full event duration'
   },
   {
     id: '2',
@@ -2267,7 +2290,8 @@ const SAMPLE_GIGS = [
     posted: '5 hours ago',
     employer_name: 'Swift Movers',
     employer_phone: '+233 20 987 6543',
-    employer_email: 'info@swiftmovers.gh'
+    employer_email: 'info@swiftmovers.gh',
+    requirements: 'Heavy lifting required\nMust be physically fit and able to lift at least 50kg\nPrevious moving experience preferred'
   },
   {
     id: '3',
@@ -2280,7 +2304,8 @@ const SAMPLE_GIGS = [
     posted: '1 day ago',
     employer_name: 'Green Thumb Services',
     employer_phone: '+233 27 456 7890',
-    employer_email: 'hello@greenthumb.gh'
+    employer_email: 'hello@greenthumb.gh',
+    requirements: 'Basic gardening knowledge preferred\nTools will be provided\nMust be comfortable working outdoors'
   },
   {
     id: '4',
@@ -2293,7 +2318,8 @@ const SAMPLE_GIGS = [
     posted: '1 day ago',
     employer_name: 'QuickServe Logistics',
     employer_phone: '+233 24 555 1234',
-    employer_email: 'jobs@quickserve.com'
+    employer_email: 'jobs@quickserve.com',
+    requirements: 'Valid driver\'s license required\nMotorcycle or vehicle needed\nGood knowledge of city routes'
   },
   {
     id: '5',
@@ -2306,7 +2332,8 @@ const SAMPLE_GIGS = [
     posted: '2 days ago',
     employer_name: 'Capture Moments Studio',
     employer_phone: '+233 20 777 8888',
-    employer_email: 'contact@capturemoments.gh'
+    employer_email: 'contact@capturemoments.gh',
+    requirements: 'Experience with photography equipment preferred\nMust be available for the full duration\nAbility to work in a fast-paced environment'
   },
   {
     id: '6',
@@ -2319,7 +2346,8 @@ const SAMPLE_GIGS = [
     posted: '2 days ago',
     employer_name: 'CleanPro Services',
     employer_phone: '+233 27 111 2222',
-    employer_email: 'info@cleanpro.gh'
+    employer_email: 'info@cleanpro.gh',
+    requirements: 'All cleaning supplies will be provided\nAttention to detail required\nPrevious cleaning experience preferred'
   }
 ];
 
@@ -2726,7 +2754,7 @@ const LocalJobGigs = () => {
                     <span>Posted {selectedGig.posted}</span>
                   </div>
                   <div className="ljg-detail-meta-item">
-                    <DollarSign className="ljg-detail-meta-icon" />
+                    <CreditCard className="ljg-detail-meta-icon" />
                     <span>Estimated Pay: {selectedGig.pay}</span>
                   </div>
                 </div>
@@ -3340,7 +3368,7 @@ const LocalJobGigs = () => {
                                 <div className="ljg-gig-detail" style={{ gridColumn: "1 / -1" }}>
                                   <div className="ljg-gig-detail-content">
                                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                      <DollarSign className="ljg-gig-detail-icon" />
+                                      <CreditCard className="ljg-gig-detail-icon" />
                                       <span className="ljg-gig-detail-value">Estimated: {gig.pay}</span>
                                     </div>
                                     <span className="ljg-gig-detail-label">Estimated Pay</span>
@@ -3423,7 +3451,7 @@ const LocalJobGigs = () => {
                             <span>Posted {selectedGig.posted}</span>
                           </div>
                           <div className="ljg-detail-meta-item">
-                            <DollarSign className="ljg-detail-meta-icon" />
+                            <CreditCard className="ljg-detail-meta-icon" />
                             <span>{selectedGig.pay}</span>
                           </div>
                         </div>
@@ -3439,15 +3467,17 @@ const LocalJobGigs = () => {
 
                         <div className="ljg-detail-section">
                           <h3 className="ljg-detail-section-title">Requirements</h3>
-                          <p className="ljg-detail-section-content">
-                            {selectedGig.title.includes('Moving') && 'Heavy lifting required. Must be physically fit and able to lift at least 50kg.'}
-                            {selectedGig.title.includes('Garden') && 'Basic gardening knowledge preferred. Tools will be provided.'}
-                            {selectedGig.title.includes('Delivery') && 'Valid driver\'s license required. Motorcycle or vehicle needed.'}
-                            {selectedGig.title.includes('Photography') && 'Experience with photography equipment preferred. Must be available for the full duration.'}
-                            {selectedGig.title.includes('Cleaning') && 'All cleaning supplies will be provided. Attention to detail required.'}
-                            {selectedGig.title.includes('Event') && 'Ability to work in a team. Physical stamina for setup and breakdown.'}
-                            {!selectedGig.title.includes('Moving') && !selectedGig.title.includes('Garden') && !selectedGig.title.includes('Delivery') && !selectedGig.title.includes('Photography') && !selectedGig.title.includes('Cleaning') && !selectedGig.title.includes('Event') && 'No specific requirements. All skill levels welcome.'}
-                          </p>
+                          {(selectedGig as any).requirements ? (
+                            <ul className="ljg-detail-list">
+                              {(selectedGig as any).requirements.split('\n').filter(Boolean).map((req: string, index: number) => (
+                                <li key={index}>{req}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="ljg-detail-section-content">
+                              No specific requirements. All skill levels welcome.
+                            </p>
+                          )}
                         </div>
 
                         <div className="ljg-detail-section">
