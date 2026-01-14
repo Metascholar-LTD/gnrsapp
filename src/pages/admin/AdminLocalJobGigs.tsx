@@ -687,12 +687,6 @@ const AdminLocalJobGigs = () => {
       gap: 0.375rem;
     }
 
-    .aljg-gig-category {
-      font-size: 0.75rem;
-      color: #6b7280;
-      margin: 0;
-    }
-
     .aljg-verified-badge {
       width: 16px;
       height: 16px;
@@ -938,7 +932,7 @@ const AdminLocalJobGigs = () => {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#111827", marginBottom: "0.125rem" }}>{gig.title}</div>
-                  <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{gig.category} • {gig.location}</div>
+                  <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{gig.location}</div>
                 </div>
                 <span className={`aljg-status-badge ${gig.status}`}>
                   {gig.status === "active" ? (
@@ -1031,7 +1025,6 @@ const AdminLocalJobGigs = () => {
                       {gig.title}
                       {gig.verified && <CheckCircle2 className="aljg-verified-badge" />}
                     </p>
-                    <p className="aljg-gig-category">{gig.category}</p>
                   </div>
                 </td>
                 <td>
@@ -1125,7 +1118,6 @@ const AdminLocalJobGigs = () => {
                   <td>
                     <div className="aljg-gig-cell">
                       <p className="aljg-gig-title">{gig.title}</p>
-                      <p className="aljg-gig-category">{gig.category}</p>
                     </div>
                   </td>
                   <td>
