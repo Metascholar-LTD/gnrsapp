@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { restaurantsData } from '@/data/restaurants';
+import RestaurantMap from '@/components/RestaurantMap';
 import { Share2, Heart, MapPin, Clock, Globe, Phone, ChevronDown, ChevronUp, ChevronRight, Filter, Search, ThumbsUp, MoreVertical, Lightbulb, Pencil, ArrowLeft, ArrowRight, Leaf, CreditCard, Info, X } from 'lucide-react';
 
 const RestaurantView: React.FC = () => {
@@ -827,6 +828,16 @@ const RestaurantView: React.FC = () => {
       height: calc(90vh - 73px);
       width: 100%;
       overflow: hidden;
+    }
+
+    .restaurant-view-map-modal-map .leaflet-container {
+      height: 100%;
+      width: 100%;
+      z-index: 1;
+    }
+
+    .restaurant-view-preview-map:hover {
+      box-shadow: 0 4px 12px rgba(0, 107, 63, 0.2);
     }
 
 
@@ -1689,17 +1700,31 @@ const RestaurantView: React.FC = () => {
                       className="restaurant-view-preview-map"
                       onClick={() => setShowMapModal(true)}
                       style={{
-                        background: '#f5f5f5',
+                        background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: '#666',
                         fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
                         fontSize: '14px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #e8e8e8 0%, #d8d8d8 100%)';
+                        e.currentTarget.style.transform = 'scale(1.02)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)';
+                        e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
-                      Map placeholder
+                      <MapPin size={32} color="#006B3F" style={{ marginBottom: '0.5rem' }} />
+                      <span style={{ fontWeight: 600, color: '#006B3F' }}>View on Map</span>
+                      <span style={{ fontSize: '12px', marginTop: '0.25rem' }}>Click to get directions</span>
                     </div>
                     <div className="restaurant-view-location-info">
                       <a 
@@ -1939,19 +1964,25 @@ const RestaurantView: React.FC = () => {
               </button>
             </div>
             <div className="restaurant-view-map-modal-map">
-              <div style={{
-                width: '100%',
-                height: '100%',
-                background: '#f5f5f5',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#666',
-                fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
-                fontSize: '16px'
-              }}>
-                Map placeholder
-              </div>
+              <RestaurantMap
+                restaurant={{
+                  id: restaurant.id,
+                  name: restaurant.name,
+                  lat: restaurant.location.lat,
+                  lng: restaurant.location.lng,
+                  rating: restaurant.rating,
+                  cuisine: restaurant.cuisine,
+                }}
+                nearbyRestaurants={restaurant.nearby.restaurants.map((r) => ({
+                  id: r.id,
+                  name: r.name,
+                  lat: r.lat,
+                  lng: r.lng,
+                  rating: r.rating,
+                  cuisine: r.cuisine,
+                }))}
+                onClose={() => setShowMapModal(false)}
+              />
             </div>
           </div>
         </div>
