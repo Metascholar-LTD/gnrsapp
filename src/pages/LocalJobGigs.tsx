@@ -1989,13 +1989,6 @@ const isolatedStyles = `
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
 
-  .ljg-upcoming-card-image {
-    width: 100%;
-    height: 110px;
-    object-fit: cover;
-    display: block;
-  }
-
   .ljg-upcoming-card-content {
     padding: 1.5rem;
   }
@@ -2173,6 +2166,7 @@ const UPCOMING_GIGS = [
     experienceLevel: 'Expert',
     locationType: 'Remote Job',
     projectType: 'Complex Gig',
+    pay: 'GHS 350',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -2189,6 +2183,7 @@ const UPCOMING_GIGS = [
     experienceLevel: 'Intermediate',
     locationType: 'On-site',
     projectType: 'Standard project',
+    pay: 'GHS 280',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -2205,6 +2200,7 @@ const UPCOMING_GIGS = [
     experienceLevel: 'Expert',
     locationType: 'Hybrid',
     projectType: 'Complex project',
+    pay: 'GHS 400',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -2221,6 +2217,7 @@ const UPCOMING_GIGS = [
     experienceLevel: 'Expert',
     locationType: 'Remote Job',
     projectType: 'Complex project',
+    pay: 'GHS 320',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -2237,6 +2234,7 @@ const UPCOMING_GIGS = [
     experienceLevel: 'Advanced',
     locationType: 'Remote Job',
     projectType: 'Standard project',
+    pay: 'GHS 300',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -2253,6 +2251,7 @@ const UPCOMING_GIGS = [
     experienceLevel: 'Intermediate',
     locationType: 'On-site',
     projectType: 'Standard project',
+    pay: 'GHS 250',
     avatars: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop',
@@ -3044,11 +3043,6 @@ const LocalJobGigs = () => {
                 >
                   {UPCOMING_GIGS.map((gig) => (
                     <div key={gig.id} className="ljg-upcoming-card">
-                      <img
-                        src={gig.thumb}
-                        alt={gig.title}
-                        className="ljg-upcoming-card-image"
-                      />
                       <div className="ljg-upcoming-card-content">
                         <div className="ljg-upcoming-card-header">
                           <h3 className="ljg-upcoming-card-name">{gig.title}</h3>
@@ -3067,10 +3061,13 @@ const LocalJobGigs = () => {
                               <span className="ljg-upcoming-card-info-label">Location</span>
                             </div>
                           </div>
-                          <div className="ljg-upcoming-card-info-item">
+                          <div className="ljg-upcoming-card-info-item" style={{ gridColumn: "1 / -1" }}>
                             <div className="ljg-upcoming-card-info-content">
-                              <span className="ljg-upcoming-card-info-value">{gig.projectType}</span>
-                              <span className="ljg-upcoming-card-info-label">Gig Type</span>
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                <CreditCard className="ljg-gig-detail-icon" style={{ width: "14px", height: "14px" }} />
+                                <span className="ljg-upcoming-card-info-value">Estimated: {gig.pay || 'GHS 0'}</span>
+                              </div>
+                              <span className="ljg-upcoming-card-info-label">Estimated Pay</span>
                             </div>
                           </div>
                         </div>

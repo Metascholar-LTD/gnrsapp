@@ -42,12 +42,11 @@ const getInitials = (name: string): string => {
 
 const AdminLocalJobGigs = () => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("gigs");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const spacerRef = useRef<HTMLDivElement>(null);
-  const overviewChartRef = useRef<HTMLCanvasElement>(null);
 
   // Modal states
   const [showAddGig, setShowAddGig] = useState(false);
@@ -265,7 +264,6 @@ const AdminLocalJobGigs = () => {
   ];
 
   const tabs = [
-    { id: "overview", label: "Overview", icon: Briefcase },
     { id: "gigs", label: "Gigs Management", icon: UserCheck },
     { id: "approval", label: "Gigs Approval", icon: CheckCircle }
   ];
@@ -845,27 +843,6 @@ const AdminLocalJobGigs = () => {
       color: white;
     }
 
-    /* Overview Cards */
-    .aljg-overview-card {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      transition: all 0.2s;
-    }
-
-    .aljg-overview-card:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      transform: translateY(-2px);
-    }
-
-    .aljg-overview-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #111827;
-      margin: 0 0 1rem 0;
-    }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -913,45 +890,6 @@ const AdminLocalJobGigs = () => {
     }
   `;
 
-  const renderOverview = () => (
-    <div>
-      <div id="aljg-filters">
-        <h3 style={{ margin: 0, fontSize: "1.125rem", fontWeight: 600, color: "#111827", flex: "1 0 100%" }}>
-          Quick Overview
-        </h3>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.5rem", marginBottom: "1.5rem" }}>
-        <div className="aljg-overview-card">
-          <h4 className="aljg-overview-title">Recent Gigs</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {gigs.slice(0, 5).map(gig => (
-              <div key={gig.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem", background: "#f9fafb", borderRadius: "8px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "0.875rem" }}>
-                  {getInitials(gig.title)}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#111827", marginBottom: "0.125rem" }}>{gig.title}</div>
-                  <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{gig.location}</div>
-                </div>
-                <span className={`aljg-status-badge ${gig.status}`}>
-                  {gig.status === "active" ? (
-                    <CheckCircle2 className="aljg-status-icon" />
-                  ) : gig.status === "pending" ? (
-                    <Clock className="aljg-status-icon" />
-                  ) : (
-                    <XCircle className="aljg-status-icon" />
-                  )}
-                  {gig.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
 
   const renderGigs = () => (
     <div>
@@ -1269,7 +1207,6 @@ const AdminLocalJobGigs = () => {
 
       {/* Content */}
       <div id="aljg-content">
-        {activeTab === "overview" && renderOverview()}
         {activeTab === "gigs" && renderGigs()}
         {activeTab === "approval" && renderApproval()}
       </div>
