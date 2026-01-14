@@ -1678,7 +1678,7 @@ const SkilledWorkers = () => {
       {/* Featured Workers Carousel Section */}
       <WorkerCarousel
         title="The smartest staffing solution for your business"
-        subtitle="Find, hire, and pay temporary workers"
+        subtitle="Post Gigs/Jobs, Find, hire, and pay temporary workers"
         workers={[
           {
             id: '1',
@@ -1926,9 +1926,9 @@ const SkilledWorkers = () => {
                 <p className="sw-feature-description">
                   Create a position, location and pay rate. Post to the entire community of over 2 million workers or your selected favorites.
                 </p>
-                <a href="#" className="sw-feature-link">
+                {/* <a href="#" className="sw-feature-link">
                   See Shift Management →
-                </a>
+                </a> */}
               </div>
             </div>
             
@@ -1944,9 +1944,9 @@ const SkilledWorkers = () => {
                 <p className="sw-feature-description">
                   Select the candidates who best fit your needs or let Smart Hire our AI-powered hiring system select for you.
                 </p>
-                <a href="#" className="sw-feature-link">
+                {/* <a href="#" className="sw-feature-link">
                   See Smart Hire →
-                </a>
+                </a> */}
               </div>
             </div>
             
@@ -1962,9 +1962,9 @@ const SkilledWorkers = () => {
                 <p className="sw-feature-description">
                   Once the shift is completed simply approve or modify the time sheet. GigSmart for Business handles payment on your behalf.
                 </p>
-                <a href="#" className="sw-feature-link">
+                {/* <a href="#" className="sw-feature-link">
                   See Payments →
-                </a>
+                </a> */}
               </div>
             </div>
           </div>
