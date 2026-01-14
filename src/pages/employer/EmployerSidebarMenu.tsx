@@ -114,7 +114,7 @@ const EmployerSidebarMenu: React.FC = () => {
       {/* Applications */}
       <li className={`menu-item ${isMenuOpen('applications') ? 'open' : ''}`}>
         <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('applications', e)}>
-          <Icon icon="hugeicons:file-check-02" className="menu-icon" style={{ fontSize: '1.5rem' }} />
+          <Icon icon="hugeicons:file-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Applications">Applications</div>
           <span className="badge bg-danger rounded-pill ms-auto">12</span>
         </a>

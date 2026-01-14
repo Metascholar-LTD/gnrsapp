@@ -1679,6 +1679,7 @@ const SkilledWorkers = () => {
       <WorkerCarousel
         title="The smartest staffing solution for your business"
         subtitle="Post Gigs/Jobs, Find, hire, and pay temporary workers"
+        onCreateAccount={() => navigate('/skilled-workers/join')}
         workers={[
           {
             id: '1',
