@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Briefcase,
   UserCheck,
@@ -58,7 +59,7 @@ const AdminLocalJobGigs = () => {
   const [selectedGig, setSelectedGig] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ type: "gig"; id: string | number; name: string } | null>(null);
 
-  // Data states - MOCK DATA (no Supabase)
+  // Data states
   const [gigs, setGigs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -101,132 +102,30 @@ const AdminLocalJobGigs = () => {
     return () => {};
   }, []);
 
-  // Load mock data (VIEW ONLY - no Supabase)
+  // Load gigs from Supabase
   useEffect(() => {
-    loadMockData();
+    loadGigs();
   }, []);
 
-  const loadMockData = () => {
+  const loadGigs = async () => {
     setLoading(true);
-    
-    // Mock gigs
-    const mockGigs = [
-      {
-        id: "1",
-        title: "Delivery Driver Needed",
-        description: "Looking for reliable delivery driver for weekend shifts",
-        category: "Delivery Services",
-        category_id: "1",
-        location: "Accra, Greater Accra",
-        employer_name: "QuickServe Logistics",
-        employer_phone: "+233 24 123 4567",
-        employer_email: "jobs@quickserve.com",
-        payment_amount: 150,
-        payment_type: "daily",
-        duration: "2 days",
-        start_date: "2026-01-20",
-        end_date: "2026-01-21",
-        status: "active",
-        slots_available: 3,
-        created_at: "2026-01-10T10:00:00Z",
-        requirements: "Valid driver's license, motorcycle preferred",
-        benefits: "Free fuel, tips allowed",
-        verified: true,
-        views: 45,
-        applications: 8
-      },
-      {
-        id: "2",
-        title: "Event Servers for Wedding",
-        description: "Professional servers needed for large wedding event",
-        category: "Event Staff",
-        category_id: "2",
-        location: "Kumasi, Ashanti",
-        employer_name: "Elite Events Ghana",
-        employer_phone: "+233 20 987 6543",
-        employer_email: "contact@eliteevents.gh",
-        payment_amount: 200,
-        payment_type: "fixed",
-        duration: "1 day",
-        start_date: "2026-01-25",
-        status: "pending",
-        slots_available: 10,
-        created_at: "2026-01-11T14:30:00Z",
-        requirements: "Experience in hospitality, formal attire required",
-        benefits: "Meals provided, transportation covered",
-        verified: false,
-        views: 32,
-        applications: 5
-      },
-      {
-        id: "3",
-        title: "Office Cleaning Staff",
-        description: "Daily office cleaning for medium-sized office",
-        category: "Cleaning & Housekeeping",
-        category_id: "3",
-        location: "Tema, Greater Accra",
-        employer_name: "CleanPro Services",
-        employer_phone: "+233 27 456 7890",
-        payment_amount: 1200,
-        payment_type: "monthly",
-        duration: "3 months",
-        status: "active",
-        slots_available: 2,
-        created_at: "2026-01-09T09:15:00Z",
-        requirements: "Experience preferred, own cleaning supplies",
-        benefits: "Weekly payment, flexible hours",
-        verified: true,
-        views: 67,
-        applications: 12
-      },
-      {
-        id: "4",
-        title: "Moving Assistant",
-        description: "Help with moving furniture and boxes",
-        category: "Moving & Transport",
-        category_id: "4",
-        location: "Accra, Greater Accra",
-        employer_name: "Swift Movers",
-        employer_phone: "+233 24 555 1234",
-        payment_amount: 180,
-        payment_type: "daily",
-        duration: "1 day",
-        start_date: "2026-01-22",
-        status: "active",
-        slots_available: 4,
-        created_at: "2026-01-12T08:00:00Z",
-        requirements: "Physical fitness required",
-        benefits: "Lunch provided",
-        verified: true,
-        views: 28,
-        applications: 6
-      },
-      {
-        id: "5",
-        title: "Handyman for Repairs",
-        description: "General maintenance and repair work needed",
-        category: "Handyman & Maintenance",
-        category_id: "5",
-        location: "Kumasi, Ashanti",
-        employer_name: "HomeFix Solutions",
-        employer_phone: "+233 20 777 8888",
-        payment_amount: 250,
-        payment_type: "fixed",
-        duration: "2 days",
-        start_date: "2026-01-18",
-        status: "pending",
-        slots_available: 1,
-        created_at: "2026-01-13T11:20:00Z",
-        requirements: "Experience in general repairs",
-        benefits: "Tools provided",
-        verified: false,
-        views: 19,
-        applications: 3
-      }
-    ];
+    try {
+      const { data, error } = await supabase
+        .from('local_job_gigs' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    setGigs(mockGigs);
-    setLoading(false);
+      if (error) throw error;
+
+      if (data) {
+        setGigs(data);
+      }
+    } catch (error: any) {
+      console.error('Error loading gigs:', error);
+      setGigs([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Calculate statistics from mock data
@@ -303,42 +202,131 @@ const AdminLocalJobGigs = () => {
   };
 
 
-  // Save handlers (mock data updates)
-  const handleSaveGig = (gigData: any) => {
-    if (gigData.id) {
-      // Edit existing gig
-      setGigs(gigs.map(g => g.id === gigData.id ? { ...g, ...gigData } : g));
-    } else {
-      // Add new gig
-      const newGig = {
-        ...gigData,
-        id: String(gigs.length + 1),
-        status: "pending",
-        created_at: new Date().toISOString(),
-        views: 0,
-        applications: 0,
-        verified: false
-      };
-      setGigs([...gigs, newGig]);
+  // Save handlers
+  const handleSaveGig = async (gigData: any) => {
+    try {
+      if (gigData.id) {
+        // Edit existing gig
+        const { error } = await supabase
+          .from('local_job_gigs' as any)
+          .update({
+            title: gigData.title,
+            description: gigData.description,
+            location: gigData.location,
+            employer_name: gigData.employer_name,
+            employer_phone: gigData.employer_phone,
+            employer_email: gigData.employer_email,
+            payment_type: gigData.payment_type,
+            payment_amount: gigData.payment_amount,
+            start_date: gigData.start_date || null,
+            end_date: gigData.end_date || null,
+            requirements: gigData.requirements || null,
+            what_to_expect: gigData.what_to_expect || null,
+            // Preserve read-only fields
+            views: gigData.views,
+            applications: gigData.applications,
+            created_at: gigData.created_at,
+            verified: gigData.verified,
+            status: gigData.status,
+          })
+          .eq('id', gigData.id);
+
+        if (error) throw error;
+      } else {
+        // Add new gig
+        const { data, error } = await supabase
+          .from('local_job_gigs' as any)
+          .insert({
+            title: gigData.title,
+            description: gigData.description,
+            location: gigData.location,
+            employer_name: gigData.employer_name,
+            employer_phone: gigData.employer_phone,
+            employer_email: gigData.employer_email || null,
+            payment_type: gigData.payment_type,
+            payment_amount: gigData.payment_amount || null,
+            start_date: gigData.start_date || null,
+            end_date: gigData.end_date || null,
+            requirements: gigData.requirements || null,
+            what_to_expect: gigData.what_to_expect || null,
+            status: 'pending',
+            verified: false,
+            views: 0,
+            applications: 0,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+      }
+      
+      // Reload gigs after save
+      await loadGigs();
+    } catch (error: any) {
+      console.error('Error saving gig:', error);
+      alert('Error saving gig: ' + (error.message || 'Unknown error'));
     }
   };
 
 
-  const handleApprove = (id: string | number) => {
-    setGigs(gigs.map(g => g.id === id ? { ...g, status: "active", verified: true } : g));
+  const handleApprove = async (id: string | number) => {
+    try {
+      const { error } = await supabase
+        .from('local_job_gigs' as any)
+        .update({
+          status: 'active',
+          verified: true,
+          approved_at: new Date().toISOString(),
+        })
+        .eq('id', String(id));
+
+      if (error) throw error;
+      
+      await loadGigs();
+    } catch (error: any) {
+      console.error('Error approving gig:', error);
+      alert('Error approving gig: ' + (error.message || 'Unknown error'));
+    }
   };
 
-  const handleReject = (id: string | number, reason: string) => {
-    setGigs(gigs.map(g => g.id === id ? { ...g, status: "rejected", rejectionReason: reason } : g));
+  const handleReject = async (id: string | number, reason: string) => {
+    try {
+      const { error } = await supabase
+        .from('local_job_gigs' as any)
+        .update({
+          status: 'inactive',
+          rejection_reason: reason,
+          rejected_at: new Date().toISOString(),
+        })
+        .eq('id', String(id));
+
+      if (error) throw error;
+      
+      await loadGigs();
+    } catch (error: any) {
+      console.error('Error rejecting gig:', error);
+      alert('Error rejecting gig: ' + (error.message || 'Unknown error'));
+    }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     
-    setGigs(gigs.filter(g => g.id !== deleteTarget.id));
-    
-    setDeleteTarget(null);
-    setShowDeleteConfirm(false);
+    try {
+      const { error } = await supabase
+        .from('local_job_gigs' as any)
+        .delete()
+        .eq('id', String(deleteTarget.id));
+
+      if (error) throw error;
+      
+      await loadGigs();
+      setDeleteTarget(null);
+      setShowDeleteConfirm(false);
+    } catch (error: any) {
+      console.error('Error deleting gig:', error);
+      alert('Error deleting gig: ' + (error.message || 'Unknown error'));
+    }
   };
 
   const isolatedStyles = `

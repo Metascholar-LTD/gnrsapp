@@ -918,12 +918,28 @@ const isolatedStyles = `
     font-family: 'DM Sans', system-ui, sans-serif;
   }
 
+  .ljg-gig-description-wrapper {
+    margin-bottom: 0.75rem;
+  }
+
   .ljg-gig-description {
     color: #54577A;
     font-size: 0.875rem;
     margin: 0 0 0.75rem 0;
     line-height: 1.5;
     font-family: 'DM Sans', system-ui, sans-serif;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ljg-gig-separator {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #E5E7EB, transparent);
+    margin: 0.75rem 0 0 0;
   }
 
   .ljg-gig-details {
@@ -2383,14 +2399,15 @@ const LocalJobGigs = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [jobQuery, setJobQuery] = useState('');
   const [locationQuery, setLocationQuery] = useState('');
-  const [gigs, setGigs] = useState(SAMPLE_GIGS);
+  const [gigs, setGigs] = useState<any[]>([]);
+  const [gigsLoading, setGigsLoading] = useState(true);
   const [jobSuggestions, setJobSuggestions] = useState<typeof JOB_TITLE_SUGGESTIONS>([]);
   const [locationSuggestions, setLocationSuggestions] = useState<typeof LOCATION_SUGGESTIONS>([]);
   const [showJobSuggestions, setShowJobSuggestions] = useState(false);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [activeLocationIndex, setActiveLocationIndex] = useState(-1);
-  const [selectedGig, setSelectedGig] = useState<typeof SAMPLE_GIGS[0] | null>(null);
+  const [selectedGig, setSelectedGig] = useState<any | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const jobInputRef = useRef<HTMLInputElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
@@ -2407,6 +2424,36 @@ const LocalJobGigs = () => {
   const [upcomingSlideIndex, setUpcomingSlideIndex] = useState(0);
   const upcomingSliderRef = useRef<HTMLDivElement>(null);
 
+  // Transform gig data from database to UI format
+  const transformGigData = (gig: any) => {
+    return {
+      id: gig.id,
+      title: gig.title,
+      description: gig.description,
+      location: gig.location,
+      pay: gig.payment_amount ? `GHS ${gig.payment_amount}` : 'Negotiable',
+      type: gig.payment_type === 'fixed' ? 'One-time' : gig.payment_type === 'daily' ? 'Daily' : gig.payment_type === 'weekly' ? 'Weekly' : gig.payment_type === 'monthly' ? 'Monthly' : 'One-time',
+      posted: formatTimeAgo(gig.created_at),
+      employer_name: gig.employer_name,
+      employer_phone: gig.employer_phone,
+      employer_email: gig.employer_email,
+      requirements: gig.requirements,
+    };
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    if (!dateString) return 'Recently';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+  };
+
   // Check if desktop on mount and resize
   useEffect(() => {
     const checkIsDesktop = () => {
@@ -2416,6 +2463,34 @@ const LocalJobGigs = () => {
     checkIsDesktop();
     window.addEventListener('resize', checkIsDesktop);
     return () => window.removeEventListener('resize', checkIsDesktop);
+  }, []);
+
+  // Load gigs from Supabase
+  useEffect(() => {
+    const loadGigs = async () => {
+      setGigsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('local_job_gigs' as any)
+          .select('*')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) throw error;
+
+        if (data) {
+          const transformed = data.map(transformGigData);
+          setGigs(transformed);
+        }
+      } catch (error: any) {
+        console.error('Error loading gigs:', error);
+        setGigs([]);
+      } finally {
+        setGigsLoading(false);
+      }
+    };
+    loadGigs();
   }, []);
 
   // Load Featured Workers from Supabase
@@ -2459,18 +2534,39 @@ const LocalJobGigs = () => {
   // Handle route param - if id exists, show detail view (for mobile/tablet)
   useEffect(() => {
     if (id) {
-      const gig = SAMPLE_GIGS.find(g => g.id === id);
+      const gig = gigs.find(g => g.id === id);
       if (gig) {
         setSelectedGig(gig);
       } else {
-        // If gig not found, navigate back
-        navigate('/local-job-gigs');
+        // Load gig from database if not in state
+        const loadGigById = async () => {
+          try {
+            const { data, error } = await supabase
+              .from('local_job_gigs' as any)
+              .select('*')
+              .eq('id', id)
+              .eq('status', 'active')
+              .single();
+
+            if (error) throw error;
+            if (data) {
+              const transformed = transformGigData(data);
+              setSelectedGig(transformed);
+            } else {
+              navigate('/local-job-gigs');
+            }
+          } catch (error: any) {
+            console.error('Error loading gig:', error);
+            navigate('/local-job-gigs');
+          }
+        };
+        loadGigById();
       }
     } else {
       // If no id, clear selection
       setSelectedGig(null);
     }
-  }, [id, navigate]);
+  }, [id, navigate, gigs]);
 
   // Filter suggestions based on input
   useEffect(() => {
@@ -2540,23 +2636,35 @@ const LocalJobGigs = () => {
     );
   };
 
-  const handleSearch = () => {
-    let filtered = SAMPLE_GIGS;
-    
-    if (jobQuery.trim()) {
-      filtered = filtered.filter(gig => 
-        gig.title.toLowerCase().includes(jobQuery.toLowerCase()) ||
-        gig.description.toLowerCase().includes(jobQuery.toLowerCase())
-      );
+  const handleSearch = async () => {
+    try {
+      let query = supabase
+        .from('local_job_gigs' as any)
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (jobQuery.trim()) {
+        query = query.or(`title.ilike.%${jobQuery}%,description.ilike.%${jobQuery}%`);
+      }
+      
+      if (locationQuery.trim()) {
+        query = query.ilike('location', `%${locationQuery}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      if (data) {
+        const transformed = data.map(transformGigData);
+        setGigs(transformed);
+      }
+    } catch (error: any) {
+      console.error('Error searching gigs:', error);
+      setGigs([]);
     }
     
-    if (locationQuery.trim()) {
-      filtered = filtered.filter(gig => 
-        gig.location.toLowerCase().includes(locationQuery.toLowerCase())
-      );
-    }
-    
-    setGigs(filtered);
     setShowJobSuggestions(false);
     setShowLocationSuggestions(false);
   };
@@ -3342,7 +3450,12 @@ const LocalJobGigs = () => {
                                 <h3 className="ljg-gig-title">{gig.title}</h3>
                                 <p className="ljg-gig-badge">{gig.type}</p>
                               </div>
-                              <p className="ljg-gig-description">{gig.description}</p>
+                              <div className="ljg-gig-description-wrapper">
+                                <p className="ljg-gig-description">
+                                  {gig.description}
+                                </p>
+                                <div className="ljg-gig-separator"></div>
+                              </div>
                               <div className="ljg-gig-details">
                                 <div className="ljg-gig-detail">
                                   <div className="ljg-gig-detail-content">
