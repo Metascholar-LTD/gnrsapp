@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+// @ts-ignore
+import 'leaflet.markercluster';
 import { MapPin, Navigation, Clock, Route, ExternalLink } from 'lucide-react';
 
 // Import leaflet-routing-machine dynamically
@@ -128,9 +132,26 @@ const RoutingControl: React.FC<{
   const map = useMap();
   const routingControlRef = useRef<any>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
+  const routeCalculatedRef = useRef(false);
+  const onRouteFoundRef = useRef(onRouteFound);
+  
+  // Keep callback ref updated
+  useEffect(() => {
+    onRouteFoundRef.current = onRouteFound;
+  }, [onRouteFound]);
 
   useEffect(() => {
-    // Clean up previous routing
+    // Only calculate route once, unless start/end changes
+    const startKey = `${start[0]},${start[1]}`;
+    const endKey = `${end[0]},${end[1]}`;
+    const routeKey = `${startKey}-${endKey}`;
+    
+    // Check if we already have a route for these coordinates
+    if (routingControlRef.current && routeCalculatedRef.current) {
+      return;
+    }
+
+    // Clean up previous routing only if coordinates changed
     if (routingControlRef.current) {
       try {
         map.removeControl(routingControlRef.current);
@@ -143,6 +164,8 @@ const RoutingControl: React.FC<{
       map.removeLayer(polylineRef.current);
       polylineRef.current = null;
     }
+    
+    routeCalculatedRef.current = false;
 
     if (Routing && typeof (Routing as any).control === 'function') {
       try {
@@ -162,7 +185,7 @@ const RoutingControl: React.FC<{
           routeWhileDragging: false,
           showAlternatives: false,
           addWaypoints: false,
-          fitSelectedRoutes: true,
+          fitSelectedRoutes: false, // Prevent auto-refitting which causes flickering
           lineOptions: {
             styles: [
               {
@@ -184,20 +207,23 @@ const RoutingControl: React.FC<{
 
         // Handle successful route
         routingControl.on('routesfound', function(e: any) {
+          if (routeCalculatedRef.current) return; // Prevent multiple calculations
+          
           const routes = e.routes;
           if (routes && routes.length > 0) {
+            routeCalculatedRef.current = true;
             const route = routes[0];
             const distance = route.summary.totalDistance / 1000; // Convert to km
             const time = route.summary.totalTime / 60; // Convert to minutes
             
-            // Fit map to show the entire route
+            // Fit map to show the entire route only once
             const bounds = L.latLngBounds(
               route.coordinates.map((coord: any) => [coord.lat, coord.lng])
             );
             map.fitBounds(bounds, { padding: [50, 50] });
             
-            if (onRouteFound) {
-              onRouteFound(distance, time);
+            if (onRouteFoundRef.current) {
+              onRouteFoundRef.current(distance, time);
             }
           }
         });
@@ -245,33 +271,36 @@ const RoutingControl: React.FC<{
             routingControlRef.current = fallbackControl;
 
             fallbackControl.on('routesfound', function(e: any) {
+              if (routeCalculatedRef.current) return;
+              
               const routes = e.routes;
               if (routes && routes.length > 0) {
+                routeCalculatedRef.current = true;
                 const route = routes[0];
                 const distance = route.summary.totalDistance / 1000;
                 const time = route.summary.totalTime / 60;
-                if (onRouteFound) {
-                  onRouteFound(distance, time);
+                if (onRouteFoundRef.current) {
+                  onRouteFoundRef.current(distance, time);
                 }
               }
             });
 
             fallbackControl.on('routingerror', function() {
               // Last resort: use API call to get route
-              fetchRouteFromAPI(start, end, map, onRouteFound, polylineRef);
+              fetchRouteFromAPI(start, end, map, onRouteFoundRef.current, polylineRef, routeCalculatedRef);
             });
           } catch (ghError) {
             console.warn('GraphHopper also failed, using API fallback:', ghError);
-            fetchRouteFromAPI(start, end, map, onRouteFound, polylineRef);
+            fetchRouteFromAPI(start, end, map, onRouteFoundRef.current, polylineRef, routeCalculatedRef);
           }
         });
       } catch (error) {
         console.warn('Routing initialization error, using API fallback:', error);
-        fetchRouteFromAPI(start, end, map, onRouteFound, polylineRef);
+        fetchRouteFromAPI(start, end, map, onRouteFoundRef.current, polylineRef, routeCalculatedRef);
       }
     } else {
       // If routing machine not available, use API directly
-      fetchRouteFromAPI(start, end, map, onRouteFound, polylineRef);
+      fetchRouteFromAPI(start, end, map, onRouteFoundRef.current, polylineRef, routeCalculatedRef);
     }
 
     return () => {
@@ -287,8 +316,9 @@ const RoutingControl: React.FC<{
         map.removeLayer(polylineRef.current);
         polylineRef.current = null;
       }
+      routeCalculatedRef.current = false;
     };
-  }, [map, start, end, onRouteFound]);
+  }, [map, start[0], start[1], end[0], end[1]]); // Only depend on coordinates, not callback
 
   return null;
 };
@@ -299,8 +329,14 @@ const fetchRouteFromAPI = async (
   end: [number, number],
   map: L.Map,
   onRouteFound?: (distance: number, time: number) => void,
-  polylineRef?: React.MutableRefObject<L.Polyline | null>
+  polylineRef?: React.MutableRefObject<L.Polyline | null>,
+  routeCalculatedRef?: React.MutableRefObject<boolean>
 ) => {
+  // Prevent multiple API calls
+  if (routeCalculatedRef?.current) {
+    return;
+  }
+  
   try {
     // Use OSRM API directly
     const url = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
@@ -309,6 +345,10 @@ const fetchRouteFromAPI = async (
     const data = await response.json();
     
     if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+      if (routeCalculatedRef) {
+        routeCalculatedRef.current = true;
+      }
+      
       const route = data.routes[0];
       const geometry = route.geometry.coordinates;
       
@@ -332,7 +372,7 @@ const fetchRouteFromAPI = async (
         polylineRef.current = polyline;
       }
       
-      // Fit map to route
+      // Fit map to route only once
       map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
       
       // Calculate distance and time
@@ -373,6 +413,127 @@ const fetchRouteFromAPI = async (
       onRouteFound(distance, estimatedTime);
     }
   }
+};
+
+// Marker Cluster Component
+const MarkerClusterComponent: React.FC<{ restaurants: Restaurant[] }> = ({ restaurants }) => {
+  const map = useMap();
+  const clusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
+
+  useEffect(() => {
+    if (restaurants.length === 0) {
+      return;
+    }
+
+    // Check if markerClusterGroup is available on L
+    const MarkerClusterGroupFn = (L as any).markerClusterGroup || (L as any).MarkerClusterGroup;
+    if (!MarkerClusterGroupFn) {
+      console.warn('markerClusterGroup not available on L object, showing individual markers');
+      // Fallback: show individual markers without clustering
+      const markers: L.Marker[] = [];
+      restaurants.forEach((restaurant) => {
+        const marker = L.marker([restaurant.lat, restaurant.lng], {
+          icon: createRestaurantIcon(false),
+        });
+        marker.bindPopup(`
+          <div style="font-family: 'DM Sans', system-ui, -apple-system, sans-serif;">
+            <strong style="color: #006B3F; font-size: 1rem;">${restaurant.name}</strong>
+            ${restaurant.cuisine ? `<div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">${restaurant.cuisine}</div>` : ''}
+            ${restaurant.rating ? `<div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">⭐ ${restaurant.rating}</div>` : ''}
+          </div>
+        `);
+        marker.addTo(map);
+        markers.push(marker);
+      });
+      
+      return () => {
+        markers.forEach(marker => map.removeLayer(marker));
+      };
+    }
+
+    // Create cluster group with custom styling and zoom on click
+    const clusterGroup = MarkerClusterGroupFn({
+          chunkedLoading: true,
+          maxClusterRadius: 80,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+          animate: true,
+          animateAddingMarkers: true,
+          iconCreateFunction: function(cluster: any) {
+            const count = cluster.getChildCount();
+            let size = 'small';
+            if (count > 10) size = 'large';
+            else if (count > 5) size = 'medium';
+
+            return L.divIcon({
+              html: `<div style="
+                background: #006B3F;
+                color: white;
+                border-radius: 50%;
+                width: ${size === 'large' ? '50px' : size === 'medium' ? '45px' : '40px'};
+                height: ${size === 'large' ? '50px' : size === 'medium' ? '45px' : '40px'};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: ${size === 'large' ? '16px' : size === 'medium' ? '14px' : '12px'};
+                border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                cursor: pointer;
+                transition: all 0.2s ease;
+              ">${count}</div>`,
+              className: 'marker-cluster-custom',
+              iconSize: L.point(size === 'large' ? 50 : size === 'medium' ? 45 : 40, size === 'large' ? 50 : size === 'medium' ? 45 : 40),
+            });
+          },
+        });
+
+    // Add markers to cluster group
+    restaurants.forEach((restaurant) => {
+      const marker = L.marker([restaurant.lat, restaurant.lng], {
+        icon: createRestaurantIcon(false),
+      });
+
+      // Add popup to marker
+      marker.bindPopup(`
+        <div style="font-family: 'DM Sans', system-ui, -apple-system, sans-serif;">
+          <strong style="color: #006B3F; font-size: 1rem;">${restaurant.name}</strong>
+          ${restaurant.cuisine ? `<div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">${restaurant.cuisine}</div>` : ''}
+          ${restaurant.rating ? `<div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">⭐ ${restaurant.rating}</div>` : ''}
+        </div>
+      `);
+
+      clusterGroup.addLayer(marker);
+    });
+
+    // Add cluster group to map
+    clusterGroup.addTo(map);
+    clusterGroupRef.current = clusterGroup;
+
+    // Handle cluster click - zoom in smoothly
+    clusterGroup.on('clusterclick', function(e: any) {
+      const cluster = e.layer;
+      const bounds = cluster.getBounds();
+      
+      // Smooth zoom to cluster bounds
+      map.flyToBounds(bounds, {
+        padding: [50, 50],
+        duration: 0.8,
+        easeLinearity: 0.25,
+      });
+    });
+
+    // Cleanup
+    return () => {
+      if (clusterGroupRef.current) {
+        map.removeLayer(clusterGroupRef.current);
+        clusterGroupRef.current = null;
+      }
+    };
+  }, [map, restaurants]);
+
+  return null;
 };
 
 const RestaurantMap: React.FC<RestaurantMapProps> = ({
@@ -421,11 +582,16 @@ const RestaurantMap: React.FC<RestaurantMapProps> = ({
   }, []);
 
   const center: [number, number] = userLocation || [restaurant.lat, restaurant.lng];
-  const bounds = L.latLngBounds(
-    [restaurant.lat, restaurant.lng],
-    ...(nearbyRestaurants.map((r) => [r.lat, r.lng] as [number, number])),
-    ...(userLocation ? [userLocation] : [])
-  );
+  
+  // Create bounds for initial map view
+  const boundsPoints: [number, number][] = [[restaurant.lat, restaurant.lng]];
+  nearbyRestaurants.forEach((r) => {
+    boundsPoints.push([r.lat, r.lng]);
+  });
+  if (userLocation) {
+    boundsPoints.push(userLocation);
+  }
+  const bounds = L.latLngBounds(boundsPoints);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -647,24 +813,8 @@ const RestaurantMap: React.FC<RestaurantMapProps> = ({
           </Popup>
         </Marker>
 
-        {/* Nearby restaurants markers */}
-        {nearbyRestaurants.map((nearby) => (
-          <Marker
-            key={nearby.id}
-            position={[nearby.lat, nearby.lng]}
-            icon={createRestaurantIcon(false)}
-          >
-            <Popup>
-              <div>
-                <strong>{nearby.name}</strong>
-                {nearby.cuisine && <div style={{ fontSize: '0.875rem', color: '#666' }}>{nearby.cuisine}</div>}
-                {nearby.rating && (
-                  <div style={{ fontSize: '0.875rem', color: '#666' }}>⭐ {nearby.rating}</div>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {/* Nearby restaurants markers with clustering */}
+        <MarkerClusterComponent restaurants={nearbyRestaurants} />
 
         {/* Routing */}
         {showRoute && userLocation && (
