@@ -60,6 +60,7 @@ import Join from "./pages/Join";
 import SkilledWorkers from "./pages/SkilledWorkers";
 import SkilledWorkersBrowse from "./pages/SkilledWorkersBrowse";
 import SkilledWorkersJoin from "./pages/SkilledWorkersJoin";
+import SkilledWorkersUploadGig from "./pages/SkilledWorkersUploadGig";
 import { SkilledWorkerProfile } from "./pages/SkilledWorkerProfile";
 import { SkilledWorkersList } from "./pages/SkilledWorkersList";
 import LocalJobGigs from "./pages/LocalJobGigs";
@@ -176,6 +177,7 @@ const App = () => (
           <Route path="/skilled-workers" element={<SkilledWorkers />} />
           <Route path="/skilled-workers/browse" element={<SkilledWorkersBrowse />} />
           <Route path="/skilled-workers/join" element={<SkilledWorkersJoin />} />
+          <Route path="/skilled-workers/upload-samples" element={<SkilledWorkersUploadGig />} />
           <Route path="/skilled-workers/category/:category" element={<SkilledWorkersList />} />
           <Route path="/skilled-workers/profile/:id" element={<SkilledWorkerProfile />} />
           {/* Local Job Gigs */}
