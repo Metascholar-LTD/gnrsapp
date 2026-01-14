@@ -25,7 +25,10 @@ import {
   Zap,
   Layers,
   Globe,
-  Eye
+  Eye,
+  Phone,
+  Mail,
+  Building2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -1051,13 +1054,13 @@ const isolatedStyles = `
     background: white;
     width: 100%;
     height: 100%;
-    padding: 2rem;
+    padding: 1.5rem;
     overflow-y: auto;
   }
 
   @media (min-width: 1024px) {
     #ljg-detail-container {
-      padding: 2.5rem;
+      padding: 2rem;
       border-radius: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
@@ -1171,7 +1174,7 @@ const isolatedStyles = `
   }
 
   .ljg-detail-section {
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
   }
 
   .ljg-detail-section:last-child {
@@ -1191,6 +1194,74 @@ const isolatedStyles = `
     font-size: 0.9375rem;
     line-height: 1.7;
     font-family: 'DM Sans', system-ui, sans-serif;
+  }
+
+  .ljg-employer-contact-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 0.875rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
+  }
+
+  .ljg-employer-contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #374151;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    transition: all 0.2s ease;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .ljg-employer-contact-item:first-child {
+    padding-left: 0;
+  }
+
+  .ljg-employer-contact-item:hover {
+    color: #2563eb;
+    background: #f3f4f6;
+  }
+
+  .ljg-employer-contact-divider {
+    width: 1px;
+    height: 1.5rem;
+    background: #e5e7eb;
+    margin: 0 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .ljg-employer-contact-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: #6b7280;
+    transition: color 0.2s ease;
+  }
+
+  .ljg-employer-contact-item:hover .ljg-employer-contact-icon {
+    color: #2563eb;
+  }
+
+  .ljg-employer-contact-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .ljg-employer-contact-item span {
+      max-width: 200px;
+    }
   }
 
   #ljg-detail-footer {
@@ -2180,7 +2251,10 @@ const SAMPLE_GIGS = [
     duration: '4 hours',
     pay: 'GHS 150',
     type: 'One-time',
-    posted: '2 hours ago'
+    posted: '2 hours ago',
+    employer_name: 'Community Events Ltd',
+    employer_phone: '+233 24 123 4567',
+    employer_email: 'contact@communityevents.gh'
   },
   {
     id: '2',
@@ -2190,7 +2264,10 @@ const SAMPLE_GIGS = [
     duration: '6 hours',
     pay: 'GHS 200',
     type: 'One-time',
-    posted: '5 hours ago'
+    posted: '5 hours ago',
+    employer_name: 'Swift Movers',
+    employer_phone: '+233 20 987 6543',
+    employer_email: 'info@swiftmovers.gh'
   },
   {
     id: '3',
@@ -2200,7 +2277,10 @@ const SAMPLE_GIGS = [
     duration: '3 hours',
     pay: 'GHS 100',
     type: 'One-time',
-    posted: '1 day ago'
+    posted: '1 day ago',
+    employer_name: 'Green Thumb Services',
+    employer_phone: '+233 27 456 7890',
+    employer_email: 'hello@greenthumb.gh'
   },
   {
     id: '4',
@@ -2210,7 +2290,10 @@ const SAMPLE_GIGS = [
     duration: '8 hours',
     pay: 'GHS 250',
     type: 'Daily',
-    posted: '1 day ago'
+    posted: '1 day ago',
+    employer_name: 'QuickServe Logistics',
+    employer_phone: '+233 24 555 1234',
+    employer_email: 'jobs@quickserve.com'
   },
   {
     id: '5',
@@ -2220,7 +2303,10 @@ const SAMPLE_GIGS = [
     duration: '5 hours',
     pay: 'GHS 180',
     type: 'One-time',
-    posted: '2 days ago'
+    posted: '2 days ago',
+    employer_name: 'Capture Moments Studio',
+    employer_phone: '+233 20 777 8888',
+    employer_email: 'contact@capturemoments.gh'
   },
   {
     id: '6',
@@ -2230,7 +2316,10 @@ const SAMPLE_GIGS = [
     duration: '4 hours',
     pay: 'GHS 120',
     type: 'One-time',
-    posted: '2 days ago'
+    posted: '2 days ago',
+    employer_name: 'CleanPro Services',
+    employer_phone: '+233 27 111 2222',
+    employer_email: 'info@cleanpro.gh'
   }
 ];
 
@@ -3370,6 +3459,39 @@ const LocalJobGigs = () => {
                             local community.
                           </p>
                         </div>
+
+                        {(selectedGig.employer_name || selectedGig.employer_phone || selectedGig.employer_email) && (
+                          <div className="ljg-detail-section">
+                            <h3 className="ljg-detail-section-title">Employer Information</h3>
+                            {selectedGig.employer_name && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                                <Building2 className="ljg-detail-meta-icon" style={{ width: '18px', height: '18px', color: '#6b7280' }} />
+                                <span className="ljg-detail-section-content" style={{ margin: 0 }}>{selectedGig.employer_name}</span>
+                              </div>
+                            )}
+                            {(selectedGig.employer_phone || selectedGig.employer_email) && (
+                              <div className="ljg-employer-contact-card">
+                                {selectedGig.employer_phone && (
+                                  <>
+                                    <a href={`tel:${selectedGig.employer_phone}`} className="ljg-employer-contact-item">
+                                      <Phone className="ljg-employer-contact-icon" />
+                                      <span>{selectedGig.employer_phone}</span>
+                                    </a>
+                                    {selectedGig.employer_email && (
+                                      <div className="ljg-employer-contact-divider" />
+                                    )}
+                                  </>
+                                )}
+                                {selectedGig.employer_email && (
+                                  <a href={`mailto:${selectedGig.employer_email}`} className="ljg-employer-contact-item">
+                                    <Mail className="ljg-employer-contact-icon" />
+                                    <span>{selectedGig.employer_email}</span>
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div id="ljg-detail-footer">
