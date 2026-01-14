@@ -4,6 +4,7 @@ import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { restaurantsData } from '@/data/restaurants';
 import RestaurantMap from '@/components/RestaurantMap';
+import PreviewMap from '@/components/PreviewMap';
 import { Share2, Heart, MapPin, Clock, Globe, Phone, ChevronDown, ChevronUp, ChevronRight, Filter, Search, ThumbsUp, MoreVertical, Lightbulb, Pencil, ArrowLeft, ArrowRight, Leaf, CreditCard, Info, X } from 'lucide-react';
 
 const RestaurantView: React.FC = () => {
@@ -721,6 +722,20 @@ const RestaurantView: React.FC = () => {
       border: 1px solid #e5e5e5;
       flex-shrink: 0;
       position: relative;
+    }
+
+    .restaurant-view-preview-map .leaflet-container {
+      height: 100%;
+      width: 100%;
+      border-radius: 0.5rem;
+    }
+
+    .restaurant-view-preview-map .preview-map-overlay {
+      border-radius: 0.5rem;
+    }
+
+    .restaurant-view-preview-map:hover .preview-map-overlay {
+      background: rgba(0, 107, 63, 0.1) !important;
     }
 
 
@@ -1700,31 +1715,25 @@ const RestaurantView: React.FC = () => {
                       className="restaurant-view-preview-map"
                       onClick={() => setShowMapModal(true)}
                       style={{
-                        background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#666',
-                        fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
-                        fontSize: '14px',
-                        cursor: 'pointer',
                         position: 'relative',
                         overflow: 'hidden',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s ease',
+                        borderRadius: '0.5rem',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #e8e8e8 0%, #d8d8d8 100%)';
                         e.currentTarget.style.transform = 'scale(1.02)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 107, 63, 0.2)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)';
                         e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
-                      <MapPin size={32} color="#006B3F" style={{ marginBottom: '0.5rem' }} />
-                      <span style={{ fontWeight: 600, color: '#006B3F' }}>View on Map</span>
-                      <span style={{ fontSize: '12px', marginTop: '0.25rem' }}>Click to get directions</span>
+                      <PreviewMap
+                        lat={restaurant.location.lat}
+                        lng={restaurant.location.lng}
+                        onClick={() => setShowMapModal(true)}
+                      />
                     </div>
                     <div className="restaurant-view-location-info">
                       <a 
