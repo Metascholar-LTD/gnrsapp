@@ -24,7 +24,8 @@ import {
   Award,
   Zap,
   Layers,
-  Globe
+  Globe,
+  Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -861,150 +862,187 @@ const isolatedStyles = `
     gap: 1.5rem;
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: 640px) {
     #ljg-gigs-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: 2rem;
+      gap: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     #ljg-gigs-grid {
       grid-template-columns: repeat(3, 1fr);
+      gap: 1.75rem;
     }
   }
 
   .ljg-gig-card {
-    background: white;
-    border-radius: 1rem;
+    background: #ffffff;
+    border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E5E7EB;
     transition: all 0.3s ease;
     cursor: pointer;
-  }
-
-  @media (min-width: 768px) {
-    .ljg-gig-card {
-      padding: 2rem;
-      border-radius: 1.25rem;
-    }
+    display: flex;
+    flex-direction: column;
+    user-select: none;
   }
 
   .ljg-gig-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
 
   .ljg-gig-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    gap: 0.75rem;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
   }
 
   .ljg-gig-title {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: #111827;
-    margin: 0;
+    color: #141522;
+    margin: 0 0 0.25rem 0;
     font-family: 'DM Sans', system-ui, sans-serif;
-    flex: 1;
-    min-width: 0;
     line-height: 1.4;
   }
 
-  @media (min-width: 768px) {
-    .ljg-gig-title {
-      font-size: 1.25rem;
-    }
-  }
-
   .ljg-gig-badge {
-    background-color: #dbeafe;
-    color: #1e40af;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.875rem;
+    color: #54577A;
+    margin: 0;
     font-family: 'DM Sans', system-ui, sans-serif;
-    white-space: nowrap;
-    flex-shrink: 0;
-    line-height: 1.5;
   }
 
   .ljg-gig-description {
-    color: #6b7280;
+    color: #54577A;
     font-size: 0.875rem;
-    margin: 0 0 1.5rem 0;
-    line-height: 1.6;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.5;
     font-family: 'DM Sans', system-ui, sans-serif;
   }
 
-  @media (min-width: 768px) {
-    .ljg-gig-description {
-      font-size: 0.9375rem;
-    }
-  }
-
   .ljg-gig-details {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-top: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
   }
 
   .ljg-gig-detail {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: #6b7280;
-    font-size: 0.875rem;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(84, 111, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ljg-gig-detail:hover {
+    background: linear-gradient(135deg, #f0f2ff 0%, #e8ebff 100%);
+    border-color: rgba(84, 111, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(84, 111, 255, 0.1);
+  }
+
+  .ljg-gig-detail-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
   }
 
   .ljg-gig-detail-icon {
-    width: 1rem;
-    height: 1rem;
-    color: #9ca3af;
+    width: 14px;
+    height: 14px;
+    color: #54577A;
+    flex-shrink: 0;
+  }
+
+  .ljg-gig-detail-value {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #141522;
+    margin: 0;
+    line-height: 1.2;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ljg-gig-detail-label {
+    font-size: 0.6875rem;
+    color: #54577A;
+    margin: 0;
+    line-height: 1.2;
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 
   .ljg-gig-footer {
+    margin-top: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 1rem;
-    border-top: 1px solid #e5e7eb;
+    gap: 0.75rem;
   }
 
   .ljg-gig-price {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #111827;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #141522;
     font-family: 'DM Sans', system-ui, sans-serif;
-  }
-
-  @media (min-width: 768px) {
-    .ljg-gig-price {
-      font-size: 1.25rem;
-    }
   }
 
   .ljg-gig-apply-btn {
-    padding: 0.5rem 1.5rem;
-    background-color: #2563eb;
-    color: white;
+    padding: 0;
+    background: transparent;
     border: none;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease;
     font-family: 'DM Sans', system-ui, sans-serif;
   }
 
-  .ljg-gig-apply-btn:hover {
-    background-color: #1d4ed8;
+  .ljg-gig-apply-btn-group {
+    position: relative;
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(220, 30%, 15%);
+    transition: color 0.3s ease;
+  }
+
+  .ljg-gig-apply-btn:hover .ljg-gig-apply-btn-group {
+    color: hsl(220, 20%, 40%);
+  }
+
+  .ljg-gig-apply-btn-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .ljg-gig-apply-btn-underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: #60a5fa;
+    transition: all 0.3s ease;
+    width: calc(100% + 14px);
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  }
+
+  .ljg-gig-apply-btn:hover .ljg-gig-apply-btn-underline {
+    background: #3b82f6;
+  }
+
+  .ljg-gig-apply-btn-icon {
+    width: 1rem;
+    height: 1rem;
   }
 
   /* Detail Sidebar Styles */
@@ -1166,9 +1204,9 @@ const isolatedStyles = `
   }
 
   .ljg-detail-price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #111827;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #141522;
     font-family: 'DM Sans', system-ui, sans-serif;
   }
 
@@ -2600,7 +2638,7 @@ const LocalJobGigs = () => {
                   </div>
                   <div className="ljg-detail-meta-item">
                     <DollarSign className="ljg-detail-meta-icon" />
-                    <span>{selectedGig.pay}</span>
+                    <span>Estimated Pay: {selectedGig.pay}</span>
                   </div>
                 </div>
               </div>
@@ -2638,7 +2676,7 @@ const LocalJobGigs = () => {
               </div>
 
               <div id="ljg-detail-footer">
-                <div className="ljg-detail-price">{selectedGig.pay}</div>
+                <div className="ljg-detail-price">Estimated: {selectedGig.pay}</div>
                 <button
                   className="ljg-detail-apply-btn"
                   onClick={() => {
@@ -3188,31 +3226,61 @@ const LocalJobGigs = () => {
                             >
                               <div className="ljg-gig-header">
                                 <h3 className="ljg-gig-title">{gig.title}</h3>
-                                <span className="ljg-gig-badge">{gig.type}</span>
+                                <p className="ljg-gig-badge">{gig.type}</p>
                               </div>
                               <p className="ljg-gig-description">{gig.description}</p>
                               <div className="ljg-gig-details">
                                 <div className="ljg-gig-detail">
-                                  <MapPin className="ljg-gig-detail-icon" />
-                                  <span>{gig.location}</span>
+                                  <div className="ljg-gig-detail-content">
+                                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                      <MapPin className="ljg-gig-detail-icon" />
+                                      <span className="ljg-gig-detail-value">{gig.location}</span>
+                                    </div>
+                                    <span className="ljg-gig-detail-label">Location</span>
+                                  </div>
                                 </div>
                                 <div className="ljg-gig-detail">
-                                  <Calendar className="ljg-gig-detail-icon" />
-                                  <span>{gig.posted}</span>
+                                  <div className="ljg-gig-detail-content">
+                                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                      <Calendar className="ljg-gig-detail-icon" />
+                                      <span className="ljg-gig-detail-value">{gig.posted}</span>
+                                    </div>
+                                    <span className="ljg-gig-detail-label">Posted</span>
+                                  </div>
+                                </div>
+                                <div className="ljg-gig-detail" style={{ gridColumn: "1 / -1" }}>
+                                  <div className="ljg-gig-detail-content">
+                                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                      <DollarSign className="ljg-gig-detail-icon" />
+                                      <span className="ljg-gig-detail-value">Estimated: {gig.pay}</span>
+                                    </div>
+                                    <span className="ljg-gig-detail-label">Estimated Pay</span>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="ljg-gig-footer">
-                                <div className="ljg-gig-price">{gig.pay}</div>
-                                <button
-                                  className="ljg-gig-apply-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleGigClick(gig.id);
-                                  }}
-                                >
-                                  View Details
-                                </button>
-                              </div>
+                              {!isSelected && (
+                                <div className="ljg-gig-footer">
+                                  <button
+                                    className="ljg-gig-apply-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleGigClick(gig.id);
+                                    }}
+                                  >
+                                    <motion.span
+                                      className="ljg-gig-apply-btn-group"
+                                      whileHover={{ x: 2 }}
+                                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                    >
+                                      <span className="ljg-gig-apply-btn-content">
+                                        <Eye className="ljg-gig-apply-btn-icon" />
+                                        View Details
+                                        <span className="ljg-gig-apply-btn-underline" />
+                                      </span>
+                                    </motion.span>
+                                  </button>
+                                </div>
+                              )}
                             </motion.div>
                           );
                         })}
@@ -3305,7 +3373,7 @@ const LocalJobGigs = () => {
                       </div>
 
                       <div id="ljg-detail-footer">
-                        <div className="ljg-detail-price">{selectedGig.pay}</div>
+                        <div className="ljg-detail-price">Estimated Pay: {selectedGig.pay}</div>
                         <button
                           className="ljg-detail-apply-btn"
                           onClick={() => {

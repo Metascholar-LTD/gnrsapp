@@ -16,20 +16,12 @@ import {
   Info,
   FileText,
   Plus,
-  Tag,
   Eye,
   Users,
   Award,
   TrendingUp
 } from "lucide-react";
 
-// All categories from browse page
-const ALL_CATEGORIES = [
-  'Delivery Services', 'Event Staff', 'Cleaning & Housekeeping',
-  'Moving & Transport', 'Handyman & Maintenance', 'Security Services',
-  'Warehouse Worker', 'Retail Assistant', 'Kitchen Helper',
-  'Waiter/Waitress', 'Bartender', 'Receptionist'
-];
 
 const PAYMENT_TYPES = [
   { value: '', label: 'Select payment type' },
@@ -48,8 +40,6 @@ interface Gig {
   id: number | string;
   title: string;
   description?: string;
-  category: string;
-  category_id?: string;
   location: string;
   employer_name: string;
   employer_phone: string;
@@ -64,6 +54,7 @@ interface Gig {
   created_at?: string;
   requirements?: string;
   benefits?: string;
+  what_to_expect?: string;
   verified?: boolean;
   views?: number;
   applications?: number;
@@ -608,7 +599,6 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "",
     location: "",
     employer_name: "",
     employer_phone: "",
@@ -618,9 +608,8 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
     duration: "",
     start_date: "",
     end_date: "",
-    slots_available: "",
     requirements: "",
-    benefits: "",
+    what_to_expect: "",
     verified: false,
   });
 
@@ -630,7 +619,6 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
   const isBasicInfoComplete = () => {
     return !!(
       formData.title &&
-      formData.category &&
       formData.location &&
       formData.employer_name &&
       formData.employer_phone
@@ -650,14 +638,12 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
     onSave({
       ...formData,
       payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount as string) : null,
-      slots_available: formData.slots_available ? parseInt(formData.slots_available as string) : 1,
     });
     onClose();
     // Reset form
     setFormData({
       title: "",
       description: "",
-      category: "",
       location: "",
       employer_name: "",
       employer_phone: "",
@@ -667,9 +653,8 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
       duration: "",
       start_date: "",
       end_date: "",
-      slots_available: "",
       requirements: "",
-      benefits: "",
+      what_to_expect: "",
       verified: false,
     });
     setActiveTab("overview");
@@ -754,26 +739,6 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
 
                     <div className="lgm-form-group">
                       <label className="lgm-form-label">
-                        <Tag size={16} />
-                        Category *
-                      </label>
-                      <select
-                        className="lgm-form-select"
-                        required
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      >
-                        <option value="">Select category</option>
-                        {ALL_CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="lgm-form-group">
-                      <label className="lgm-form-label">
                         <MapPin size={16} />
                         Location *
                       </label>
@@ -831,21 +796,6 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
                       />
                     </div>
 
-                    <div className="lgm-form-group">
-                      <label className="lgm-form-label">
-                        <Users size={16} />
-                        Slots Available
-                      </label>
-                      <input
-                        className="lgm-form-input"
-                        type="number"
-                        min="1"
-                        value={formData.slots_available}
-                        onChange={(e) => setFormData({ ...formData, slots_available: e.target.value })}
-                        placeholder="1"
-                      />
-                    </div>
-
                     <div className="lgm-form-group full-width">
                       <label className="lgm-form-label">
                         <FileText size={16} />
@@ -862,15 +812,15 @@ export const AddGigModal = ({ isOpen, onClose, onSave }: AddGigModalProps) => {
 
                     <div className="lgm-form-group full-width">
                       <label className="lgm-form-label">
-                        <Award size={16} />
-                        Benefits
+                        <Info size={16} />
+                        What to Expect
                       </label>
                       <textarea
                         className="lgm-form-textarea"
-                        value={formData.benefits}
-                        onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                        placeholder="List any benefits or perks..."
-                        rows={3}
+                        value={formData.what_to_expect}
+                        onChange={(e) => setFormData({ ...formData, what_to_expect: e.target.value })}
+                        placeholder="Describe what applicants can expect from this opportunity..."
+                        rows={4}
                       />
                     </div>
                   </div>
@@ -984,7 +934,6 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "",
     location: "",
     employer_name: "",
     employer_phone: "",
@@ -994,10 +943,8 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
     duration: "",
     start_date: "",
     end_date: "",
-    slots_available: "",
     requirements: "",
-    benefits: "",
-    verified: false,
+    what_to_expect: "",
   });
 
   // Update form data when gig changes
@@ -1007,7 +954,6 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
       setFormData({
         title: gigData.title || "",
         description: gigData.description || "",
-        category: gigData.category || "",
         location: gigData.location || "",
         employer_name: gigData.employer_name || "",
         employer_phone: gigData.employer_phone || "",
@@ -1017,10 +963,8 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
         duration: gigData.duration || "",
         start_date: gigData.start_date || "",
         end_date: gigData.end_date || "",
-        slots_available: gigData.slots_available?.toString() || "",
         requirements: gigData.requirements || "",
-        benefits: gigData.benefits || "",
-        verified: gigData.verified || false,
+        what_to_expect: gigData.what_to_expect || "",
       });
       setActiveTab("overview");
     }
@@ -1032,7 +976,6 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
   const isBasicInfoComplete = () => {
     return !!(
       formData.title &&
-      formData.category &&
       formData.location &&
       formData.employer_name &&
       formData.employer_phone
@@ -1053,7 +996,13 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
       ...gig,
       ...formData,
       payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount as string) : null,
-      slots_available: formData.slots_available ? parseInt(formData.slots_available as string) : 1,
+      // Preserve read-only fields from original gig
+      views: (gig as any).views,
+      applications: (gig as any).applications,
+      created_at: (gig as any).created_at,
+      verified: (gig as any).verified,
+      status: (gig as any).status,
+      slots_available: (gig as any).slots_available,
     });
     onClose();
   };
@@ -1135,26 +1084,6 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
 
                     <div className="lgm-form-group">
                       <label className="lgm-form-label">
-                        <Tag size={16} />
-                        Category *
-                      </label>
-                      <select
-                        className="lgm-form-select"
-                        required
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      >
-                        <option value="">Select category</option>
-                        {ALL_CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="lgm-form-group">
-                      <label className="lgm-form-label">
                         <MapPin size={16} />
                         Location *
                       </label>
@@ -1208,20 +1137,6 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
                       />
                     </div>
 
-                    <div className="lgm-form-group">
-                      <label className="lgm-form-label">
-                        <Users size={16} />
-                        Slots Available
-                      </label>
-                      <input
-                        className="lgm-form-input"
-                        type="number"
-                        min="1"
-                        value={formData.slots_available}
-                        onChange={(e) => setFormData({ ...formData, slots_available: e.target.value })}
-                      />
-                    </div>
-
                     <div className="lgm-form-group full-width">
                       <label className="lgm-form-label">
                         <FileText size={16} />
@@ -1231,20 +1146,22 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
                         className="lgm-form-textarea"
                         value={formData.requirements}
                         onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                        placeholder="List any requirements or qualifications..."
                         rows={3}
                       />
                     </div>
 
                     <div className="lgm-form-group full-width">
                       <label className="lgm-form-label">
-                        <Award size={16} />
-                        Benefits
+                        <Info size={16} />
+                        What to Expect
                       </label>
                       <textarea
                         className="lgm-form-textarea"
-                        value={formData.benefits}
-                        onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                        rows={3}
+                        value={formData.what_to_expect}
+                        onChange={(e) => setFormData({ ...formData, what_to_expect: e.target.value })}
+                        placeholder="Describe what applicants can expect from this opportunity..."
+                        rows={4}
                       />
                     </div>
                   </div>
@@ -1284,7 +1201,7 @@ export const EditGigModal = ({ isOpen, onClose, onSave, gig }: EditGigModalProps
                         min="0"
                         value={formData.payment_amount}
                         onChange={(e) => setFormData({ ...formData, payment_amount: e.target.value })}
-                        disabled={formData.payment_type === 'negotiable'}
+                        placeholder="Enter amount or leave empty for negotiable"
                       />
                     </div>
 
@@ -1373,7 +1290,7 @@ export const ViewGigModal = ({ isOpen, onClose, gig }: ViewGigModalProps) => {
                 <h2 className="lgm-modal-title">
                   {gig.title}
                 </h2>
-                <p className="lgm-modal-subtitle">{gig.category} • {gig.location}</p>
+                <p className="lgm-modal-subtitle">{gig.location}</p>
               </div>
             </div>
             <button className="lgm-close-btn" onClick={onClose}>
@@ -1413,13 +1330,6 @@ export const ViewGigModal = ({ isOpen, onClose, gig }: ViewGigModalProps) => {
                   </div>
                   <div className="lgm-detail-row">
                     <span className="lgm-detail-label">
-                      <Tag size={16} />
-                      Category
-                    </span>
-                    <span className="lgm-detail-value">{gig.category}</span>
-                  </div>
-                  <div className="lgm-detail-row">
-                    <span className="lgm-detail-label">
                       <MapPin size={16} />
                       Location
                     </span>
@@ -1428,7 +1338,7 @@ export const ViewGigModal = ({ isOpen, onClose, gig }: ViewGigModalProps) => {
                   <div className="lgm-detail-row">
                     <span className="lgm-detail-label">
                       <DollarSign size={16} />
-                      Payment
+                      Estimated Pay
                     </span>
                     <span className="lgm-detail-value">
                       {gig.payment_amount ? `₦${gig.payment_amount.toLocaleString()}` : "Negotiable"} 
@@ -1458,13 +1368,6 @@ export const ViewGigModal = ({ isOpen, onClose, gig }: ViewGigModalProps) => {
                       <span className="lgm-detail-value">{gig.end_date}</span>
                     </div>
                   )}
-                  <div className="lgm-detail-row">
-                    <span className="lgm-detail-label">
-                      <Users size={16} />
-                      Slots Available
-                    </span>
-                    <span className="lgm-detail-value">{gig.slots_available || 1}</span>
-                  </div>
                   <div className="lgm-detail-row">
                     <span className="lgm-detail-label">
                       <CheckCircle size={16} />
@@ -1514,13 +1417,13 @@ export const ViewGigModal = ({ isOpen, onClose, gig }: ViewGigModalProps) => {
                   </div>
                 )}
 
-                {gig.benefits && (
+                {gig.what_to_expect && (
                   <div className="lgm-detail-section">
                     <h3 className="lgm-detail-section-title">
-                      Benefits
+                      What to Expect
                     </h3>
                     <p style={{ color: "#374151", lineHeight: "1.6", margin: 0 }}>
-                      {gig.benefits}
+                      {gig.what_to_expect}
                     </p>
                   </div>
                 )}
@@ -1613,7 +1516,7 @@ export const ApprovalModal = ({
                 {gig.title}
               </h3>
               <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>
-                {gig.category} • {gig.location}
+                {gig.location}
               </p>
             </div>
             <p style={{ color: "#374151", marginBottom: "1.5rem" }}>
@@ -1684,7 +1587,7 @@ export const RejectConfirmModal = ({
                 {gig.title}
               </h3>
               <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>
-                {gig.category} • {gig.location}
+                {gig.location}
               </p>
             </div>
             <div className="lgm-form-group" style={{ marginBottom: "1.5rem" }}>

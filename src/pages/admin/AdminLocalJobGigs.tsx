@@ -8,7 +8,6 @@ import {
   Search,
   Eye,
   CheckCircle,
-  Tag,
   MapPin,
   DollarSign,
   Calendar,
@@ -16,8 +15,6 @@ import {
   Phone,
   Mail,
   Filter,
-  Grid3x3,
-  List,
   CheckCircle2,
   XCircle,
   Plus,
@@ -30,8 +27,6 @@ import {
   ViewGigModal,
   ApprovalModal,
   RejectConfirmModal,
-  AddCategoryModal,
-  EditCategoryModal,
   DeleteConfirmModal
 } from "./components/LocalGigsModals";
 
@@ -44,23 +39,12 @@ const getInitials = (name: string): string => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-// Helper function to get category icon
-const getCategoryIcon = (name: string) => {
-  const lower = name.toLowerCase();
-  if (lower.includes("delivery") || lower.includes("driver")) return Briefcase;
-  if (lower.includes("event") || lower.includes("party")) return UserCheck;
-  if (lower.includes("cleaning") || lower.includes("housekeeping")) return Building2;
-  if (lower.includes("moving") || lower.includes("transport")) return MapPin;
-  return Briefcase;
-};
 
 const AdminLocalJobGigs = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [categoryViewMode, setCategoryViewMode] = useState<"grid" | "list">("grid");
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const spacerRef = useRef<HTMLDivElement>(null);
   const overviewChartRef = useRef<HTMLCanvasElement>(null);
@@ -71,24 +55,18 @@ const AdminLocalJobGigs = () => {
   const [showViewGig, setShowViewGig] = useState(false);
   const [showApproval, setShowApproval] = useState(false);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-  const [showAddCategory, setShowAddCategory] = useState(false);
-  const [showEditCategory, setShowEditCategory] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedGig, setSelectedGig] = useState<any>(null);
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: "gig" | "category"; id: string | number; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "gig"; id: string | number; name: string } | null>(null);
 
   // Data states - MOCK DATA (no Supabase)
   const [gigs, setGigs] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Set active tab based on route
   useEffect(() => {
     if (location.pathname.includes("/approval")) {
       setActiveTab("approval");
-    } else if (location.pathname.includes("/categories")) {
-      setActiveTab("categories");
     } else if (location.pathname.includes("/gigs")) {
       setActiveTab("gigs");
     }
@@ -132,15 +110,6 @@ const AdminLocalJobGigs = () => {
   const loadMockData = () => {
     setLoading(true);
     
-    // Mock categories
-    const mockCategories = [
-      { id: "1", name: "Delivery Services", description: "Delivery drivers and couriers", count: 12 },
-      { id: "2", name: "Event Staff", description: "Event assistants and waiters", count: 8 },
-      { id: "3", name: "Cleaning & Housekeeping", description: "Cleaners and housekeeping", count: 15 },
-      { id: "4", name: "Moving & Transport", description: "Movers and drivers", count: 6 },
-      { id: "5", name: "Handyman & Maintenance", description: "General repairs", count: 10 },
-    ];
-
     // Mock gigs
     const mockGigs = [
       {
@@ -257,19 +226,6 @@ const AdminLocalJobGigs = () => {
       }
     ];
 
-    // Add icons to categories
-    const categoriesWithIcons = mockCategories.map(cat => {
-      const Icon = getCategoryIcon(cat.name);
-      return {
-        ...cat,
-        icon: Icon,
-        color: "#1f2937",
-        bgColor: "#f3f4f6",
-        status: "active" as const
-      };
-    });
-
-    setCategories(categoriesWithIcons);
     setGigs(mockGigs);
     setLoading(false);
   };
@@ -306,23 +262,12 @@ const AdminLocalJobGigs = () => {
       color: "#f59e0b",
       bgColor: "#fef3c7"
     },
-    {
-      id: 4,
-      label: "Active Categories",
-      value: categories.filter(c => c.count > 0).length.toLocaleString(),
-      change: "+0",
-      trend: "up",
-      icon: Tag,
-      color: "#8b5cf6",
-      bgColor: "#f5f3ff"
-    }
   ];
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Briefcase },
     { id: "gigs", label: "Gigs Management", icon: UserCheck },
-    { id: "approval", label: "Gigs Approval", icon: CheckCircle },
-    { id: "categories", label: "Categories", icon: Tag }
+    { id: "approval", label: "Gigs Approval", icon: CheckCircle }
   ];
 
   const filteredGigs = gigs.filter(gig => {
@@ -330,8 +275,7 @@ const AdminLocalJobGigs = () => {
                           gig.employer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           gig.location.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || gig.status === statusFilter;
-    const matchesCategory = categoryFilter === "all" || gig.category_id === categoryFilter;
-    return matchesSearch && matchesStatus && matchesCategory;
+    return matchesSearch && matchesStatus;
   });
 
   // Modal handlers
@@ -360,15 +304,6 @@ const AdminLocalJobGigs = () => {
     setShowRejectConfirm(true);
   };
 
-  const handleEditCategory = (category: any) => {
-    setSelectedCategory(category);
-    setShowEditCategory(true);
-  };
-
-  const handleDeleteCategory = (category: any) => {
-    setDeleteTarget({ type: "category", id: category.id, name: category.name });
-    setShowDeleteConfirm(true);
-  };
 
   // Save handlers (mock data updates)
   const handleSaveGig = (gigData: any) => {
@@ -390,24 +325,6 @@ const AdminLocalJobGigs = () => {
     }
   };
 
-  const handleSaveCategory = (categoryData: any) => {
-    if (categoryData.id) {
-      // Edit existing category
-      setCategories(categories.map(c => c.id === categoryData.id ? { ...c, ...categoryData } : c));
-    } else {
-      // Add new category
-      const newCategory = {
-        ...categoryData,
-        id: String(categories.length + 1),
-        count: 0,
-        icon: getCategoryIcon(categoryData.name),
-        color: "#1f2937",
-        bgColor: "#f3f4f6",
-        status: "active" as const
-      };
-      setCategories([...categories, newCategory]);
-    }
-  };
 
   const handleApprove = (id: string | number) => {
     setGigs(gigs.map(g => g.id === id ? { ...g, status: "active", verified: true } : g));
@@ -420,11 +337,7 @@ const AdminLocalJobGigs = () => {
   const handleConfirmDelete = () => {
     if (!deleteTarget) return;
     
-    if (deleteTarget.type === "gig") {
-      setGigs(gigs.filter(g => g.id !== deleteTarget.id));
-    } else {
-      setCategories(categories.filter(c => c.id !== deleteTarget.id));
-    }
+    setGigs(gigs.filter(g => g.id !== deleteTarget.id));
     
     setDeleteTarget(null);
     setShowDeleteConfirm(false);
@@ -1042,25 +955,6 @@ const AdminLocalJobGigs = () => {
           </div>
         </div>
 
-        <div className="aljg-overview-card">
-          <h4 className="aljg-overview-title">Top Categories</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {categories.slice(0, 5).map(category => {
-              const IconComponent = category.icon;
-              return (
-                <div key={category.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem", background: "#f9fafb", borderRadius: "8px" }}>
-                  <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: category.bgColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <IconComponent size={20} style={{ color: category.color }} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#111827" }}>{category.name}</div>
-                    <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{category.count} gigs</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -1090,16 +984,6 @@ const AdminLocalJobGigs = () => {
           <option value="inactive">Inactive</option>
         </select>
 
-        <select
-          className="aljg-filter-select"
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-        >
-          <option value="all">All Categories</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
 
         <button className="aljg-filter-select" style={{ padding: "0.625rem 1rem", cursor: "pointer" }}>
           <Filter size={16} style={{ marginRight: "0.5rem", display: "inline" }} />
@@ -1133,7 +1017,7 @@ const AdminLocalJobGigs = () => {
               <th>Gig Details</th>
               <th>Employer</th>
               <th>Location</th>
-              <th>Payment</th>
+              <th>Estimated Pay</th>
               <th>Duration</th>
               <th>Status</th>
               <th>Actions</th>
@@ -1169,7 +1053,7 @@ const AdminLocalJobGigs = () => {
                 <td>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", fontWeight: 600, color: "#10b981" }}>
                     <DollarSign style={{ width: "14px", height: "14px" }} />
-                    {gig.payment_amount ? `₦${gig.payment_amount.toLocaleString()}` : "Negotiable"}
+                    {gig.payment_amount ? `Estimated: ₦${gig.payment_amount.toLocaleString()}` : "Negotiable"}
                   </div>
                 </td>
                 <td>
@@ -1237,7 +1121,7 @@ const AdminLocalJobGigs = () => {
                 <th>Gig Details</th>
                 <th>Employer</th>
                 <th>Location</th>
-                <th>Payment</th>
+                <th>Estimated Pay</th>
                 <th>Submitted</th>
                 <th>Actions</th>
               </tr>
@@ -1325,131 +1209,6 @@ const AdminLocalJobGigs = () => {
     );
   };
 
-  const renderCategories = () => (
-    <div>
-      <div id="aljg-filters">
-        <h3 style={{ margin: 0, fontSize: "1.125rem", fontWeight: 600, color: "#111827", flex: 1 }}>
-          All Categories ({categories.length})
-        </h3>
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-          <div className="aljg-view-toggle">
-            <button
-              className={`aljg-view-toggle-btn ${categoryViewMode === "grid" ? "active" : ""}`}
-              onClick={() => setCategoryViewMode("grid")}
-              title="Grid View"
-            >
-              <Grid3x3 size={18} />
-            </button>
-            <button
-              className={`aljg-view-toggle-btn ${categoryViewMode === "list" ? "active" : ""}`}
-              onClick={() => setCategoryViewMode("list")}
-              title="List View"
-            >
-              <List size={18} />
-            </button>
-          </div>
-          <button
-            className="aljg-filter-select"
-            style={{
-              padding: "0.625rem 1rem",
-              cursor: "pointer",
-              background: "#3b82f6",
-              color: "white",
-              border: "none",
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem"
-            }}
-            onClick={() => setShowAddCategory(true)}
-          >
-            <Plus size={16} />
-            Add Category
-          </button>
-        </div>
-      </div>
-
-      {categoryViewMode === "grid" ? (
-        <div id="aljg-categories-grid">
-          {categories.map(category => {
-            const IconComponent = category.icon;
-            return (
-              <div key={category.id} className="aljg-category-card">
-                <div className="aljg-category-header">
-                  <div style={{ width: "48px", height: "48px", borderRadius: "10px", background: category.bgColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <IconComponent size={24} style={{ color: category.color }} />
-                  </div>
-                  <div className="aljg-category-info">
-                    <h4 className="aljg-category-name">{category.name}</h4>
-                    <p className="aljg-category-count">{category.count} gigs</p>
-                  </div>
-                </div>
-                {category.description && (
-                  <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: "0 0 1rem 0" }}>{category.description}</p>
-                )}
-                <div className="aljg-actions" style={{ marginTop: "auto", paddingTop: "1rem", borderTop: "1px solid #e5e7eb" }}>
-                  <button className="aljg-action-btn edit" title="Edit Category" onClick={() => handleEditCategory(category)}>
-                    <Edit2 className="aljg-action-icon" />
-                  </button>
-                  <button className="aljg-action-btn delete" title="Delete Category" onClick={() => handleDeleteCategory(category)}>
-                    <Trash2 className="aljg-action-icon" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div id="aljg-table-container">
-          <table id="aljg-table">
-            <thead>
-              <tr>
-                <th>Category Name</th>
-                <th>Gigs</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categories.map(category => (
-                <tr key={category.id}>
-                  <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: category.bgColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {(() => {
-                          const IconComponent = category.icon;
-                          return <IconComponent size={18} style={{ color: category.color }} />;
-                        })()}
-                      </div>
-                      <div style={{ fontWeight: 600, color: "#111827" }}>{category.name}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <span style={{ color: "#3b82f6", fontWeight: 600 }}>{category.count}</span>
-                  </td>
-                  <td>
-                    <span className={`aljg-status-badge ${category.status || "active"}`}>
-                      {category.status || "Active"}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="aljg-actions">
-                      <button className="aljg-action-btn edit" title="Edit Category" onClick={() => handleEditCategory(category)}>
-                        <Edit2 className="aljg-action-icon" />
-                      </button>
-                      <button className="aljg-action-btn delete" title="Delete Category" onClick={() => handleDeleteCategory(category)}>
-                        <Trash2 className="aljg-action-icon" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
 
   if (loading) {
     return (
@@ -1528,7 +1287,6 @@ const AdminLocalJobGigs = () => {
         {activeTab === "overview" && renderOverview()}
         {activeTab === "gigs" && renderGigs()}
         {activeTab === "approval" && renderApproval()}
-        {activeTab === "categories" && renderCategories()}
       </div>
 
       {/* Modals */}
@@ -1574,20 +1332,6 @@ const AdminLocalJobGigs = () => {
         onConfirm={handleReject}
         gig={selectedGig}
       />
-      <AddCategoryModal
-        isOpen={showAddCategory}
-        onClose={() => setShowAddCategory(false)}
-        onSave={handleSaveCategory}
-      />
-      <EditCategoryModal
-        isOpen={showEditCategory}
-        onClose={() => {
-          setShowEditCategory(false);
-          setSelectedCategory(null);
-        }}
-        onSave={handleSaveCategory}
-        category={selectedCategory}
-      />
       <DeleteConfirmModal
         isOpen={showDeleteConfirm}
         onClose={() => {
@@ -1595,9 +1339,9 @@ const AdminLocalJobGigs = () => {
           setDeleteTarget(null);
         }}
         onConfirm={handleConfirmDelete}
-        title={`Delete ${deleteTarget?.type === "gig" ? "Gig" : "Category"}?`}
+        title="Delete Gig?"
         message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
-        type={deleteTarget?.type}
+        type="gig"
       />
     </div>
   );
