@@ -112,6 +112,10 @@ import SneatLayout from "./pages/sneat/SneatLayout";
 import Dashboard from "./pages/sneat/Dashboard";
 import AccountSettings from "./pages/sneat/pages/AccountSettings";
 import { GenericPage, CardsPage, TablesPage, IconsPage, FormsBasicInputs, FormLayouts, ErrorPage, MaintenancePage } from "./pages/sneat/pages/SimplePages";
+import EmployerLayout from "./pages/employer/EmployerLayout";
+import EmployerDashboard from "./pages/employer/EmployerDashboard";
+import PostNewJob from "./pages/employer/PostNewJob";
+import PostNewGig from "./pages/employer/PostNewGig";
 
 const queryClient = new QueryClient();
 
@@ -325,6 +329,22 @@ const App = () => (
             {/* Misc */}
             <Route path="misc/error" element={<ErrorPage />} />
             <Route path="misc/maintenance" element={<MaintenancePage />} />
+          </Route>
+
+          {/* Employer Dashboard Routes */}
+          <Route path="/employer" element={<EmployerLayout />}>
+            <Route index element={<EmployerDashboard />} />
+            <Route path="job-listings/post" element={<PostNewJob />} />
+            <Route path="job-listings/*" element={<GenericPage title="Job Listings" description="Post and manage job listings" />} />
+            <Route path="gigs-listing/post" element={<PostNewGig />} />
+            <Route path="gigs-listing/*" element={<GenericPage title="Gigs Listing" description="Post and manage gig listings" />} />
+            <Route path="applications/*" element={<GenericPage title="Applications" description="Track and manage applications" />} />
+            <Route path="candidates/*" element={<GenericPage title="Candidates" description="Shortlist and message candidates" />} />
+            <Route path="analytics" element={<GenericPage title="Analytics" description="View candidate analytics" />} />
+            <Route path="subscription/*" element={<GenericPage title="Subscription & Billing" description="Manage subscription and billing" />} />
+            <Route path="settings/*" element={<GenericPage title="Settings" description="Account settings" />} />
+            <Route path="support" element={<GenericPage title="Support" description="Help & Support" />} />
+            <Route path="*" element={<GenericPage title="Page" />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
