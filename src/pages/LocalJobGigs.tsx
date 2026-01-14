@@ -1242,7 +1242,7 @@ const isolatedStyles = `
     display: flex;
     align-items: center;
     gap: 0;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
 
   .ljg-employer-contact-item {
@@ -1290,16 +1290,9 @@ const isolatedStyles = `
   }
 
   .ljg-employer-contact-item span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
-
-  @media (min-width: 640px) {
-    .ljg-employer-contact-item span {
-      max-width: 200px;
-    }
+    word-break: break-all;
+    overflow-wrap: break-word;
+    white-space: normal;
   }
 
   #ljg-detail-footer {
