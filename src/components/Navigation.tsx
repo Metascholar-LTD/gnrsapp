@@ -472,6 +472,7 @@ export const Navigation = React.memo(() => {
                   <MegaMenu menuKey="jobs" label="Career & Employment" path="/jobs" />
                   <MegaMenu menuKey="skilledWorkers" label="Hands & Skills" path="/skilled-workers" />
                   <Link to="/directories" className={`nav-link ${isActive("/directories") ? "nav-link-active" : ""}`}>Directories</Link>
+                  <Link to="/scholarly" className={`nav-link ${isActive("/scholarly") ? "nav-link-active" : ""}`}>Uni Rankings</Link>
                   <MegaMenu menuKey="news" label="News & Info" path="/news" />
                   {isLoggedIn && (
                     <div className="nav-item-dropdown">
@@ -610,6 +611,9 @@ export const Navigation = React.memo(() => {
                 </MobileDropdown>
                 <Link to="/directories" className={`nav-mobile-link ${isActive("/directories") ? "nav-mobile-link-active" : ""}`} onClick={closeMobileMenu}>
                   <span><i className="fa fa-folder nav-mobile-icon"></i>Directories</span>
+                </Link>
+                <Link to="/scholarly" className={`nav-mobile-link ${isActive("/scholarly") ? "nav-mobile-link-active" : ""}`} onClick={closeMobileMenu}>
+                  <span><i className="fa fa-trophy nav-mobile-icon"></i>Scholarly Rankings</span>
                 </Link>
                 <MobileDropdown label="News & Info" icon="fa-newspaper" path="/news">
                   {Object.values(megaMenuData.news.content).flat().map((group, gIdx) => (

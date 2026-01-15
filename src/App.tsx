@@ -120,6 +120,12 @@ import AllGigs from "./pages/employer/AllGigs";
 import Applications from "./pages/employer/Applications";
 import ApplicationDetail from "./pages/employer/ApplicationDetail";
 import Drafts from "./pages/employer/Drafts";
+// Scholarly Ranking Platform
+import ScholarlyIndex from "./pages/scholarly/Index";
+import ScholarlyRankings from "./pages/scholarly/Rankings";
+import ScholarlyUniversityProfile from "./pages/scholarly/UniversityProfile";
+import ScholarlyArticles from "./pages/scholarly/Articles";
+import ScholarlyArticleView from "./pages/scholarly/ArticleView";
 
 const queryClient = new QueryClient();
 
@@ -209,6 +215,12 @@ const App = () => (
           <Route path="/directories/banks" element={<Banks />} />
           <Route path="/directories/datasets" element={<Datasets />} />
           <Route path="/directories/datasets/:category" element={<DatasetCategory />} />
+          {/* Scholarly Ranking Platform Routes */}
+          <Route path="/scholarly" element={<ScholarlyIndex />} />
+          <Route path="/scholarly/rankings" element={<ScholarlyRankings />} />
+          <Route path="/scholarly/universities/:slug" element={<ScholarlyUniversityProfile />} />
+          <Route path="/scholarly/articles" element={<ScholarlyArticles />} />
+          <Route path="/scholarly/articles/:id" element={<ScholarlyArticleView />} />
           {/* News Routes */}
           <Route path="/news" element={<NewsHub />} />
           <Route path="/news/:id" element={<NewsArticle />} />
