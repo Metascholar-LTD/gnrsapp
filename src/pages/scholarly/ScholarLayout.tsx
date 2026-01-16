@@ -1,10 +1,17 @@
+// ============================================================================
+// SCHOLAR LAYOUT
+// ============================================================================
+// Layout wrapper for scholar dashboard pages with sidebar and header
+// Matches EmployerLayout structure exactly
+// ============================================================================
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import NotificationMenu from './components/NotificationMenu';
-import SidebarMenu from './SidebarMenu';
+import NotificationMenu from '../sneat/components/NotificationMenu';
+import ScholarSidebarMenu from './ScholarSidebarMenu';
 
-const SneatLayout: React.FC = () => {
+const ScholarLayout: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuCollapsed, setMenuCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -14,16 +21,13 @@ const SneatLayout: React.FC = () => {
   useEffect(() => {
     const checkMobile = () => {
       const width = window.innerWidth;
-      setIsMobile(width < 1200); // Bootstrap XL breakpoint
+      setIsMobile(width < 1200);
       
-      // Auto-collapse on tablets and below
       if (width < 1200) {
         setMenuCollapsed(true);
       } else if (width >= 1200 && width < 1600) {
-        // Medium desktop - collapsed by default
         setMenuCollapsed(true);
       } else {
-        // Large desktop - expanded by default
         setMenuCollapsed(false);
       }
     };
@@ -37,14 +41,13 @@ const SneatLayout: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Load only essential Sneat JS (excluding menu.js to prevent conflicts with React)
+    // Load Sneat JS scripts
     const scripts = [
       '/sneat-assets/vendor/js/helpers.js',
       '/sneat-assets/js/config.js',
       '/sneat-assets/vendor/libs/jquery/jquery.js',
       '/sneat-assets/vendor/libs/popper/popper.js',
       '/sneat-assets/vendor/js/bootstrap.js',
-      // NOTE: menu.js is excluded - we handle menu behavior in React
     ];
 
     const loadedScripts: HTMLScriptElement[] = [];
@@ -62,7 +65,6 @@ const SneatLayout: React.FC = () => {
       });
     };
 
-    // Load scripts sequentially
     const loadScripts = async () => {
       for (const src of scripts) {
         try {
@@ -76,7 +78,6 @@ const SneatLayout: React.FC = () => {
     loadScripts();
 
     return () => {
-      // Cleanup scripts
       loadedScripts.forEach(script => {
         if (script.parentNode) {
           try {
@@ -90,7 +91,6 @@ const SneatLayout: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Update wrapper class for collapsed state
     const wrapper = document.querySelector('.layout-wrapper');
     if (wrapper) {
       if (menuCollapsed) {
@@ -101,30 +101,25 @@ const SneatLayout: React.FC = () => {
     }
   }, [menuCollapsed]);
 
-  const isActive = (path: string) => location.pathname === path;
-
   const toggleMenuCollapse = () => {
     setMenuCollapsed(!menuCollapsed);
   };
 
   return (
     <>
-      {/* Scoped Sneat Styles - Only apply within this layout */}
+      {/* Scoped Sneat Styles - Same as EmployerLayout */}
       <style>{`
-        /* Import Sneat CSS files - Scoped to .layout-wrapper */
         @import url('/sneat-assets/vendor/fonts/boxicons.css');
         @import url('/sneat-assets/vendor/css/core.css');
         @import url('/sneat-assets/vendor/css/theme-default.css');
         @import url('/sneat-assets/css/demo.css');
         @import url('simplebar-react/dist/simplebar.min.css');
 
-        /* Apply Plus Jakarta Sans font from dnx - SCOPED to layout-wrapper */
         .layout-wrapper,
         .layout-wrapper * {
           font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
-        /* Iconify icon styling for sidebar - match dnx */
         .layout-wrapper .menu-icon {
           display: inline-flex !important;
           align-items: center !important;
@@ -140,7 +135,6 @@ const SneatLayout: React.FC = () => {
           visibility: visible !important;
         }
 
-        /* Ensure all menu links have icons visible */
         .layout-wrapper .menu-link .menu-icon {
           opacity: 1 !important;
           visibility: visible !important;
@@ -155,7 +149,6 @@ const SneatLayout: React.FC = () => {
           color: #141522 !important;
         }
 
-        /* dnx sidebar menu item styling - exact match */
         .layout-wrapper .menu-item .menu-link div[data-i18n],
         .layout-wrapper .menu-item .menu-link span {
           font-family: 'Plus Jakarta Sans', sans-serif !important;
@@ -164,7 +157,6 @@ const SneatLayout: React.FC = () => {
           color: #54577A !important;
         }
 
-        /* dnx menu header styling */
         .layout-wrapper .menu-header .menu-header-text {
           font-family: 'Plus Jakarta Sans', sans-serif !important;
           font-size: 0.75rem !important;
@@ -172,26 +164,22 @@ const SneatLayout: React.FC = () => {
           color: #8E92BC !important;
         }
 
-        /* Active menu item - match dnx */
         .layout-wrapper .menu-item.active .menu-link div[data-i18n],
         .layout-wrapper .menu-item.active .menu-link span {
           color: #141522 !important;
           font-weight: 700 !important;
         }
 
-        /* Hover state */
         .layout-wrapper .menu-item .menu-link:hover div[data-i18n],
         .layout-wrapper .menu-item .menu-link:hover span {
           color: #141522 !important;
         }
 
-        /* Ensure proper background colors - SCOPED */
         .layout-wrapper .layout-menu {
           background-color: #fff !important;
           box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
         }
 
-        /* Sticky logo at top */
         .layout-wrapper .app-brand.demo {
           position: sticky !important;
           top: 0 !important;
@@ -214,7 +202,6 @@ const SneatLayout: React.FC = () => {
           background-color: #f5f5f9 !important;
         }
 
-        /* Menu toggle button styling - match PastQuestions/LectureNotes pattern */
         .layout-wrapper .app-brand {
           position: relative !important;
           display: flex !important;
@@ -258,7 +245,6 @@ const SneatLayout: React.FC = () => {
           color: #697a8d !important;
         }
 
-        /* Collapsed menu state */
         .layout-wrapper.layout-menu-collapsed .layout-menu {
           width: 80px !important;
           overflow-x: visible !important;
@@ -269,7 +255,6 @@ const SneatLayout: React.FC = () => {
           overflow: visible !important;
         }
 
-        /* Custom thin scrollbar for collapsed menu */
         .layout-wrapper.layout-menu-collapsed .layout-menu::-webkit-scrollbar {
           width: 4px !important;
         }
@@ -291,7 +276,6 @@ const SneatLayout: React.FC = () => {
           padding-left: 80px !important;
         }
 
-        /* Hide text elements in collapsed state */
         .layout-wrapper.layout-menu-collapsed .app-brand-text {
           display: none !important;
         }
@@ -311,7 +295,6 @@ const SneatLayout: React.FC = () => {
           }
         }
 
-        /* Constrain menu items to sidebar width */
         .layout-wrapper.layout-menu-collapsed .menu-item {
           display: block !important;
           width: 100% !important;
@@ -327,7 +310,6 @@ const SneatLayout: React.FC = () => {
           margin: 0 auto !important;
         }
 
-        /* Keep icons visible and perfectly centered */
         .layout-wrapper.layout-menu-collapsed .menu-icon {
           margin: 0 auto !important;
           display: flex !important;
@@ -359,56 +341,15 @@ const SneatLayout: React.FC = () => {
           align-items: center !important;
         }
 
-        /* Hide chevrons for menu toggles */
         .layout-wrapper.layout-menu-collapsed .menu-toggle::after {
           display: none !important;
         }
 
-        /* Force menu inner to respect width */
         .layout-wrapper.layout-menu-collapsed .menu-inner {
           width: 100% !important;
           padding: 0 !important;
         }
 
-        /* Add thin divider lines between sections in collapsed state */
-        .layout-wrapper.layout-menu-collapsed .menu-inner > .menu-item:first-of-type .menu-link {
-          position: relative !important;
-          margin-bottom: 0.5rem !important;
-        }
-
-        .layout-wrapper.layout-menu-collapsed .menu-inner > .menu-item:first-of-type .menu-link::after {
-          content: '' !important;
-          position: absolute !important;
-          bottom: -0.5rem !important;
-          left: 50% !important;
-          transform: translateX(-50%) !important;
-          width: 50% !important;
-          max-width: 40px !important;
-          height: 1px !important;
-          background-color: #e4e6ef !important;
-          opacity: 0.8 !important;
-        }
-
-        .layout-wrapper.layout-menu-collapsed .menu-header + .menu-item .menu-link {
-          position: relative !important;
-          margin-top: 0.75rem !important;
-          padding-top: 0.875rem !important;
-        }
-
-        .layout-wrapper.layout-menu-collapsed .menu-header + .menu-item .menu-link::before {
-          content: '' !important;
-          position: absolute !important;
-          top: 0 !important;
-          left: 50% !important;
-          transform: translateX(-50%) !important;
-          width: 50% !important;
-          max-width: 40px !important;
-          height: 1px !important;
-          background-color: #e4e6ef !important;
-          opacity: 0.8 !important;
-        }
-
-        /* Expanded menu state - Fixed layout */
         .layout-wrapper:not(.layout-menu-collapsed) .layout-menu {
           width: 260px !important;
         }
@@ -417,7 +358,6 @@ const SneatLayout: React.FC = () => {
           padding-left: 260px !important;
         }
 
-        /* Remove any max-width constraints on content */
         .layout-wrapper .layout-page {
           width: 100% !important;
           max-width: none !important;
@@ -429,7 +369,6 @@ const SneatLayout: React.FC = () => {
           padding-left: 1.5rem !important;
         }
 
-        /* Smooth transitions */
         .layout-wrapper .layout-menu {
           transition: width 0.3s ease-in-out !important;
           position: fixed !important;
@@ -442,7 +381,6 @@ const SneatLayout: React.FC = () => {
           box-sizing: border-box !important;
         }
 
-        /* Thin scrollbar for expanded menu */
         .layout-wrapper .layout-menu::-webkit-scrollbar {
           width: 6px !important;
         }
@@ -465,12 +403,10 @@ const SneatLayout: React.FC = () => {
           margin-left: 0 !important;
         }
 
-        /* Prevent menu items from wrapping */
         .layout-wrapper .menu-item {
           white-space: nowrap !important;
         }
 
-        /* Menu sub items - show when parent has open class or menu-sub has show class */
         .layout-wrapper .menu-item .menu-sub {
           display: none !important;
         }
@@ -480,33 +416,26 @@ const SneatLayout: React.FC = () => {
           display: block !important;
         }
 
-        /* Fix menu sub items in collapsed state */
         .layout-wrapper.layout-menu-collapsed .menu-item.open .menu-sub {
           display: none !important;
         }
 
-        /* Menu inner container */
         .layout-wrapper .menu-inner {
           display: block !important;
         }
 
-        /* Ensure menu items are visible */
         .layout-wrapper.layout-menu-collapsed .menu-inner .menu-item {
           opacity: 1 !important;
           visibility: visible !important;
         }
 
-        /* Active menu item in collapsed state */
         .layout-wrapper.layout-menu-collapsed .menu-item.active .menu-link {
-          background-color: rgba(105, 108, 255, 0.16) !important;
+          background-color: rgba(30, 58, 95, 0.16) !important;
         }
 
-        /* Tooltip on hover for collapsed items */
         .layout-wrapper.layout-menu-collapsed .menu-item:hover .menu-link {
           background-color: rgba(0, 0, 0, 0.04) !important;
         }
-
-        /* RESPONSIVE BREAKPOINTS */
 
         /* Mobile: max-width 767px */
         @media (max-width: 767px) {
@@ -560,7 +489,6 @@ const SneatLayout: React.FC = () => {
             position: relative !important;
           }
 
-          /* Ensure icon is properly aligned on mobile */
           .layout-wrapper .layout-menu .menu-item .menu-link .menu-icon {
             display: inline-flex !important;
             align-items: center !important;
@@ -574,7 +502,6 @@ const SneatLayout: React.FC = () => {
             padding: 0 !important;
           }
 
-          /* Ensure menu item text is properly aligned on mobile */
           .layout-wrapper .layout-menu .menu-item .menu-link div[data-i18n],
           .layout-wrapper .layout-menu .menu-item .menu-link span {
             display: block !important;
@@ -652,7 +579,6 @@ const SneatLayout: React.FC = () => {
 
         /* Tablet: 768px to 1199px */
         @media (min-width: 768px) and (max-width: 1199px) {
-          /* Ensure wrapper doesn't constrain fixed sidebar */
           .layout-wrapper {
             position: relative !important;
             overflow: visible !important;
@@ -660,7 +586,6 @@ const SneatLayout: React.FC = () => {
             height: 100% !important;
           }
 
-          /* Ensure menu item names are visible on tablet */
           .layout-wrapper .layout-menu .menu-item div[data-i18n],
           .layout-wrapper .layout-menu .menu-item .menu-link span {
             display: block !important;
@@ -683,7 +608,6 @@ const SneatLayout: React.FC = () => {
             position: relative !important;
           }
 
-          /* Ensure icon is properly aligned on tablet */
           .layout-wrapper .layout-menu .menu-item .menu-link .menu-icon {
             display: inline-flex !important;
             align-items: center !important;
@@ -697,7 +621,6 @@ const SneatLayout: React.FC = () => {
             padding: 0 !important;
           }
 
-          /* Fix overlay blocking sidebar toggle */
           .layout-wrapper .layout-overlay {
             position: fixed !important;
             top: 0 !important;
@@ -718,7 +641,6 @@ const SneatLayout: React.FC = () => {
             pointer-events: auto !important;
           }
 
-          /* Ensure navbar toggle is above overlay */
           .layout-wrapper .navbar {
             z-index: 1002 !important;
             position: relative !important;
@@ -750,7 +672,6 @@ const SneatLayout: React.FC = () => {
             left: 0 !important;
           }
 
-          /* Ensure container doesn't constrain the fixed sidebar */
           .layout-wrapper .layout-container {
             position: relative !important;
             overflow: visible !important;
@@ -781,7 +702,6 @@ const SneatLayout: React.FC = () => {
             display: none !important;
           }
 
-          /* Ensure sidebar brand text (Sneat) is visible on tablet - match desktop spacing */
           .layout-wrapper .layout-menu .app-brand-text {
             display: inline-block !important;
             opacity: 1 !important;
@@ -802,7 +722,6 @@ const SneatLayout: React.FC = () => {
             gap: 0.5rem !important;
           }
 
-          /* Ensure menu headers are visible on tablet */
           .layout-wrapper .layout-menu .menu-header {
             display: block !important;
             opacity: 1 !important;
@@ -938,7 +857,6 @@ const SneatLayout: React.FC = () => {
           }
         }
 
-        /* Fix for mobile menu toggle */
         @media (max-width: 1199.98px) {
           .layout-wrapper .layout-menu-toggle {
             display: block !important;
@@ -949,7 +867,6 @@ const SneatLayout: React.FC = () => {
           }
         }
 
-        /* Ensure proper z-index stacking */
         .layout-wrapper .layout-menu {
           z-index: 1001 !important;
         }
@@ -967,14 +884,14 @@ const SneatLayout: React.FC = () => {
         {/* Menu */}
         <aside id="layout-menu" className={`layout-menu menu-vertical menu bg-menu-theme ${menuOpen ? 'show' : ''}`}>
           <div className="app-brand demo">
-            <Link to="/userprofile" className="app-brand-link">
+            <Link to="/scholar/dashboard" className="app-brand-link">
               <span className="app-brand-logo demo">
                 <img src="https://res.cloudinary.com/dsypclqxk/image/upload/v1762441822/Metscholar_iyoxrw.png" alt="GNRS" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
               </span>
-              <span className="app-brand-text demo menu-text fw-bolder ms-2">GNRS</span>
+              <span className="app-brand-text demo menu-text fw-bolder ms-2">Scholar</span>
             </Link>
 
-            {/* Desktop Menu Toggle Button - In Header */}
+            {/* Desktop Menu Toggle Button */}
             <div className="menu-toggle-desktop d-none d-xl-block">
               <button 
                 className="btn btn-sm" 
@@ -994,7 +911,7 @@ const SneatLayout: React.FC = () => {
 
           <div className="menu-inner-shadow"></div>
 
-          <SidebarMenu />
+          <ScholarSidebarMenu />
         </aside>
         {/* / Menu */}
 
@@ -1041,8 +958,8 @@ const SneatLayout: React.FC = () => {
                             </div>
                           </div>
                           <div className="flex-grow-1">
-                            <span className="fw-semibold d-block">John Doe</span>
-                            <small className="text-muted">Admin</small>
+                            <span className="fw-semibold d-block">Scholar</span>
+                            <small className="text-muted">Academic Account</small>
                           </div>
                         </div>
                       </a>
@@ -1051,31 +968,22 @@ const SneatLayout: React.FC = () => {
                       <div className="dropdown-divider"></div>
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/userprofile/account-settings/account">
+                      <Link className="dropdown-item" to="/scholar/profile">
                         <Icon icon="hugeicons:user-circle" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">My Profile</span>
                       </Link>
                     </li>
                     <li>
-                      <a className="dropdown-item" href="#">
+                      <Link className="dropdown-item" to="/scholar/settings">
                         <Icon icon="hugeicons:settings-01" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">Settings</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        <span className="d-flex align-items-center align-middle">
-                          <Icon icon="hugeicons:wallet-01" style={{ fontSize: '1rem', marginRight: '0.5rem', flexShrink: 0 }} />
-                          <span className="flex-grow-1 align-middle">Billing</span>
-                          <span className="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                        </span>
-                      </a>
+                      </Link>
                     </li>
                     <li>
                       <div className="dropdown-divider"></div>
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/join">
+                      <Link className="dropdown-item" to="/scholarly/auth/sign-in">
                         <Icon icon="hugeicons:logout-01" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">Log Out</span>
                       </Link>
@@ -1096,8 +1004,6 @@ const SneatLayout: React.FC = () => {
             </div>
             {/* / Content */}
 
-            {/* / Footer */}
-
             <div className="content-backdrop fade"></div>
           </div>
           {/* Content wrapper */}
@@ -1115,4 +1021,4 @@ const SneatLayout: React.FC = () => {
   );
 };
 
-export default SneatLayout;
+export default ScholarLayout;

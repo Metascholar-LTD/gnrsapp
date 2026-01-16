@@ -615,6 +615,14 @@ const ArticleView: React.FC = () => {
                 <Download size={14} />
                 PDF
               </button>
+              <Link
+                to="/scholarly/auth/sign-in"
+                className="sr-article-actions__btn"
+                style={{ textDecoration: 'none' }}
+                title="Sign in to claim authorship"
+              >
+                Claim Authorship
+              </Link>
             </div>
           </div>
         </div>

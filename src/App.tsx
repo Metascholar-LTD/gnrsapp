@@ -126,6 +126,16 @@ import ScholarlyRankings from "./pages/scholarly/Rankings";
 import ScholarlyUniversityProfile from "./pages/scholarly/UniversityProfile";
 import ScholarlyArticles from "./pages/scholarly/Articles";
 import ScholarlyArticleView from "./pages/scholarly/ArticleView";
+// Scholar Auth & Management
+import ScholarSignUp from "./pages/scholarly/auth/SignUp";
+import ScholarSignIn from "./pages/scholarly/auth/SignIn";
+import CompleteProfile from "./pages/scholarly/auth/CompleteProfile";
+import ResetPassword from "./pages/scholarly/auth/ResetPassword";
+import VerifyEmail from "./pages/scholarly/auth/VerifyEmail";
+import ScholarProfile from "./pages/scholarly/ScholarProfile";
+import ScholarLayout from "./pages/scholarly/ScholarLayout";
+import ScholarDashboard from "./pages/scholarly/ScholarDashboard";
+import SubmitPaper from "./pages/scholarly/SubmitPaper";
 
 const queryClient = new QueryClient();
 
@@ -221,6 +231,20 @@ const App = () => (
           <Route path="/scholarly/universities/:slug" element={<ScholarlyUniversityProfile />} />
           <Route path="/scholarly/articles" element={<ScholarlyArticles />} />
           <Route path="/scholarly/articles/:id" element={<ScholarlyArticleView />} />
+          {/* Scholar Auth Routes */}
+          <Route path="/scholarly/auth/sign-up" element={<ScholarSignUp />} />
+          <Route path="/scholarly/auth/sign-in" element={<ScholarSignIn />} />
+          <Route path="/scholarly/auth/complete-profile" element={<CompleteProfile />} />
+          <Route path="/scholarly/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/scholarly/auth/verify-email" element={<VerifyEmail />} />
+          {/* Scholar Public Routes */}
+          <Route path="/scholarly/scholars/:id" element={<ScholarProfile />} />
+          {/* Scholar Dashboard Routes - Inside Layout */}
+          <Route path="/scholar" element={<ScholarLayout />}>
+            <Route index element={<ScholarDashboard />} />
+            <Route path="dashboard" element={<ScholarDashboard />} />
+            <Route path="submit-paper" element={<SubmitPaper />} />
+          </Route>
           {/* News Routes */}
           <Route path="/news" element={<NewsHub />} />
           <Route path="/news/:id" element={<NewsArticle />} />

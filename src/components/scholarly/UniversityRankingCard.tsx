@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, TrendingUp, Building2 } from 'lucide-react';
+import { TrendingUp, Building2 } from 'lucide-react';
 import { MovementIndicator } from './MovementIndicator';
 import { Sparkline } from './RankingCharts';
 import type { RankedUniversity } from '@/utils/scholarlyRankingTypes';
@@ -204,14 +204,6 @@ export const UniversityRankingCard: React.FC<UniversityRankingCardProps> = ({
       opacity: 0.7;
     }
 
-    .sr-ranking-card__arrow {
-      display: flex;
-      align-items: center;
-      color: #A8A29E;
-      margin-left: 8px;
-      flex-shrink: 0;
-    }
-
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .sr-ranking-card {
@@ -317,10 +309,6 @@ export const UniversityRankingCard: React.FC<UniversityRankingCardProps> = ({
             />
           </div>
         )}
-
-        <div className="sr-ranking-card__arrow">
-          <ExternalLink size={16} />
-        </div>
       </Link>
     </>
   );

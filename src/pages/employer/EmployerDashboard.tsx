@@ -1316,9 +1316,9 @@ const EmployerDashboard: React.FC = () => {
                         2025
                       </button>
                       <div className="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
-                        <a className="dropdown-item" href="javascript:void(0);">2024</a>
-                        <a className="dropdown-item" href="javascript:void(0);">2023</a>
-                        <a className="dropdown-item" href="javascript:void(0);">2022</a>
+                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2024</a>
+                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2023</a>
+                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2022</a>
                       </div>
                     </div>
                   </div>

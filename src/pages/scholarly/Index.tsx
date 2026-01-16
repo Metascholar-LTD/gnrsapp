@@ -593,6 +593,10 @@ const ScholarlyIndex: React.FC = () => {
                   <BookOpen size={18} />
                   Browse Articles
                 </Link>
+                <Link to="/scholarly/auth/sign-up" className="sr-landing-hero__btn sr-landing-hero__btn--secondary">
+                  <Users size={18} />
+                  Join as Scholar
+                </Link>
               </div>
             </div>
           </div>

@@ -281,8 +281,11 @@ const EmployerLayout: React.FC = () => {
           display: none !important;
         }
 
-        .layout-wrapper.layout-menu-collapsed .menu-sub {
-          display: none !important;
+        /* Only hide menu-sub on desktop when collapsed - not on mobile/tablet */
+        @media (min-width: 1200px) {
+          .layout-wrapper.layout-menu-collapsed .menu-sub {
+            display: none !important;
+          }
         }
 
         .layout-wrapper.layout-menu-collapsed .menu-item {
@@ -427,7 +430,8 @@ const EmployerLayout: React.FC = () => {
           background-color: rgba(0, 0, 0, 0.04) !important;
         }
 
-        @media (max-width: 575.98px) {
+        /* Mobile: max-width 767px */
+        @media (max-width: 767px) {
           .layout-wrapper .layout-menu {
             position: fixed !important;
             top: 0 !important;
@@ -475,6 +479,7 @@ const EmployerLayout: React.FC = () => {
             text-align: left !important;
             gap: 0.75rem !important;
             margin: 0 !important;
+            position: relative !important;
           }
 
           .layout-wrapper .layout-menu .menu-item .menu-link .menu-icon {
@@ -509,6 +514,41 @@ const EmployerLayout: React.FC = () => {
             text-align: left !important;
           }
 
+          /* Mobile: Ensure submenus work properly */
+          .layout-wrapper .layout-menu .menu-item.open .menu-sub,
+          .layout-wrapper .layout-menu .menu-sub.show {
+            display: block !important;
+          }
+
+          /* Mobile: Sub-menu item styling - proper padding to avoid dot conflict */
+          .layout-wrapper .layout-menu .menu-sub .menu-link {
+            padding-left: 3.5rem !important;
+          }
+
+          /* Mobile: Show dropdown toggle arrow - matching desktop chevron style */
+          .layout-wrapper .layout-menu .menu-toggle {
+            padding-right: calc(1.5rem + 1.26em) !important;
+          }
+
+          .layout-wrapper .layout-menu .menu-toggle::after {
+            content: '' !important;
+            position: absolute !important;
+            right: 1rem !important;
+            top: 50% !important;
+            display: block !important;
+            width: 0.42em !important;
+            height: 0.42em !important;
+            border: 1px solid !important;
+            border-bottom: 0 !important;
+            border-left: 0 !important;
+            transform: translateY(-50%) rotate(45deg) !important;
+            transition: transform 0.3s ease !important;
+          }
+
+          .layout-wrapper .layout-menu .menu-item.open > .menu-toggle::after {
+            transform: translateY(-50%) rotate(135deg) !important;
+          }
+
           .layout-wrapper .layout-overlay {
             position: fixed !important;
             top: 0 !important;
@@ -530,7 +570,8 @@ const EmployerLayout: React.FC = () => {
           }
         }
 
-        @media (min-width: 576px) and (max-width: 1199.98px) {
+        /* Tablet: 768px to 1199px */
+        @media (min-width: 768px) and (max-width: 1199px) {
           .layout-wrapper {
             position: relative !important;
             overflow: visible !important;
@@ -557,6 +598,7 @@ const EmployerLayout: React.FC = () => {
             gap: 0.75rem !important;
             padding: 0.75rem 1.5rem !important;
             margin: 0 !important;
+            position: relative !important;
           }
 
           .layout-wrapper .layout-menu .menu-item .menu-link .menu-icon {
@@ -678,9 +720,45 @@ const EmployerLayout: React.FC = () => {
             opacity: 1 !important;
             visibility: visible !important;
           }
+
+          /* Tablet: Ensure submenus work properly */
+          .layout-wrapper .layout-menu .menu-item.open .menu-sub,
+          .layout-wrapper .layout-menu .menu-sub.show {
+            display: block !important;
+          }
+
+          /* Tablet: Sub-menu item styling - proper padding to avoid dot conflict */
+          .layout-wrapper .layout-menu .menu-sub .menu-link {
+            padding-left: 3.5rem !important;
+          }
+
+          /* Tablet: Show dropdown toggle arrow - matching desktop chevron style */
+          .layout-wrapper .layout-menu .menu-toggle {
+            padding-right: calc(1.5rem + 1.26em) !important;
+          }
+
+          .layout-wrapper .layout-menu .menu-toggle::after {
+            content: '' !important;
+            position: absolute !important;
+            right: 1rem !important;
+            top: 50% !important;
+            display: block !important;
+            width: 0.42em !important;
+            height: 0.42em !important;
+            border: 1px solid !important;
+            border-bottom: 0 !important;
+            border-left: 0 !important;
+            transform: translateY(-50%) rotate(45deg) !important;
+            transition: transform 0.3s ease !important;
+          }
+
+          .layout-wrapper .layout-menu .menu-item.open > .menu-toggle::after {
+            transform: translateY(-50%) rotate(135deg) !important;
+          }
         }
 
-        @media (min-width: 1200px) and (max-width: 1599.98px) {
+        /* Small Desktop: 1200px to 1599px */
+        @media (min-width: 1200px) and (max-width: 1599px) {
           .layout-wrapper .layout-menu {
             position: fixed !important;
             top: 0 !important;
@@ -706,6 +784,7 @@ const EmployerLayout: React.FC = () => {
           }
         }
 
+        /* Large Desktop: min-width 1600px */
         @media (min-width: 1600px) {
           .layout-wrapper .layout-menu {
             position: fixed !important;
@@ -732,6 +811,7 @@ const EmployerLayout: React.FC = () => {
           }
         }
 
+        /* Desktop shared styles (1200px+) */
         @media (min-width: 1200px) {
           .layout-wrapper .layout-menu {
             left: 0 !important;

@@ -41,6 +41,8 @@ All colors MUST be HSL.
     --border: 165 20% 90%;
     --input: 165 20% 90%;
     --ring: 165 70% 40%;
+    --skeleton: 0 0% 90%;
+    --btn-border: 214 31.8% 91.4%;
 
     /* Education hub premium palette (Elsevier + MetaConsult inspired) */
     --edu-navy: 224 67% 18%;
@@ -98,6 +100,15 @@ All colors MUST be HSL.
     --border: 165 30% 25%;
     --input: 165 30% 25%;
     --ring: 165 70% 50%;
+    --skeleton: 218 36% 16%;
+    --btn-border: 217 32.6% 17.5%;
+  }
+}
+
+@layer components {
+  .g-button {
+    @apply rounded-[var(--radius)] border;
+    border-color: hsl(var(--btn-border));
   }
 }
 
@@ -470,4 +481,30 @@ All colors MUST be HSL.
 /* Responsive Spacing Utilities */
 .responsive-padding {
   padding: clamp(1rem, 3vw, 2rem);
+}
+
+/* Hide browser default password reveal icons */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button:hover,
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-reveal:hover,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Firefox */
+input[type="password"] {
+  -moz-appearance: textfield;
+}
+
+input[type="password"]::-moz-reveal-password {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }

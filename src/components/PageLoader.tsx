@@ -126,9 +126,43 @@ export const PageLoader = () => {
   const checkmarkCircleIdPrefix = "loadingCheckCircleSVG-";
   const minDisplayTimeRef = useRef<number>(2500); // Minimum 2.5 seconds display time
   const initializedRef = useRef<boolean>(false);
+  const previousPathRef = useRef<string>('');
+
+  // Check if path is an auth page
+  const isAuthPage = (path: string): boolean => {
+    return path.startsWith('/scholarly/auth/');
+  };
 
   // Reset loader on route change
   useEffect(() => {
+    const currentPath = location.pathname;
+    const previousPath = previousPathRef.current;
+    
+    // Skip loader if navigating between auth pages
+    if (isAuthPage(currentPath) && isAuthPage(previousPath) && previousPath !== '') {
+      // If loader is already showing, hide it immediately
+      if (isLoading) {
+        setIsLoading(false);
+        document.body.classList.add('loaded', 'preloaded');
+        document.documentElement.classList.add('loaded', 'preloaded');
+        document.body.style.setProperty('overflow', 'auto', 'important');
+        document.documentElement.style.setProperty('overflow', 'auto', 'important');
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+          rootElement.style.opacity = '1';
+          rootElement.style.pointerEvents = 'auto';
+        }
+        const loaderWrapper = document.getElementById('loader-wrapper');
+        if (loaderWrapper) {
+          loaderWrapper.style.display = 'none';
+        }
+      }
+      previousPathRef.current = currentPath;
+      return; // Don't show loader when switching between auth pages
+    }
+    
+    previousPathRef.current = currentPath;
+    
     setIsLoading(true);
     currentYRef.current = 0;
     startTimeRef.current = Date.now();
