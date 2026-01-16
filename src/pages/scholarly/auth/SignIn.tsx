@@ -82,6 +82,7 @@ const ScholarSignIn: React.FC = () => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
       }}
     >
       {/* Overlay for better readability */}

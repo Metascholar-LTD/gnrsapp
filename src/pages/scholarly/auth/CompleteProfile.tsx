@@ -431,6 +431,7 @@ const CompleteProfile: React.FC = () => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
       }}
     >
       {/* Blurred Background Overlay */}

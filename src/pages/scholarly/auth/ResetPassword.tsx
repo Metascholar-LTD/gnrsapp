@@ -1,248 +1,18 @@
 // ============================================================================
 // PASSWORD RESET PAGE
 // ============================================================================
-// Elegant password reset flow for scholars
+// Modern password reset flow matching auth pages design
 // ============================================================================
 
-import React, { useState } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-// No Navigation or Footer on auth pages - full screen experience
-import {
-  GraduationCap,
-  Mail,
-  CheckCircle2,
-  AlertCircle,
-  ArrowLeft,
-} from 'lucide-react';
+import { Mail, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const ResetPassword: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const styles = `
-    .sr-auth-page {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #FAFAF9 0%, #F5F5F4 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      position: fixed;
-      inset: 0;
-      overflow-y: auto;
-    }
-
-    .sr-auth-container {
-      width: 100%;
-      max-width: 440px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sr-auth-card {
-      width: 100%;
-      background: #FFFFFF;
-      border: 1px solid #E7E5E4;
-      border-radius: 16px;
-      padding: 48px 40px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-    }
-
-    @media (max-width: 640px) {
-      .sr-auth-card {
-        padding: 32px 24px;
-      }
-    }
-
-    .sr-auth-header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .sr-auth-header__icon {
-      width: 64px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(30, 58, 95, 0.08);
-      border-radius: 12px;
-      color: #1E3A5F;
-      margin: 0 auto 20px;
-    }
-
-    .sr-auth-header__icon--success {
-      background: rgba(45, 90, 71, 0.1);
-      color: #2D5A47;
-    }
-
-    .sr-auth-header__title {
-      font-family: 'Crimson Text', Georgia, serif;
-      font-size: 2rem;
-      font-weight: 600;
-      color: #1C1917;
-      margin: 0 0 8px 0;
-    }
-
-    .sr-auth-header__subtitle {
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.9375rem;
-      color: #57534E;
-      margin: 0;
-      line-height: 1.6;
-    }
-
-    .sr-auth-form {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .sr-auth-form__group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .sr-auth-form__label {
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #1C1917;
-    }
-
-    .sr-auth-form__input-wrapper {
-      position: relative;
-    }
-
-    .sr-auth-form__input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #E7E5E4;
-      border-radius: 8px;
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.9375rem;
-      color: #1C1917;
-      background: #FFFFFF;
-      transition: all 0.2s ease;
-    }
-
-    .sr-auth-form__input:focus {
-      outline: none;
-      border-color: #1E3A5F;
-      box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-    }
-
-    .sr-auth-form__input--error {
-      border-color: #7C2D36;
-    }
-
-    .sr-auth-form__input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #A8A29E;
-      pointer-events: none;
-    }
-
-    .sr-auth-form__input--with-icon {
-      padding-left: 44px;
-    }
-
-    .sr-auth-form__error {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.8125rem;
-      color: #7C2D36;
-      margin-top: 4px;
-    }
-
-    .sr-auth-form__submit {
-      width: 100%;
-      padding: 14px 24px;
-      background: #1E3A5F;
-      color: #FFFFFF;
-      border: none;
-      border-radius: 8px;
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      margin-top: 8px;
-    }
-
-    .sr-auth-form__submit:hover:not(:disabled) {
-      background: #2D4A6F;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
-    }
-
-    .sr-auth-form__submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .sr-auth-success {
-      text-align: center;
-      padding: 24px 0;
-    }
-
-    .sr-auth-success__message {
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.9375rem;
-      color: #57534E;
-      line-height: 1.6;
-      margin: 0 0 24px 0;
-    }
-
-    .sr-auth-success__email {
-      font-weight: 600;
-      color: #1C1917;
-    }
-
-    .sr-auth-back {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.875rem;
-      color: #1E3A5F;
-      text-decoration: none;
-      margin-bottom: 24px;
-      transition: color 0.15s ease;
-    }
-
-    .sr-auth-back:hover {
-      color: #2D4A6F;
-    }
-
-    .sr-auth-footer {
-      text-align: center;
-      margin-top: 32px;
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.875rem;
-      color: #57534E;
-    }
-
-    .sr-auth-footer__link {
-      color: #1E3A5F;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.15s ease;
-    }
-
-    .sr-auth-footer__link:hover {
-      color: #2D4A6F;
-      text-decoration: underline;
-    }
-  `;
 
   const validateEmail = (): boolean => {
     if (!email.trim()) {
@@ -257,7 +27,7 @@ const ResetPassword: React.FC = () => {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!validateEmail()) {
@@ -275,107 +45,163 @@ const ResetPassword: React.FC = () => {
 
   if (isSubmitted) {
     return (
-      <>
-        <style>{styles}</style>
-        <div className="sr-auth-page">
-          <div className="sr-auth-container">
-            <div className="sr-auth-card">
-              <div className="sr-auth-header">
-                <div className="sr-auth-header__icon sr-auth-header__icon--success">
-                  <CheckCircle2 size={32} />
-                </div>
-                <h1 className="sr-auth-header__title">Check Your Email</h1>
-                <p className="sr-auth-header__subtitle">
-                  We've sent password reset instructions to your email address
-                </p>
-              </div>
-
-              <div className="sr-auth-success">
-                <p className="sr-auth-success__message">
-                  If an account exists for <span className="sr-auth-success__email">{email}</span>, you will receive password reset instructions shortly.
-                </p>
-                <p className="sr-auth-success__message" style={{ fontSize: '0.875rem', color: '#78716C' }}>
-                  Didn't receive the email? Check your spam folder or try again.
-                </p>
-              </div>
-
-              <div className="sr-auth-footer">
-                <Link to="/scholarly/auth/sign-in" className="sr-auth-footer__link">
-                  <ArrowLeft size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-                  Back to Sign In
-                </Link>
-              </div>
+      <div 
+        className='min-h-screen flex items-center justify-center px-4 py-12 relative'
+        style={{
+          backgroundImage: 'url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/38816/image-from-rawpixel-id-2210775-jpeg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
+        }}
+      >
+        {/* Blurred Background Overlay */}
+        <div className='absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-md'></div>
+        
+        <div className='relative z-10 w-full max-w-md'>
+          {/* Form Container */}
+          <div className='bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-8 md:p-10'>
+            {/* Header */}
+            <div className='text-center mb-8'>
+              <h1 className='text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-2'>
+                Check Your Email
+              </h1>
+              <p className='text-slate-600 dark:text-slate-400 text-sm'>
+                We've sent password reset instructions to your email address
+              </p>
             </div>
+
+            {/* Success Message */}
+            <div className='mb-6 p-4 rounded-xl bg-green-50/50 dark:bg-green-900/10 border border-green-200/50 dark:border-green-800/50'>
+              <p className='text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-2'>
+                If an account exists for <span className='font-semibold text-slate-900 dark:text-slate-100'>{email}</span>, you will receive password reset instructions shortly.
+              </p>
+              <p className='text-xs text-slate-600 dark:text-slate-400'>
+                Didn't receive the email? Check your spam folder or try again.
+              </p>
+            </div>
+
+            {/* Back Button */}
+            <Link 
+              to="/scholarly/auth/sign-in" 
+              className='w-full h-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md'
+            >
+              <ArrowLeft className='w-5 h-5' />
+              Back to Sign In
+            </Link>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <style>{styles}</style>
-      <div className="sr-auth-page">
-        <div className="sr-auth-container">
-          <div className="sr-auth-card">
-            <Link to="/scholarly/auth/sign-in" className="sr-auth-back">
-              <ArrowLeft size={16} />
-              Back to Sign In
-            </Link>
+    <div 
+      className='min-h-screen flex items-center justify-center px-4 py-12 relative'
+      style={{
+        backgroundImage: 'url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/38816/image-from-rawpixel-id-2210775-jpeg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+      }}
+    >
+      {/* Blurred Background Overlay */}
+      <div className='absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-md'></div>
+      
+      <div className='relative z-10 w-full max-w-md'>
+        {/* Form Container */}
+        <div className='bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-8 md:p-10'>
+          {/* Back Link */}
+          <Link 
+            to="/scholarly/auth/sign-in" 
+            className='inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-6 transition-colors'
+          >
+            <ArrowLeft className='w-4 h-4' />
+            Back to Sign In
+          </Link>
 
-            <div className="sr-auth-header">
-              <div className="sr-auth-header__icon">
-                <GraduationCap size={32} />
+          {/* Header */}
+          <div className='text-center mb-8'>
+            <h1 className='text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-2'>
+              Reset Password
+            </h1>
+            <p className='text-slate-600 dark:text-slate-400 text-sm'>
+              Enter your email address and we'll send you instructions to reset your password
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className='space-y-5'>
+            {/* Email Field */}
+            <div className='space-y-2'>
+              <label htmlFor="email" className='text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2'>
+                <Mail className='w-4 h-4' />
+                Email Address
+              </label>
+              <div className='relative'>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="your.email@university.edu"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError('');
+                  }}
+                  className={`w-full h-12 px-4 rounded-xl border-2 ${
+                    error 
+                      ? 'border-red-300 dark:border-red-700' 
+                      : 'border-slate-200 dark:border-slate-700'
+                  } bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200`}
+                  required
+                />
               </div>
-              <h1 className="sr-auth-header__title">Reset Password</h1>
-              <p className="sr-auth-header__subtitle">
-                Enter your email address and we'll send you instructions to reset your password
-              </p>
+              {error && (
+                <div className='flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'>
+                  <AlertCircle className='w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0' />
+                  <p className='text-red-600 dark:text-red-400 text-sm font-medium'>{error}</p>
+                </div>
+              )}
             </div>
 
-            <form className="sr-auth-form" onSubmit={handleSubmit}>
-              <div className="sr-auth-form__group">
-                <label className="sr-auth-form__label">Email Address</label>
-                <div className="sr-auth-form__input-wrapper">
-                  <Mail size={18} className="sr-auth-form__input-icon" />
-                  <input
-                    type="email"
-                    className={`sr-auth-form__input sr-auth-form__input--with-icon ${error ? 'sr-auth-form__input--error' : ''}`}
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setError('');
-                    }}
-                    placeholder="john.doe@university.edu"
-                  />
-                </div>
-                {error && (
-                  <div className="sr-auth-form__error">
-                    <AlertCircle size={14} />
-                    {error}
-                  </div>
-                )}
-              </div>
+            {/* Submit Button */}
+            <button
+              type='submit'
+              disabled={isSubmitting}
+              className='w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group'
+            >
+              {isSubmitting ? (
+                <>
+                  <div className='w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin' />
+                  <span>Sending...</span>
+                </>
+              ) : (
+                <>
+                  <span>Send Reset Instructions</span>
+                  <svg className='w-5 h-5 group-hover:translate-x-1 transition-transform' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
+                  </svg>
+                </>
+              )}
+            </button>
+          </form>
 
-              <button
-                type="submit"
-                className="sr-auth-form__submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Sending...' : 'Send Reset Instructions'}
-              </button>
-            </form>
-
-            <div className="sr-auth-footer">
+          {/* Footer */}
+          <div className='text-center pt-6 mt-6 border-t border-slate-200 dark:border-slate-700'>
+            <p className='text-sm text-slate-600 dark:text-slate-400'>
               Remember your password?{' '}
-              <Link to="/scholarly/auth/sign-in" className="sr-auth-footer__link">
+              <Link
+                to="/scholarly/auth/sign-in"
+                className='text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors'
+              >
                 Sign In
               </Link>
-            </div>
+            </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
