@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  Filter
+  Filter,
+  Plus
 } from "lucide-react";
 
 interface Institution {
@@ -30,14 +31,17 @@ interface Institution {
 interface AllInstitutionsManagerProps {
   onEdit: (institution: Institution) => void;
   onDelete: (institution: Institution) => void;
+  onAdd: () => void;
 }
 
-const AllInstitutionsManager = ({ onEdit, onDelete }: AllInstitutionsManagerProps) => {
+const AllInstitutionsManager = ({ onEdit, onDelete, onAdd }: AllInstitutionsManagerProps) => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadInstitutions();
@@ -47,7 +51,7 @@ const AllInstitutionsManager = ({ onEdit, onDelete }: AllInstitutionsManagerProp
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('universities' as any)
+        .from('institutions')
         .select('*')
         .order('name', { ascending: true });
 
@@ -131,6 +135,34 @@ const AllInstitutionsManager = ({ onEdit, onDelete }: AllInstitutionsManagerProp
     return matchesSearch && matchesStatus && matchesRegion;
   });
 
+  // Pagination
+  const totalPages = Math.ceil(filteredInstitutions.length / itemsPerPage);
+  const paginatedInstitutions = filteredInstitutions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+        pages.push(i);
+      }
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, regionFilter]);
+
   const uniqueRegions = Array.from(new Set(institutions.map(inst => inst.region).filter(Boolean))).sort();
 
   if (loading) {
@@ -147,6 +179,35 @@ const AllInstitutionsManager = ({ onEdit, onDelete }: AllInstitutionsManagerProp
   return (
     <div>
       <div id="aljg-filters" style={{ background: "white", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem", display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)" }}>
+        <button
+          onClick={onAdd}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.625rem 1.25rem",
+            background: "#3b82f6",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+            cursor: "pointer",
+            transition: "all 0.2s",
+            whiteSpace: "nowrap"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#2563eb";
+            e.currentTarget.style.transform = "translateY(-1px)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "#3b82f6";
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+        >
+          <Plus size={18} />
+          Add New Institution
+        </button>
         <div id="aljg-search-wrapper" style={{ position: "relative", flex: 1, minWidth: "280px" }}>
           <Search id="aljg-search-icon" style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#9ca3af", width: "18px", height: "18px", pointerEvents: "none" }} />
           <input
@@ -196,7 +257,7 @@ const AllInstitutionsManager = ({ onEdit, onDelete }: AllInstitutionsManagerProp
             </tr>
           </thead>
           <tbody>
-            {filteredInstitutions.map(inst => (
+            {paginatedInstitutions.map(inst => (
               <tr key={inst.id} style={{ borderBottom: "1px solid #f3f4f6", transition: "background 0.15s" }}>
                 <td style={{ padding: "1rem", fontSize: "0.875rem", color: "#374151", verticalAlign: "middle" }}>
                   <div className="aljg-gig-cell" style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
@@ -259,6 +320,142 @@ const AllInstitutionsManager = ({ onEdit, onDelete }: AllInstitutionsManagerProp
           <GraduationCap style={{ width: "48px", height: "48px", margin: "0 auto 1rem" }} />
           <p style={{ margin: 0, fontSize: "1rem", fontWeight: 600 }}>No institutions found</p>
           <p style={{ margin: "0.5rem 0 0", fontSize: "0.875rem" }}>Try adjusting your filters or search query</p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.5rem",
+          marginTop: "1.5rem",
+          padding: "1rem",
+          background: "white",
+          border: "1px solid #e5e7eb",
+          borderRadius: "12px",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)"
+        }}>
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            style={{
+              padding: "0.5rem 1rem",
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+              background: currentPage === 1 ? "#f9fafb" : "white",
+              color: currentPage === 1 ? "#9ca3af" : "#374151",
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              transition: "all 0.2s",
+              opacity: currentPage === 1 ? 0.5 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (currentPage !== 1) {
+                e.currentTarget.style.background = "#f3f4f6";
+                e.currentTarget.style.borderColor = "#d1d5db";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (currentPage !== 1) {
+                e.currentTarget.style.background = "white";
+                e.currentTarget.style.borderColor = "#e5e7eb";
+              }
+            }}
+          >
+            Previous
+          </button>
+
+          {getPageNumbers().map((page, idx) =>
+            page === '...' ? (
+              <span
+                key={`ellipsis-${idx}`}
+                style={{
+                  padding: "0.5rem 0.75rem",
+                  color: "#6b7280",
+                  fontSize: "0.875rem"
+                }}
+              >
+                ...
+              </span>
+            ) : (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page as number)}
+                style={{
+                  padding: "0.5rem 1rem",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  background: currentPage === page ? "#3b82f6" : "white",
+                  color: currentPage === page ? "white" : "#374151",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                  fontWeight: currentPage === page ? 600 : 500,
+                  transition: "all 0.2s",
+                  minWidth: "40px"
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== page) {
+                    e.currentTarget.style.background = "#f3f4f6";
+                    e.currentTarget.style.borderColor = "#d1d5db";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== page) {
+                    e.currentTarget.style.background = "white";
+                    e.currentTarget.style.borderColor = "#e5e7eb";
+                  }
+                }}
+              >
+                {page}
+              </button>
+            )
+          )}
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            style={{
+              padding: "0.5rem 1rem",
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+              background: currentPage === totalPages ? "#f9fafb" : "white",
+              color: currentPage === totalPages ? "#9ca3af" : "#374151",
+              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              transition: "all 0.2s",
+              opacity: currentPage === totalPages ? 0.5 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (currentPage !== totalPages) {
+                e.currentTarget.style.background = "#f3f4f6";
+                e.currentTarget.style.borderColor = "#d1d5db";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (currentPage !== totalPages) {
+                e.currentTarget.style.background = "white";
+                e.currentTarget.style.borderColor = "#e5e7eb";
+              }
+            }}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Pagination Info */}
+      {filteredInstitutions.length > 0 && (
+        <div style={{
+          textAlign: "center",
+          marginTop: "1rem",
+          fontSize: "0.875rem",
+          color: "#6b7280"
+        }}>
+          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredInstitutions.length)} of {filteredInstitutions.length} institutions
         </div>
       )}
     </div>

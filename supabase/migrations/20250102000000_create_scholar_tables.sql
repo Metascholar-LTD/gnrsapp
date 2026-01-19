@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS public.articles (
   pdf_url TEXT, -- URL to Supabase Storage bucket
   
   -- Publication Identifiers
-  identifier_type TEXT CHECK (identifier_type IS NULL OR identifier_type IN ('doi', 'issn', 'isbn', 'other')),
+  identifier_type TEXT,
   identifier_value TEXT,
   identifier_url TEXT,
   
@@ -146,6 +146,11 @@ CREATE TABLE IF NOT EXISTS public.article_references (
 
 -- Indexes for article_references
 CREATE INDEX IF NOT EXISTS idx_article_references_article_id ON public.article_references(article_id);
+
+-- Add constraint for identifier_type (must be done after table creation)
+ALTER TABLE public.articles 
+ADD CONSTRAINT articles_identifier_type_check 
+CHECK (identifier_type IS NULL OR identifier_type IN ('doi', 'issn', 'isbn', 'other'));
 
 -- ============================================================================
 -- 5. TRIGGERS AND FUNCTIONS

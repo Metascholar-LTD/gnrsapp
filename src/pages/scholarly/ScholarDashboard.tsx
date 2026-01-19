@@ -9,6 +9,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   FileText,
   TrendingUp,
@@ -24,8 +26,8 @@ import {
   LayoutGrid,
   List as ListIcon,
   ArrowRight,
+  Loader2,
 } from 'lucide-react';
-import { mockArticles, mockUniversities } from '@/utils/scholarlyRankingData';
 import { UniversityRankingCard, UniversityTableRow } from '@/components/scholarly/UniversityRankingCard';
 
 const ScholarDashboard: React.FC = () => {
@@ -34,6 +36,168 @@ const ScholarDashboard: React.FC = () => {
   const [universityViewMode, setUniversityViewMode] = useState<'cards' | 'table'>('cards');
   const [paperViewMode, setPaperViewMode] = useState<'cards' | 'table'>('cards');
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [institutions, setInstitutions] = useState<any[]>([]);
+
+  // Load data from Supabase
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        navigate('/scholarly/auth/sign-in');
+        return;
+      }
+
+      // Load profile
+      const { data: profileData } = await supabase
+        .from('profiles' as any)
+        .select('*, institutions(name, abbreviation, current_rank)')
+        .eq('user_id', session.user.id)
+        .single();
+      
+      if (profileData) setProfile(profileData);
+
+      // Load scholar's articles with authors
+      const { data: articlesData } = await supabase
+        .from('articles' as any)
+        .select(`
+          *,
+          article_authors(*)
+        `)
+        .eq('submitted_by', session.user.id)
+        .eq('is_current_version', true)
+        .order('submitted_at', { ascending: false });
+
+      if (articlesData) {
+        // Transform articles to match expected format
+        const transformedArticles = articlesData.map((article: any) => ({
+          ...article,
+          slug: article.id, // Use ID as slug for now
+          authors: article.article_authors || [],
+          publishedAt: article.published_at || article.submitted_at,
+        }));
+        setArticles(transformedArticles);
+      }
+
+      // Load top institutions for ranking
+      const { data: institutionsData } = await supabase
+        .from('institutions' as any)
+        .select('*')
+        .eq('status', 'active')
+        .order('current_rank', { ascending: true })
+        .limit(5);
+
+      if (institutionsData) {
+        const institutionIds = institutionsData.map((inst: any) => inst.id);
+        
+        // Fetch ALL articles for these institutions to calculate total counts
+        const { data: allArticlesData } = await supabase
+          .from('articles' as any)
+          .select('institution_id, published_at, created_at')
+          .eq('status', 'approved')
+          .eq('is_current_version', true)
+          .in('institution_id', institutionIds);
+
+        // Fetch monthly article counts for last 6 months
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        
+        const { data: articlesData } = await supabase
+          .from('articles' as any)
+          .select('institution_id, published_at, created_at')
+          .eq('status', 'approved')
+          .eq('is_current_version', true)
+          .in('institution_id', institutionIds)
+          .gte('created_at', sixMonthsAgo.toISOString());
+
+        // Calculate current month boundaries
+        const now = new Date();
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        // Calculate total articles per institution
+        const totalArticlesByInstitution: { [key: string]: number } = {};
+        if (allArticlesData) {
+          allArticlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            totalArticlesByInstitution[instId] = (totalArticlesByInstitution[instId] || 0) + 1;
+          });
+        }
+
+        // Calculate articles this month per institution
+        const articlesThisMonthByInstitution: { [key: string]: number } = {};
+        if (allArticlesData) {
+          allArticlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            
+            const date = article.published_at || article.created_at;
+            if (!date) return;
+            
+            const articleDate = new Date(date);
+            if (articleDate >= currentMonthStart) {
+              articlesThisMonthByInstitution[instId] = (articlesThisMonthByInstitution[instId] || 0) + 1;
+            }
+          });
+        }
+
+        // Group articles by institution and month
+        const monthlyCountsByInstitution: { [key: string]: { [key: string]: number } } = {};
+        
+        if (articlesData) {
+          articlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            
+            const date = article.published_at || article.created_at;
+            if (!date) return;
+            
+            const articleDate = new Date(date);
+            const monthKey = `${articleDate.getFullYear()}-${String(articleDate.getMonth() + 1).padStart(2, '0')}`;
+            
+            if (!monthlyCountsByInstitution[instId]) {
+              monthlyCountsByInstitution[instId] = {};
+            }
+            monthlyCountsByInstitution[instId][monthKey] = (monthlyCountsByInstitution[instId][monthKey] || 0) + 1;
+          });
+        }
+
+        // Generate last 6 months array
+        const last6Months: string[] = [];
+        for (let i = 5; i >= 0; i--) {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          last6Months.push(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+        }
+
+        // Add monthly counts and calculated article counts to institutions
+        const institutionsWithTrends = institutionsData.map((inst: any) => {
+          const instMonthlyCounts = monthlyCountsByInstitution[inst.id] || {};
+          const monthlyArticleCounts = last6Months.map(month => instMonthlyCounts[month] || 0);
+          return {
+            ...inst,
+            total_articles: totalArticlesByInstitution[inst.id] || 0, // Override with calculated value
+            articles_this_month: articlesThisMonthByInstitution[inst.id] || 0, // Override with calculated value
+            monthlyArticleCounts: monthlyArticleCounts,
+          };
+        });
+        
+        setInstitutions(institutionsWithTrends);
+      }
+    } catch (error: any) {
+      console.error('Error loading dashboard data:', error);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Force cards view on mobile
   useEffect(() => {
@@ -445,19 +609,33 @@ const ScholarDashboard: React.FC = () => {
     };
   }, []);
 
+  // Calculate stats from real data
   const stats = {
-    totalPapers: 12,
-    approved: 8,
-    pending: 3,
-    rejected: 1,
-    totalViews: 45678,
-    totalDownloads: 12345,
-    totalCitations: 234,
-    universityRanking: 1,
-    contributionScore: 8.5,
+    totalPapers: articles.length,
+    approved: articles.filter(a => a.status === 'approved').length,
+    pending: articles.filter(a => a.status === 'under-review' || a.status === 'revision-requested').length,
+    rejected: articles.filter(a => a.status === 'rejected').length,
+    totalViews: articles.reduce((sum, a) => sum + (a.views || 0), 0),
+    totalDownloads: articles.reduce((sum, a) => sum + (a.downloads || 0), 0),
+    totalCitations: articles.reduce((sum, a) => sum + (a.citations || 0), 0),
+    universityRanking: profile?.institutions?.current_rank || null,
+    contributionScore: profile?.total_articles || 0,
   };
 
-  const recentPapers = mockArticles.slice(0, 5);
+  const recentPapers = articles.slice(0, 5);
+
+  if (loading) {
+    return (
+      <div className="container-fluid p-0">
+        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
+          <div className="text-center">
+            <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite' }} />
+            <p>Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-fluid p-0">
@@ -693,10 +871,32 @@ const ScholarDashboard: React.FC = () => {
             <div className="card-body p-0">
               {universityViewMode === 'cards' ? (
                 <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {mockUniversities.slice(0, 5).map((university) => (
-                    <div key={university.id}>
+                  {institutions.map((institution: any, index: number) => (
+                    <div key={institution.id}>
                       <UniversityRankingCard 
-                        university={university} 
+                        university={{
+                          id: institution.id,
+                          slug: institution.id,
+                          name: institution.name,
+                          abbreviation: institution.abbreviation,
+                          logo: institution.logo,
+                          country: institution.country || 'Ghana',
+                          city: institution.city || '',
+                          currentRank: index + 1, // Always sequential
+                          previousRank: institution.previous_rank,
+                          movement: institution.movement || 'stable',
+                          movementDelta: 0,
+                          totalArticles: institution.total_articles || 0,
+                          articlesThisMonth: institution.articles_this_month || 0,
+                          articlesThisYear: 0,
+                          totalCitations: 0,
+                          totalViews: 0,
+                          totalDownloads: 0,
+                          hIndex: 0,
+                          monthlyArticleCounts: institution.monthlyArticleCounts || [],
+                          createdAt: institution.created_at,
+                          updatedAt: institution.updated_at,
+                        }} 
                         variant="compact"
                         showTrend={false}
                       />
@@ -730,10 +930,32 @@ const ScholarDashboard: React.FC = () => {
                     <span style={{ textAlign: 'right' }}>This Month</span>
                     <span style={{ textAlign: 'right' }}>Trend</span>
                   </div>
-                  {mockUniversities.slice(0, 5).map((university, index) => (
+                  {institutions.map((institution: any, index: number) => (
                     <UniversityTableRow
-                      key={university.id}
-                      university={university}
+                      key={institution.id}
+                      university={{
+                        id: institution.id,
+                        slug: institution.id,
+                        name: institution.name,
+                        abbreviation: institution.abbreviation,
+                        logo: institution.logo,
+                        country: institution.country || 'Ghana',
+                        city: institution.city || '',
+                        currentRank: index + 1, // Always sequential
+                        previousRank: institution.previous_rank,
+                        movement: institution.movement || 'stable',
+                        movementDelta: 0,
+                        totalArticles: institution.total_articles || 0,
+                        articlesThisMonth: institution.articles_this_month || 0,
+                        articlesThisYear: 0,
+                        totalCitations: 0,
+                        totalViews: 0,
+                        totalDownloads: 0,
+                        hIndex: 0,
+                        monthlyArticleCounts: institution.monthlyArticleCounts || [],
+                        createdAt: institution.created_at,
+                        updatedAt: institution.updated_at,
+                      }}
                       isFirst={index === 0}
                     />
                   ))}
@@ -850,7 +1072,7 @@ const ScholarDashboard: React.FC = () => {
                   {recentPapers.slice(0, 5).map((paper) => (
                     <Link
                       key={paper.id}
-                      to={`/scholarly/articles/${paper.slug}`}
+                      to={`/scholarly/articles/${paper.id}`}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -901,8 +1123,9 @@ const ScholarDashboard: React.FC = () => {
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
                         }}>
-                          {paper.authors.slice(0, 2).map(a => a.name).join(', ')}
-                          {paper.authors.length > 2 && ' et al.'}
+                          {paper.authors && paper.authors.length > 0 
+                            ? paper.authors.slice(0, 2).map((a: any) => a.name).join(', ') + (paper.authors.length > 2 ? ' et al.' : '')
+                            : 'No authors listed'}
                         </p>
                         <p style={{
                           fontFamily: "'Source Sans Pro', system-ui, sans-serif",
@@ -910,7 +1133,11 @@ const ScholarDashboard: React.FC = () => {
                           color: '#A8A29E',
                           margin: '4px 0 0 0',
                         }}>
-                          {new Date(paper.publishedAt).toLocaleDateString()}
+                          {paper.publishedAt 
+                            ? new Date(paper.publishedAt).toLocaleDateString()
+                            : paper.submitted_at 
+                            ? new Date(paper.submitted_at).toLocaleDateString()
+                            : 'Date not available'}
                         </p>
                       </div>
                       <div style={{
@@ -967,7 +1194,7 @@ const ScholarDashboard: React.FC = () => {
                   {recentPapers.slice(0, 5).map((paper, index) => (
                     <Link
                       key={paper.id}
-                      to={`/scholarly/articles/${paper.slug}`}
+                      to={`/scholarly/articles/${paper.id}`}
                       style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 120px 100px 100px',
@@ -1009,8 +1236,9 @@ const ScholarDashboard: React.FC = () => {
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
                         }}>
-                          {paper.authors.slice(0, 2).map(a => a.name).join(', ')}
-                          {paper.authors.length > 2 && ' et al.'}
+                          {paper.authors && paper.authors.length > 0 
+                            ? paper.authors.slice(0, 2).map((a: any) => a.name).join(', ') + (paper.authors.length > 2 ? ' et al.' : '')
+                            : 'No authors listed'}
                         </p>
                       </div>
                       <div style={{

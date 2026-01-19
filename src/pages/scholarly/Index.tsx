@@ -5,10 +5,12 @@
 // Academic, authoritative design communicating trust and credibility
 // ============================================================================
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   Award,
   BookOpen,
@@ -20,18 +22,227 @@ import {
   BarChart3,
   FileText,
   Search,
+  Loader2,
 } from 'lucide-react';
 import { UniversityRankingCard } from '@/components/scholarly/UniversityRankingCard';
 import { ArticleCard } from '@/components/scholarly/ArticleCard';
 import { StatCard } from '@/components/scholarly/StatCard';
-import {
-  mockUniversities,
-  mockArticles,
-  mockPlatformStats,
-  formatNumber,
-} from '@/utils/scholarlyRankingData';
+
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toLocaleString();
+};
 
 const ScholarlyIndex: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [topUniversities, setTopUniversities] = useState<any[]>([]);
+  const [recentArticles, setRecentArticles] = useState<any[]>([]);
+  const [platformStats, setPlatformStats] = useState({
+    totalArticles: 0,
+    totalUniversities: 0,
+    totalAuthors: 0,
+    totalCountries: 0,
+  });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Load top 5 universities
+      const { data: universitiesData } = await supabase
+        .from('institutions' as any)
+        .select('*')
+        .eq('status', 'active')
+        .order('current_rank', { ascending: true })
+        .limit(5);
+
+      if (universitiesData) {
+        const institutionIds = universitiesData.map((inst: any) => inst.id);
+        
+        // Fetch ALL articles for these institutions to calculate total counts
+        const { data: allArticlesData } = await supabase
+          .from('articles' as any)
+          .select('institution_id, published_at, created_at')
+          .eq('status', 'approved')
+          .eq('is_current_version', true)
+          .in('institution_id', institutionIds);
+
+        // Fetch monthly article counts for last 6 months
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        
+        const { data: articlesData } = await supabase
+          .from('articles' as any)
+          .select('institution_id, published_at, created_at')
+          .eq('status', 'approved')
+          .eq('is_current_version', true)
+          .in('institution_id', institutionIds)
+          .gte('created_at', sixMonthsAgo.toISOString());
+
+        // Calculate current month boundaries
+        const now = new Date();
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        // Calculate total articles per institution
+        const totalArticlesByInstitution: { [key: string]: number } = {};
+        if (allArticlesData) {
+          allArticlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            totalArticlesByInstitution[instId] = (totalArticlesByInstitution[instId] || 0) + 1;
+          });
+        }
+
+        // Calculate articles this month per institution
+        const articlesThisMonthByInstitution: { [key: string]: number } = {};
+        if (allArticlesData) {
+          allArticlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            
+            const date = article.published_at || article.created_at;
+            if (!date) return;
+            
+            const articleDate = new Date(date);
+            if (articleDate >= currentMonthStart) {
+              articlesThisMonthByInstitution[instId] = (articlesThisMonthByInstitution[instId] || 0) + 1;
+            }
+          });
+        }
+
+        // Group articles by institution and month
+        const monthlyCountsByInstitution: { [key: string]: { [key: string]: number } } = {};
+        
+        if (articlesData) {
+          articlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            
+            const date = article.published_at || article.created_at;
+            if (!date) return;
+            
+            const articleDate = new Date(date);
+            const monthKey = `${articleDate.getFullYear()}-${String(articleDate.getMonth() + 1).padStart(2, '0')}`;
+            
+            if (!monthlyCountsByInstitution[instId]) {
+              monthlyCountsByInstitution[instId] = {};
+            }
+            monthlyCountsByInstitution[instId][monthKey] = (monthlyCountsByInstitution[instId][monthKey] || 0) + 1;
+          });
+        }
+
+        // Generate last 6 months array
+        const last6Months: string[] = [];
+        for (let i = 5; i >= 0; i--) {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          last6Months.push(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+        }
+
+        // Ensure sequential ranks (1, 2, 3, 4...)
+        const transformed = universitiesData.map((inst: any, index: number) => {
+          const instMonthlyCounts = monthlyCountsByInstitution[inst.id] || {};
+          const monthlyArticleCounts = last6Months.map(month => instMonthlyCounts[month] || 0);
+          
+          // Use calculated values from database instead of hardcoded
+          const totalArticles = totalArticlesByInstitution[inst.id] || 0;
+          const articlesThisMonth = articlesThisMonthByInstitution[inst.id] || 0;
+          
+          return {
+            id: inst.id,
+            slug: inst.id,
+            name: inst.name,
+            abbreviation: inst.abbreviation,
+            logo: inst.logo,
+            country: inst.country || 'Ghana',
+            city: inst.city || '',
+            currentRank: index + 1, // Always sequential
+            previousRank: inst.previous_rank,
+            movement: inst.movement || 'stable',
+            movementDelta: 0,
+            totalArticles: totalArticles, // Calculated from actual articles
+            articlesThisMonth: articlesThisMonth, // Calculated from current month articles
+            articlesThisYear: 0,
+            totalCitations: 0,
+            totalViews: 0,
+            totalDownloads: 0,
+            hIndex: 0,
+            monthlyArticleCounts: monthlyArticleCounts, // Real data or flat line
+            createdAt: inst.created_at,
+            updatedAt: inst.updated_at,
+          };
+        });
+        setTopUniversities(transformed);
+      }
+
+      // Load recent 4 articles
+      const { data: articlesData } = await supabase
+        .from('articles' as any)
+        .select(`
+          *,
+          article_authors(*),
+          institutions(name, abbreviation)
+        `)
+        .eq('is_current_version', true)
+        .eq('status', 'approved')
+        .order('submitted_at', { ascending: false })
+        .limit(4);
+
+      if (articlesData) {
+        const transformed = articlesData.map((article: any) => ({
+          ...article,
+          slug: article.id,
+          authors: article.article_authors || [],
+          publishedAt: article.published_at || article.submitted_at,
+          viewCount: article.views || 0,
+          citationCount: article.citations || 0,
+          downloadCount: article.downloads || 0,
+          universityName: article.institutions?.name || 'Unknown',
+          disciplineName: article.discipline || 'General',
+        }));
+        setRecentArticles(transformed);
+      }
+
+      // Load platform stats
+      const { count: totalArticles } = await supabase
+        .from('articles' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('is_current_version', true)
+        .eq('status', 'approved');
+
+      const { count: totalUniversities } = await supabase
+        .from('institutions' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      const { data: authorsData } = await supabase
+        .from('article_authors' as any)
+        .select('id', { count: 'exact' });
+
+      const { data: countriesData } = await supabase
+        .from('institutions' as any)
+        .select('country')
+        .eq('status', 'active');
+
+      const uniqueCountries = new Set((countriesData as any)?.map((c: any) => c.country) || []);
+
+      setPlatformStats({
+        totalArticles: totalArticles || 0,
+        totalUniversities: totalUniversities || 0,
+        totalAuthors: authorsData?.length || 0,
+        totalCountries: uniqueCountries.size,
+      });
+    } catch (error: any) {
+      console.error('Error loading data:', error);
+      toast.error('Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  };
   const styles = `
     .sr-landing {
       min-height: 100vh;
@@ -519,9 +730,6 @@ const ScholarlyIndex: React.FC = () => {
     }
   `;
 
-  const topUniversities = mockUniversities.slice(0, 5);
-  const recentArticles = mockArticles.slice(0, 4);
-
   const features = [
     {
       icon: <BarChart3 size={24} />,
@@ -533,7 +741,7 @@ const ScholarlyIndex: React.FC = () => {
       icon: <FileText size={24} />,
       title: 'Scholarly Repository',
       description:
-        'Access peer-reviewed research articles from leading institutions worldwide. Filter by discipline, university, or keywords.',
+        'Access peer-reviewed research articles from leading institutions in Ghana. Filter by discipline, university, or keywords.',
     },
     {
       icon: <Building2 size={24} />,
@@ -555,9 +763,9 @@ const ScholarlyIndex: React.FC = () => {
     },
     {
       icon: <Globe size={24} />,
-      title: 'Global Coverage',
+      title: 'Ghana Focus',
       description:
-        'Rankings include universities from around the world, providing a comprehensive view of global academic output.',
+        'Comprehensive rankings of Ghanaian universities, providing a clear view of academic research output across the country.',
     },
   ];
 
@@ -607,23 +815,22 @@ const ScholarlyIndex: React.FC = () => {
           <div className="sr-landing-stats__grid">
             <StatCard
               label="Ranked Universities"
-              value={mockPlatformStats.totalUniversities}
+              value={platformStats.totalUniversities}
               icon={<Building2 size={20} />}
             />
             <StatCard
               label="Published Articles"
-              value={formatNumber(mockPlatformStats.totalArticles)}
-              change={{ value: mockPlatformStats.articlesThisMonth, isPositive: true, label: 'this month' }}
+              value={formatNumber(platformStats.totalArticles)}
               icon={<BookOpen size={20} />}
             />
             <StatCard
               label="Contributing Authors"
-              value={formatNumber(mockPlatformStats.totalAuthors)}
+              value={formatNumber(platformStats.totalAuthors)}
               icon={<Users size={20} />}
             />
             <StatCard
               label="Countries"
-              value={89}
+              value={platformStats.totalCountries}
               icon={<Globe size={20} />}
             />
           </div>
@@ -645,9 +852,18 @@ const ScholarlyIndex: React.FC = () => {
             </Link>
           </div>
           <div className="sr-landing-rankings">
-            {topUniversities.map((university) => (
-              <UniversityRankingCard key={university.id} university={university} variant="compact" />
-            ))}
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+                <p>Loading rankings...</p>
+              </div>
+            ) : topUniversities.length > 0 ? (
+              topUniversities.map((university) => (
+                <UniversityRankingCard key={university.id} university={university} variant="compact" />
+              ))
+            ) : (
+              <p style={{ textAlign: 'center', padding: '40px', color: '#78716C' }}>No rankings available</p>
+            )}
           </div>
         </section>
 
@@ -668,9 +884,18 @@ const ScholarlyIndex: React.FC = () => {
               </Link>
             </div>
             <div className="sr-landing-articles">
-              {recentArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} variant="compact" />
-              ))}
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+                  <p>Loading articles...</p>
+                </div>
+              ) : recentArticles.length > 0 ? (
+                recentArticles.map((article) => (
+                  <ArticleCard key={article.id} article={article} variant="compact" />
+                ))
+              ) : (
+                <p style={{ textAlign: 'center', padding: '40px', color: '#78716C' }}>No articles available</p>
+              )}
             </div>
           </div>
         </section>
@@ -766,8 +991,7 @@ const ScholarlyIndex: React.FC = () => {
             <div className="sr-landing-cta__content">
               <h3 className="sr-landing-cta__title">Explore the Complete Rankings</h3>
               <p className="sr-landing-cta__description">
-                Discover how universities worldwide stack up based on their scholarly output. Filter by
-                country, search for specific institutions, and track ranking movements over time.
+                Discover how Ghanaian universities stack up based on their scholarly output. Search for specific institutions, and track ranking movements over time.
               </p>
             </div>
             <Link to="/scholarly/rankings" className="sr-landing-cta__btn">

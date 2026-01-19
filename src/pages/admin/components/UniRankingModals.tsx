@@ -1122,16 +1122,33 @@ export const EditInstitutionModal = ({
   useEffect(() => {
     if (institution) {
       setFormData({
+        name: institution.name || "",
+        abbreviation: institution.abbreviation || "",
         description: institution.description || "",
         logo: institution.logo || "",
         website: institution.website || "",
         foundedYear: institution.foundedYear || undefined,
         city: institution.city || "",
+        region: institution.region || "",
+        type: institution.type || "",
+      });
+    } else {
+      // Reset form for new institution
+      setFormData({
+        name: "",
+        abbreviation: "",
+        description: "",
+        logo: "",
+        website: "",
+        foundedYear: undefined,
+        city: "",
+        region: "",
+        type: "",
       });
     }
   }, [institution]);
 
-  if (!isOpen || !institution) return null;
+  if (!isOpen) return null;
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1189,9 +1206,14 @@ export const EditInstitutionModal = ({
   };
 
   const handleSave = async () => {
+    if (!formData.name || formData.name.trim() === "") {
+      alert("Institution name is required");
+      return;
+    }
+    
     try {
       await onSave({
-        id: institution.id,
+        ...(institution ? { id: institution.id } : {}),
         ...formData,
       });
       onClose();
@@ -1208,7 +1230,7 @@ export const EditInstitutionModal = ({
         <div className="lgm-modal-content lg" onClick={(e) => e.stopPropagation()}>
           <div className="lgm-modal-header">
             <h2 className="lgm-modal-title">
-              Edit Institution
+              {institution ? "Edit Institution" : "Add New Institution"}
             </h2>
             <button className="lgm-close-btn" onClick={onClose}>
               <X size={20} />
@@ -1216,6 +1238,29 @@ export const EditInstitutionModal = ({
           </div>
 
           <div className="lgm-modal-body">
+            <div className="lgm-form-group">
+              <label className="lgm-form-label">Institution Name <span style={{ color: "#ef4444" }}>*</span></label>
+              <input
+                type="text"
+                className="lgm-form-input"
+                value={formData.name || ""}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., University of Ghana"
+                required
+              />
+            </div>
+
+            <div className="lgm-form-group">
+              <label className="lgm-form-label">Abbreviation (Optional)</label>
+              <input
+                type="text"
+                className="lgm-form-input"
+                value={formData.abbreviation || ""}
+                onChange={(e) => setFormData(prev => ({ ...prev, abbreviation: e.target.value }))}
+                placeholder="e.g., UG"
+              />
+            </div>
+
             <div className="lgm-form-group">
               <label className="lgm-form-label">About / Description</label>
               <textarea
@@ -1309,6 +1354,46 @@ export const EditInstitutionModal = ({
                 onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                 placeholder="e.g., Legon, Accra"
               />
+            </div>
+
+            <div className="lgm-form-group">
+              <label className="lgm-form-label">Region</label>
+              <select
+                className="lgm-form-input"
+                value={formData.region || ""}
+                onChange={(e) => setFormData(prev => ({ ...prev, region: e.target.value }))}
+              >
+                <option value="">Select Region</option>
+                <option value="Greater Accra">Greater Accra</option>
+                <option value="Ashanti">Ashanti</option>
+                <option value="Central">Central</option>
+                <option value="Western">Western</option>
+                <option value="Northern">Northern</option>
+                <option value="Bono">Bono</option>
+                <option value="Eastern">Eastern</option>
+                <option value="Volta">Volta</option>
+                <option value="Western North">Western North</option>
+                <option value="Ahafo">Ahafo</option>
+                <option value="Bono East">Bono East</option>
+                <option value="Oti">Oti</option>
+                <option value="Savannah">Savannah</option>
+                <option value="North East">North East</option>
+                <option value="Upper East">Upper East</option>
+                <option value="Upper West">Upper West</option>
+              </select>
+            </div>
+
+            <div className="lgm-form-group">
+              <label className="lgm-form-label">Type</label>
+              <select
+                className="lgm-form-input"
+                value={formData.type || ""}
+                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+              >
+                <option value="">Select Type</option>
+                <option value="Public">Public</option>
+                <option value="Private">Private</option>
+              </select>
             </div>
           </div>
 

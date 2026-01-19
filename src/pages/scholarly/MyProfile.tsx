@@ -57,7 +57,7 @@ const MyProfile: React.FC = () => {
       // Load profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('*, universities(name, abbreviation)')
+        .select('*, institutions(name, abbreviation)')
         .eq('user_id', session.user.id)
         .single();
 
@@ -114,14 +114,14 @@ const MyProfile: React.FC = () => {
   const loadUniversities = async () => {
     try {
       const { data, error } = await supabase
-        .from('universities')
+        .from('institutions')
         .select('id, name, abbreviation')
         .order('name', { ascending: true });
 
       if (error) throw error;
       if (data) setUniversities(data);
     } catch (error: any) {
-      console.error('Error loading universities:', error);
+      console.error('Error loading institutions:', error);
     }
   };
 

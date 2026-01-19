@@ -5,10 +5,12 @@
 // Inspired by Nature, ScienceDirect, IEEE Xplore, JSTOR
 // ============================================================================
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   ChevronLeft,
   Calendar,
@@ -21,12 +23,101 @@ import {
   ExternalLink,
   Mail,
   Building2,
+  Loader2,
 } from 'lucide-react';
-import { mockArticles } from '@/utils/scholarlyRankingData';
+
+// References Section Component
+const ReferencesSection: React.FC<{ articleId: string }> = ({ articleId }) => {
+  const [references, setReferences] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadReferences();
+  }, [articleId]);
+
+  const loadReferences = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('article_references' as any)
+        .select('*')
+        .eq('article_id', articleId)
+        .order('reference_order', { ascending: true });
+
+      if (error) throw error;
+      setReferences(data || []);
+    } catch (error: any) {
+      console.error('Error loading references:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return null;
+  if (!references || references.length === 0) return null;
+
+  return (
+    <section className="sr-article-section">
+      <h2 className="sr-article-section__title">References</h2>
+      <div className="sr-article-references">
+        {references.map((ref, idx) => (
+          <div key={ref.id || idx} className="sr-article-reference">
+            <span className="sr-article-reference__number">[{idx + 1}]</span>
+            {ref.reference_text}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
 
 const ArticleView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const article = mockArticles.find((a) => a.id === id);
+  const [article, setArticle] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [institution, setInstitution] = useState<any>(null);
+
+  useEffect(() => {
+    loadArticle();
+  }, [id]);
+
+  const loadArticle = async () => {
+    if (!id) return;
+    
+    setLoading(true);
+    try {
+      // Load article with authors and institution
+      const { data: articleData, error: articleError } = await supabase
+        .from('articles' as any)
+        .select(`
+          *,
+          article_authors(*),
+          institutions(name, abbreviation)
+        `)
+        .eq('id', id)
+        .eq('is_current_version', true)
+        .single();
+
+      if (articleError) throw articleError;
+      if (!articleData) {
+        setLoading(false);
+        return;
+      }
+
+      setArticle(articleData);
+      setInstitution(articleData.institutions);
+
+      // Increment view count
+      await supabase
+        .from('articles' as any)
+        .update({ views: (articleData.views || 0) + 1 })
+        .eq('id', id);
+    } catch (error: any) {
+      console.error('Error loading article:', error);
+      toast.error('Failed to load article');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const styles = `
     .sr-article-page {
@@ -448,6 +539,22 @@ const ArticleView: React.FC = () => {
     }
   `;
 
+  if (loading) {
+    return (
+      <>
+        <style>{styles}</style>
+        <div className="sr-article-page">
+          <Navigation />
+          <main className="sr-article-not-found">
+            <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite', margin: '0 auto' }} />
+            <p className="sr-article-not-found__text">Loading article...</p>
+          </main>
+          <Footer />
+        </div>
+      </>
+    );
+  }
+
   if (!article) {
     return (
       <>
@@ -490,7 +597,6 @@ const ArticleView: React.FC = () => {
     return labels[type] || 'Article';
   };
 
-  const correspondingAuthor = article.authors.find((a) => a.isCorresponding);
 
   // Mock cited by data
   const citedByArticles = [
@@ -524,11 +630,11 @@ const ArticleView: React.FC = () => {
 
             <div className="sr-article-header__meta-top">
               <span className="sr-article-header__discipline">
-                {article.disciplineName} | {article.universityName}
+                {article.discipline || 'General'} | {institution?.name || 'Unknown Institution'}
               </span>
               <span className="sr-article-header__type">
                 <FileText size={10} />
-                {getArticleTypeLabel(article.articleType)}
+                {getArticleTypeLabel(article.article_type)}
               </span>
             </div>
 
@@ -536,27 +642,35 @@ const ArticleView: React.FC = () => {
 
             <div className="sr-article-header__authors">
               <p className="sr-article-header__author-list">
-                {article.authors.map((author, idx) => (
-                  <span key={author.id}>
-                    <a href="#">{author.name}</a>
-                    <sup>{author.affiliationNumber}</sup>
-                    {author.isCorresponding && '*'}
-                    {idx < article.authors.length - 1 && ', '}
-                  </span>
-                ))}
+                {article.article_authors && article.article_authors.length > 0 ? (
+                  article.article_authors.map((author: any, idx: number) => (
+                    <span key={author.id || idx}>
+                      <a href="#">{author.name}</a>
+                      {author.affiliation && <sup>1</sup>}
+                      {author.is_corresponding && '*'}
+                      {idx < article.article_authors.length - 1 && ', '}
+                    </span>
+                  ))
+                ) : (
+                  <span>No authors listed</span>
+                )}
               </p>
             </div>
 
-            <p className="sr-article-header__affiliations">
-              <sup>1</sup> {article.universityName}
-            </p>
+            {institution && (
+              <p className="sr-article-header__affiliations">
+                <sup>1</sup> {institution.name}
+              </p>
+            )}
 
-            {correspondingAuthor && correspondingAuthor.email && (
+            {article.article_authors && article.article_authors.find((a: any) => a.is_corresponding && a.email) && (
               <div className="sr-article-header__corresponding">
                 <Mail size={14} />
                 <span>
                   * Corresponding author:{' '}
-                  <a href={`mailto:${correspondingAuthor.email}`}>{correspondingAuthor.email}</a>
+                  <a href={`mailto:${article.article_authors.find((a: any) => a.is_corresponding)?.email}`}>
+                    {article.article_authors.find((a: any) => a.is_corresponding)?.email}
+                  </a>
                 </span>
               </div>
             )}
@@ -564,16 +678,18 @@ const ArticleView: React.FC = () => {
             <div className="sr-article-header__meta-line">
               <span className="sr-article-header__meta-item">
                 <Calendar size={14} className="sr-article-header__meta-icon" />
-                Published: {formatDate(article.publishedAt)}
+                {article.published_at 
+                  ? `Published: ${formatDate(article.published_at)}`
+                  : `Submitted: ${formatDate(article.submitted_at)}`}
               </span>
-              {article.doi && (
+              {article.identifier_type === 'doi' && article.identifier_value && (
                 <a
-                  href={`https://doi.org/${article.doi}`}
+                  href={article.identifier_url || `https://doi.org/${article.identifier_value}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="sr-article-header__doi"
                 >
-                  DOI: {article.doi}
+                  DOI: {article.identifier_value}
                 </a>
               )}
             </div>
@@ -586,15 +702,15 @@ const ArticleView: React.FC = () => {
             <div className="sr-article-actions__stats">
               <span className="sr-article-actions__stat">
                 <Eye size={16} className="sr-article-actions__stat-icon" />
-                {article.viewCount.toLocaleString()} views
+                {(article.views || 0).toLocaleString()} views
               </span>
               <span className="sr-article-actions__stat">
                 <Quote size={16} className="sr-article-actions__stat-icon" />
-                {article.citationCount} citations
+                {(article.citations || 0)} citations
               </span>
               <span className="sr-article-actions__stat">
                 <Download size={16} className="sr-article-actions__stat-icon" />
-                {article.downloadCount} downloads
+                {(article.downloads || 0)} downloads
               </span>
             </div>
 
@@ -611,10 +727,18 @@ const ArticleView: React.FC = () => {
                 <Quote size={14} />
                 Cite
               </button>
-              <button className="sr-article-actions__btn sr-article-actions__btn--primary">
-                <Download size={14} />
-                PDF
-              </button>
+              {article.pdf_url && (
+                <a
+                  href={article.pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sr-article-actions__btn sr-article-actions__btn--primary"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Download size={14} />
+                  PDF
+                </a>
+              )}
               <Link
                 to="/scholarly/auth/sign-in"
                 className="sr-article-actions__btn"
@@ -638,12 +762,12 @@ const ArticleView: React.FC = () => {
           </section>
 
           {/* Keywords */}
-          {article.keywords.length > 0 && (
+          {article.keywords && article.keywords.length > 0 && (
             <section className="sr-article-section">
               <h2 className="sr-article-section__title">Keywords</h2>
               <div className="sr-article-keywords">
-                {article.keywords.map((keyword) => (
-                  <span key={keyword} className="sr-article-keyword">
+                {article.keywords.map((keyword: string, idx: number) => (
+                  <span key={idx} className="sr-article-keyword">
                     {keyword}
                   </span>
                 ))}
@@ -652,7 +776,7 @@ const ArticleView: React.FC = () => {
           )}
 
           {/* Full Text Access Notice */}
-          {article.doi && (
+          {(article.identifier_type === 'doi' && article.identifier_value) || article.pdf_url ? (
             <section className="sr-article-section">
               <div style={{
                 background: '#F5F5F4',
@@ -668,11 +792,13 @@ const ArticleView: React.FC = () => {
                   margin: '0 0 12px 0',
                   lineHeight: '1.6'
                 }}>
-                  To access the full text of this article, please use the DOI link above or download the PDF.
+                  {article.pdf_url 
+                    ? 'Download the PDF to access the full text of this article.'
+                    : 'To access the full text of this article, please use the DOI link above.'}
                 </p>
-                {article.doi && (
+                {article.identifier_type === 'doi' && article.identifier_value && (
                   <a
-                    href={`https://doi.org/${article.doi}`}
+                    href={article.identifier_url || `https://doi.org/${article.identifier_value}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -698,48 +824,23 @@ const ArticleView: React.FC = () => {
                 )}
               </div>
             </section>
+          ) : null}
+
+          {/* References - Load from article_references table */}
+          {article.id && (
+            <ReferencesSection articleId={article.id} />
           )}
 
-          {/* References */}
-          {article.references && article.references.length > 0 && (
-            <section className="sr-article-section">
-              <h2 className="sr-article-section__title">References</h2>
-              <div className="sr-article-references">
-                {article.references.map((ref, idx) => {
-                  // Handle both string[] and Reference[] formats
-                  const citation = typeof ref === 'string' ? ref : ref.citation || '';
-                  return (
-                    <div key={idx} className="sr-article-reference">
-                      <span className="sr-article-reference__number">[{idx + 1}]</span>
-                      {citation}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Cited By */}
-          {article.citationCount > 0 && (
+          {/* Cited By - TODO: Implement citation tracking */}
+          {article.citations > 0 && (
             <section className="sr-article-section">
               <div className="sr-article-cited-by">
                 <h3 className="sr-article-cited-by__title">
-                  Cited By ({article.citationCount} articles)
+                  Cited By ({article.citations} articles)
                 </h3>
-                <div className="sr-article-cited-by__list">
-                  {citedByArticles.map((cited, idx) => (
-                    <div key={idx} className="sr-article-cited-by__item">
-                      <h4 className="sr-article-cited-by__item-title">{cited.title}</h4>
-                      <p className="sr-article-cited-by__item-meta">
-                        {cited.authors}, {cited.university}, {cited.year}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <a href="#" className="sr-article-cited-by__view-all">
-                  View all citing articles
-                  <ChevronLeft size={14} style={{ transform: 'rotate(180deg)' }} />
-                </a>
+                <p style={{ fontFamily: "'Source Sans Pro', system-ui, sans-serif", color: '#78716C', margin: 0 }}>
+                  Citation tracking coming soon.
+                </p>
               </div>
             </section>
           )}

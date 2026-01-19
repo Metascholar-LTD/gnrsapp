@@ -43,6 +43,102 @@ const AdminUniRanking = () => {
   const [selectedInstitution, setSelectedInstitution] = useState<any>(null);
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ type: "institution"; id: string | number; name: string } | null>(null);
+  
+  // Stats state
+  const [stats, setStats] = useState([
+    {
+      id: 1,
+      label: "Total Institutions",
+      value: "0",
+      change: "+0%",
+      trend: "up",
+      icon: GraduationCap,
+      color: "#3b82f6",
+      bgColor: "#eff6ff"
+    },
+    {
+      id: 2,
+      label: "Active Institutions",
+      value: "0",
+      change: "+0%",
+      trend: "up",
+      icon: CheckCircle2,
+      color: "#10b981",
+      bgColor: "#f0fdf4"
+    },
+    {
+      id: 3,
+      label: "Pending Articles",
+      value: "0",
+      change: "+0%",
+      trend: "down",
+      icon: Clock,
+      color: "#f59e0b",
+      bgColor: "#fef3c7"
+    },
+  ]);
+
+  // Load stats from Supabase
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      // Get total institutions
+      const { count: totalInstitutions } = await supabase
+        .from('institutions' as any)
+        .select('*', { count: 'exact', head: true });
+
+      // Get active institutions
+      const { count: activeInstitutions } = await supabase
+        .from('institutions' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Get pending articles (under-review or revision-requested)
+      const { count: pendingArticles } = await supabase
+        .from('articles' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('is_current_version', true)
+        .in('status', ['under-review', 'revision-requested']);
+
+      setStats([
+        {
+          id: 1,
+          label: "Total Institutions",
+          value: totalInstitutions ? (totalInstitutions >= 50 ? "50+" : totalInstitutions.toString()) : "0",
+          change: "+0%",
+          trend: "up",
+          icon: GraduationCap,
+          color: "#3b82f6",
+          bgColor: "#eff6ff"
+        },
+        {
+          id: 2,
+          label: "Active Institutions",
+          value: activeInstitutions?.toString() || "0",
+          change: "+0%",
+          trend: "up",
+          icon: CheckCircle2,
+          color: "#10b981",
+          bgColor: "#f0fdf4"
+        },
+        {
+          id: 3,
+          label: "Pending Articles",
+          value: pendingArticles?.toString() || "0",
+          change: "+0%",
+          trend: "down",
+          icon: Clock,
+          color: "#f59e0b",
+          bgColor: "#fef3c7"
+        },
+      ]);
+    } catch (error: any) {
+      console.error('Error loading stats:', error);
+    }
+  };
 
   // Set active tab based on route
   useEffect(() => {
@@ -83,39 +179,6 @@ const AdminUniRanking = () => {
     return () => {};
   }, []);
 
-  // Calculate statistics
-  const stats = [
-    {
-      id: 1,
-      label: "Total Institutions",
-      value: "50+",
-      change: "+0%",
-      trend: "up",
-      icon: GraduationCap,
-      color: "#3b82f6",
-      bgColor: "#eff6ff"
-    },
-    {
-      id: 2,
-      label: "Active Institutions",
-      value: "48",
-      change: "+0%",
-      trend: "up",
-      icon: CheckCircle2,
-      color: "#10b981",
-      bgColor: "#f0fdf4"
-    },
-    {
-      id: 3,
-      label: "Pending Articles",
-      value: "12",
-      change: "+0%",
-      trend: "down",
-      icon: Clock,
-      color: "#f59e0b",
-      bgColor: "#fef3c7"
-    },
-  ];
 
   const tabs = [
     { id: "institutions", label: "All Institutions", icon: GraduationCap },
@@ -135,19 +198,49 @@ const AdminUniRanking = () => {
 
   const handleSaveInstitution = async (data: any) => {
     try {
-      const { error } = await supabase
-        .from('universities' as any)
-        .update({
-          description: data.description,
-          logo: data.logo,
-          website: data.website,
-          founded_year: data.foundedYear,
-          city: data.city,
-        })
-        .eq('id', String(data.id));
+      if (data.id) {
+        // Update existing institution
+        const { error } = await supabase
+          .from('institutions')
+          .update({
+            name: data.name,
+            abbreviation: data.abbreviation || null,
+            description: data.description || null,
+            logo: data.logo || null,
+            website: data.website || null,
+            founded_year: data.foundedYear || null,
+            city: data.city || null,
+            region: data.region || null,
+            type: data.type || null,
+          })
+          .eq('id', String(data.id));
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Create new institution
+        const { error } = await supabase
+          .from('institutions')
+          .insert({
+            name: data.name,
+            abbreviation: data.abbreviation || null,
+            description: data.description || null,
+            logo: data.logo || null,
+            website: data.website || null,
+            founded_year: data.foundedYear || null,
+            city: data.city || null,
+            region: data.region || null,
+            type: data.type || null,
+            country: 'Ghana',
+            status: 'active',
+            total_articles: 0,
+            articles_this_month: 0,
+          });
+
+        if (error) throw error;
+      }
       
+      // Reload stats after saving institution
+      await loadStats();
       // Reload page to refresh data
       window.location.reload();
     } catch (error: any) {
@@ -200,16 +293,21 @@ const AdminUniRanking = () => {
 
   const handleApprove = async (id: string | number) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase
-        .from('scholarly_articles' as any)
+        .from('articles' as any)
         .update({
           status: 'approved',
-          approved_at: new Date().toISOString(),
+          reviewed_by: user?.id,
+          reviewed_at: new Date().toISOString(),
+          published_at: new Date().toISOString(),
         })
         .eq('id', String(id));
 
       if (error) throw error;
       
+      // Reload stats after approval
+      await loadStats();
       // Reload data
       window.location.reload();
     } catch (error: any) {
@@ -220,17 +318,21 @@ const AdminUniRanking = () => {
 
   const handleReject = async (id: string | number, reason: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase
-        .from('scholarly_articles' as any)
+        .from('articles' as any)
         .update({
           status: 'rejected',
           rejection_reason: reason,
-          rejected_at: new Date().toISOString(),
+          reviewed_by: user?.id,
+          reviewed_at: new Date().toISOString(),
         })
         .eq('id', String(id));
 
       if (error) throw error;
       
+      // Reload stats after rejection
+      await loadStats();
       // Reload data
       window.location.reload();
     } catch (error: any) {
@@ -239,17 +341,68 @@ const AdminUniRanking = () => {
     }
   };
 
+  const recalculateRanks = async () => {
+    try {
+      // Call the database function to recalculate ranks
+      const { error } = await supabase.rpc('recalculate_institution_ranks' as any);
+      
+      if (error) {
+        // Fallback: manual recalculation if function doesn't exist
+        console.warn('RPC function not available, using manual recalculation:', error);
+        
+        // Get all active institutions ordered by current rank
+        const { data: institutions, error: fetchError } = await supabase
+          .from('institutions' as any)
+          .select('id, current_rank')
+          .eq('status', 'active')
+          .order('current_rank', { ascending: true, nullsLast: true });
+
+        if (fetchError) throw fetchError;
+        if (!institutions || institutions.length === 0) return;
+
+        // Update ranks sequentially (1, 2, 3, 4...)
+        for (let index = 0; index < institutions.length; index++) {
+          const inst = institutions[index];
+          const oldRank = inst.current_rank;
+          const newRank = index + 1;
+          
+          const { error: updateError } = await supabase
+            .from('institutions' as any)
+            .update({
+              previous_rank: oldRank,
+              current_rank: newRank,
+              movement: oldRank === newRank ? 'stable' : 
+                        (oldRank && oldRank > newRank ? 'up' : 'down'),
+            })
+            .eq('id', inst.id);
+
+          if (updateError) {
+            console.error(`Error updating rank for institution ${inst.id}:`, updateError);
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error('Error recalculating ranks:', error);
+      // Don't throw - ranks will be recalculated on next page load or by trigger
+    }
+  };
+
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     
     try {
       const { error } = await supabase
-        .from('universities' as any)
+        .from('institutions')
         .delete()
         .eq('id', String(deleteTarget.id));
 
       if (error) throw error;
       
+      // Recalculate ranks after deletion to fill gaps
+      await recalculateRanks();
+      
+      // Reload stats after deleting institution
+      await loadStats();
       window.location.reload();
       setDeleteTarget(null);
       setShowDeleteConfirm(false);
@@ -554,10 +707,14 @@ const AdminUniRanking = () => {
       {/* Content */}
       <div id="aur-content">
         {activeTab === "institutions" && (
-          <AllInstitutionsManager
-            onEdit={handleEditInstitution}
-            onDelete={handleDeleteInstitution}
-          />
+        <AllInstitutionsManager
+          onEdit={handleEditInstitution}
+          onDelete={handleDeleteInstitution}
+          onAdd={() => {
+            setSelectedInstitution(null);
+            setShowEditInstitution(true);
+          }}
+        />
         )}
         {activeTab === "approval" && (
           <ResearchArticlesApprovalManager

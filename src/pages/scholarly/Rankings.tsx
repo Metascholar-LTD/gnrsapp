@@ -5,27 +5,239 @@
 // Features filters, statistics, and visualizations
 // ============================================================================
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
-import { Search, Filter, LayoutGrid, List, Award, BookOpen, Building2, Globe } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Search, Filter, LayoutGrid, List, Award, BookOpen, Building2, Globe, Loader2 } from 'lucide-react';
 import { UniversityRankingCard, UniversityTableRow } from '@/components/scholarly/UniversityRankingCard';
 import { StatCard } from '@/components/scholarly/StatCard';
 import { RankingBarChart, TrendLineChart } from '@/components/scholarly/RankingCharts';
-import {
-  mockUniversities,
-  mockPlatformStats,
-  mockBarChartData,
-  mockTrendData,
-  formatNumber,
-} from '@/utils/scholarlyRankingData';
+
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toLocaleString();
+};
 
 const Rankings: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [institutions, setInstitutions] = useState<any[]>([]);
+  const [platformStats, setPlatformStats] = useState({
+    totalInstitutions: 0,
+    totalArticles: 0,
+    totalCitations: 0,
+    totalViews: 0,
+  });
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    loadInstitutions();
+    loadPlatformStats();
+  }, []);
+
+  const loadInstitutions = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('institutions' as any)
+        .select('*')
+        .eq('status', 'active')
+        .order('current_rank', { ascending: true });
+
+      if (error) throw error;
+      if (data) {
+        const institutionIds = data.map((inst: any) => inst.id);
+        
+        // Fetch ALL articles for these institutions to calculate total counts
+        const { data: allArticlesData } = await supabase
+          .from('articles' as any)
+          .select('institution_id, published_at, created_at')
+          .eq('status', 'approved')
+          .eq('is_current_version', true)
+          .in('institution_id', institutionIds);
+
+        // Fetch monthly article counts for last 6 months
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        
+        const { data: articlesData } = await supabase
+          .from('articles' as any)
+          .select('institution_id, published_at, created_at')
+          .eq('status', 'approved')
+          .eq('is_current_version', true)
+          .in('institution_id', institutionIds)
+          .gte('created_at', sixMonthsAgo.toISOString());
+
+        // Calculate current month boundaries
+        const now = new Date();
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        // Calculate total articles per institution
+        const totalArticlesByInstitution: { [key: string]: number } = {};
+        if (allArticlesData) {
+          allArticlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            totalArticlesByInstitution[instId] = (totalArticlesByInstitution[instId] || 0) + 1;
+          });
+        }
+
+        // Calculate articles this month per institution
+        const articlesThisMonthByInstitution: { [key: string]: number } = {};
+        if (allArticlesData) {
+          allArticlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            
+            const date = article.published_at || article.created_at;
+            if (!date) return;
+            
+            const articleDate = new Date(date);
+            if (articleDate >= currentMonthStart) {
+              articlesThisMonthByInstitution[instId] = (articlesThisMonthByInstitution[instId] || 0) + 1;
+            }
+          });
+        }
+
+        // Group articles by institution and month for trend chart
+        const monthlyCountsByInstitution: { [key: string]: { [key: string]: number } } = {};
+        
+        if (articlesData) {
+          articlesData.forEach((article: any) => {
+            const instId = article.institution_id;
+            if (!instId) return;
+            
+            const date = article.published_at || article.created_at;
+            if (!date) return;
+            
+            const articleDate = new Date(date);
+            const monthKey = `${articleDate.getFullYear()}-${String(articleDate.getMonth() + 1).padStart(2, '0')}`;
+            
+            if (!monthlyCountsByInstitution[instId]) {
+              monthlyCountsByInstitution[instId] = {};
+            }
+            monthlyCountsByInstitution[instId][monthKey] = (monthlyCountsByInstitution[instId][monthKey] || 0) + 1;
+          });
+        }
+
+        // Generate last 6 months array
+        const last6Months: string[] = [];
+        for (let i = 5; i >= 0; i--) {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          last6Months.push(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+        }
+
+        // Transform to match expected format and ensure sequential ranks
+        // If ranks have gaps, recalculate them sequentially (1, 2, 3, 4...)
+        const transformed = data.map((inst: any, index: number) => {
+          // Use sequential rank based on position in ordered list
+          // This ensures no gaps even if database has gaps temporarily
+          const sequentialRank = index + 1;
+          const dbRank = inst.current_rank;
+          
+          // Get monthly article counts for this institution
+          const instMonthlyCounts = monthlyCountsByInstitution[inst.id] || {};
+          const monthlyArticleCounts = last6Months.map(month => instMonthlyCounts[month] || 0);
+          
+          // Use calculated values from database instead of hardcoded
+          const totalArticles = totalArticlesByInstitution[inst.id] || 0;
+          const articlesThisMonth = articlesThisMonthByInstitution[inst.id] || 0;
+          
+          return {
+            id: inst.id,
+            slug: inst.id,
+            name: inst.name,
+            abbreviation: inst.abbreviation,
+            logo: inst.logo,
+            country: inst.country || 'Ghana',
+            city: inst.city || '',
+            currentRank: sequentialRank, // Always sequential
+            previousRank: inst.previous_rank,
+            movement: inst.movement || 'stable',
+            movementDelta: 0,
+            totalArticles: totalArticles, // Calculated from actual articles
+            articlesThisMonth: articlesThisMonth, // Calculated from current month articles
+            articlesThisYear: 0,
+            totalCitations: 0,
+            totalViews: 0,
+            totalDownloads: 0,
+            hIndex: 0,
+            monthlyArticleCounts: monthlyArticleCounts, // Real data or flat line (all zeros)
+            createdAt: inst.created_at,
+            updatedAt: inst.updated_at,
+          };
+        });
+        setInstitutions(transformed);
+        
+        // If there are rank gaps in the database, trigger recalculation
+        const hasGaps = data.some((inst: any, index: number) => {
+          const expectedRank = index + 1;
+          return inst.current_rank !== expectedRank && inst.current_rank !== null;
+        });
+        
+        if (hasGaps && data.length > 0) {
+          // Trigger database recalculation in background
+          (async () => {
+            try {
+              await (supabase.rpc as any)('recalculate_institution_ranks');
+            } catch (err: any) {
+              console.warn('Could not trigger rank recalculation:', err);
+            }
+          })();
+        }
+      }
+    } catch (error: any) {
+      console.error('Error loading institutions:', error);
+      toast.error('Failed to load rankings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPlatformStats = async () => {
+    try {
+      // Get total institutions
+      const { count: totalInstitutions } = await supabase
+        .from('institutions' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Get total articles
+      const { count: totalArticles } = await supabase
+        .from('articles' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('is_current_version', true)
+        .eq('status', 'approved');
+
+      // Get total citations and views
+      const { data: articlesData } = await supabase
+        .from('articles' as any)
+        .select('citations, views')
+        .eq('is_current_version', true)
+        .eq('status', 'approved');
+
+      const articles = (articlesData as any) || [];
+      const totalCitations = articles.reduce((sum: number, a: any) => sum + (a.citations || 0), 0) || 0;
+      const totalViews = articles.reduce((sum: number, a: any) => sum + (a.views || 0), 0) || 0;
+
+      setPlatformStats({
+        totalInstitutions: totalInstitutions || 0,
+        totalArticles: totalArticles || 0,
+        totalCitations,
+        totalViews,
+      });
+    } catch (error: any) {
+      console.error('Error loading platform stats:', error);
+    }
+  };
 
   const styles = `
     .sr-rankings-page {
@@ -353,13 +565,13 @@ const Rankings: React.FC = () => {
 
   // Get unique countries
   const countries = useMemo(() => {
-    const uniqueCountries = Array.from(new Set(mockUniversities.map((u) => u.country)));
+    const uniqueCountries = Array.from(new Set(institutions.map((u) => u.country)));
     return uniqueCountries.sort();
-  }, []);
+  }, [institutions]);
 
-  // Filter universities
-  const filteredUniversities = useMemo(() => {
-    return mockUniversities.filter((uni) => {
+  // Filter institutions
+  const filteredInstitutions = useMemo(() => {
+    return institutions.filter((uni) => {
       const matchesSearch =
         uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         uni.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -367,11 +579,11 @@ const Rankings: React.FC = () => {
       const matchesCountry = !selectedCountry || uni.country === selectedCountry;
       return matchesSearch && matchesCountry;
     });
-  }, [searchQuery, selectedCountry]);
+  }, [institutions, searchQuery, selectedCountry]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredUniversities.length / itemsPerPage);
-  const paginatedUniversities = filteredUniversities.slice(
+  const totalPages = Math.ceil(filteredInstitutions.length / itemsPerPage);
+  const paginatedInstitutions = filteredInstitutions.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -419,32 +631,31 @@ const Rankings: React.FC = () => {
           <div className="sr-rankings-stats">
             <StatCard
               label="Universities"
-              value={mockPlatformStats.totalUniversities}
+              value={platformStats.totalInstitutions}
               icon={<Building2 size={20} />}
             />
             <StatCard
               label="Articles Published"
-              value={formatNumber(mockPlatformStats.totalArticles)}
-              change={{ value: mockPlatformStats.articlesThisMonth, isPositive: true, label: 'this month' }}
+              value={formatNumber(platformStats.totalArticles)}
               icon={<BookOpen size={20} />}
             />
             <StatCard
-              label="Contributing Authors"
-              value={formatNumber(mockPlatformStats.totalAuthors)}
+              label="Total Citations"
+              value={formatNumber(platformStats.totalCitations)}
               icon={<Award size={20} />}
             />
             <StatCard
               label="Countries"
-              value={89}
+              value={countries.length}
               icon={<Globe size={20} />}
             />
           </div>
 
-          {/* Charts Section */}
-          <div className="sr-rankings-charts">
+          {/* Charts Section - TODO: Implement real chart data */}
+          {/* <div className="sr-rankings-charts">
             <RankingBarChart data={mockBarChartData} title="Top 10 Universities by Articles" height={320} />
             <TrendLineChart data={mockTrendData} title="Publication Growth (2025)" height={280} />
-          </div>
+          </div> */}
 
           {/* Controls */}
           <div className="sr-rankings-controls">
@@ -501,9 +712,20 @@ const Rankings: React.FC = () => {
           {/* Rankings List */}
           {viewMode === 'cards' ? (
             <div className="sr-rankings-list">
-              {paginatedUniversities.map((university) => (
-                <UniversityRankingCard key={university.id} university={university} />
-              ))}
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+                  <Loader2 size={48} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+                  <p>Loading rankings...</p>
+                </div>
+              ) : paginatedInstitutions.length > 0 ? (
+                paginatedInstitutions.map((university) => (
+                  <UniversityRankingCard key={university.id} university={university} />
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+                  <p>No institutions found</p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="sr-rankings-table">
@@ -514,7 +736,7 @@ const Rankings: React.FC = () => {
                 <span>This Month</span>
                 <span>Trend</span>
               </div>
-              {paginatedUniversities.map((university, index) => (
+              {paginatedInstitutions.map((university, index) => (
                 <UniversityTableRow
                   key={university.id}
                   university={university}

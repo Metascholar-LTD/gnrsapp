@@ -5,22 +5,23 @@
 // Inspired by academic journal layouts (Nature, ScienceDirect, IEEE)
 // ============================================================================
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
-import { Search, BookOpen, FileText, Users, Filter, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Search, BookOpen, FileText, Users, Filter, X, Loader2 } from 'lucide-react';
 import { ArticleCard } from '@/components/scholarly/ArticleCard';
 import { ArticleFilters } from '@/components/scholarly/ArticleFilters';
 import { StatCard } from '@/components/scholarly/StatCard';
-import {
-  mockArticles,
-  mockDisciplines,
-  mockUniversities,
-  mockPlatformStats,
-  getArticlesByFilters,
-  formatNumber,
-} from '@/utils/scholarlyRankingData';
+import { mockDisciplines } from '@/utils/scholarlyRankingData';
+
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toLocaleString();
+};
 
 const Articles: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,8 +39,165 @@ const Articles: React.FC = () => {
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'recent');
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [institutions, setInstitutions] = useState<any[]>([]);
+  const [platformStats, setPlatformStats] = useState({
+    totalArticles: 0,
+    articlesThisMonth: 0,
+    totalDisciplines: 0,
+    totalAuthors: 0,
+  });
 
   const itemsPerPage = 10;
+
+  // Load data from Supabase
+  useEffect(() => {
+    loadArticles();
+    loadInstitutions();
+    loadPlatformStats();
+  }, []);
+
+  const loadArticles = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('articles' as any)
+        .select(`
+          *,
+          article_authors(*),
+          institutions(name, abbreviation),
+          profiles!articles_submitted_by_fkey(full_name)
+        `)
+        .eq('is_current_version', true)
+        .eq('status', 'approved'); // Only show approved articles
+
+      // Apply filters
+      if (selectedDiscipline) {
+        query = query.eq('discipline', selectedDiscipline);
+      }
+      if (selectedUniversity) {
+        query = query.eq('university_id', selectedUniversity);
+      }
+      if (selectedYear) {
+        const startDate = `${selectedYear}-01-01`;
+        const endDate = `${selectedYear}-12-31`;
+        query = query.gte('submitted_at', startDate).lte('submitted_at', endDate);
+      }
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,abstract.ilike.%${searchQuery}%,keywords.cs.{${searchQuery}}`);
+      }
+
+      // Apply sorting
+      switch (sortBy) {
+        case 'recent':
+          query = query.order('submitted_at', { ascending: false });
+          break;
+        case 'oldest':
+          query = query.order('submitted_at', { ascending: true });
+          break;
+        case 'views':
+          query = query.order('views', { ascending: false });
+          break;
+        case 'citations':
+          query = query.order('citations', { ascending: false });
+          break;
+        default:
+          query = query.order('submitted_at', { ascending: false });
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      if (data) {
+        // Transform articles to match expected format
+        const transformedArticles = data.map((article: any) => ({
+          ...article,
+          slug: article.id,
+          authors: article.article_authors || [],
+          publishedAt: article.published_at || article.submitted_at,
+          viewCount: article.views || 0,
+          citationCount: article.citations || 0,
+          downloadCount: article.downloads || 0,
+          universityName: article.institutions?.name || 'Unknown',
+          disciplineName: article.discipline || 'General',
+        }));
+        setArticles(transformedArticles);
+      }
+    } catch (error: any) {
+      console.error('Error loading articles:', error);
+      toast.error('Failed to load articles');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadInstitutions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('institutions' as any)
+        .select('id, name, abbreviation')
+        .eq('status', 'active')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      if (data) setInstitutions(data);
+    } catch (error: any) {
+      console.error('Error loading institutions:', error);
+    }
+  };
+
+  const loadPlatformStats = async () => {
+    try {
+      // Get total approved articles
+      const { count: totalArticles } = await supabase
+        .from('articles' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('is_current_version', true)
+        .eq('status', 'approved');
+
+      // Get articles this month
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const { count: articlesThisMonth } = await supabase
+        .from('articles' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('is_current_version', true)
+        .eq('status', 'approved')
+        .gte('submitted_at', startOfMonth.toISOString());
+
+      // Get unique disciplines count
+      const { data: disciplinesData } = await supabase
+        .from('articles' as any)
+        .select('discipline')
+        .eq('is_current_version', true)
+        .eq('status', 'approved')
+        .not('discipline', 'is', null);
+      
+      const uniqueDisciplines = new Set(disciplinesData?.map(d => d.discipline) || []);
+
+      // Get unique authors count
+      const { data: authorsData } = await supabase
+        .from('article_authors' as any)
+        .select('id', { count: 'exact' });
+
+      setPlatformStats({
+        totalArticles: totalArticles || 0,
+        articlesThisMonth: articlesThisMonth || 0,
+        totalDisciplines: uniqueDisciplines.size,
+        totalAuthors: authorsData?.length || 0,
+      });
+    } catch (error: any) {
+      console.error('Error loading platform stats:', error);
+    }
+  };
+
+  // Reload articles when filters change
+  useEffect(() => {
+    loadArticles();
+  }, [selectedDiscipline, selectedUniversity, selectedYear, searchQuery, sortBy]);
 
   const styles = `
     .sr-articles-page {
@@ -351,28 +509,18 @@ const Articles: React.FC = () => {
     }
   `;
 
-  // Filter articles
-  const filteredArticles = useMemo(() => {
-    return getArticlesByFilters({
-      discipline: selectedDiscipline,
-      university: selectedUniversity,
-      search: searchQuery,
-      sortBy,
-    });
-  }, [selectedDiscipline, selectedUniversity, searchQuery, sortBy]);
-
   // Pagination
-  const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
-  const paginatedArticles = filteredArticles.slice(
+  const totalPages = Math.ceil(articles.length / itemsPerPage);
+  const paginatedArticles = articles.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   // University options for filters
-  const universityOptions = mockUniversities.map((u) => ({
-    slug: u.slug,
+  const universityOptions = institutions.map((u) => ({
+    slug: u.id,
     name: u.name,
-    abbreviation: u.abbreviation,
+    abbreviation: u.abbreviation || '',
   }));
 
   const handleFilterChange = () => {
@@ -417,7 +565,7 @@ const Articles: React.FC = () => {
             <h1 className="sr-articles-hero__title">Research Articles</h1>
             <div className="sr-articles-hero__separator" />
             <p className="sr-articles-hero__description">
-              Browse peer-reviewed research from leading institutions worldwide. Discover groundbreaking
+              Browse peer-reviewed research from leading institutions in Ghana. Discover groundbreaking
               research across multiple disciplines.
             </p>
           </div>
@@ -428,18 +576,18 @@ const Articles: React.FC = () => {
           <div className="sr-articles-stats">
             <StatCard
               label="Total Articles"
-              value={formatNumber(mockPlatformStats.totalArticles)}
-              change={{ value: mockPlatformStats.articlesThisMonth, isPositive: true, label: 'this month' }}
+              value={formatNumber(platformStats.totalArticles)}
+              change={{ value: platformStats.articlesThisMonth, isPositive: true, label: 'this month' }}
               icon={<BookOpen size={20} />}
             />
             <StatCard
               label="Disciplines"
-              value={mockPlatformStats.totalDisciplines}
+              value={platformStats.totalDisciplines}
               icon={<FileText size={20} />}
             />
             <StatCard
               label="Contributing Authors"
-              value={formatNumber(mockPlatformStats.totalAuthors)}
+              value={formatNumber(platformStats.totalAuthors)}
               icon={<Users size={20} />}
             />
           </div>
@@ -544,7 +692,7 @@ const Articles: React.FC = () => {
                 <p className="sr-articles-header__title">
                   Showing{' '}
                   <span className="sr-articles-header__count">
-                    {filteredArticles.length.toLocaleString()}
+                    {articles.length.toLocaleString()}
                   </span>{' '}
                   articles
                 </p>
@@ -558,7 +706,12 @@ const Articles: React.FC = () => {
               </div>
 
               {/* Articles List */}
-              {paginatedArticles.length > 0 ? (
+              {loading ? (
+                <div className="sr-articles-empty">
+                  <Loader2 size={48} className="sr-articles-empty__icon" style={{ animation: 'spin 1s linear infinite' }} />
+                  <p className="sr-articles-empty__text">Loading articles...</p>
+                </div>
+              ) : paginatedArticles.length > 0 ? (
                 <div className="sr-articles-list">
                   {paginatedArticles.map((article) => (
                     <ArticleCard key={article.id} article={article} variant="detailed" />

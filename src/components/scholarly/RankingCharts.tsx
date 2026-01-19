@@ -315,20 +315,22 @@ export const Sparkline: React.FC<SparklineProps> = ({
   height = 24,
   color = '#1E3A5F',
 }) => {
-  const chartData = data.map((value, index) => ({ value, index }));
+  // Ensure we have data - if empty, create flat line
+  const chartData = data.length > 0 
+    ? data.map((value, index) => ({ value, index }))
+    : Array.from({ length: 6 }, (_, i) => ({ value: 0, index: i })); // Flat line with 6 points
 
   return (
-    <ResponsiveContainer width={width} height={height}>
-      <LineChart data={chartData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-        <Line
-          type="monotone"
-          dataKey="value"
-          stroke={color}
-          strokeWidth={1.5}
-          dot={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <LineChart width={width} height={height} data={chartData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+      <Line
+        type="monotone"
+        dataKey="value"
+        stroke={color}
+        strokeWidth={1.5}
+        dot={false}
+        isAnimationActive={false}
+      />
+    </LineChart>
   );
 };
 

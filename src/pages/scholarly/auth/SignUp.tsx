@@ -227,7 +227,7 @@ const ScholarSignUp: React.FC = () => {
 
       if (error) {
         setErrorField(error.message);
-        setIsSubmitting(false);
+    setIsSubmitting(false);
         return;
       }
 
@@ -241,7 +241,7 @@ const ScholarSignUp: React.FC = () => {
           navigate('/scholarly/auth/complete-profile');
         } else {
           // Email confirmation required, redirect to verify email page
-          navigate('/scholarly/auth/verify-email');
+    navigate('/scholarly/auth/verify-email');
         }
       } else {
         setErrorField('Account creation failed. Please try again.');
@@ -470,14 +470,14 @@ const ScholarSignUp: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <img
-                    src='https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
-                    width={20}
-                    height={20}
-                    alt='Google'
-                    className='w-5 h-5'
-                  />
-                  Continue with Google
+              <img
+                src='https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
+                width={20}
+                height={20}
+                alt='Google'
+                className='w-5 h-5'
+              />
+              Continue with Google
                 </>
               )}
             </button>

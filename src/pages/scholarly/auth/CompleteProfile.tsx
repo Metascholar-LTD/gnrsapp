@@ -52,12 +52,12 @@ const CompleteProfile: React.FC = () => {
 
   const totalSteps = 3;
 
-  // Load universities from database
+  // Load institutions from database (for ranking)
   useEffect(() => {
-    const loadUniversities = async () => {
+    const loadInstitutions = async () => {
       try {
         const { data, error } = await supabase
-          .from('universities')
+          .from('institutions')
           .select('id, name, abbreviation')
           .order('name', { ascending: true });
 
@@ -67,14 +67,14 @@ const CompleteProfile: React.FC = () => {
           setUniversitiesList(data);
         }
       } catch (error: any) {
-        console.error('Error loading universities:', error);
+        console.error('Error loading institutions:', error);
         // Fallback to hardcoded list if database fails
       } finally {
         setLoadingUniversities(false);
       }
     };
 
-    loadUniversities();
+    loadInstitutions();
   }, []);
 
   // Use universities from database, fallback to hardcoded list
