@@ -8,6 +8,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockDisciplines } from '@/utils/scholarlyRankingData';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   FileText,
   ChevronRight,
@@ -783,9 +785,124 @@ const SubmitPaper: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    navigate('/scholar/dashboard');
+
+    try {
+      // Get current user
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user) {
+        toast.error('Please sign in to submit a paper');
+        navigate('/scholarly/auth/sign-in');
+        return;
+      }
+
+      // Get user's profile to get university_id
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('university_id')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      if (!profile?.university_id) {
+        toast.error('Please complete your profile and set your university affiliation before submitting a paper');
+        navigate('/scholar/profile');
+        return;
+      }
+
+      // Upload PDF to Supabase Storage
+      let pdfUrl = '';
+      if (formData.pdfFile) {
+        const fileExt = formData.pdfFile.name.split('.').pop();
+        const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('article-pdfs')
+          .upload(fileName, formData.pdfFile, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('article-pdfs')
+          .getPublicUrl(fileName);
+
+        pdfUrl = publicUrl;
+      }
+
+      // Create article record
+      const { data: article, error: articleError } = await supabase
+        .from('articles')
+        .insert({
+          title: formData.title,
+          abstract: formData.abstract,
+          keywords: formData.keywords,
+          discipline_category: formData.disciplineCategory,
+          discipline: formData.discipline,
+          article_type: formData.articleType,
+          pdf_url: pdfUrl,
+          identifier_type: formData.identifierType || null,
+          identifier_value: formData.identifierValue || null,
+          identifier_url: formData.identifierUrl || null,
+          status: 'under-review', // Default status as per requirements
+          submitted_by: session.user.id,
+          university_id: profile.university_id,
+        })
+        .select()
+        .single();
+
+      if (articleError) throw articleError;
+
+      if (!article) {
+        throw new Error('Failed to create article');
+      }
+
+      // Create article authors
+      if (formData.authors.length > 0) {
+        const authorsData = formData.authors.map((author, index) => ({
+          article_id: article.id,
+          name: author.name,
+          email: author.email,
+          affiliation: author.affiliation,
+          is_corresponding: author.isCorresponding,
+          author_order: index + 1,
+        }));
+
+        const { error: authorsError } = await supabase
+          .from('article_authors')
+          .insert(authorsData);
+
+        if (authorsError) throw authorsError;
+      }
+
+      // Create article references
+      if (formData.references.length > 0) {
+        const referencesData = formData.references.map((ref, index) => ({
+          article_id: article.id,
+          reference_text: ref,
+          reference_order: index + 1,
+        }));
+
+        const { error: referencesError } = await supabase
+          .from('article_references')
+          .insert(referencesData);
+
+        if (referencesError) throw referencesError;
+      }
+
+      toast.success('Paper submitted successfully! It is now under review.');
+      navigate('/scholar/dashboard');
+    } catch (error: any) {
+      console.error('Error submitting paper:', error);
+      toast.error(`Failed to submit paper: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = () => {

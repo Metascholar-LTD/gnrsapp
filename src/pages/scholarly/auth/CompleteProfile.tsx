@@ -5,9 +5,11 @@
 // Collects: University Affiliation, Department, Research Interests
 // ============================================================================
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { 
   Building2, 
   GraduationCap, 
@@ -35,6 +37,8 @@ const CompleteProfile: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [universitiesList, setUniversitiesList] = useState<Array<{ id: string; name: string; abbreviation: string | null }>>([]);
+  const [loadingUniversities, setLoadingUniversities] = useState(true);
   
   const [profileData, setProfileData] = useState<ProfileData>({
     university: '',
@@ -48,20 +52,47 @@ const CompleteProfile: React.FC = () => {
 
   const totalSteps = 3;
 
-  // Common universities in Ghana
-  const universities = [
-    { name: 'University of Ghana', short: 'UG' },
-    { name: 'Kwame Nkrumah University of Science and Technology', short: 'KNUST' },
-    { name: 'University of Cape Coast', short: 'UCC' },
-    { name: 'University of Education, Winneba', short: 'UEW' },
-    { name: 'University of Mines and Technology', short: 'UMaT' },
-    { name: 'University for Development Studies', short: 'UDS' },
-    { name: 'Ghana Institute of Management and Public Administration', short: 'GIMPA' },
-    { name: 'Catholic University of Ghana', short: 'CUG' },
-    { name: 'Presbyterian University College', short: 'PUC' },
-    { name: 'University of Energy and Natural Resources', short: 'UENR' },
-    { name: 'Accra Institute of Technology', short: 'AIT' },
-  ];
+  // Load universities from database
+  useEffect(() => {
+    const loadUniversities = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('universities')
+          .select('id, name, abbreviation')
+          .order('name', { ascending: true });
+
+        if (error) throw error;
+        
+        if (data) {
+          setUniversitiesList(data);
+        }
+      } catch (error: any) {
+        console.error('Error loading universities:', error);
+        // Fallback to hardcoded list if database fails
+      } finally {
+        setLoadingUniversities(false);
+      }
+    };
+
+    loadUniversities();
+  }, []);
+
+  // Use universities from database, fallback to hardcoded list
+  const universities = universitiesList.length > 0 
+    ? universitiesList.map(u => ({ name: u.name, short: u.abbreviation || '' }))
+    : [
+        { name: 'University of Ghana', short: 'UG' },
+        { name: 'Kwame Nkrumah University of Science and Technology', short: 'KNUST' },
+        { name: 'University of Cape Coast', short: 'UCC' },
+        { name: 'University of Education, Winneba', short: 'UEW' },
+        { name: 'University of Mines and Technology', short: 'UMaT' },
+        { name: 'University for Development Studies', short: 'UDS' },
+        { name: 'Ghana Institute of Management and Public Administration', short: 'GIMPA' },
+        { name: 'Catholic University of Ghana', short: 'CUG' },
+        { name: 'Presbyterian University College', short: 'PUC' },
+        { name: 'University of Energy and Natural Resources', short: 'UENR' },
+        { name: 'Accra Institute of Technology', short: 'AIT' },
+      ];
 
   const academicTitles = [
     { value: 'lecturer', label: 'Lecturer' },
@@ -118,11 +149,65 @@ const CompleteProfile: React.FC = () => {
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setIsSubmitting(false);
-    navigate('/scholar/dashboard');
+    try {
+      // Get current user
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user) {
+        toast.error('Please sign in to complete your profile');
+        navigate('/scholarly/auth/sign-up');
+        return;
+      }
+
+      // Find university ID from selected university name
+      const selectedUniversity = universitiesList.find(
+        u => u.name === profileData.university
+      );
+
+      // Update profile in database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          university_id: selectedUniversity?.id || null,
+          department: profileData.department || null,
+          title: profileData.title || null,
+          research_interests: profileData.researchInterests.length > 0 ? profileData.researchInterests : null,
+          orcid_id: profileData.orcidId || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', session.user.id);
+
+      if (updateError) {
+        // If profile doesn't exist, create it
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: session.user.id,
+            role: 'scholar',
+            full_name: session.user.user_metadata?.full_name || 
+                      session.user.user_metadata?.name || 
+                      session.user.email?.split('@')[0] || 
+                      null,
+            university_id: selectedUniversity?.id || null,
+            department: profileData.department || null,
+            title: profileData.title || null,
+            research_interests: profileData.researchInterests.length > 0 ? profileData.researchInterests : null,
+            orcid_id: profileData.orcidId || null,
+          });
+
+        if (insertError) {
+          throw insertError;
+        }
+      }
+
+      toast.success('Profile completed successfully!');
+      navigate('/scholar/dashboard');
+    } catch (error: any) {
+      console.error('Error completing profile:', error);
+      toast.error(error.message || 'Failed to complete profile. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const addResearchInterest = () => {
@@ -189,6 +274,7 @@ const CompleteProfile: React.FC = () => {
                     });
                   }
                 }}
+                disabled={loadingUniversities}
                 className='w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200'
                 required
               >

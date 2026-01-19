@@ -5,9 +5,10 @@
 // Additional profile info collected after email verification
 // ============================================================================
 
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, CheckCircle2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 type FormData = {
   email: string;
@@ -26,6 +27,7 @@ const ScholarSignUp: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorField, setErrorField] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -79,6 +81,110 @@ const ScholarSignUp: React.FC = () => {
     return { strength, percentage, color };
   };
 
+  // Function to create or update scholar profile
+  const createScholarProfile = async (userId: string, fullName?: string, email?: string) => {
+    try {
+      // Check if profile already exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (existingProfile) {
+        // Profile exists, update if needed
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            role: 'scholar',
+            full_name: fullName || existingProfile.full_name,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', userId);
+
+        if (updateError) {
+          console.error('Error updating profile:', updateError);
+        }
+      } else {
+        // Create new profile
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: userId,
+            role: 'scholar',
+            full_name: fullName || null,
+            affiliation: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          // Don't throw - profile creation failure shouldn't block auth
+        }
+      }
+    } catch (error) {
+      console.error('Error in createScholarProfile:', error);
+      // Don't throw - profile creation failure shouldn't block auth
+    }
+  };
+
+  // Handle OAuth callback after redirect
+  useEffect(() => {
+    const checkAuthAndCreateProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        // Check if we're coming back from OAuth (check URL params)
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        if (code) {
+          // User is authenticated via OAuth, create profile if needed
+          const user = session.user;
+          const fullName = user.user_metadata?.full_name || 
+                          user.user_metadata?.name || 
+                          `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() ||
+                          user.email?.split('@')[0] || 
+                          null;
+
+          await createScholarProfile(user.id, fullName || undefined, user.email);
+          
+          // Clean up URL params
+          window.history.replaceState({}, '', window.location.pathname);
+          
+          // Redirect to complete profile (Google users skip email verification)
+          navigate('/scholarly/auth/complete-profile');
+        }
+      }
+    };
+
+    checkAuthAndCreateProfile();
+
+    // Listen for auth state changes (for OAuth redirects)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const user = session.user;
+        // Check if this is an OAuth sign-in (has provider metadata)
+        if (user.app_metadata?.provider === 'google') {
+          const fullName = user.user_metadata?.full_name || 
+                          user.user_metadata?.name || 
+                          `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() ||
+                          user.email?.split('@')[0] || 
+                          null;
+
+          await createScholarProfile(user.id, fullName || undefined, user.email);
+          // Redirect to complete profile (Google users skip email verification)
+          navigate('/scholarly/auth/complete-profile');
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     
@@ -112,11 +218,65 @@ const ScholarSignUp: React.FC = () => {
     setErrorField('');
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setIsSubmitting(false);
-    navigate('/scholarly/auth/verify-email');
+    try {
+      // Sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        setErrorField(error.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (data.user) {
+        // Create scholar profile
+        await createScholarProfile(data.user.id, null, formData.email);
+        
+        // Check if user is automatically signed in (email confirmation disabled)
+        if (data.session) {
+          // User is automatically signed in, redirect to complete profile
+          navigate('/scholarly/auth/complete-profile');
+        } else {
+          // Email confirmation required, redirect to verify email page
+          navigate('/scholarly/auth/verify-email');
+        }
+      } else {
+        setErrorField('Account creation failed. Please try again.');
+        setIsSubmitting(false);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setErrorField(errorMessage);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setIsGoogleLoading(true);
+    setErrorField('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/scholarly/auth/sign-up`,
+        },
+      });
+
+      if (error) {
+        setErrorField(error.message);
+        setIsGoogleLoading(false);
+      }
+      // If successful, user will be redirected to Google, then back to our callback
+      // The useEffect will handle the callback
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setErrorField(errorMessage);
+      setIsGoogleLoading(false);
+    }
   };
 
   const goToSignIn = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -299,16 +459,27 @@ const ScholarSignUp: React.FC = () => {
             {/* Google Sign Up */}
             <button
               type='button'
-              className='w-full h-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all duration-200 flex items-center justify-center gap-3 shadow-sm hover:shadow-md'
+              onClick={handleGoogleSignUp}
+              disabled={isGoogleLoading || isSubmitting}
+              className='w-full h-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all duration-200 flex items-center justify-center gap-3 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              <img
-                src='https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
-                width={20}
-                height={20}
-                alt='Google'
-                className='w-5 h-5'
-              />
-              Continue with Google
+              {isGoogleLoading ? (
+                <>
+                  <div className='w-5 h-5 border-2 border-slate-400/30 border-t-slate-600 rounded-full animate-spin' />
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <>
+                  <img
+                    src='https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
+                    width={20}
+                    height={20}
+                    alt='Google'
+                    className='w-5 h-5'
+                  />
+                  Continue with Google
+                </>
+              )}
             </button>
 
             {/* Sign In Link */}
