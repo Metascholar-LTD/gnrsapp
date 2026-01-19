@@ -651,54 +651,73 @@ const ArticleView: React.FC = () => {
             </section>
           )}
 
-          {/* Full Text (Placeholder) */}
-          <section className="sr-article-section">
-            <h2 className="sr-article-section__title">1. Introduction</h2>
-            <div className="sr-article-section__content">
-              <p>
-                {article.abstract.split('.')[0]}. This foundational work builds upon decades of research
-                in the field and introduces novel methodologies that advance our understanding
-                significantly.
-              </p>
-              <p>
-                Recent advances have opened new avenues for investigation, and our approach combines
-                theoretical frameworks with practical implementations. The implications of this research
-                extend beyond the immediate field and have potential applications across multiple
-                disciplines.
-              </p>
-              <p>
-                In this paper, we present our findings and discuss their significance in the broader
-                context of current scientific discourse. Our methodology, detailed in Section 2, provides
-                a robust framework for future investigations.
-              </p>
-            </div>
-          </section>
+          {/* Full Text Access Notice */}
+          {article.doi && (
+            <section className="sr-article-section">
+              <div style={{
+                background: '#F5F5F4',
+                border: '1px solid #E7E5E4',
+                borderRadius: '8px',
+                padding: '24px',
+                textAlign: 'center'
+              }}>
+                <p style={{
+                  fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                  fontSize: '0.9375rem',
+                  color: '#57534E',
+                  margin: '0 0 12px 0',
+                  lineHeight: '1.6'
+                }}>
+                  To access the full text of this article, please use the DOI link above or download the PDF.
+                </p>
+                {article.doi && (
+                  <a
+                    href={`https://doi.org/${article.doi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 20px',
+                      background: '#1E3A5F',
+                      color: '#FFFFFF',
+                      borderRadius: '6px',
+                      textDecoration: 'none',
+                      fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      transition: 'background 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#2D4A6F'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = '#1E3A5F'}
+                  >
+                    <ExternalLink size={16} />
+                    Access Full Text via DOI
+                  </a>
+                )}
+              </div>
+            </section>
+          )}
 
           {/* References */}
-          <section className="sr-article-section">
-            <h2 className="sr-article-section__title">References</h2>
-            <div className="sr-article-references">
-              <div className="sr-article-reference">
-                <span className="sr-article-reference__number">[1]</span>
-                Shor, P.W. (1995). Scheme for reducing decoherence in quantum computer memory. Phys.
-                Rev. A, 52, R2493.
+          {article.references && article.references.length > 0 && (
+            <section className="sr-article-section">
+              <h2 className="sr-article-section__title">References</h2>
+              <div className="sr-article-references">
+                {article.references.map((ref, idx) => {
+                  // Handle both string[] and Reference[] formats
+                  const citation = typeof ref === 'string' ? ref : ref.citation || '';
+                  return (
+                    <div key={idx} className="sr-article-reference">
+                      <span className="sr-article-reference__number">[{idx + 1}]</span>
+                      {citation}
+                    </div>
+                  );
+                })}
               </div>
-              <div className="sr-article-reference">
-                <span className="sr-article-reference__number">[2]</span>
-                Steane, A.M. (1996). Error Correcting Codes in Quantum Theory. Phys. Rev. Lett., 77, 793.
-              </div>
-              <div className="sr-article-reference">
-                <span className="sr-article-reference__number">[3]</span>
-                Kitaev, A.Y. (2003). Fault-tolerant quantum computation by anyons. Annals of Physics,
-                303(1), 2-30.
-              </div>
-              <div className="sr-article-reference">
-                <span className="sr-article-reference__number">[4]</span>
-                Fowler, A.G., et al. (2012). Surface codes: Towards practical large-scale quantum
-                computation. Phys. Rev. A, 86, 032324.
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* Cited By */}
           {article.citationCount > 0 && (

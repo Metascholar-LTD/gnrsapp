@@ -13,8 +13,10 @@ const AdminAuth = () => {
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   
   // Form state for sign up
-  const [signUpUser, setSignUpUser] = useState({ name: '', email: '', password: '' });
+  const [signUpUser, setSignUpUser] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordMatchError, setPasswordMatchError] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -40,7 +42,28 @@ const AdminAuth = () => {
   };
 
   const handleSignUpInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSignUpUser({ ...signUpUser, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setSignUpUser({ ...signUpUser, [name]: value });
+    
+    // Clear password match error when user types
+    if (passwordMatchError) {
+      setPasswordMatchError('');
+    }
+    
+    // Real-time password match validation
+    if (name === 'confirmPassword') {
+      if (value && value !== signUpUser.password) {
+        setPasswordMatchError('Passwords do not match');
+      } else if (value && value === signUpUser.password) {
+        setPasswordMatchError('');
+      }
+    } else if (name === 'password' && signUpUser.confirmPassword) {
+      if (value !== signUpUser.confirmPassword) {
+        setPasswordMatchError('Passwords do not match');
+      } else {
+        setPasswordMatchError('');
+      }
+    }
   };
 
   const handleSignInSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -60,6 +83,18 @@ const AdminAuth = () => {
 
   const handleSignUpSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Validate password match
+    if (signUpUser.password !== signUpUser.confirmPassword) {
+      setPasswordMatchError('Passwords do not match');
+      toast({
+        title: "Validation Error",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     // TODO: Replace with actual authentication API call
@@ -93,6 +128,9 @@ const AdminAuth = () => {
     setIsAnimating(true);
     setTimeout(() => {
       setIsSignUp(false);
+      // Reset sign up form state
+      setSignUpUser({ name: '', email: '', password: '', confirmPassword: '' });
+      setPasswordMatchError('');
       // Update URL without navigation
       window.history.replaceState({}, '', '/admin/sign-in');
       setTimeout(() => setIsAnimating(false), 10);
@@ -110,6 +148,38 @@ const AdminAuth = () => {
       padding-top: 3.5rem;
       padding-bottom: 3.5rem;
       position: relative;
+      overflow: hidden;
+    }
+
+    #admin-auth-video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      filter: blur(8px);
+      transform: scale(1.1);
+    }
+
+    #admin-auth-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+
+    #admin-auth-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #admin-auth-logo {
@@ -121,6 +191,13 @@ const AdminAuth = () => {
       gap: 0.5rem;
       text-decoration: none;
       color: #111827;
+      z-index: 3;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     #admin-auth-logo:hover {
@@ -134,12 +211,15 @@ const AdminAuth = () => {
     }
 
     #admin-auth-paper {
-      background-color: #ffffff;
-      padding: 1.25rem;
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 2rem;
       width: 100%;
       max-width: 380px;
       border-radius: 24px;
-      box-shadow: none;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       position: relative;
       overflow: hidden;
     }
@@ -178,14 +258,14 @@ const AdminAuth = () => {
       text-align: center;
       font-size: 1.875rem;
       font-weight: 600;
-      color: #111827;
+      color: #ffffff;
       margin: 0 0 0.5rem 0;
     }
 
     #admin-auth-subtitle {
       text-align: center;
       font-size: 0.875rem;
-      color: #6b7280;
+      color: rgba(255, 255, 255, 0.7);
       margin: 0.5rem 0 1.5rem 0;
     }
 
@@ -204,21 +284,44 @@ const AdminAuth = () => {
     .admin-auth-input {
       width: 100%;
       padding: 0.875rem 0.875rem 0.875rem 2.75rem;
-      border: none;
-      border-radius: 0.375rem;
-      background-color: #f3f4f6;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       font-size: 0.875rem;
-      color: #111827;
-      transition: background-color 0.2s;
+      color: #ffffff;
+      transition: all 0.2s ease;
     }
 
     .admin-auth-input:focus {
       outline: none;
-      background-color: #e5e7eb;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    }
+
+    .admin-auth-input--error {
+      border-color: rgba(239, 68, 68, 0.6) !important;
+      background-color: rgba(239, 68, 68, 0.1) !important;
+    }
+
+    .admin-auth-input--error:focus {
+      border-color: rgba(239, 68, 68, 0.8) !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
     }
 
     .admin-auth-input::placeholder {
-      color: #9ca3af;
+      color: rgba(255, 255, 255, 0.5);
+      opacity: 1;
+    }
+
+    .admin-auth-input:-webkit-autofill,
+    .admin-auth-input:-webkit-autofill:hover,
+    .admin-auth-input:-webkit-autofill:focus {
+      -webkit-text-fill-color: #ffffff;
+      -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset;
+      transition: background-color 5000s ease-in-out 0s;
     }
 
     .admin-auth-input-icon {
@@ -228,8 +331,13 @@ const AdminAuth = () => {
       transform: translateY(-50%);
       width: 20px;
       height: 20px;
-      color: #6b7280;
+      color: rgba(255, 255, 255, 0.6);
       pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .admin-auth-input-wrapper:focus-within .admin-auth-input-icon {
+      color: rgba(255, 255, 255, 0.9);
     }
 
     .admin-auth-password-toggle {
@@ -257,7 +365,12 @@ const AdminAuth = () => {
     .admin-auth-password-toggle-icon {
       width: 18px;
       height: 18px;
-      color: #6b7280;
+      color: rgba(255, 255, 255, 0.6);
+      transition: color 0.2s ease;
+    }
+
+    .admin-auth-password-toggle:hover .admin-auth-password-toggle-icon {
+      color: rgba(255, 255, 255, 0.9);
     }
 
     .admin-auth-remember-forgot {
@@ -273,7 +386,7 @@ const AdminAuth = () => {
       align-items: center;
       gap: 0.5rem;
       font-size: 0.875rem;
-      color: #374151;
+      color: rgba(255, 255, 255, 0.8);
       cursor: pointer;
     }
 
@@ -282,12 +395,28 @@ const AdminAuth = () => {
       height: 16px;
       cursor: pointer;
       accent-color: #2563eb;
+      filter: brightness(1.2);
+    }
+
+    .admin-auth-error-message {
+      margin-top: -0.5rem;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 0.375rem;
+      font-size: 0.8125rem;
+      color: #fca5a5;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .admin-auth-forgot-link {
       font-size: 0.875rem;
-      color: #2563eb;
+      color: rgba(255, 255, 255, 0.9);
       text-decoration: none;
+      transition: color 0.2s ease;
     }
 
     .admin-auth-forgot-link:hover {
@@ -296,24 +425,28 @@ const AdminAuth = () => {
 
     .admin-auth-submit-btn {
       width: 100%;
-      padding: 0.75rem 1rem;
+      padding: 0.875rem 1rem;
       border: none;
-      border-radius: 0.375rem;
-      background-color: #2563eb;
+      border-radius: 0.5rem;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       color: #ffffff;
       font-size: 0.875rem;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all 0.2s ease;
       margin-top: 0.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
     }
 
     .admin-auth-submit-btn:hover:not(:disabled) {
-      background-color: #1d4ed8;
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.4);
     }
 
     .admin-auth-submit-btn:active:not(:disabled) {
-      background-color: #1e40af;
+      transform: translateY(0);
+      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3);
     }
 
     .admin-auth-submit-btn:disabled {
@@ -325,15 +458,17 @@ const AdminAuth = () => {
       margin-top: 2.5rem;
       text-align: center;
       font-size: 0.875rem;
-      color: #6b7280;
+      color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0.025em;
     }
 
     .admin-auth-switch-link {
-      color: #2563eb;
+      color: rgba(255, 255, 255, 0.95);
       text-decoration: none;
       margin-left: 0.25rem;
       cursor: pointer;
+      font-weight: 500;
+      transition: color 0.2s ease;
     }
 
     .admin-auth-switch-link:hover {
@@ -366,6 +501,16 @@ const AdminAuth = () => {
   return (
     <div id="admin-auth-wrapper">
       <style>{isolatedStyles}</style>
+      <video
+        id="admin-auth-video-background"
+        autoPlay
+        loop
+        muted
+        playsInline
+      >
+        <source src="https://res.cloudinary.com/dsypclqxk/video/upload/v1768821020/19264a464315513c06c2dc242649e340_w36wot.mp4" type="video/mp4" />
+      </video>
+      <div id="admin-auth-overlay"></div>
       <Link to="/" id="admin-auth-logo">
         <img 
           src="https://res.cloudinary.com/dsypclqxk/image/upload/v1764944554/Of_Participation_-_1_-_Edited_l53t4f.png" 
@@ -373,7 +518,8 @@ const AdminAuth = () => {
           id="admin-auth-logo-img"
         />
       </Link>
-      <div id="admin-auth-paper">
+      <div id="admin-auth-content">
+        <div id="admin-auth-paper">
         <div className="admin-auth-form-container">
           <div className={`admin-auth-form-content ${isAnimating ? 'animating' : ''}`} key={isSignUp ? 'signup' : 'signin'}>
           {isSignUp ? (
@@ -444,6 +590,39 @@ const AdminAuth = () => {
                     />
                   </button>
                 </div>
+                <div className="admin-auth-input-wrapper">
+                  <Icon 
+                    icon="hugeicons:lock-key" 
+                    className="admin-auth-input-icon" 
+                  />
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={signUpUser.confirmPassword}
+                    onChange={handleSignUpInputChange}
+                    className={`admin-auth-input ${passwordMatchError ? 'admin-auth-input--error' : ''}`}
+                    placeholder="Confirm Password"
+                    autoComplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className={`admin-auth-password-toggle ${signUpUser.confirmPassword ? 'visible' : ''}`}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label="toggle password visibility"
+                  >
+                    <Icon
+                      icon={showConfirmPassword ? 'fluent-mdl2:view' : 'fluent-mdl2:hide-3'}
+                      className="admin-auth-password-toggle-icon"
+                    />
+                  </button>
+                </div>
+                {passwordMatchError && (
+                  <div className="admin-auth-error-message">
+                    {passwordMatchError}
+                  </div>
+                )}
 
                 <button 
                   type="submit" 
@@ -547,6 +726,7 @@ const AdminAuth = () => {
           )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

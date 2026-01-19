@@ -107,6 +107,7 @@ import AdminUsersList from "./pages/admin/AdminUsersList";
 import AdminAuth from "./pages/admin/AdminAuth";
 import AdminSkilledWorkers from "./pages/admin/AdminSkilledWorkers";
 import AdminLocalJobGigs from "./pages/admin/AdminLocalJobGigs";
+import AdminUniRanking from "./pages/admin/AdminUniRanking";
 import SneatLayout from "./pages/sneat/SneatLayout";
 import Dashboard from "./pages/sneat/Dashboard";
 import AccountSettings from "./pages/sneat/pages/AccountSettings";
@@ -297,6 +298,9 @@ const App = () => (
             <Route path="local-job-gigs/categories" element={<AdminLocalJobGigs />} />
             <Route path="local-job-gigs/gigs" element={<AdminLocalJobGigs />} />
             <Route path="local-job-gigs/approval" element={<AdminLocalJobGigs />} />
+            <Route path="uni-ranking" element={<AdminUniRanking />} />
+            <Route path="uni-ranking/institutions" element={<AdminUniRanking />} />
+            <Route path="uni-ranking/approval" element={<AdminUniRanking />} />
             <Route path="scholarships" element={<AdminScholarshipHub />} />
             <Route path="ui-buttons" element={<AdminDashboard />} />
             <Route path="ui-forms" element={<AdminDashboard />} />

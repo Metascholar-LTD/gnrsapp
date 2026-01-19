@@ -102,6 +102,12 @@ const AdminSidebar = () => {
       ],
     },
     {
+      header: "Uni Ranking",
+      items: [
+        { icon: "award", label: "Uni Ranking", path: "/admin/uni-ranking" },
+      ],
+    },
+    {
       header: "Directories",
       items: [
         { icon: "map-pin", label: "Directories", path: "/admin/directories" },
