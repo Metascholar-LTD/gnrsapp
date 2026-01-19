@@ -11,6 +11,14 @@ import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ServiceCard } from "@/components/ui/service-card";
 import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { 
   ArrowLeft, 
   CheckCircle2, 
   XCircle, 
@@ -20,7 +28,10 @@ import {
   Target,
   CheckCircle,
   Download,
-  File
+  File,
+  Trophy,
+  AlertTriangle,
+  RotateCcw
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -70,6 +81,15 @@ interface TrialQuestionData {
 
 const QUESTIONS_PER_PAGE = 10;
 
+interface QuizResults {
+  totalQuestions: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  scorePercentage: number;
+  passed: boolean;
+  forcedRetake: boolean;
+}
+
 const TrialQuestionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -80,6 +100,9 @@ const TrialQuestionDetail = () => {
   const [showResult, setShowResult] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [questionData, setQuestionData] = useState<TrialQuestionData | null>(null);
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [quizResults, setQuizResults] = useState<QuizResults | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch question data from database
   useEffect(() => {
@@ -213,6 +236,24 @@ const TrialQuestionDetail = () => {
     }
   };
 
+  // Use fetched data (compute before early return)
+  const mockData: TrialQuestionData | null = questionData;
+
+  // Pagination logic (computed before early return, but safe with null checks)
+  const totalPages = mockData ? Math.ceil(mockData.mcqs.length / QUESTIONS_PER_PAGE) : 0;
+  const startIndex = (currentPage - 1) * QUESTIONS_PER_PAGE;
+  const endIndex = startIndex + QUESTIONS_PER_PAGE;
+  const currentPageQuestions = mockData?.mcqs.slice(startIndex, endIndex) || [];
+  const currentPageAnswered = currentPageQuestions.every(q => answeredQuestions.has(q.id));
+  
+  // Check if all questions are answered (computed value, not a hook)
+  const allQuestionsAnswered = mockData 
+    ? mockData.mcqs.length > 0 && mockData.mcqs.every(q => answeredQuestions.has(q.id))
+    : false;
+  
+  // Check if we're on the last page
+  const isLastPage = currentPage === totalPages;
+
   if (loading || !questionData) {
     return (
       <>
@@ -234,16 +275,6 @@ const TrialQuestionDetail = () => {
     );
   }
 
-  // Use fetched data
-  const mockData: TrialQuestionData = questionData;
-
-  // Pagination logic
-  const totalPages = Math.ceil(mockData.mcqs.length / QUESTIONS_PER_PAGE);
-  const startIndex = (currentPage - 1) * QUESTIONS_PER_PAGE;
-  const endIndex = startIndex + QUESTIONS_PER_PAGE;
-  const currentPageQuestions = mockData.mcqs.slice(startIndex, endIndex);
-  const currentPageAnswered = currentPageQuestions.every(q => answeredQuestions.has(q.id));
-
   const handleAnswerSelect = (questionId: string, answerId: string) => {
     setSelectedAnswers(prev => ({ ...prev, [questionId]: answerId }));
   };
@@ -259,10 +290,116 @@ const TrialQuestionDetail = () => {
     setAnsweredQuestions(prev => new Set([...prev, questionId]));
   };
 
+  // Calculate quiz results
+  const calculateResults = (): QuizResults => {
+    if (!mockData || mockData.mcqs.length === 0) {
+      return {
+        totalQuestions: 0,
+        correctAnswers: 0,
+        incorrectAnswers: 0,
+        scorePercentage: 0,
+        passed: false,
+        forcedRetake: false,
+      };
+    }
+
+    let correct = 0;
+    let incorrect = 0;
+
+    mockData.mcqs.forEach(mcq => {
+      const userAnswer = selectedAnswers[mcq.id];
+      if (userAnswer === mcq.correctAnswer) {
+        correct++;
+      } else if (userAnswer) {
+        incorrect++;
+      }
+    });
+
+    const total = mockData.mcqs.length;
+    const scorePercentage = total > 0 ? (correct / total) * 100 : 0;
+    const passed = scorePercentage >= 50;
+    const forcedRetake = scorePercentage < 40; // Abysmally poor
+
+    return {
+      totalQuestions: total,
+      correctAnswers: correct,
+      incorrectAnswers: incorrect,
+      scorePercentage: Math.round(scorePercentage * 100) / 100,
+      passed,
+      forcedRetake,
+    };
+  };
+
+  // Save attempt to database
+  const saveAttemptToDatabase = async (results: QuizResults) => {
+    if (!id) return;
+
+    try {
+      // Get current user if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('trial_question_attempts' as any)
+        .insert({
+          trial_question_id: id,
+          user_id: user?.id || null,
+          answers: selectedAnswers,
+          total_questions: results.totalQuestions,
+          correct_answers: results.correctAnswers,
+          incorrect_answers: results.incorrectAnswers,
+          score_percentage: results.scorePercentage,
+          passed: results.passed,
+          forced_retake: results.forcedRetake,
+          completed_at: new Date().toISOString(),
+        });
+
+      if (error) {
+        console.error("Error saving attempt:", error);
+      }
+    } catch (error) {
+      console.error("Error saving attempt:", error);
+    }
+  };
+
+  // Handle finish quiz
+  const handleFinishQuiz = async () => {
+    if (!allQuestionsAnswered || !id) return;
+
+    setIsSubmitting(true);
+    try {
+      const results = calculateResults();
+      setQuizResults(results);
+      
+      // Save attempt to database
+      await saveAttemptToDatabase(results);
+      
+      // Show results modal
+      setShowResultsModal(true);
+    } catch (error) {
+      console.error("Error finishing quiz:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle retake quiz
+  const handleRetakeQuiz = () => {
+    // Reset all state
+    setSelectedAnswers({});
+    setAnsweredQuestions(new Set());
+    setCurrentPage(1);
+    setShowResult({});
+    setShowResultsModal(false);
+    setQuizResults(null);
+  };
+
   const handleNextPage = () => {
     if (currentPage < totalPages && currentPageAnswered) {
       setCurrentPage(prev => prev + 1);
       setShowResult({});
+    } else if (isLastPage && allQuestionsAnswered) {
+      // If on last page and all questions answered, trigger finish
+      handleFinishQuiz();
     }
   };
 
@@ -603,12 +740,25 @@ const TrialQuestionDetail = () => {
                     </span>
 
                     <Button
-                      onClick={handleNextPage}
-                      disabled={currentPage >= totalPages || !currentPageAnswered}
-                      className={`${currentPageAnswered ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}
+                      onClick={isLastPage && allQuestionsAnswered ? handleFinishQuiz : handleNextPage}
+                      disabled={!currentPageAnswered || (isLastPage && !allQuestionsAnswered) || isSubmitting}
+                      className={`${currentPageAnswered && !isSubmitting ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}
                     >
-                      Next
-                      <ChevronRight className="w-4 h-4 ml-2" />
+                      {isSubmitting ? (
+                        <>
+                          Finishing...
+                        </>
+                      ) : isLastPage && allQuestionsAnswered ? (
+                        <>
+                          Finish
+                          <CheckCircle className="w-4 h-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          Next
+                          <ChevronRight className="w-4 h-4 ml-2" />
+                        </>
+                      )}
                     </Button>
                   </div>
 
@@ -672,6 +822,148 @@ const TrialQuestionDetail = () => {
         </div>
         <Footer />
       </div>
+
+      {/* Results Modal */}
+      <Dialog 
+        open={showResultsModal} 
+        onOpenChange={(open) => {
+          // Prevent closing modal if forced retake is required
+          if (!open && quizResults?.forcedRetake) {
+            return;
+          }
+          setShowResultsModal(open);
+        }}
+      >
+        <DialogContent 
+          className={`sm:max-w-[500px] ${quizResults?.forcedRetake ? '[&>button]:hidden' : ''}`}
+          onInteractOutside={(e) => {
+            // Prevent closing modal when clicking outside if forced retake is required
+            if (quizResults?.forcedRetake) {
+              e.preventDefault();
+            }
+          }}
+          onEscapeKeyDown={(e) => {
+            // Prevent closing modal with Escape key if forced retake is required
+            if (quizResults?.forcedRetake) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center">
+              {quizResults?.forcedRetake ? (
+                <div className="flex items-center justify-center gap-2 text-red-600">
+                  <AlertTriangle className="w-6 h-6" />
+                  <span>Quiz Results</span>
+                </div>
+              ) : quizResults?.passed ? (
+                <div className="flex items-center justify-center gap-2 text-green-600">
+                  <Trophy className="w-6 h-6" />
+                  <span>Congratulations!</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-amber-600">
+                  <XCircle className="w-6 h-6" />
+                  <span>Quiz Results</span>
+                </div>
+              )}
+            </DialogTitle>
+            <DialogDescription className="text-center pt-4">
+              {quizResults?.forcedRetake ? (
+                <span className="text-red-700 font-semibold block">
+                  Your performance is abysmally poor. You must retake this quiz.
+                </span>
+              ) : quizResults?.passed ? (
+                <span className="text-green-700 font-semibold block">
+                  You passed! Well done!
+                </span>
+              ) : (
+                <span className="text-amber-700 font-semibold block">
+                  You didn't pass, but you can retake the quiz to improve your score.
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Score Display */}
+            <div className="text-center">
+              <div className={`text-5xl font-bold mb-2 ${
+                quizResults?.forcedRetake ? 'text-red-600' :
+                quizResults?.passed ? 'text-green-600' : 'text-amber-600'
+              }`}>
+                {quizResults?.scorePercentage.toFixed(1)}%
+              </div>
+              <p className="text-sm text-slate-600">Your Score</p>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-200">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-slate-900">{quizResults?.totalQuestions}</div>
+                <div className="text-xs text-slate-600 mt-1">Total Questions</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{quizResults?.correctAnswers}</div>
+                <div className="text-xs text-slate-600 mt-1">Correct</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">{quizResults?.incorrectAnswers}</div>
+                <div className="text-xs text-slate-600 mt-1">Incorrect</div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            {quizResults?.forcedRetake ? (
+              <>
+                <Button
+                  onClick={handleRetakeQuiz}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Retake Quiz (Required)
+                </Button>
+              </>
+            ) : quizResults?.passed ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/education/trial-questions")}
+                  className="w-full"
+                >
+                  Back to Questions
+                </Button>
+                <Button
+                  onClick={handleRetakeQuiz}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Retake Quiz
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/education/trial-questions")}
+                  className="w-full"
+                >
+                  Back to Questions
+                </Button>
+                <Button
+                  onClick={handleRetakeQuiz}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Retake Quiz
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -102,14 +102,6 @@ const ScholarSidebarMenu: React.FC = () => {
         </Link>
       </li>
 
-      {/* Impact Metrics */}
-      <li className={`menu-item ${isActive('/scholar/dashboard?tab=metrics') ? 'active' : ''}`}>
-        <Link to="/scholar/dashboard?tab=metrics" className="menu-link">
-          <Icon icon="hugeicons:chart-03" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Impact Metrics">Impact Metrics</div>
-        </Link>
-      </li>
-
       {/* EXPLORE SECTION */}
       <li className="menu-header small text-uppercase mt-3">
         <span className="menu-header-text">Explore</span>
