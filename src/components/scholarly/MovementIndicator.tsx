@@ -41,8 +41,24 @@ export const MovementIndicator: React.FC<MovementIndicatorProps> = ({
       color: #2D5A47;
     }
 
+    .sr-movement-indicator--up .sr-movement-icon {
+      color: #10B981;
+    }
+
+    .sr-movement-indicator--up .sr-movement-label {
+      color: #FFFFFF;
+    }
+
     .sr-movement-indicator--down {
       color: #7C2D36;
+    }
+
+    .sr-movement-indicator--down .sr-movement-icon {
+      color: #EF4444;
+    }
+
+    .sr-movement-indicator--down .sr-movement-label {
+      color: #FFFFFF;
     }
 
     .sr-movement-indicator--stable {
