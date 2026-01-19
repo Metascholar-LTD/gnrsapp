@@ -31,7 +31,7 @@ const MyProfile: React.FC = () => {
   const [formData, setFormData] = useState({
     full_name: '',
     bio: '',
-    university_id: '',
+    institution_id: '',
     department: '',
     title: '',
     research_interests: [] as string[],
@@ -70,7 +70,7 @@ const MyProfile: React.FC = () => {
         setFormData({
           full_name: profileData.full_name || '',
           bio: profileData.bio || '',
-          university_id: profileData.university_id || '',
+          institution_id: profileData.institution_id || '',
           department: profileData.department || '',
           title: profileData.title || '',
           research_interests: profileData.research_interests || [],
@@ -237,7 +237,7 @@ const MyProfile: React.FC = () => {
         .update({
           full_name: formData.full_name || null,
           bio: formData.bio || null,
-          university_id: formData.university_id || null,
+          institution_id: formData.institution_id || null,
           department: formData.department || null,
           title: formData.title || null,
           research_interests: formData.research_interests.length > 0 ? formData.research_interests : null,
@@ -387,8 +387,8 @@ const MyProfile: React.FC = () => {
                 University
               </label>
               <select
-                value={formData.university_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, university_id: e.target.value }))}
+                value={formData.institution_id}
+                onChange={(e) => setFormData(prev => ({ ...prev, institution_id: e.target.value }))}
                 className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select your university</option>

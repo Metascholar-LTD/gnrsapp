@@ -113,7 +113,6 @@ const ScholarSignUp: React.FC = () => {
             user_id: userId,
             role: 'scholar',
             full_name: fullName || null,
-            affiliation: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });

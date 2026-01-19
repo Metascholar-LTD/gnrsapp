@@ -77,7 +77,7 @@ const Articles: React.FC = () => {
         query = query.eq('discipline', selectedDiscipline);
       }
       if (selectedUniversity) {
-        query = query.eq('university_id', selectedUniversity);
+        query = query.eq('institution_id', selectedUniversity);
       }
       if (selectedYear) {
         const startDate = `${selectedYear}-01-01`;

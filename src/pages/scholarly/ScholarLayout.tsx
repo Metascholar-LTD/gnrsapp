@@ -6,16 +6,129 @@
 // ============================================================================
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import NotificationMenu from '../sneat/components/NotificationMenu';
 import ScholarSidebarMenu from './ScholarSidebarMenu';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from 'lucide-react';
 
 const ScholarLayout: React.FC = () => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuCollapsed, setMenuCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const location = useLocation();
+
+  // Authentication check - runs immediately and blocks rendering
+  useEffect(() => {
+    let mounted = true;
+    let subscription: any = null;
+
+    const checkAuth = async () => {
+      try {
+        // First, check if there's any session at all
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+
+        if (error) {
+          console.error('Auth check error:', error);
+          setIsAuthenticated(false);
+          setUser(null);
+          setAuthChecked(true);
+          navigate('/scholarly/auth/sign-in', { replace: true });
+          return;
+        }
+        
+        // Strict check: must have session AND user
+        if (!session || !session.user || !session.user.id) {
+          setIsAuthenticated(false);
+          setUser(null);
+          setAuthChecked(true);
+          navigate('/scholarly/auth/sign-in', { 
+            state: { from: location.pathname },
+            replace: true 
+          });
+          return;
+        }
+
+        // Verify the user object is valid
+        if (!session.user.id || !session.user.email) {
+          setIsAuthenticated(false);
+          setUser(null);
+          setAuthChecked(true);
+          navigate('/scholarly/auth/sign-in', { 
+            state: { from: location.pathname },
+            replace: true 
+          });
+          return;
+        }
+
+        // Verify user has a scholar profile
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles' as any)
+          .select('id, role')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (!mounted) return;
+
+        // If profile doesn't exist or user is not a scholar, redirect to sign up
+        if (profileError || !profile || (profile as any)?.role !== 'scholar') {
+          setIsAuthenticated(false);
+          setUser(null);
+          setAuthChecked(true);
+          navigate('/scholarly/auth/sign-up', { replace: true });
+          return;
+        }
+
+        // User is authenticated and has scholar profile - set state
+        setUser(session.user);
+        setIsAuthenticated(true);
+        setAuthChecked(true);
+
+        // Listen for auth state changes
+        const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          if (!mounted) return;
+
+          if (event === 'SIGNED_OUT' || !session || !session.user || !session.user.id) {
+            setIsAuthenticated(false);
+            setUser(null);
+            setAuthChecked(true);
+            navigate('/scholarly/auth/sign-in', { replace: true });
+          } else if (session?.user && session.user.id) {
+            setUser(session.user);
+            setIsAuthenticated(true);
+            setAuthChecked(true);
+          }
+        });
+
+        subscription = authSubscription;
+      } catch (error) {
+        console.error('Auth check error:', error);
+        if (mounted) {
+          setIsAuthenticated(false);
+          setUser(null);
+          setAuthChecked(true);
+          navigate('/scholarly/auth/sign-in', { replace: true });
+        }
+      }
+    };
+
+    // Run auth check immediately - don't wait
+    checkAuth();
+
+    return () => {
+      mounted = false;
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+  }, [navigate, location.pathname]);
 
   // Check if mobile on mount and handle responsive behavior
   useEffect(() => {
@@ -104,6 +217,48 @@ const ScholarLayout: React.FC = () => {
   const toggleMenuCollapse = () => {
     setMenuCollapsed(!menuCollapsed);
   };
+
+  // Block ALL rendering until authentication is checked
+  // Show loading state while checking authentication
+  if (!authChecked || isAuthenticated === null) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#FAFAF9',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <Loader2 size={48} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 16px', color: '#1E3A5F' }} />
+          <p style={{ color: '#78716C', fontFamily: "'Source Sans Pro', system-ui, sans-serif" }}>Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render layout if not authenticated - show loading while redirecting
+  if (isAuthenticated === false) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#FAFAF9',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <Loader2 size={48} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 16px', color: '#1E3A5F' }} />
+          <p style={{ color: '#78716C', fontFamily: "'Source Sans Pro', system-ui, sans-serif" }}>Redirecting to sign in...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Only render if authenticated and user exists
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   return (
     <>
@@ -877,6 +1032,15 @@ const ScholarLayout: React.FC = () => {
 
         .layout-wrapper .layout-page {
           z-index: 1 !important;
+        }
+
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
       <div className={`layout-wrapper layout-content-navbar ${menuCollapsed ? 'layout-menu-collapsed' : ''}`}>

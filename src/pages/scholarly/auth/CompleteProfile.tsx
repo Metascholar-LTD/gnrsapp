@@ -39,6 +39,9 @@ const CompleteProfile: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [universitiesList, setUniversitiesList] = useState<Array<{ id: string; name: string; abbreviation: string | null }>>([]);
   const [loadingUniversities, setLoadingUniversities] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedUniversity, setSelectedUniversity] = useState<{ id: string; name: string; abbreviation: string | null } | null>(null);
   
   const [profileData, setProfileData] = useState<ProfileData>({
     university: '',
@@ -77,22 +80,11 @@ const CompleteProfile: React.FC = () => {
     loadInstitutions();
   }, []);
 
-  // Use universities from database, fallback to hardcoded list
-  const universities = universitiesList.length > 0 
-    ? universitiesList.map(u => ({ name: u.name, short: u.abbreviation || '' }))
-    : [
-        { name: 'University of Ghana', short: 'UG' },
-        { name: 'Kwame Nkrumah University of Science and Technology', short: 'KNUST' },
-        { name: 'University of Cape Coast', short: 'UCC' },
-        { name: 'University of Education, Winneba', short: 'UEW' },
-        { name: 'University of Mines and Technology', short: 'UMaT' },
-        { name: 'University for Development Studies', short: 'UDS' },
-        { name: 'Ghana Institute of Management and Public Administration', short: 'GIMPA' },
-        { name: 'Catholic University of Ghana', short: 'CUG' },
-        { name: 'Presbyterian University College', short: 'PUC' },
-        { name: 'University of Energy and Natural Resources', short: 'UENR' },
-        { name: 'Accra Institute of Technology', short: 'AIT' },
-      ];
+  // Filter institutions based on search query
+  const filteredInstitutions = universitiesList.filter(inst => 
+    inst.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (inst.abbreviation && inst.abbreviation.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   const academicTitles = [
     { value: 'lecturer', label: 'Lecturer' },
@@ -107,8 +99,8 @@ const CompleteProfile: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (step === 1) {
-      if (!profileData.university.trim()) {
-        newErrors.university = 'University affiliation is required';
+      if (!selectedUniversity && !profileData.university.trim()) {
+        newErrors.university = 'Institution affiliation is required';
       }
       if (!profileData.department.trim()) {
         newErrors.department = 'Department is required';
@@ -159,8 +151,8 @@ const CompleteProfile: React.FC = () => {
         return;
       }
 
-      // Find university ID from selected university name
-      const selectedUniversity = universitiesList.find(
+      // Use the selected university from state
+      const selectedUniversityToSave = selectedUniversity || universitiesList.find(
         u => u.name === profileData.university
       );
 
@@ -168,7 +160,7 @@ const CompleteProfile: React.FC = () => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          university_id: selectedUniversity?.id || null,
+          institution_id: selectedUniversityToSave?.id || null,
           department: profileData.department || null,
           title: profileData.title || null,
           research_interests: profileData.researchInterests.length > 0 ? profileData.researchInterests : null,
@@ -188,7 +180,7 @@ const CompleteProfile: React.FC = () => {
                       session.user.user_metadata?.name || 
                       session.user.email?.split('@')[0] || 
                       null,
-            university_id: selectedUniversity?.id || null,
+            institution_id: selectedUniversityToSave?.id || null,
             department: profileData.department || null,
             title: profileData.title || null,
             research_interests: profileData.researchInterests.length > 0 ? profileData.researchInterests : null,
@@ -250,51 +242,90 @@ const CompleteProfile: React.FC = () => {
               </p>
             </div>
 
-            {/* University */}
-            <div className='space-y-2'>
+            {/* University - Searchable Autocomplete */}
+            <div className='space-y-2 relative'>
               <label htmlFor="university" className='text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2'>
                 <Building2 className='w-4 h-4' />
-                University Affiliation <span className='text-red-500'>*</span>
+                Institution Affiliation <span className='text-red-500'>*</span>
               </label>
-              <select
-                id="university"
-                value={profileData.university}
-                onChange={(e) => {
-                  const selected = universities.find(u => u.name === e.target.value);
-                  setProfileData(prev => ({
-                    ...prev,
-                    university: e.target.value,
-                    universityShort: selected?.short || '',
-                  }));
-                  if (errors.university) {
-                    setErrors(prev => {
-                      const newErrors = { ...prev };
-                      delete newErrors.university;
-                      return newErrors;
-                    });
-                  }
-                }}
-                disabled={loadingUniversities}
-                className='w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200'
-                required
-              >
-                <option value="">Select your university</option>
-                {universities.map((uni) => (
-                  <option key={uni.short} value={uni.name}>
-                    {uni.name}
-                  </option>
-                ))}
-                <option value="other">Other (Please specify)</option>
-              </select>
-              {profileData.university === 'other' && (
-                <input
-                  type="text"
-                  placeholder="Enter your university name"
-                  value={profileData.university}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, university: e.target.value }))}
-                  className='w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 mt-2'
-                />
-              )}
+              <div className='relative'>
+                <div className='relative'>
+                  <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400' />
+                  <input
+                    type="text"
+                    id="university"
+                    placeholder="Type to search institutions..."
+                    value={selectedUniversity ? selectedUniversity.name : searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSuggestions(true);
+                      setSelectedUniversity(null);
+                      setProfileData(prev => ({
+                        ...prev,
+                        university: '',
+                        universityShort: '',
+                      }));
+                      if (errors.university) {
+                        setErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors.university;
+                          return newErrors;
+                        });
+                      }
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => {
+                      // Delay to allow click on suggestion
+                      setTimeout(() => setShowSuggestions(false), 200);
+                    }}
+                    disabled={loadingUniversities}
+                    className='w-full h-12 pl-10 pr-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200'
+                    required
+                  />
+                </div>
+                
+                {/* Suggestions Dropdown */}
+                {showSuggestions && searchQuery && filteredInstitutions.length > 0 && (
+                  <div className='absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-60 overflow-y-auto'>
+                    {filteredInstitutions.map((inst) => (
+                      <button
+                        key={inst.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedUniversity(inst);
+                          setSearchQuery(inst.name);
+                          setShowSuggestions(false);
+                          setProfileData(prev => ({
+                            ...prev,
+                            university: inst.name,
+                            universityShort: inst.abbreviation || '',
+                          }));
+                          if (errors.university) {
+                            setErrors(prev => {
+                              const newErrors = { ...prev };
+                              delete newErrors.university;
+                              return newErrors;
+                            });
+                          }
+                        }}
+                        className='w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-b border-slate-100 dark:border-slate-700 last:border-b-0'
+                      >
+                        <div className='font-medium text-slate-900 dark:text-slate-100'>{inst.name}</div>
+                        {inst.abbreviation && (
+                          <div className='text-xs text-slate-500 dark:text-slate-400'>{inst.abbreviation}</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* No results message */}
+                {showSuggestions && searchQuery && filteredInstitutions.length === 0 && !loadingUniversities && (
+                  <div className='absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-lg p-4'>
+                    <p className='text-sm text-slate-500 dark:text-slate-400'>No institutions found matching "{searchQuery}"</p>
+                  </div>
+                )}
+              </div>
               {errors.university && (
                 <p className='text-red-500 text-sm'>{errors.university}</p>
               )}
@@ -470,8 +501,10 @@ const CompleteProfile: React.FC = () => {
             <div className='bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 space-y-4'>
               {/* University & Department */}
               <div>
-                <h3 className='text-sm font-semibold text-slate-500 dark:text-slate-400 mb-2'>University & Department</h3>
-                <p className='text-slate-900 dark:text-slate-100 font-medium'>{profileData.university}</p>
+                <h3 className='text-sm font-semibold text-slate-500 dark:text-slate-400 mb-2'>Institution & Department</h3>
+                <p className='text-slate-900 dark:text-slate-100 font-medium'>
+                  {selectedUniversity ? selectedUniversity.name : profileData.university}
+                </p>
                 <p className='text-slate-600 dark:text-slate-400 text-sm'>{profileData.department}</p>
                 <p className='text-slate-600 dark:text-slate-400 text-sm mt-1'>
                   {academicTitles.find(t => t.value === profileData.title)?.label}

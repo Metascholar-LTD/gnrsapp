@@ -1067,7 +1067,59 @@ const ScholarDashboard: React.FC = () => {
               </div>
             </div>
             <div className="card-body p-0">
-              {(paperViewMode === 'cards' || isMobile) ? (
+              {recentPapers.length === 0 ? (
+                <div style={{ 
+                  padding: '48px 24px', 
+                  textAlign: 'center',
+                  background: '#FAFAF9',
+                  borderRadius: '0 0 10px 10px',
+                }}>
+                  <FileText size={48} style={{ color: '#A8A29E', margin: '0 auto 16px' }} />
+                  <h6 style={{
+                    fontFamily: "'Crimson Text', Georgia, serif",
+                    fontSize: '1.125rem',
+                    fontWeight: 600,
+                    color: '#1C1917',
+                    margin: '0 0 8px 0',
+                  }}>
+                    No papers yet
+                  </h6>
+                  <p style={{
+                    fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                    fontSize: '0.875rem',
+                    color: '#78716C',
+                    margin: '0 0 20px 0',
+                  }}>
+                    Get started by submitting your first research paper
+                  </p>
+                  <Link
+                    to="/scholar/submit-paper"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 20px',
+                      background: '#1E3A5F',
+                      color: '#FFFFFF',
+                      borderRadius: '8px',
+                      textDecoration: 'none',
+                      fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      transition: 'background 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#2D4A6F';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#1E3A5F';
+                    }}
+                  >
+                    <FileText size={16} />
+                    Submit Your First Paper
+                  </Link>
+                </div>
+              ) : (paperViewMode === 'cards' || isMobile) ? (
                 <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {recentPapers.slice(0, 5).map((paper) => (
                     <Link
@@ -1164,6 +1216,50 @@ const ScholarDashboard: React.FC = () => {
                       </div>
                     </Link>
                   ))}
+                </div>
+              ) : recentPapers.length === 0 ? (
+                <div style={{ 
+                  padding: '48px 24px', 
+                  textAlign: 'center',
+                  background: '#FAFAF9',
+                }}>
+                  <FileText size={48} style={{ color: '#A8A29E', margin: '0 auto 16px' }} />
+                  <h6 style={{
+                    fontFamily: "'Crimson Text', Georgia, serif",
+                    fontSize: '1.125rem',
+                    fontWeight: 600,
+                    color: '#1C1917',
+                    margin: '0 0 8px 0',
+                  }}>
+                    No papers yet
+                  </h6>
+                  <p style={{
+                    fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                    fontSize: '0.875rem',
+                    color: '#78716C',
+                    margin: '0 0 20px 0',
+                  }}>
+                    Get started by submitting your first research paper
+                  </p>
+                  <Link
+                    to="/scholar/submit-paper"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 20px',
+                      background: '#1E3A5F',
+                      color: '#FFFFFF',
+                      borderRadius: '8px',
+                      textDecoration: 'none',
+                      fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    <FileText size={16} />
+                    Submit Your First Paper
+                  </Link>
                 </div>
               ) : (
                 <div style={{ 

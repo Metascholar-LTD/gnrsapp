@@ -796,10 +796,10 @@ const SubmitPaper: React.FC = () => {
         return;
       }
 
-      // Get user's profile to get university_id
+      // Get user's profile to get institution_id
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('university_id')
+        .select('institution_id')
         .eq('user_id', session.user.id)
         .single();
 
@@ -807,8 +807,8 @@ const SubmitPaper: React.FC = () => {
         throw profileError;
       }
 
-      if (!profile?.university_id) {
-        toast.error('Please complete your profile and set your university affiliation before submitting a paper');
+      if (!profile?.institution_id) {
+        toast.error('Please complete your profile and set your institution affiliation before submitting a paper');
         navigate('/scholar/profile');
         return;
       }
@@ -851,7 +851,7 @@ const SubmitPaper: React.FC = () => {
           identifier_url: formData.identifierUrl || null,
           status: 'under-review', // Default status as per requirements
           submitted_by: session.user.id,
-          university_id: profile.university_id,
+          institution_id: profile.institution_id,
         })
         .select()
         .single();

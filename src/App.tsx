@@ -138,6 +138,9 @@ import ScholarLayout from "./pages/scholarly/ScholarLayout";
 import ScholarDashboard from "./pages/scholarly/ScholarDashboard";
 import SubmitPaper from "./pages/scholarly/SubmitPaper";
 import MyProfile from "./pages/scholarly/MyProfile";
+import AllPapers from "./pages/scholarly/AllPapers";
+import PendingReview from "./pages/scholarly/PendingReview";
+import Approved from "./pages/scholarly/Approved";
 
 const queryClient = new QueryClient();
 
@@ -247,6 +250,9 @@ const App = () => (
             <Route path="dashboard" element={<ScholarDashboard />} />
             <Route path="profile" element={<MyProfile />} />
             <Route path="submit-paper" element={<SubmitPaper />} />
+            <Route path="papers" element={<AllPapers />} />
+            <Route path="papers/pending" element={<PendingReview />} />
+            <Route path="papers/approved" element={<Approved />} />
           </Route>
           {/* News Routes */}
           <Route path="/news" element={<NewsHub />} />

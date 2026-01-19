@@ -23,7 +23,8 @@ const ScholarSidebarMenu: React.FC = () => {
     if (path.startsWith('/scholar/dashboard') || path === '/scholar') {
       menusToOpen.add('dashboard');
     }
-    if (path.startsWith('/scholar/submit-paper')) {
+    if (path.startsWith('/scholar/submit-paper') || 
+        path.startsWith('/scholar/papers')) {
       menusToOpen.add('papers');
     }
     if (path.startsWith('/scholarly/scholars/')) {
@@ -75,18 +76,18 @@ const ScholarSidebarMenu: React.FC = () => {
               <div data-i18n="Submit Paper">Submit New Paper</div>
             </Link>
           </li>
-          <li className="menu-item">
-            <Link to="/scholar/dashboard?tab=papers" className="menu-link">
+          <li className={`menu-item ${isActive('/scholar/papers') ? 'active' : ''}`}>
+            <Link to="/scholar/papers" className="menu-link">
               <div data-i18n="All Papers">All Papers</div>
             </Link>
           </li>
-          <li className="menu-item">
-            <Link to="/scholar/dashboard?tab=papers&status=pending" className="menu-link">
+          <li className={`menu-item ${isActive('/scholar/papers/pending') ? 'active' : ''}`}>
+            <Link to="/scholar/papers/pending" className="menu-link">
               <div data-i18n="Pending">Pending Review</div>
             </Link>
           </li>
-          <li className="menu-item">
-            <Link to="/scholar/dashboard?tab=papers&status=approved" className="menu-link">
+          <li className={`menu-item ${isActive('/scholar/papers/approved') ? 'active' : ''}`}>
+            <Link to="/scholar/papers/approved" className="menu-link">
               <div data-i18n="Approved">Approved</div>
             </Link>
           </li>
@@ -121,18 +122,18 @@ const ScholarSidebarMenu: React.FC = () => {
 
       {/* Rankings */}
       <li className="menu-item">
-        <Link to="/scholarly/rankings" className="menu-link">
+        <a href="/scholarly/rankings" target="_blank" rel="noopener noreferrer" className="menu-link">
           <Icon icon="hugeicons:ranking" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Rankings">University Rankings</div>
-        </Link>
+        </a>
       </li>
 
       {/* Articles */}
       <li className="menu-item">
-        <Link to="/scholarly/articles" className="menu-link">
+        <a href="/scholarly/articles" target="_blank" rel="noopener noreferrer" className="menu-link">
           <Icon icon="hugeicons:book-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Articles">Browse Articles</div>
-        </Link>
+        </a>
       </li>
 
       {/* ACCOUNT SECTION */}
