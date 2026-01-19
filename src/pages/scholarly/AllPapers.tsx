@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Loader2,
   Building2,
+  Users,
 } from 'lucide-react';
 
 const AllPapers: React.FC = () => {
@@ -57,6 +58,8 @@ const AllPapers: React.FC = () => {
         .eq('submitted_by', session.user.id)
         .eq('is_current_version', true)
         .order('submitted_at', { ascending: false });
+      
+      // Note: thumbnail_url is included in * selector
 
       if (error) throw error;
 
@@ -94,6 +97,24 @@ const AllPapers: React.FC = () => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const getArticleTypeLabel = (type: string): string => {
+    const labels: Record<string, string> = {
+      research: 'Research Article',
+      review: 'Review',
+      'case-study': 'Case Study',
+      methodology: 'Methodology',
+      other: 'Article',
+    };
+    return labels[type] || 'Article';
+  };
+
+  const isNewPaper = (submittedAt: string): boolean => {
+    const submittedDate = new Date(submittedAt);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return submittedDate >= thirtyDaysAgo;
   };
 
   const filteredArticles = articles.filter(article => {
@@ -212,57 +233,80 @@ const AllPapers: React.FC = () => {
     .papers-grid {
       max-width: 1280px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-    }
-
-    @media (max-width: 768px) {
-      .papers-grid {
-        grid-template-columns: 1fr;
-      }
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .paper-card {
       background: #FFFFFF;
       border: 1px solid #E7E5E4;
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 20px;
       transition: all 0.2s ease;
       cursor: pointer;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
     }
 
     .paper-card:hover {
       border-color: #D6D3D1;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
-    .paper-card__header {
+    .paper-card__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .paper-card__badges {
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-bottom: 12px;
     }
 
-    .paper-card__status {
+    .paper-card__badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
       padding: 4px 10px;
-      border-radius: 6px;
+      border-radius: 4px;
       font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.75rem;
+      font-size: 0.6875rem;
       font-weight: 600;
-      border: 1px solid;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .paper-card__badge--new {
+      background: #0F766E;
+      color: #FFFFFF;
+    }
+
+    .paper-card__badge--article {
+      background: #5EEAD4;
+      color: #134E4A;
+    }
+
+    .paper-card__badge--fulltext {
+      background: #FFFFFF;
+      color: #134E4A;
+      border: 1px solid #0F766E;
+    }
+
+    .paper-card__badge--status {
+      background: #F5F5F4;
+      color: #57534E;
+      border: 1px solid #E7E5E4;
     }
 
     .paper-card__title {
       font-family: 'Crimson Text', Georgia, serif;
-      font-size: 1.125rem;
+      font-size: 1.25rem;
       font-weight: 600;
       color: #1C1917;
-      margin: 0 0 8px 0;
+      margin: 0 0 12px 0;
       line-height: 1.4;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -270,63 +314,112 @@ const AllPapers: React.FC = () => {
       overflow: hidden;
     }
 
-    .paper-card__abstract {
+    .paper-card__date {
       font-family: 'Source Sans Pro', system-ui, sans-serif;
       font-size: 0.875rem;
-      color: #57534E;
-      line-height: 1.6;
+      color: #78716C;
       margin: 0 0 16px 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
 
-    .paper-card__meta {
+    .paper-card__authors {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 16px;
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.8125rem;
-      color: #78716C;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
-    .paper-card__meta-item {
+    .paper-card__author {
       display: flex;
       align-items: center;
-      gap: 6px;
-    }
-
-    .paper-card__actions {
-      display: flex;
       gap: 8px;
-      padding-top: 16px;
-      border-top: 1px solid #F5F5F4;
+      font-family: 'Source Sans Pro', system-ui, sans-serif;
+      font-size: 0.875rem;
+      color: #1C1917;
     }
 
-    .paper-card__action {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #E7E5E4;
-      border-radius: 6px;
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: #57534E;
-      background: #FFFFFF;
-      cursor: pointer;
-      transition: all 0.15s ease;
+    .paper-card__author-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #F5F5F4;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      flex-shrink: 0;
+      overflow: hidden;
     }
 
-    .paper-card__action:hover {
-      border-color: #1E3A5F;
-      color: #1E3A5F;
-      background: #FAFAF9;
+    .paper-card__author-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .paper-card__author-avatar svg {
+      width: 14px;
+      height: 14px;
+      color: #78716C;
+    }
+
+    .paper-card__thumbnail {
+      flex-shrink: 0;
+      width: 120px;
+      height: 160px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #F5F5F4;
+      border: 1px solid #E7E5E4;
+      position: relative;
+    }
+
+    .paper-card__thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .paper-card__thumbnail-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #F5F5F4 0%, #E7E5E4 100%);
+    }
+
+    .paper-card__thumbnail-placeholder svg {
+      width: 48px;
+      height: 48px;
+      color: #A8A29E;
+    }
+
+    .paper-card__source {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 4px 8px;
+      font-family: 'Source Sans Pro', system-ui, sans-serif;
+      font-size: 0.6875rem;
+      color: #57534E;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .paper-card {
+        flex-direction: column;
+      }
+
+      .paper-card__thumbnail {
+        width: 100%;
+        height: 200px;
+      }
+
+      .paper-card__title {
+        font-size: 1.125rem;
+      }
     }
 
     .papers-empty {
@@ -424,64 +517,116 @@ const AllPapers: React.FC = () => {
             {filteredArticles.map((article) => {
               const statusConfig = getStatusConfig(article.status);
               const StatusIcon = statusConfig.icon;
+              const isNew = isNewPaper(article.submitted_at);
+              const publishedDate = article.published_at || article.submitted_at;
+              const dateObj = new Date(publishedDate);
+              const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
               return (
                 <div
                   key={article.id}
                   className="paper-card"
-                  onClick={() => navigate(`/scholarly/articles/${article.id}`)}
+                  onClick={() => navigate(`/scholar/papers/${article.id}`)}
                 >
-                  <div className="paper-card__header">
-                    <FileText size={20} style={{ color: '#1E3A5F' }} />
-                    <span className={`paper-card__status ${statusConfig.color}`}>
-                      <StatusIcon size={12} />
-                      {statusConfig.label}
-                    </span>
-                  </div>
-
-                  <h3 className="paper-card__title">{article.title}</h3>
-                  <p className="paper-card__abstract">{article.abstract}</p>
-
-                  <div className="paper-card__meta">
-                    <div className="paper-card__meta-item">
-                      <Calendar size={14} />
-                      {formatDate(article.submitted_at)}
+                  <div className="paper-card__content">
+                    {/* Badges */}
+                    <div className="paper-card__badges">
+                      {isNew && (
+                        <span className="paper-card__badge paper-card__badge--new">New</span>
+                      )}
+                      <span className="paper-card__badge paper-card__badge--article">
+                        {getArticleTypeLabel(article.article_type)}
+                      </span>
+                      {article.pdf_url && (
+                        <span className="paper-card__badge paper-card__badge--fulltext">Full-text available</span>
+                      )}
+                      <span className="paper-card__badge paper-card__badge--status">
+                        <StatusIcon size={10} style={{ marginRight: '4px' }} />
+                        {statusConfig.label}
+                      </span>
                     </div>
-                    <div className="paper-card__meta-item">
-                      <Building2 size={14} />
-                      {article.institutionName}
-                    </div>
-                    {article.views > 0 && (
-                      <div className="paper-card__meta-item">
-                        <Eye size={14} />
-                        {article.views}
+
+                    {/* Title */}
+                    <h3 className="paper-card__title">{article.title}</h3>
+
+                    {/* Date */}
+                    <p className="paper-card__date">{formattedDate}</p>
+
+                    {/* Authors */}
+                    {article.authors && article.authors.length > 0 ? (
+                      <div className="paper-card__authors">
+                        {article.authors.slice(0, 4).map((author: any, idx: number) => (
+                          <div key={author.id || idx} className="paper-card__author">
+                            <div className="paper-card__author-avatar">
+                              {author.profile_id ? (
+                                // Try to get profile image from profiles table if needed
+                                <Users size={14} />
+                              ) : (
+                                <Users size={14} />
+                              )}
+                            </div>
+                            <span>{author.name}</span>
+                          </div>
+                        ))}
+                        {article.authors.length > 4 && (
+                          <span className="paper-card__author" style={{ color: '#78716C' }}>
+                            +{article.authors.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="paper-card__authors">
+                        <span className="paper-card__author" style={{ color: '#78716C' }}>
+                          No authors listed
+                        </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="paper-card__actions">
-                    <button
-                      className="paper-card__action"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/scholarly/articles/${article.id}`);
-                      }}
-                    >
-                      <Eye size={14} />
-                      View
-                    </button>
-                    {article.status === 'under-review' || article.status === 'revision-requested' ? (
-                      <button
-                        className="paper-card__action"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/scholar/submit-paper?edit=${article.id}`);
-                        }}
-                      >
-                        <Edit size={14} />
-                        Edit
-                      </button>
-                    ) : null}
+                  {/* Thumbnail */}
+                  <div className="paper-card__thumbnail">
+                    {article.thumbnail_url ? (
+                      <>
+                        <img 
+                          src={article.thumbnail_url} 
+                          alt={article.title}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            if (target.nextElementSibling) {
+                              (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                            }
+                          }}
+                        />
+                        <div className="paper-card__thumbnail-placeholder" style={{ display: 'none' }}>
+                          <FileText />
+                        </div>
+                        <div className="paper-card__source">Source</div>
+                      </>
+                    ) : article.pdf_url ? (
+                      <>
+                        {/* Fallback: Try to generate thumbnail URL from PDF URL */}
+                        <img 
+                          src={article.pdf_url.replace(/\.pdf$/i, '.jpg')} 
+                          alt={article.title}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            if (target.nextElementSibling) {
+                              (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                            }
+                          }}
+                        />
+                        <div className="paper-card__thumbnail-placeholder" style={{ display: 'none' }}>
+                          <FileText />
+                        </div>
+                        <div className="paper-card__source">Source</div>
+                      </>
+                    ) : (
+                      <div className="paper-card__thumbnail-placeholder">
+                        <FileText />
+                      </div>
+                    )}
                   </div>
                 </div>
               );

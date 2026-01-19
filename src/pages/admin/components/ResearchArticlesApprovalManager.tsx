@@ -47,15 +47,36 @@ const ResearchArticlesApprovalManager = ({ onView, onEdit, onApprove, onReject }
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('scholarly_articles' as any)
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+        .from('articles' as any)
+        .select(`
+          *,
+          institutions(name, abbreviation)
+        `)
+        .in('status', ['under-review', 'revision-requested'])
+        .eq('is_current_version', true)
+        .order('submitted_at', { ascending: false });
 
       if (error) throw error;
 
       if (data) {
-        setArticles(data);
+        // Get author names from profiles table
+        const userIds = [...new Set(data.map((article: any) => article.submitted_by))];
+        const { data: profilesData } = await supabase
+          .from('profiles' as any)
+          .select('user_id, full_name')
+          .in('user_id', userIds);
+
+        const profilesMap = new Map(
+          (profilesData || []).map((profile: any) => [profile.user_id, profile.full_name])
+        );
+
+        // Transform data to match expected format
+        const transformed = data.map((article: any) => ({
+          ...article,
+          author_name: profilesMap.get(article.submitted_by) || 'Unknown',
+          institution_name: article.institutions?.name || 'Unknown',
+        }));
+        setArticles(transformed);
       }
     } catch (error: any) {
       console.error('Error loading articles:', error);

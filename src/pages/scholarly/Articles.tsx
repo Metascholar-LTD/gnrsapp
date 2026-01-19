@@ -42,6 +42,7 @@ const Articles: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState<any[]>([]);
   const [institutions, setInstitutions] = useState<any[]>([]);
+  const [disciplinesWithCounts, setDisciplinesWithCounts] = useState(mockDisciplines);
   const [platformStats, setPlatformStats] = useState({
     totalArticles: 0,
     articlesThisMonth: 0,
@@ -56,6 +57,7 @@ const Articles: React.FC = () => {
     loadArticles();
     loadInstitutions();
     loadPlatformStats();
+    loadDisciplineCounts();
   }, []);
 
   const loadArticles = async () => {
@@ -66,8 +68,7 @@ const Articles: React.FC = () => {
         .select(`
           *,
           article_authors(*),
-          institutions(name, abbreviation),
-          profiles!articles_submitted_by_fkey(full_name)
+          institutions(name, abbreviation)
         `)
         .eq('is_current_version', true)
         .eq('status', 'approved'); // Only show approved articles
@@ -148,6 +149,75 @@ const Articles: React.FC = () => {
     }
   };
 
+  const loadDisciplineCounts = async () => {
+    try {
+      // Fetch all approved articles with their disciplines
+      const { data: articlesData, error } = await supabase
+        .from('articles' as any)
+        .select('discipline, discipline_category')
+        .eq('is_current_version', true)
+        .eq('status', 'approved');
+
+      if (error) throw error;
+
+      // Create a mapping from child discipline names to parent category names
+      const childToParentMap: Record<string, string> = {};
+      mockDisciplines.forEach((parent) => {
+        parent.children?.forEach((child) => {
+          childToParentMap[child.name] = parent.name;
+        });
+      });
+
+      // Count articles by discipline (specific discipline name)
+      const disciplineCounts: Record<string, number> = {};
+      // Count articles by category (parent category) - will include both direct category and child disciplines
+      const categoryCounts: Record<string, number> = {};
+
+      articlesData?.forEach((article: any) => {
+        // Count by specific discipline
+        if (article.discipline) {
+          disciplineCounts[article.discipline] = (disciplineCounts[article.discipline] || 0) + 1;
+          
+          // Also count towards parent category if this is a child discipline
+          const parentCategory = childToParentMap[article.discipline];
+          if (parentCategory) {
+            categoryCounts[parentCategory] = (categoryCounts[parentCategory] || 0) + 1;
+          }
+        }
+        
+        // Count by category (parent) - if discipline_category is set directly
+        if (article.discipline_category) {
+          categoryCounts[article.discipline_category] = (categoryCounts[article.discipline_category] || 0) + 1;
+        }
+      });
+
+      // Update disciplines with real counts
+      const updatedDisciplines = mockDisciplines.map((parent) => {
+        // Get count for parent category - try both name and slug variations
+        const parentCount = categoryCounts[parent.name] || 
+                           categoryCounts[parent.slug] || 
+                           0;
+        
+        // Update children with real counts
+        const updatedChildren = parent.children?.map((child) => ({
+          ...child,
+          articleCount: disciplineCounts[child.name] || 0,
+        })) || [];
+
+        return {
+          ...parent,
+          articleCount: parentCount,
+          children: updatedChildren,
+        };
+      });
+
+      setDisciplinesWithCounts(updatedDisciplines);
+    } catch (error: any) {
+      console.error('Error loading discipline counts:', error);
+      // Keep mock data if there's an error
+    }
+  };
+
   const loadPlatformStats = async () => {
     try {
       // Get total approved articles
@@ -176,7 +246,7 @@ const Articles: React.FC = () => {
         .eq('status', 'approved')
         .not('discipline', 'is', null);
       
-      const uniqueDisciplines = new Set(disciplinesData?.map(d => d.discipline) || []);
+      const uniqueDisciplines = new Set(disciplinesData?.map((d: any) => d.discipline) || []);
 
       // Get unique authors count
       const { data: authorsData } = await supabase
@@ -597,7 +667,7 @@ const Articles: React.FC = () => {
             {/* Sidebar Filters (Desktop) */}
             <aside className="sr-articles-sidebar">
               <ArticleFilters
-                disciplines={mockDisciplines}
+                disciplines={disciplinesWithCounts}
                 universities={universityOptions}
                 selectedDiscipline={selectedDiscipline}
                 selectedUniversity={selectedUniversity}
@@ -638,7 +708,7 @@ const Articles: React.FC = () => {
                   <X size={20} />
                 </button>
                 <ArticleFilters
-                  disciplines={mockDisciplines}
+                  disciplines={disciplinesWithCounts}
                   universities={universityOptions}
                   selectedDiscipline={selectedDiscipline}
                   selectedUniversity={selectedUniversity}

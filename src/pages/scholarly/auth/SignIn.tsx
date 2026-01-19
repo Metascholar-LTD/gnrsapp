@@ -4,9 +4,10 @@
 // Modern, clean sign-in form for academic users
 // ============================================================================
 
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 type FormData = {
   email: string;
@@ -22,12 +23,141 @@ const ScholarSignIn: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorField, setErrorField] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  // Handle OAuth callback after redirect
+  useEffect(() => {
+    const checkAuthAndRedirect = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        // Check if we're coming back from OAuth (check URL params)
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        if (code) {
+          // User is authenticated via OAuth, check profile and redirect
+          const user = session.user;
+          
+          // Check if user has a scholar profile
+          const { data: profile } = await supabase
+            .from('profiles' as any)
+            .select('id, role, full_name')
+            .eq('user_id', user.id)
+            .single();
+
+          // Create or update profile if needed
+          if (!profile || (profile as any).role !== 'scholar') {
+            const fullName = user.user_metadata?.full_name || 
+                            user.user_metadata?.name || 
+                            `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() ||
+                            user.email?.split('@')[0] || 
+                            null;
+
+            await supabase
+              .from('profiles' as any)
+              .upsert({
+                user_id: user.id,
+                role: 'scholar',
+                full_name: fullName || undefined,
+                updated_at: new Date().toISOString(),
+              }, {
+                onConflict: 'user_id'
+              });
+          }
+
+          // Clean up URL params
+          window.history.replaceState({}, '', window.location.pathname);
+          
+          // Redirect based on profile status
+          if (!profile || !(profile as any).full_name) {
+            navigate('/scholarly/auth/complete-profile');
+          } else {
+            navigate('/scholar/dashboard');
+          }
+        }
+      }
+    };
+
+    checkAuthAndRedirect();
+
+    // Listen for auth state changes (for OAuth redirects)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const user = session.user;
+        
+        // Check if this is an OAuth sign-in
+        if (user.app_metadata?.provider === 'google') {
+          // Check profile
+          const { data: profile } = await supabase
+            .from('profiles' as any)
+            .select('id, role, full_name')
+            .eq('user_id', user.id)
+            .single();
+
+          if (!profile || (profile as any).role !== 'scholar') {
+            const fullName = user.user_metadata?.full_name || 
+                            user.user_metadata?.name || 
+                            `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() ||
+                            user.email?.split('@')[0] || 
+                            null;
+
+            await supabase
+              .from('profiles' as any)
+              .upsert({
+                user_id: user.id,
+                role: 'scholar',
+                full_name: fullName || undefined,
+                updated_at: new Date().toISOString(),
+              }, {
+                onConflict: 'user_id'
+              });
+          }
+
+          if (!profile || !(profile as any).full_name) {
+            navigate('/scholarly/auth/complete-profile');
+          } else {
+            navigate('/scholar/dashboard');
+          }
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const goToForgotPassword = (
     event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => {
     event.preventDefault();
     navigate('/scholarly/auth/reset-password');
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    setErrorField('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/scholarly/auth/sign-in`,
+        },
+      });
+
+      if (error) {
+        setErrorField(error.message);
+        setIsGoogleLoading(false);
+      }
+      // If successful, user will be redirected to Google, then back to our callback
+      // The useEffect will handle the callback
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setErrorField(errorMessage);
+      setIsGoogleLoading(false);
+    }
   };
 
   const handleInputChange = (
@@ -67,11 +197,65 @@ const ScholarSignIn: React.FC = () => {
     setErrorField('');
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    
-    setIsSubmitting(false);
-    navigate('/scholar/dashboard');
+    try {
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        setErrorField(error.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!data.session || !data.user) {
+        setErrorField('Sign in failed. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Check if user has a scholar profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles' as any)
+        .select('id, role, full_name')
+        .eq('user_id', data.user.id)
+        .single();
+
+      // If profile doesn't exist or user is not a scholar, redirect to complete profile
+      if (profileError || !profile || (profile as any).role !== 'scholar') {
+        // Create or update profile to scholar role
+        const { error: upsertError } = await supabase
+          .from('profiles' as any)
+          .upsert({
+            user_id: data.user.id,
+            role: 'scholar',
+            full_name: data.user.user_metadata?.full_name || 
+                      data.user.user_metadata?.name || 
+                      data.user.email?.split('@')[0] || 
+                      null,
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id'
+          });
+
+        if (upsertError) {
+          console.error('Error creating/updating profile:', upsertError);
+        }
+
+        // Redirect to complete profile page
+        navigate('/scholarly/auth/complete-profile');
+        return;
+      }
+
+      // User is authenticated and has scholar profile - redirect to dashboard
+      navigate('/scholar/dashboard');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setErrorField(errorMessage);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -209,16 +393,27 @@ const ScholarSignIn: React.FC = () => {
             {/* Google Sign In */}
             <button
               type='button'
-              className='w-full h-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all duration-200 flex items-center justify-center gap-3 shadow-sm hover:shadow-md'
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading || isSubmitting}
+              className='w-full h-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all duration-200 flex items-center justify-center gap-3 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              <img
-                src='https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
-                width={20}
-                height={20}
-                alt='Google'
-                className='w-5 h-5'
-              />
-              Continue with Google
+              {isGoogleLoading ? (
+                <>
+                  <div className='w-5 h-5 border-2 border-slate-400/30 border-t-slate-600 rounded-full animate-spin' />
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <>
+                  <img
+                    src='https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
+                    width={20}
+                    height={20}
+                    alt='Google'
+                    className='w-5 h-5'
+                  />
+                  Continue with Google
+                </>
+              )}
             </button>
 
             {/* Sign Up Link */}

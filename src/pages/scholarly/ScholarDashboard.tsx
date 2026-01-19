@@ -82,6 +82,9 @@ const ScholarDashboard: React.FC = () => {
           slug: article.id, // Use ID as slug for now
           authors: article.article_authors || [],
           publishedAt: article.published_at || article.submitted_at,
+          viewCount: article.views || 0,
+          citationCount: article.citations || 0,
+          downloadCount: article.downloads || 0,
         }));
         setArticles(transformedArticles);
       }
@@ -1204,7 +1207,7 @@ const ScholarDashboard: React.FC = () => {
                           fontSize: '0.875rem',
                           color: '#1C1917',
                         }}>
-                          {paper.viewCount.toLocaleString()}
+                          {(paper.viewCount || 0).toLocaleString()}
                         </span>
                         <span style={{
                           fontFamily: "'Source Sans Pro', system-ui, sans-serif",
@@ -1351,7 +1354,7 @@ const ScholarDashboard: React.FC = () => {
                         color: '#1C1917',
                         textAlign: 'right',
                       }}>
-                        {paper.citationCount.toLocaleString()}
+                        {(paper.citationCount || 0).toLocaleString()}
                       </div>
                       <div style={{
                         fontFamily: "'Source Sans Pro', system-ui, sans-serif",

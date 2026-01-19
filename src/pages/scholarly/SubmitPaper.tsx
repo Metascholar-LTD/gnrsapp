@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { mockDisciplines } from '@/utils/scholarlyRankingData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { extractThumbnailWithCloudinary } from '@/utils/cloudinary';
 import {
   FileText,
   ChevronRight,
@@ -47,7 +48,7 @@ const SubmitPaper: React.FC = () => {
     authors: [
       { name: '', email: '', affiliation: '', isCorresponding: true },
     ],
-    university: 'Massachusetts Institute of Technology',
+    university: '',
     pdfFile: null as File | null,
     references: [] as string[],
     referencesInput: '',
@@ -55,12 +56,53 @@ const SubmitPaper: React.FC = () => {
     identifierValue: '',
     identifierUrl: '',
   });
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
   const totalSteps = 4;
   const [showDisciplineSuggestions, setShowDisciplineSuggestions] = useState(false);
   const [highlightedSuggestionIndex, setHighlightedSuggestionIndex] = useState(-1);
   const disciplineInputRef = useRef<HTMLInputElement>(null);
   const disciplineSuggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Load user's institution affiliation on mount
+  useEffect(() => {
+    const loadUserInstitution = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          return;
+        }
+
+        // Load user's profile with institution
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles' as any)
+          .select('institution_id, institutions(name)')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error loading profile:', profileError);
+          return;
+        }
+
+        if (profile && (profile as any).institutions?.name) {
+          const institutionName = (profile as any).institutions.name;
+          setFormData(prev => ({
+            ...prev,
+            university: institutionName,
+            // Also auto-populate the first author's affiliation
+            authors: prev.authors.map((author, idx) => 
+              idx === 0 && !author.affiliation ? { ...author, affiliation: institutionName } : author
+            ),
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading user institution:', error);
+      }
+    };
+
+    loadUserInstitution();
+  }, []);
 
   // Get available sub-disciplines based on selected category
   const getAvailableSubDisciplines = (): string[] => {
@@ -815,6 +857,8 @@ const SubmitPaper: React.FC = () => {
 
       // Upload PDF to Supabase Storage
       let pdfUrl = '';
+      let thumbnailUrl: string | null = null;
+      
       if (formData.pdfFile) {
         const fileExt = formData.pdfFile.name.split('.').pop();
         const fileName = `${session.user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -833,6 +877,25 @@ const SubmitPaper: React.FC = () => {
           .getPublicUrl(fileName);
 
         pdfUrl = publicUrl;
+
+        // Generate thumbnail from PDF using Cloudinary
+        // Uses same Cloudinary config as lecture notes
+        // Handles large PDF files automatically
+        try {
+          console.log(`Generating thumbnail for PDF (${(formData.pdfFile.size / 1024 / 1024).toFixed(2)}MB)...`);
+          thumbnailUrl = await extractThumbnailWithCloudinary(formData.pdfFile, 'articles/thumbnails');
+          console.log('Thumbnail generated successfully:', thumbnailUrl);
+        } catch (thumbnailError: any) {
+          console.error('Error generating thumbnail:', thumbnailError);
+          // Don't fail the submission if thumbnail generation fails
+          // Large files may take longer, but Cloudinary should handle them
+          const errorMessage = thumbnailError.message || 'Unknown error';
+          if (errorMessage.includes('timeout')) {
+            toast.warning('PDF uploaded successfully, but thumbnail generation timed out (file may be very large). Thumbnail will be generated in the background.');
+          } else {
+            toast.warning('PDF uploaded successfully, but thumbnail generation failed. You can add a thumbnail later.');
+          }
+        }
       }
 
       // Create article record
@@ -846,6 +909,7 @@ const SubmitPaper: React.FC = () => {
           discipline: formData.discipline,
           article_type: formData.articleType,
           pdf_url: pdfUrl,
+          thumbnail_url: thumbnailUrl,
           identifier_type: formData.identifierType || null,
           identifier_value: formData.identifierValue || null,
           identifier_url: formData.identifierUrl || null,

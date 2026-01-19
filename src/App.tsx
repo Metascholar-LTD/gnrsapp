@@ -139,6 +139,7 @@ import ScholarDashboard from "./pages/scholarly/ScholarDashboard";
 import SubmitPaper from "./pages/scholarly/SubmitPaper";
 import MyProfile from "./pages/scholarly/MyProfile";
 import AllPapers from "./pages/scholarly/AllPapers";
+import MyPaperView from "./pages/scholarly/MyPaperView";
 import PendingReview from "./pages/scholarly/PendingReview";
 import Approved from "./pages/scholarly/Approved";
 
@@ -251,6 +252,7 @@ const App = () => (
             <Route path="profile" element={<MyProfile />} />
             <Route path="submit-paper" element={<SubmitPaper />} />
             <Route path="papers" element={<AllPapers />} />
+            <Route path="papers/:id" element={<MyPaperView />} />
             <Route path="papers/pending" element={<PendingReview />} />
             <Route path="papers/approved" element={<Approved />} />
           </Route>

@@ -4,10 +4,12 @@
 // Detailed view of a single university with stats, charts, and articles
 // ============================================================================
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   ChevronLeft,
   ExternalLink,
@@ -18,6 +20,7 @@ import {
   Eye,
   Quote,
   Building2,
+  Loader2,
 } from 'lucide-react';
 import { MovementIndicator } from '@/components/scholarly/MovementIndicator';
 import { StatCard } from '@/components/scholarly/StatCard';
@@ -27,11 +30,216 @@ import {
   DisciplineBreakdown,
 } from '@/components/scholarly/RankingCharts';
 import { ArticleListItem } from '@/components/scholarly/ArticleCard';
-import { generateUniversityProfile, formatNumber } from '@/utils/scholarlyRankingData';
+import { formatNumber } from '@/utils/scholarlyRankingData';
+import type { UniversityProfile, RankingHistoryPoint, DisciplineCount } from '@/utils/scholarlyRankingTypes';
 
 const UniversityProfile: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const profile = generateUniversityProfile(slug || '');
+  const [profile, setProfile] = useState<UniversityProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (slug) {
+      loadInstitutionProfile(slug);
+    }
+  }, [slug]);
+
+  const loadInstitutionProfile = async (institutionId: string) => {
+    setLoading(true);
+    try {
+      // Fetch institution
+      const { data: institutionData, error: institutionError } = await supabase
+        .from('institutions' as any)
+        .select('*')
+        .eq('id', institutionId)
+        .eq('status', 'active')
+        .single();
+
+      if (institutionError) throw institutionError;
+      if (!institutionData) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      const institution = institutionData as any;
+
+      // Fetch all approved articles for this institution to calculate real counts
+      const { data: allArticlesData } = await supabase
+        .from('articles' as any)
+        .select('id, published_at, created_at, submitted_at, discipline, views, downloads, citations')
+        .eq('institution_id', institutionId)
+        .eq('status', 'approved')
+        .eq('is_current_version', true);
+
+      // Calculate total articles (real count)
+      const totalArticles = allArticlesData?.length || 0;
+
+      // Calculate articles this month
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const articlesThisMonth = allArticlesData?.filter((article: any) => {
+        const articleDate = new Date(article.created_at || article.published_at || article.submitted_at);
+        return articleDate >= startOfMonth;
+      }).length || 0;
+
+      // Calculate total citations, views, downloads
+      const totalCitations = allArticlesData?.reduce((sum: number, article: any) => sum + (article.citations || 0), 0) || 0;
+      const totalViews = allArticlesData?.reduce((sum: number, article: any) => sum + (article.views || 0), 0) || 0;
+      const totalDownloads = allArticlesData?.reduce((sum: number, article: any) => sum + (article.downloads || 0), 0) || 0;
+
+      // Fetch recent articles for display (limit 5)
+      const { data: articlesData } = await supabase
+        .from('articles' as any)
+        .select('*')
+        .eq('institution_id', institutionId)
+        .eq('status', 'approved')
+        .eq('is_current_version', true)
+        .order('published_at', { ascending: false })
+        .limit(5);
+
+      // Calculate monthly article counts for last 6 months
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const { data: monthlyArticlesData } = await supabase
+        .from('articles' as any)
+        .select('published_at, created_at, discipline')
+        .eq('institution_id', institutionId)
+        .eq('status', 'approved')
+        .eq('is_current_version', true)
+        .gte('created_at', sixMonthsAgo.toISOString());
+
+      // Fetch contributing authors - unique authors from articles belonging to this institution
+      let contributingAuthorsCount = 0;
+      if (allArticlesData && allArticlesData.length > 0) {
+        const articleIds = allArticlesData.map((a: any) => a.id);
+        const { data: authorsData } = await supabase
+          .from('article_authors' as any)
+          .select('name, email, affiliation, profile_id')
+          .in('article_id', articleIds);
+
+        // Get unique authors (by name and email combination, or by profile_id if available)
+        const uniqueAuthorsMap = new Map<string, any>();
+        authorsData?.forEach((author: any) => {
+          const key = author.profile_id || `${author.name}_${author.email || ''}`;
+          if (!uniqueAuthorsMap.has(key)) {
+            uniqueAuthorsMap.set(key, {
+              id: author.profile_id || `author_${key}`,
+              name: author.name,
+              email: author.email,
+              affiliation: author.affiliation,
+              profileId: author.profile_id,
+            });
+          }
+        });
+        contributingAuthorsCount = uniqueAuthorsMap.size;
+      }
+
+      // Generate last 6 months array
+      const last6Months: string[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        last6Months.push(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+      }
+
+      // Calculate monthly counts
+      const monthlyCounts: { [key: string]: number } = {};
+      monthlyArticlesData?.forEach((article: any) => {
+        const date = article.published_at || article.created_at;
+        if (!date) return;
+        const articleDate = new Date(date);
+        const monthKey = `${articleDate.getFullYear()}-${String(articleDate.getMonth() + 1).padStart(2, '0')}`;
+        monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
+      });
+
+      const monthlyArticleCounts = last6Months.map(month => monthlyCounts[month] || 0);
+
+      // Calculate discipline breakdown
+      const disciplineCounts: Record<string, number> = {};
+      monthlyArticlesData?.forEach((article: any) => {
+        if (article.discipline) {
+          disciplineCounts[article.discipline] = (disciplineCounts[article.discipline] || 0) + 1;
+        }
+      });
+
+      const disciplineBreakdown: DisciplineCount[] = Object.entries(disciplineCounts)
+        .map(([discipline, count]) => ({
+          discipline,
+          count,
+          percentage: totalArticles > 0 ? Math.round((count / totalArticles) * 100) : 0,
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      // Generate ranking history (simplified - last 6 months)
+      const rankingHistory: RankingHistoryPoint[] = last6Months.map((month, idx) => ({
+        date: month,
+        rank: institution.current_rank || 0,
+        articleCount: Math.max(0, totalArticles - (5 - idx) * 10), // Simplified progression
+      }));
+
+      // Transform articles to match expected format
+      const recentArticles = (articlesData || []).map((article: any) => ({
+        id: article.id,
+        title: article.title,
+        slug: article.id,
+        abstract: article.abstract || '',
+        authors: [],
+        publishedAt: article.published_at || article.submitted_at,
+        viewCount: article.views || 0,
+        citationCount: article.citations || 0,
+        downloadCount: article.downloads || 0,
+        universityId: institution.id,
+        universityName: institution.name,
+        universitySlug: institution.id,
+        disciplineId: article.discipline || '',
+        disciplineName: article.discipline || 'General',
+        keywords: article.keywords || [],
+        pdfUrl: article.pdf_url || '',
+      })) as any[];
+
+      // Build profile object
+      const profileData: UniversityProfile & { contributingAuthorsCount?: number } = {
+        id: institution.id,
+        slug: institution.id,
+        name: institution.name,
+        abbreviation: institution.abbreviation || '',
+        logo: institution.logo || '',
+        country: institution.country || 'Ghana',
+        city: institution.city || '',
+        currentRank: institution.current_rank || 0,
+        previousRank: institution.previous_rank || null,
+        movement: institution.movement || 'stable',
+        movementDelta: 0,
+        totalArticles: totalArticles,
+        articlesThisMonth: articlesThisMonth,
+        articlesThisYear: 0,
+        totalCitations: totalCitations,
+        totalViews: totalViews,
+        totalDownloads: totalDownloads,
+        hIndex: 0,
+        monthlyArticleCounts: monthlyArticleCounts,
+        createdAt: institution.created_at,
+        updatedAt: institution.updated_at,
+        fullDescription: institution.description || `${institution.name} is a leading institution contributing to research and knowledge production in Ghana and beyond.`,
+        rankingHistory,
+        topAuthors: [], // Can be populated later if needed
+        recentArticles: recentArticles as any,
+        disciplineBreakdown,
+        contributingAuthorsCount: contributingAuthorsCount,
+      };
+
+      setProfile(profileData);
+    } catch (error: any) {
+      console.error('Error loading institution profile:', error);
+      toast.error('Failed to load university profile');
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const styles = `
     .sr-profile-page {
@@ -396,6 +604,22 @@ const UniversityProfile: React.FC = () => {
     }
   `;
 
+  if (loading) {
+    return (
+      <>
+        <style>{styles}</style>
+        <div className="sr-profile-page">
+          <Navigation />
+          <main className="sr-profile-not-found">
+            <Loader2 className="animate-spin" size={32} style={{ margin: '0 auto 16px', color: '#1E3A5F' }} />
+            <p className="sr-profile-not-found__text">Loading university profile...</p>
+          </main>
+          <Footer />
+        </div>
+      </>
+    );
+  }
+
   if (!profile) {
     return (
       <>
@@ -513,7 +737,7 @@ const UniversityProfile: React.FC = () => {
             />
             <StatCard
               label="Contributing Authors"
-              value={profile.topAuthors.length * 39}
+              value={(profile as any).contributingAuthorsCount || 0}
               icon={<Users size={20} />}
             />
           </div>

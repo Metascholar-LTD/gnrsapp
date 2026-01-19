@@ -21,6 +21,8 @@ const ScholarLayout: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<any>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('Scholar');
   const location = useLocation();
 
   // Authentication check - runs immediately and blocks rendering
@@ -68,10 +70,10 @@ const ScholarLayout: React.FC = () => {
           return;
         }
 
-        // Verify user has a scholar profile
+        // Verify user has a scholar profile and load profile data
         const { data: profile, error: profileError } = await supabase
           .from('profiles' as any)
-          .select('id, role')
+          .select('id, role, profile_image, full_name')
           .eq('user_id', session.user.id)
           .single();
 
@@ -91,6 +93,20 @@ const ScholarLayout: React.FC = () => {
         setIsAuthenticated(true);
         setAuthChecked(true);
 
+        // Load profile image and name
+        if (profile && (profile as any)?.profile_image) {
+          setProfileImage((profile as any).profile_image);
+        }
+        if (profile && (profile as any)?.full_name) {
+          setUserName((profile as any).full_name);
+        } else if (session.user.user_metadata?.full_name) {
+          setUserName(session.user.user_metadata.full_name);
+        } else if (session.user.user_metadata?.name) {
+          setUserName(session.user.user_metadata.name);
+        } else if (session.user.email) {
+          setUserName(session.user.email.split('@')[0]);
+        }
+
         // Listen for auth state changes
         const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
           if (!mounted) return;
@@ -98,12 +114,32 @@ const ScholarLayout: React.FC = () => {
           if (event === 'SIGNED_OUT' || !session || !session.user || !session.user.id) {
             setIsAuthenticated(false);
             setUser(null);
+            setProfileImage(null);
+            setUserName('Scholar');
             setAuthChecked(true);
             navigate('/scholarly/auth/sign-in', { replace: true });
           } else if (session?.user && session.user.id) {
             setUser(session.user);
             setIsAuthenticated(true);
             setAuthChecked(true);
+
+            // Reload profile image when auth state changes
+            supabase
+              .from('profiles' as any)
+              .select('profile_image, full_name')
+              .eq('user_id', session.user.id)
+              .single()
+              .then(({ data: updatedProfile }) => {
+                if (!mounted) return;
+                if (updatedProfile) {
+                  if ((updatedProfile as any)?.profile_image) {
+                    setProfileImage((updatedProfile as any).profile_image);
+                  }
+                  if ((updatedProfile as any)?.full_name) {
+                    setUserName((updatedProfile as any).full_name);
+                  }
+                }
+              });
           }
         });
 
@@ -130,6 +166,70 @@ const ScholarLayout: React.FC = () => {
     };
   }, [navigate, location.pathname]);
 
+  // Refresh profile image and name when user changes or location changes
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refreshProfile = async () => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles' as any)
+          .select('profile_image, full_name')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profile) {
+          if ((profile as any)?.profile_image) {
+            setProfileImage((profile as any).profile_image);
+          }
+          if ((profile as any)?.full_name) {
+            setUserName((profile as any).full_name);
+          } else {
+            // If no full_name, fallback to email username
+            if (user.email) {
+              setUserName(user.email.split('@')[0]);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error refreshing profile:', error);
+      }
+    };
+
+    refreshProfile();
+  }, [user?.id, location.pathname]); // Refresh when location changes too
+
+  // Listen for profile update events
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      if (user?.id) {
+        // Refresh profile when update event is fired
+        supabase
+          .from('profiles' as any)
+          .select('profile_image, full_name')
+          .eq('user_id', user.id)
+          .single()
+          .then(({ data: profile }) => {
+            if (profile) {
+              if ((profile as any)?.profile_image) {
+                setProfileImage((profile as any).profile_image);
+              }
+              if ((profile as any)?.full_name) {
+                setUserName((profile as any).full_name);
+              }
+            }
+          });
+      }
+    };
+
+    // Listen for custom profile update event
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
+  }, [user?.id]);
+
   // Check if mobile on mount and handle responsive behavior
   useEffect(() => {
     const checkMobile = () => {
@@ -154,6 +254,52 @@ const ScholarLayout: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Use a global flag to prevent duplicate script loading
+    const SNEAT_SCRIPTS_LOADED_KEY = '__sneat_scripts_loaded__';
+    
+    // Check if scripts are already loaded
+    if ((window as any)[SNEAT_SCRIPTS_LOADED_KEY]) {
+      return; // Scripts already loaded, skip
+    }
+
+    // Check if config is already defined (indicates scripts are loaded)
+    if (typeof (window as any).config !== 'undefined') {
+      (window as any)[SNEAT_SCRIPTS_LOADED_KEY] = true;
+      return; // Scripts already loaded, skip
+    }
+
+    // Check if scripts exist in DOM
+    const isScriptLoaded = (src: string): boolean => {
+      const scriptSrc = src.startsWith('/') ? src : `/${src}`;
+      return Array.from(document.querySelectorAll('script')).some(
+        script => {
+          const scriptSrcAttr = script.getAttribute('src');
+          return scriptSrcAttr && (
+            scriptSrcAttr.includes(scriptSrc) || 
+            scriptSrcAttr.endsWith(scriptSrc) ||
+            script.src.includes(scriptSrc)
+          );
+        }
+      );
+    };
+
+    // Check if all scripts are already in DOM
+    const allScriptsLoaded = [
+      '/sneat-assets/vendor/js/helpers.js',
+      '/sneat-assets/js/config.js',
+      '/sneat-assets/vendor/libs/jquery/jquery.js',
+      '/sneat-assets/vendor/libs/popper/popper.js',
+      '/sneat-assets/vendor/js/bootstrap.js',
+    ].every(src => isScriptLoaded(src));
+
+    if (allScriptsLoaded) {
+      (window as any)[SNEAT_SCRIPTS_LOADED_KEY] = true;
+      return; // All scripts already loaded
+    }
+
+    // Mark as loading to prevent duplicate loads
+    (window as any)[SNEAT_SCRIPTS_LOADED_KEY] = true;
+
     // Load Sneat JS scripts
     const scripts = [
       '/sneat-assets/vendor/js/helpers.js',
@@ -164,15 +310,24 @@ const ScholarLayout: React.FC = () => {
     ];
 
     const loadedScripts: HTMLScriptElement[] = [];
-    let scriptsLoaded = 0;
 
     const loadScript = (src: string) => {
       return new Promise<void>((resolve, reject) => {
+        // Skip if script is already loaded
+        if (isScriptLoaded(src)) {
+          resolve();
+          return;
+        }
+
         const script = document.createElement('script');
         script.src = src;
         script.async = false;
         script.onload = () => resolve();
-        script.onerror = () => reject();
+        script.onerror = () => {
+          // Reset flag on error so it can retry
+          (window as any)[SNEAT_SCRIPTS_LOADED_KEY] = false;
+          reject();
+        };
         document.body.appendChild(script);
         loadedScripts.push(script);
       });
@@ -191,15 +346,9 @@ const ScholarLayout: React.FC = () => {
     loadScripts();
 
     return () => {
-      loadedScripts.forEach(script => {
-        if (script.parentNode) {
-          try {
-            script.parentNode.removeChild(script);
-          } catch (e) {
-            // Ignore removal errors
-          }
-        }
-      });
+      // Don't remove scripts on unmount - they should persist
+      // Only remove if component is being completely destroyed
+      // (which shouldn't happen in a SPA)
     };
   }, []);
 
@@ -1109,7 +1258,15 @@ const ScholarLayout: React.FC = () => {
                 <li className="nav-item navbar-dropdown dropdown-user dropdown">
                   <a className="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown">
                     <div className="avatar avatar-online">
-                      <img src="/sneat-assets/img/avatars/1.png" alt="" className="w-px-40 h-auto rounded-circle" />
+                      <img 
+                        src={profileImage || "/sneat-assets/img/avatars/1.png"} 
+                        alt={userName} 
+                        className="w-px-40 h-px-40 rounded-circle"
+                        style={{ objectFit: 'cover' }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "/sneat-assets/img/avatars/1.png";
+                        }}
+                      />
                     </div>
                   </a>
                   <ul className="dropdown-menu dropdown-menu-end">
@@ -1118,11 +1275,19 @@ const ScholarLayout: React.FC = () => {
                         <div className="d-flex">
                           <div className="flex-shrink-0 me-3">
                             <div className="avatar avatar-online">
-                              <img src="/sneat-assets/img/avatars/1.png" alt="" className="w-px-40 h-auto rounded-circle" />
+                              <img 
+                                src={profileImage || "/sneat-assets/img/avatars/1.png"} 
+                                alt={userName} 
+                                className="w-px-40 h-px-40 rounded-circle"
+                                style={{ objectFit: 'cover' }}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "/sneat-assets/img/avatars/1.png";
+                                }}
+                              />
                             </div>
                           </div>
                           <div className="flex-grow-1">
-                            <span className="fw-semibold d-block">Scholar</span>
+                            <span className="fw-semibold d-block">{userName}</span>
                             <small className="text-muted">Academic Account</small>
                           </div>
                         </div>

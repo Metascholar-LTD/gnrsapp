@@ -1,14 +1,12 @@
 // ============================================================================
-// INDIVIDUAL ARTICLE VIEW PAGE
+// MY PAPER VIEW PAGE (Scholar's Own Paper)
 // ============================================================================
-// Full article display with academic journal styling
-// Inspired by Nature, ScienceDirect, IEEE Xplore, JSTOR
+// Dedicated view page for scholars to view their own papers within dashboard
+// Uses the same design as public ArticleView but with scholar-specific features
 // ============================================================================
 
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Navigation } from '@/components/Navigation';
-import { Footer } from '@/components/Footer';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -17,13 +15,17 @@ import {
   Eye,
   Download,
   Quote,
-  Share2,
-  Bookmark,
+  Edit,
   FileText,
-  ExternalLink,
-  Mail,
   Building2,
   Loader2,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  XCircle,
+  ExternalLink,
+  Mail,
+  Share2,
 } from 'lucide-react';
 
 // References Section Component
@@ -70,8 +72,9 @@ const ReferencesSection: React.FC<{ articleId: string }> = ({ articleId }) => {
   );
 };
 
-const ArticleView: React.FC = () => {
+const MyPaperView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [institution, setInstitution] = useState<any>(null);
@@ -104,38 +107,102 @@ const ArticleView: React.FC = () => {
     
     setLoading(true);
     try {
-      // Load article with authors and institution
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        navigate('/scholarly/auth/sign-in');
+        return;
+      }
+
+      // Fetch article with all related data
       const { data: articleData, error: articleError } = await supabase
         .from('articles' as any)
         .select(`
           *,
           article_authors(*),
+          article_references(*),
           institutions(name, abbreviation)
         `)
         .eq('id', id)
-        .eq('is_current_version', true)
+        .eq('submitted_by', session.user.id) // Ensure it's the user's own paper
         .single();
 
       if (articleError) throw articleError;
       if (!articleData) {
-        setLoading(false);
+        toast.error('Paper not found or you do not have permission to view it');
+        navigate('/scholar/papers');
         return;
       }
 
       setArticle(articleData);
       setInstitution(articleData.institutions);
-
-      // Increment view count
-      await supabase
-        .from('articles' as any)
-        .update({ views: (articleData.views || 0) + 1 })
-        .eq('id', id);
     } catch (error: any) {
       console.error('Error loading article:', error);
-      toast.error('Failed to load article');
+      toast.error('Failed to load paper');
+      navigate('/scholar/papers');
     } finally {
       setLoading(false);
     }
+  };
+
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return { 
+          label: 'Approved', 
+          icon: CheckCircle2, 
+          textColor: 'text-emerald-700',
+          iconColor: 'text-emerald-600'
+        };
+      case 'under-review':
+        return { 
+          label: 'Under Review', 
+          icon: Clock, 
+          textColor: 'text-amber-700',
+          iconColor: 'text-amber-600'
+        };
+      case 'revision-requested':
+        return { 
+          label: 'Revision Requested', 
+          icon: AlertCircle, 
+          textColor: 'text-blue-700',
+          iconColor: 'text-blue-600'
+        };
+      case 'rejected':
+        return { 
+          label: 'Rejected', 
+          icon: XCircle, 
+          textColor: 'text-red-700',
+          iconColor: 'text-red-600'
+        };
+      default:
+        return { 
+          label: status, 
+          icon: Clock, 
+          textColor: 'text-slate-700',
+          iconColor: 'text-slate-600'
+        };
+    }
+  };
+
+  const formatDate = (dateString: string): string => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const getArticleTypeLabel = (type: string): string => {
+    const labels: Record<string, string> = {
+      research: 'Research Article',
+      review: 'Review',
+      'case-study': 'Case Study',
+      methodology: 'Methodology',
+      other: 'Article',
+    };
+    return labels[type] || 'Article';
   };
 
   const styles = `
@@ -154,6 +221,7 @@ const ArticleView: React.FC = () => {
       max-width: 960px;
       margin: 0 auto;
       padding: 0 24px 40px;
+      position: relative;
     }
 
     .sr-article-header__back {
@@ -170,6 +238,26 @@ const ArticleView: React.FC = () => {
 
     .sr-article-header__back:hover {
       color: #2D4A6F;
+    }
+
+    .sr-article-header__status-badge {
+      position: absolute;
+      top: 0;
+      right: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'Source Sans Pro', system-ui, sans-serif;
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .sr-article-header__meta-top {
@@ -454,70 +542,6 @@ const ArticleView: React.FC = () => {
       color: #78716C;
     }
 
-    .sr-article-cited-by {
-      background: #FFFFFF;
-      border: 1px solid #E7E5E4;
-      border-radius: 10px;
-      padding: 24px;
-    }
-
-    .sr-article-cited-by__title {
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: #78716C;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 0 0 16px 0;
-    }
-
-    .sr-article-cited-by__list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .sr-article-cited-by__item {
-      padding-bottom: 16px;
-      border-bottom: 1px solid #F5F5F4;
-    }
-
-    .sr-article-cited-by__item:last-child {
-      padding-bottom: 0;
-      border-bottom: none;
-    }
-
-    .sr-article-cited-by__item-title {
-      font-family: 'Crimson Text', Georgia, serif;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #1C1917;
-      margin: 0 0 4px 0;
-    }
-
-    .sr-article-cited-by__item-meta {
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.8125rem;
-      color: #78716C;
-      margin: 0;
-    }
-
-    .sr-article-cited-by__view-all {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 16px;
-      font-family: 'Source Sans Pro', system-ui, sans-serif;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #1E3A5F;
-      text-decoration: none;
-    }
-
-    .sr-article-cited-by__view-all:hover {
-      color: #2D4A6F;
-    }
-
     .sr-article-not-found {
       text-align: center;
       padding: 120px 24px;
@@ -563,12 +587,10 @@ const ArticleView: React.FC = () => {
       <>
         <style>{styles}</style>
         <div className="sr-article-page">
-          <Navigation />
           <main className="sr-article-not-found">
             <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite', margin: '0 auto' }} />
-            <p className="sr-article-not-found__text">Loading article...</p>
+            <p className="sr-article-not-found__text">Loading paper...</p>
           </main>
-          <Footer />
         </div>
       </>
     );
@@ -579,73 +601,42 @@ const ArticleView: React.FC = () => {
       <>
         <style>{styles}</style>
         <div className="sr-article-page">
-          <Navigation />
           <main className="sr-article-not-found">
-            <h1 className="sr-article-not-found__title">Article Not Found</h1>
+            <h1 className="sr-article-not-found__title">Paper Not Found</h1>
             <p className="sr-article-not-found__text">
-              The article you're looking for doesn't exist or has been removed.
+              The paper you're looking for doesn't exist or you don't have permission to view it.
             </p>
-            <Link to="/scholarly/articles" className="sr-article-not-found__link">
+            <Link to="/scholar/papers" className="sr-article-not-found__link">
               <ChevronLeft size={18} />
-              Browse Articles
+              Back to Papers
             </Link>
           </main>
-          <Footer />
         </div>
       </>
     );
   }
 
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const getArticleTypeLabel = (type: string): string => {
-    const labels: Record<string, string> = {
-      research: 'Research Article',
-      review: 'Review',
-      'case-study': 'Case Study',
-      commentary: 'Commentary',
-      letter: 'Letter',
-    };
-    return labels[type] || 'Article';
-  };
-
-
-  // Mock cited by data
-  const citedByArticles = [
-    {
-      title: 'Extending Topological Codes to Higher Dimensions',
-      authors: 'Wang et al.',
-      university: 'Stanford University',
-      year: 2026,
-    },
-    {
-      title: 'Practical Quantum Memory Using Surface Codes',
-      authors: 'Nakamura et al.',
-      university: 'University of Tokyo',
-      year: 2026,
-    },
-  ];
+  const statusConfig = getStatusConfig(article.status);
+  const StatusIcon = statusConfig.icon;
+  const { uniqueAffiliations, affiliationMap } = getAffiliationData();
 
   return (
     <>
       <style>{styles}</style>
       <div className="sr-article-page">
-        <Navigation />
-
         {/* Article Header */}
         <header className="sr-article-header">
           <div className="sr-article-header__container">
-            <Link to="/scholarly/articles" className="sr-article-header__back">
+            <Link to="/scholar/papers" className="sr-article-header__back">
               <ChevronLeft size={16} />
-              Back to Articles
+              Back to Papers
             </Link>
+
+            {/* Status Badge - Positioned top right like scholarship cards */}
+            <div className={`sr-article-header__status-badge ${statusConfig.textColor}`}>
+              <StatusIcon size={10} className={statusConfig.iconColor} />
+              {statusConfig.label}
+            </div>
 
             <div className="sr-article-header__meta-top">
               <span className="sr-article-header__discipline">
@@ -662,7 +653,6 @@ const ArticleView: React.FC = () => {
             <div className="sr-article-header__authors">
               <p className="sr-article-header__author-list">
                 {article.article_authors && article.article_authors.length > 0 ? (() => {
-                  const { affiliationMap } = getAffiliationData();
                   return article.article_authors.map((author: any, idx: number) => (
                     <span key={author.id || idx}>
                       <a href="#">{author.name}</a>
@@ -680,7 +670,6 @@ const ArticleView: React.FC = () => {
             </div>
 
             {(() => {
-              const { uniqueAffiliations } = getAffiliationData();
               if (uniqueAffiliations.length > 0) {
                 return (
                   <div className="sr-article-header__affiliations">
@@ -753,38 +742,35 @@ const ArticleView: React.FC = () => {
             </div>
 
             <div className="sr-article-actions__buttons">
-              <button className="sr-article-actions__btn">
-                <Share2 size={14} />
-                Share
-              </button>
-              <button className="sr-article-actions__btn">
-                <Bookmark size={14} />
-                Save
-              </button>
-              <button className="sr-article-actions__btn">
-                <Quote size={14} />
-                Cite
-              </button>
+              {(article.status === 'under-review' || article.status === 'revision-requested') && (
+                <Link
+                  to={`/scholar/submit-paper?edit=${article.id}`}
+                  className="sr-article-actions__btn sr-article-actions__btn--primary"
+                >
+                  <Edit size={14} />
+                  Edit Paper
+                </Link>
+              )}
               {article.pdf_url && (
                 <a
                   href={article.pdf_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="sr-article-actions__btn sr-article-actions__btn--primary"
-                  style={{ textDecoration: 'none' }}
                 >
                   <Download size={14} />
                   PDF
                 </a>
               )}
-              <Link
-                to="/scholarly/auth/sign-in"
-                className="sr-article-actions__btn"
-                style={{ textDecoration: 'none' }}
-                title="Sign in to claim authorship"
-              >
-                Claim Authorship
-              </Link>
+              {article.status === 'approved' && (
+                <Link
+                  to={`/scholarly/articles/${article.id}`}
+                  className="sr-article-actions__btn"
+                >
+                  <ExternalLink size={14} />
+                  View Public Page
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -864,30 +850,14 @@ const ArticleView: React.FC = () => {
             </section>
           ) : null}
 
-          {/* References - Load from article_references table */}
+          {/* References */}
           {article.id && (
             <ReferencesSection articleId={article.id} />
           )}
-
-          {/* Cited By - TODO: Implement citation tracking */}
-          {article.citations > 0 && (
-            <section className="sr-article-section">
-              <div className="sr-article-cited-by">
-                <h3 className="sr-article-cited-by__title">
-                  Cited By ({article.citations} articles)
-                </h3>
-                <p style={{ fontFamily: "'Source Sans Pro', system-ui, sans-serif", color: '#78716C', margin: 0 }}>
-                  Citation tracking coming soon.
-                </p>
-              </div>
-            </section>
-          )}
         </main>
-
-        <Footer />
       </div>
     </>
   );
 };
 
-export default ArticleView;
+export default MyPaperView;

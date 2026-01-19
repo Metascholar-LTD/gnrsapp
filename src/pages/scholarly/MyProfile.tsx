@@ -251,6 +251,9 @@ const MyProfile: React.FC = () => {
 
       toast.success('Profile updated successfully');
       await loadProfile();
+      
+      // Dispatch event to notify other components of profile update
+      window.dispatchEvent(new CustomEvent('profileUpdated'));
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast.error(`Failed to update profile: ${error.message}`);
