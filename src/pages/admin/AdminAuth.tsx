@@ -2,6 +2,7 @@ import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminAuth = () => {
   const location = useLocation();
@@ -11,12 +12,14 @@ const AdminAuth = () => {
   // Form state for sign in
   const [signInUser, setSignInUser] = useState({ email: '', password: '' });
   const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [signInError, setSignInError] = useState('');
   
   // Form state for sign up
   const [signUpUser, setSignUpUser] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordMatchError, setPasswordMatchError] = useState('');
+  const [signUpError, setSignUpError] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -39,15 +42,22 @@ const AdminAuth = () => {
 
   const handleSignInInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSignInUser({ ...signInUser, [e.target.name]: e.target.value });
+    // Clear error when user types
+    if (signInError) {
+      setSignInError('');
+    }
   };
 
   const handleSignUpInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setSignUpUser({ ...signUpUser, [name]: value });
     
-    // Clear password match error when user types
+    // Clear errors when user types
     if (passwordMatchError) {
       setPasswordMatchError('');
+    }
+    if (signUpError) {
+      setSignUpError('');
     }
     
     // Real-time password match validation
@@ -69,16 +79,35 @@ const AdminAuth = () => {
   const handleSignInSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setSignInError('');
     
-    // TODO: Replace with actual authentication API call
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Welcome back!",
-        description: "You've successfully logged in.",
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: signInUser.email,
+        password: signInUser.password,
       });
-      navigate('/admin');
-    }, 1500);
+
+      if (error) {
+        setSignInError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully logged in.",
+        });
+        navigate('/admin');
+      } else {
+        setSignInError('Login failed. Please try again.');
+        setIsLoading(false);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setSignInError(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   const handleSignUpSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -96,16 +125,50 @@ const AdminAuth = () => {
     }
     
     setIsLoading(true);
+    setSignUpError('');
     
-    // TODO: Replace with actual authentication API call
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Account created!",
-        description: "Welcome! Your account has been created successfully.",
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: signUpUser.email,
+        password: signUpUser.password,
+        options: {
+          data: {
+            name: signUpUser.name,
+          },
+        },
       });
-      navigate('/admin');
-    }, 1500);
+
+      if (error) {
+        setSignUpError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        // If user is automatically signed in, sign them out so they need to sign in manually
+        if (data.session) {
+          await supabase.auth.signOut();
+        }
+        
+        toast({
+          title: "Account created!",
+          description: "Your account has been created successfully. Please sign in.",
+        });
+        // Always switch to sign in form after successful sign up
+        setIsSignUp(false);
+        window.history.replaceState({}, '', '/admin/sign-in');
+        // Clear sign up form
+        setSignUpUser({ name: '', email: '', password: '', confirmPassword: '' });
+        setIsLoading(false);
+      } else {
+        setSignUpError('Account creation failed. Please try again.');
+        setIsLoading(false);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setSignUpError(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   const switchToSignUp = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -623,6 +686,11 @@ const AdminAuth = () => {
                     {passwordMatchError}
                   </div>
                 )}
+                {signUpError && (
+                  <div className="admin-auth-error-message">
+                    {signUpError}
+                  </div>
+                )}
 
                 <button 
                   type="submit" 
@@ -691,6 +759,12 @@ const AdminAuth = () => {
                     />
                   </button>
                 </div>
+
+                {signInError && (
+                  <div className="admin-auth-error-message">
+                    {signInError}
+                  </div>
+                )}
 
                 <div className="admin-auth-remember-forgot">
                   <label className="admin-auth-remember-label">
