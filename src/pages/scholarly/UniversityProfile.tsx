@@ -849,9 +849,21 @@ const UniversityProfile: React.FC = () => {
     );
   }
 
+  // Generate month labels for the last 6 months
+  const getMonthLabels = () => {
+    const labels: string[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      labels.push(monthNames[date.getMonth()]);
+    }
+    return labels;
+  };
+
   const trendData = profile.monthlyArticleCounts
     ? profile.monthlyArticleCounts.map((count, idx) => ({
-        month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][idx],
+        month: getMonthLabels()[idx],
         articles: count,
       }))
     : [];
