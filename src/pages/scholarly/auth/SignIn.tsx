@@ -212,7 +212,7 @@ const ScholarSignIn: React.FC = () => {
 
       if (!data.session || !data.user) {
         setErrorField('Sign in failed. Please try again.');
-        setIsSubmitting(false);
+    setIsSubmitting(false);
         return;
       }
 
@@ -250,7 +250,7 @@ const ScholarSignIn: React.FC = () => {
       }
 
       // User is authenticated and has scholar profile - redirect to dashboard
-      navigate('/scholar/dashboard');
+    navigate('/scholar/dashboard');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
       setErrorField(errorMessage);
@@ -404,14 +404,14 @@ const ScholarSignIn: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <img
-                    src='https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
-                    width={20}
-                    height={20}
-                    alt='Google'
-                    className='w-5 h-5'
-                  />
-                  Continue with Google
+              <img
+                src='https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png'
+                width={20}
+                height={20}
+                alt='Google'
+                className='w-5 h-5'
+              />
+              Continue with Google
                 </>
               )}
             </button>

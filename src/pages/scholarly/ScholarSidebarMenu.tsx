@@ -76,19 +76,14 @@ const ScholarSidebarMenu: React.FC = () => {
               <div data-i18n="Submit Paper">Submit New Paper</div>
             </Link>
           </li>
-          <li className={`menu-item ${isActive('/scholar/papers') ? 'active' : ''}`}>
-            <Link to="/scholar/papers" className="menu-link">
-              <div data-i18n="All Papers">All Papers</div>
-            </Link>
-          </li>
           <li className={`menu-item ${isActive('/scholar/papers/pending') ? 'active' : ''}`}>
             <Link to="/scholar/papers/pending" className="menu-link">
               <div data-i18n="Pending">Pending Review</div>
             </Link>
           </li>
-          <li className={`menu-item ${isActive('/scholar/papers/approved') ? 'active' : ''}`}>
-            <Link to="/scholar/papers/approved" className="menu-link">
-              <div data-i18n="Approved">Approved</div>
+          <li className={`menu-item ${isActive('/scholar/papers') ? 'active' : ''}`}>
+            <Link to="/scholar/papers" className="menu-link">
+              <div data-i18n="All Papers">All Papers</div>
             </Link>
           </li>
         </ul>

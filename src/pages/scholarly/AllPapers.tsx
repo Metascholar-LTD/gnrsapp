@@ -34,6 +34,8 @@ const AllPapers: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     loadArticles();
@@ -97,6 +99,59 @@ const AllPapers: React.FC = () => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const handleDelete = async (articleId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
+    
+    if (!confirm('Are you sure you want to delete this paper? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingId(articleId);
+    try {
+      // Get article to find PDF URL
+      const article = articles.find(a => a.id === articleId);
+      
+      // Delete PDF from storage if exists
+      if (article?.pdf_url) {
+        try {
+          // Extract file path from URL
+          const urlParts = article.pdf_url.split('/storage/v1/object/public/article-pdfs/');
+          if (urlParts.length > 1) {
+            const filePath = urlParts[1];
+            const { error: storageError } = await supabase.storage
+              .from('article-pdfs')
+              .remove([filePath]);
+            
+            if (storageError) {
+              console.warn('Error deleting PDF from storage:', storageError);
+              // Continue with database deletion even if storage deletion fails
+            }
+          }
+        } catch (storageErr) {
+          console.warn('Error deleting PDF from storage:', storageErr);
+          // Continue with database deletion
+        }
+      }
+
+      // Delete article from database (cascade will handle authors/references)
+      const { error } = await supabase
+        .from('articles' as any)
+        .delete()
+        .eq('id', articleId);
+
+      if (error) throw error;
+
+      toast.success('Paper deleted successfully');
+      await loadArticles(); // Refresh the list
+    } catch (error: any) {
+      console.error('Error deleting paper:', error);
+      toast.error(`Failed to delete paper: ${error.message}`);
+    } finally {
+      setDeletingId(null);
+      setDeleteConfirmId(null);
+    }
   };
 
   const getArticleTypeLabel = (type: string): string => {
@@ -239,6 +294,7 @@ const AllPapers: React.FC = () => {
     }
 
     .paper-card {
+      position: relative;
       background: #FFFFFF;
       border: 1px solid #E7E5E4;
       border-radius: 8px;
@@ -487,12 +543,6 @@ const AllPapers: React.FC = () => {
               Under Review
             </button>
             <button
-              className={`papers-filter__btn ${statusFilter === 'approved' ? 'papers-filter__btn--active' : ''}`}
-              onClick={() => setStatusFilter('approved')}
-            >
-              Approved
-            </button>
-            <button
               className={`papers-filter__btn ${statusFilter === 'revision-requested' ? 'papers-filter__btn--active' : ''}`}
               onClick={() => setStatusFilter('revision-requested')}
             >
@@ -528,6 +578,49 @@ const AllPapers: React.FC = () => {
                   className="paper-card"
                   onClick={() => navigate(`/scholar/papers/${article.id}`)}
                 >
+                  {/* Delete Button */}
+                  <button
+                    className="paper-card__delete"
+                    onClick={(e) => handleDelete(article.id, e)}
+                    disabled={deletingId === article.id}
+                    title="Delete paper"
+                    style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      background: deletingId === article.id ? 'rgba(239, 68, 68, 0.2)' : 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '6px',
+                      padding: '6px 8px',
+                      cursor: deletingId === article.id ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      color: '#ef4444',
+                      fontSize: '12px',
+                      zIndex: 10,
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (deletingId !== article.id) {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                        e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (deletingId !== article.id) {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                        e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                      }
+                    }}
+                  >
+                    {deletingId === article.id ? (
+                      <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                  </button>
+
                   <div className="paper-card__content">
                     {/* Badges */}
                     <div className="paper-card__badges">
@@ -601,7 +694,6 @@ const AllPapers: React.FC = () => {
                         <div className="paper-card__thumbnail-placeholder" style={{ display: 'none' }}>
                           <FileText />
                         </div>
-                        <div className="paper-card__source">Source</div>
                       </>
                     ) : article.pdf_url ? (
                       <>
@@ -620,7 +712,6 @@ const AllPapers: React.FC = () => {
                         <div className="paper-card__thumbnail-placeholder" style={{ display: 'none' }}>
                           <FileText />
                         </div>
-                        <div className="paper-card__source">Source</div>
                       </>
                     ) : (
                       <div className="paper-card__thumbnail-placeholder">

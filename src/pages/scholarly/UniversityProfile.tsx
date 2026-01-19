@@ -21,6 +21,9 @@ import {
   Quote,
   Building2,
   Loader2,
+  FileText,
+  Clock,
+  CheckCircle2,
 } from 'lucide-react';
 import { MovementIndicator } from '@/components/scholarly/MovementIndicator';
 import { StatCard } from '@/components/scholarly/StatCard';
@@ -88,10 +91,13 @@ const UniversityProfile: React.FC = () => {
       const totalViews = allArticlesData?.reduce((sum: number, article: any) => sum + (article.views || 0), 0) || 0;
       const totalDownloads = allArticlesData?.reduce((sum: number, article: any) => sum + (article.downloads || 0), 0) || 0;
 
-      // Fetch recent articles for display (limit 5)
+      // Fetch recent articles for display (limit 5) with authors and thumbnails
       const { data: articlesData } = await supabase
         .from('articles' as any)
-        .select('*')
+        .select(`
+          *,
+          article_authors(*)
+        `)
         .eq('institution_id', institutionId)
         .eq('status', 'approved')
         .eq('is_current_version', true)
@@ -180,14 +186,15 @@ const UniversityProfile: React.FC = () => {
         articleCount: Math.max(0, totalArticles - (5 - idx) * 10), // Simplified progression
       }));
 
-      // Transform articles to match expected format
+      // Transform articles to match expected format with full data for card display
       const recentArticles = (articlesData || []).map((article: any) => ({
         id: article.id,
         title: article.title,
         slug: article.id,
         abstract: article.abstract || '',
-        authors: [],
+        authors: article.article_authors || [],
         publishedAt: article.published_at || article.submitted_at,
+        submittedAt: article.submitted_at,
         viewCount: article.views || 0,
         citationCount: article.citations || 0,
         downloadCount: article.downloads || 0,
@@ -198,6 +205,9 @@ const UniversityProfile: React.FC = () => {
         disciplineName: article.discipline || 'General',
         keywords: article.keywords || [],
         pdfUrl: article.pdf_url || '',
+        thumbnailUrl: article.thumbnail_url || null,
+        articleType: article.article_type || 'research',
+        status: article.status || 'approved',
       })) as any[];
 
       // Build profile object
@@ -238,6 +248,37 @@ const UniversityProfile: React.FC = () => {
       setProfile(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper functions for article display
+  const isNewPaper = (dateString: string) => {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    const now = new Date();
+    const daysDiff = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+    return daysDiff <= 30; // New if published within last 30 days
+  };
+
+  const getArticleTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      research: 'Research Article',
+      review: 'Review',
+      'case-study': 'Case Study',
+      methodology: 'Methodology',
+      other: 'Article',
+    };
+    return labels[type] || 'Article';
+  };
+
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return { label: 'Approved', icon: CheckCircle2, color: 'bg-emerald-50 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' };
+      case 'under-review':
+        return { label: 'Under Review', icon: Clock, color: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-500' };
+      default:
+        return { label: status, icon: Clock, color: 'bg-slate-50 text-slate-700 border-slate-200', dot: 'bg-slate-500' };
     }
   };
 
@@ -495,11 +536,177 @@ const UniversityProfile: React.FC = () => {
     }
 
     .sr-profile-articles {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .paper-card {
+      position: relative;
       background: #FFFFFF;
       border: 1px solid #E7E5E4;
-      border-radius: 10px;
-      padding: 20px 24px;
+      border-radius: 8px;
+      padding: 20px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
     }
+
+    .paper-card:hover {
+      border-color: #D6D3D1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .paper-card__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .paper-card__badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .paper-card__badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: 'Source Sans Pro', system-ui, sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .paper-card__badge--new {
+      background: #0F766E;
+      color: #FFFFFF;
+    }
+
+    .paper-card__badge--article {
+      background: #5EEAD4;
+      color: #134E4A;
+    }
+
+    .paper-card__badge--fulltext {
+      background: #FFFFFF;
+      color: #134E4A;
+      border: 1px solid #0F766E;
+    }
+
+    .paper-card__badge--status {
+      background: #F5F5F4;
+      color: #57534E;
+      border: 1px solid #E7E5E4;
+    }
+
+    .paper-card__title {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1C1917;
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .paper-card__date {
+      font-family: 'Source Sans Pro', system-ui, sans-serif;
+      font-size: 0.875rem;
+      color: #78716C;
+      margin: 0 0 16px 0;
+    }
+
+    .paper-card__authors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .paper-card__author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Source Sans Pro', system-ui, sans-serif;
+      font-size: 0.875rem;
+      color: #1C1917;
+    }
+
+    .paper-card__author-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #F5F5F4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .paper-card__author-avatar svg {
+      width: 14px;
+      height: 14px;
+      color: #78716C;
+    }
+
+    .paper-card__thumbnail {
+      flex-shrink: 0;
+      width: 120px;
+      height: 160px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #F5F5F4;
+      border: 1px solid #E7E5E4;
+      position: relative;
+    }
+
+    .paper-card__thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .paper-card__thumbnail-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #F5F5F4 0%, #E7E5E4 100%);
+    }
+
+    .paper-card__thumbnail-placeholder svg {
+      width: 48px;
+      height: 48px;
+      color: #A8A29E;
+    }
+
+    @media (max-width: 768px) {
+      .paper-card {
+        flex-direction: column;
+      }
+
+      .paper-card__thumbnail {
+        width: 100%;
+        height: 200px;
+      }
+
+      .paper-card__title {
+        font-size: 1.125rem;
+      }
+    }
+
 
     .sr-profile-authors {
       display: grid;
@@ -778,9 +985,115 @@ const UniversityProfile: React.FC = () => {
               </Link>
             </div>
             <div className="sr-profile-articles">
-              {profile.recentArticles.map((article) => (
-                <ArticleListItem key={article.id} article={article} />
-              ))}
+              {profile.recentArticles.map((article: any) => {
+                const statusConfig = getStatusConfig(article.status || 'approved');
+                const StatusIcon = statusConfig.icon;
+                const isNew = isNewPaper(article.publishedAt || article.submittedAt);
+                const publishedDate = article.publishedAt || article.submittedAt;
+                const dateObj = new Date(publishedDate);
+                const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+                return (
+                  <div
+                    key={article.id}
+                    className="paper-card"
+                    onClick={() => window.location.href = `/scholarly/articles/${article.id}`}
+                  >
+                    <div className="paper-card__content">
+                      {/* Badges */}
+                      <div className="paper-card__badges">
+                        {isNew && (
+                          <span className="paper-card__badge paper-card__badge--new">New</span>
+                        )}
+                        <span className="paper-card__badge paper-card__badge--article">
+                          {getArticleTypeLabel(article.articleType || 'research')}
+                        </span>
+                        {article.pdfUrl && (
+                          <span className="paper-card__badge paper-card__badge--fulltext">Full-text available</span>
+                        )}
+                        <span className="paper-card__badge paper-card__badge--status">
+                          <StatusIcon size={10} style={{ marginRight: '4px' }} />
+                          {statusConfig.label}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="paper-card__title">{article.title}</h3>
+
+                      {/* Date */}
+                      <p className="paper-card__date">{formattedDate}</p>
+
+                      {/* Authors */}
+                      {article.authors && article.authors.length > 0 ? (
+                        <div className="paper-card__authors">
+                          {article.authors.slice(0, 4).map((author: any, idx: number) => (
+                            <div key={author.id || idx} className="paper-card__author">
+                              <div className="paper-card__author-avatar">
+                                <Users size={14} />
+                              </div>
+                              <span>{author.name}</span>
+                            </div>
+                          ))}
+                          {article.authors.length > 4 && (
+                            <span className="paper-card__author" style={{ color: '#78716C' }}>
+                              +{article.authors.length - 4} more
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="paper-card__authors">
+                          <span className="paper-card__author" style={{ color: '#78716C' }}>
+                            No authors listed
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Thumbnail */}
+                    <div className="paper-card__thumbnail">
+                      {article.thumbnailUrl ? (
+                        <>
+                          <img 
+                            src={article.thumbnailUrl} 
+                            alt={article.title}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              if (target.nextElementSibling) {
+                                (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <div className="paper-card__thumbnail-placeholder" style={{ display: 'none' }}>
+                            <FileText />
+                          </div>
+                        </>
+                      ) : article.pdfUrl ? (
+                        <>
+                          <img 
+                            src={article.pdfUrl.replace(/\.pdf$/i, '.jpg')} 
+                            alt={article.title}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              if (target.nextElementSibling) {
+                                (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <div className="paper-card__thumbnail-placeholder" style={{ display: 'none' }}>
+                            <FileText />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="paper-card__thumbnail-placeholder">
+                          <FileText />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

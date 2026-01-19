@@ -134,7 +134,7 @@ const MyPaperView: React.FC = () => {
       }
 
       setArticle(articleData);
-      setInstitution(articleData.institutions);
+      setInstitution((articleData as any).institutions);
     } catch (error: any) {
       console.error('Error loading article:', error);
       toast.error('Failed to load paper');
@@ -204,6 +204,7 @@ const MyPaperView: React.FC = () => {
     };
     return labels[type] || 'Article';
   };
+
 
   const styles = `
     .sr-article-page {

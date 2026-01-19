@@ -135,19 +135,45 @@ const Rankings: React.FC = () => {
           last6Months.push(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
         }
 
-        // Transform to match expected format and ensure sequential ranks
-        // If ranks have gaps, recalculate them sequentially (1, 2, 3, 4...)
-        const transformed = data.map((inst: any, index: number) => {
-          // Use sequential rank based on position in ordered list
-          // This ensures no gaps even if database has gaps temporarily
-          const sequentialRank = index + 1;
-          const dbRank = inst.current_rank;
+        // Sort institutions by actual article count (descending) for live ranking
+        // This ensures rankings reflect real-time article counts
+        const sortedInstitutions = [...data].sort((a: any, b: any) => {
+          const aCount = totalArticlesByInstitution[a.id] || 0;
+          const bCount = totalArticlesByInstitution[b.id] || 0;
+          
+          // Primary sort: by article count (descending)
+          if (bCount !== aCount) {
+            return bCount - aCount;
+          }
+          
+          // Secondary sort: by name (alphabetical) if counts are equal
+          return (a.name || '').localeCompare(b.name || '');
+        });
+
+        // Transform to match expected format with live-calculated ranks
+        const transformed = sortedInstitutions.map((inst: any, index: number) => {
+          // Rank is based on sorted position (1 = highest article count)
+          const newRank = index + 1;
+          const oldRank = inst.current_rank;
+          
+          // Calculate movement
+          let movement = 'stable';
+          let movementDelta = 0;
+          if (oldRank && oldRank !== null) {
+            if (newRank < oldRank) {
+              movement = 'up';
+              movementDelta = oldRank - newRank;
+            } else if (newRank > oldRank) {
+              movement = 'down';
+              movementDelta = newRank - oldRank;
+            }
+          }
           
           // Get monthly article counts for this institution
           const instMonthlyCounts = monthlyCountsByInstitution[inst.id] || {};
           const monthlyArticleCounts = last6Months.map(month => instMonthlyCounts[month] || 0);
           
-          // Use calculated values from database instead of hardcoded
+          // Use calculated values from database
           const totalArticles = totalArticlesByInstitution[inst.id] || 0;
           const articlesThisMonth = articlesThisMonthByInstitution[inst.id] || 0;
           
@@ -159,10 +185,10 @@ const Rankings: React.FC = () => {
             logo: inst.logo,
             country: inst.country || 'Ghana',
             city: inst.city || '',
-            currentRank: sequentialRank, // Always sequential
-            previousRank: inst.previous_rank,
-            movement: inst.movement || 'stable',
-            movementDelta: 0,
+            currentRank: newRank, // Live-calculated rank based on article count
+            previousRank: oldRank,
+            movement: movement,
+            movementDelta: movementDelta,
             totalArticles: totalArticles, // Calculated from actual articles
             articlesThisMonth: articlesThisMonth, // Calculated from current month articles
             articlesThisYear: 0,
@@ -170,12 +196,41 @@ const Rankings: React.FC = () => {
             totalViews: 0,
             totalDownloads: 0,
             hIndex: 0,
-            monthlyArticleCounts: monthlyArticleCounts, // Real data or flat line (all zeros)
+            monthlyArticleCounts: monthlyArticleCounts,
             createdAt: inst.created_at,
             updatedAt: inst.updated_at,
           };
         });
         setInstitutions(transformed);
+        
+        // Update database ranks in background to keep them in sync
+        // Only update if ranks have changed
+        const ranksChanged = transformed.some((inst: any) => {
+          const originalInst = data.find((d: any) => d.id === inst.id);
+          return originalInst && originalInst.current_rank !== inst.currentRank;
+        });
+        
+        if (ranksChanged) {
+          // Update ranks in database asynchronously
+          (async () => {
+            try {
+              // Update each institution's rank
+              for (const inst of transformed) {
+                await supabase
+                  .from('institutions' as any)
+                  .update({
+                    previous_rank: inst.previousRank,
+                    current_rank: inst.currentRank,
+                    movement: inst.movement,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('id', inst.id);
+              }
+            } catch (err: any) {
+              console.warn('Could not update ranks in database:', err);
+            }
+          })();
+        }
         
         // If there are rank gaps in the database, trigger recalculation
         const hasGaps = data.some((inst: any, index: number) => {
