@@ -44,12 +44,8 @@ const AdminLayout = () => {
   const showWarningRef = useRef(false); // Ref to track warning state for event handlers
 
   // Auto-logout timer
-  // TODO: Change to 30 minutes (30 * 60 * 1000) after testing
-  // Currently set to 20 seconds for testing purposes
-  const AUTO_LOGOUT_TIME = 20 * 1000; // 20 seconds for testing
-  const WARNING_TIME = 10 * 1000; // Show warning 10 seconds before logout
-  // const AUTO_LOGOUT_TIME = 30 * 60 * 1000; // 30 minutes for production
-  // const WARNING_TIME = 5 * 60 * 1000; // Show warning 5 minutes before logout
+  const AUTO_LOGOUT_TIME = 20 * 60 * 1000; // 20 minutes
+  const WARNING_TIME = 5 * 60 * 1000; // Show warning 5 minutes before logout
 
   const handleAutoLogout = useCallback(async () => {
     try {
