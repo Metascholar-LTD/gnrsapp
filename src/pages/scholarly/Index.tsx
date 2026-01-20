@@ -357,7 +357,8 @@ const ScholarlyIndex: React.FC = () => {
     }
 
     .sr-landing-hero__btn--primary:hover {
-      background: #F5F5F4;
+      background: #1C1917;
+      color: #FFFFFF;
       transform: translateY(-1px);
     }
 
@@ -368,8 +369,9 @@ const ScholarlyIndex: React.FC = () => {
     }
 
     .sr-landing-hero__btn--secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: #1C1917;
+      border-color: #1C1917;
+      color: #FFFFFF;
     }
 
     /* Stats Section */

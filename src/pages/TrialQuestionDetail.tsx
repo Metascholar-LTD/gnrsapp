@@ -914,51 +914,89 @@ const TrialQuestionDetail = () => {
             </div>
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:justify-end">
             {quizResults?.forcedRetake ? (
               <>
-                <Button
+                <button
                   onClick={handleRetakeQuiz}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  className="group relative inline-block text-sm font-semibold text-red-600 transition-colors duration-300 hover:text-red-700"
                 >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Retake Quiz (Required)
-                </Button>
+                  <motion.span
+                    className="relative inline-block pb-1 flex items-center gap-1.5"
+                    whileHover={{ x: 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Retake Quiz (Required)
+                    <span
+                      className="absolute bottom-0 left-0 h-[2px] bg-red-600 transition-all duration-300 group-hover:bg-red-700"
+                      style={{
+                        width: 'calc(100% + 14px)',
+                        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                      }}
+                    />
+                  </motion.span>
+                </button>
               </>
             ) : quizResults?.passed ? (
               <>
                 <Button
                   variant="outline"
                   onClick={() => navigate("/education/trial-questions")}
-                  className="w-full"
+                  className="w-full sm:w-auto"
                 >
                   Back to Questions
                 </Button>
-                <Button
+                <button
                   onClick={handleRetakeQuiz}
-                  variant="outline"
-                  className="w-full"
+                  className="group relative inline-block text-sm font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700 w-full sm:w-auto"
                 >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Retake Quiz
-                </Button>
+                  <motion.span
+                    className="relative inline-block pb-1 flex items-center gap-1.5"
+                    whileHover={{ x: 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Retake Quiz
+                    <span
+                      className="absolute bottom-0 left-0 h-[2px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                      style={{
+                        width: 'calc(100% + 14px)',
+                        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                      }}
+                    />
+                  </motion.span>
+                </button>
               </>
             ) : (
               <>
                 <Button
                   variant="outline"
                   onClick={() => navigate("/education/trial-questions")}
-                  className="w-full"
+                  className="w-full sm:w-auto"
                 >
                   Back to Questions
                 </Button>
-                <Button
+                <button
                   onClick={handleRetakeQuiz}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  className="group relative inline-block text-sm font-semibold text-blue-600 transition-colors duration-300 hover:text-blue-700 w-full sm:w-auto"
                 >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Retake Quiz
-                </Button>
+                  <motion.span
+                    className="relative inline-block pb-1 flex items-center gap-1.5"
+                    whileHover={{ x: 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Retake Quiz
+                    <span
+                      className="absolute bottom-0 left-0 h-[2px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                      style={{
+                        width: 'calc(100% + 14px)',
+                        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                      }}
+                    />
+                  </motion.span>
+                </button>
               </>
             )}
           </DialogFooter>

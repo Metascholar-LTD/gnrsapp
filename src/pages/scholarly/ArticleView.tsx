@@ -25,6 +25,7 @@ import {
   Building2,
   Loader2,
 } from 'lucide-react';
+import CitationModal, { CitationData } from '@/components/scholarly/CitationModal';
 
 // References Section Component
 const ReferencesSection: React.FC<{ articleId: string }> = ({ articleId }) => {
@@ -75,6 +76,7 @@ const ArticleView: React.FC = () => {
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [institution, setInstitution] = useState<any>(null);
+  const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
 
   // Compute unique affiliations and mapping
   const getAffiliationData = () => {
@@ -761,7 +763,10 @@ const ArticleView: React.FC = () => {
                 <Bookmark size={14} />
                 Save
               </button>
-              <button className="sr-article-actions__btn">
+              <button 
+                className="sr-article-actions__btn"
+                onClick={() => setIsCitationModalOpen(true)}
+              >
                 <Quote size={14} />
                 Cite
               </button>
@@ -883,6 +888,24 @@ const ArticleView: React.FC = () => {
             </section>
           )}
         </main>
+
+        {/* Citation Modal */}
+        {article && (
+          <CitationModal
+            isOpen={isCitationModalOpen}
+            onClose={() => setIsCitationModalOpen(false)}
+            citationData={{
+              title: article.title,
+              authors: article.article_authors || [],
+              publishedAt: article.published_at,
+              submittedAt: article.submitted_at,
+              journal: 'Ghana National Resource System',
+              institution: institution?.name || '',
+              doi: article.identifier_type === 'doi' ? article.identifier_value : undefined,
+              url: window.location.href,
+            }}
+          />
+        )}
 
         <Footer />
       </div>
