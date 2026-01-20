@@ -5,6 +5,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import {
   Briefcase,
   FileText,
@@ -20,7 +21,10 @@ import {
   ArrowUp,
   ArrowDown,
   UserCheck,
-  Mail
+  Mail,
+  ArrowRight,
+  LayoutGrid,
+  List as ListIcon
 } from 'lucide-react';
 
 dayjs.extend(isoWeek);
@@ -178,23 +182,8 @@ const WeekCalendar: React.FC = () => {
 
 const EmployerDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'applications' | 'views' | 'hires'>('applications');
-  const applicationsChartRef = useRef<HTMLDivElement>(null);
-  const viewsChartRef = useRef<HTMLDivElement>(null);
-  const hiresChartRef = useRef<HTMLDivElement>(null);
-  const applicationsChartInstanceRef = useRef<any>(null);
-  const viewsChartInstanceRef = useRef<any>(null);
-  const hiresChartInstanceRef = useRef<any>(null);
-  const applicationsWeekChartRef = useRef<HTMLDivElement>(null);
-  const viewsWeekChartRef = useRef<HTMLDivElement>(null);
-  const hiresWeekChartRef = useRef<HTMLDivElement>(null);
-  const applicationsWeekChartInstanceRef = useRef<any>(null);
-  const viewsWeekChartInstanceRef = useRef<any>(null);
-  const hiresWeekChartInstanceRef = useRef<any>(null);
-  const jobPerformanceChartRef = useRef<HTMLDivElement>(null);
-  const growthChartRef = useRef<HTMLDivElement>(null);
-  const jobPerformanceChartInstanceRef = useRef<any>(null);
-  const growthChartInstanceRef = useRef<any>(null);
+  const [applicationViewMode, setApplicationViewMode] = useState<'cards' | 'table'>('cards');
+  const [isMobile, setIsMobile] = useState(false);
 
   // Chart configuration matching sneat-1.0.0 exactly
   const chartConfig = {
@@ -246,891 +235,25 @@ const EmployerDashboard: React.FC = () => {
       const ApexCharts = (window as any).ApexCharts;
       if (!ApexCharts) return;
 
-      // Applications Chart Configuration
-      if (applicationsChartRef.current && !applicationsChartInstanceRef.current) {
-        const applicationsChartConfig = {
-          series: [
-            {
-              data: [18, 15, 22, 20, 28, 24, 30, 26]
-            }
-          ],
-          chart: {
-            height: 215,
-            parentHeightOffset: 0,
-            parentWidthOffset: 0,
-            toolbar: {
-              show: false
-            },
-            type: 'area'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            width: 2,
-            curve: 'smooth'
-          },
-          legend: {
-            show: false
-          },
-          markers: {
-            size: 6,
-            colors: 'transparent',
-            strokeColors: 'transparent',
-            strokeWidth: 4,
-            discrete: [
-              {
-                fillColor: chartConfig.colors.white,
-                seriesIndex: 0,
-                dataPointIndex: 7,
-                strokeColor: chartConfig.colors.primary,
-                strokeWidth: 2,
-                size: 6,
-                radius: 8
-              }
-            ],
-            hover: {
-              size: 7
-            }
-          },
-          colors: [chartConfig.colors.primary],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: shadeColor,
-              shadeIntensity: 0.6,
-              opacityFrom: 0.5,
-              opacityTo: 0.25,
-              stops: [0, 95, 100]
-            }
-          },
-          grid: {
-            borderColor: borderColor,
-            strokeDashArray: 3,
-            padding: {
-              top: 10,
-              bottom: 10,
-              left: 15,
-              right: 15
-            }
-          },
-          xaxis: {
-            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            axisBorder: {
-              show: false
-            },
-            axisTicks: {
-              show: false
-            },
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              show: false
-            },
-            min: 10,
-            max: 35,
-            tickAmount: 4
-          }
-        };
-        applicationsChartInstanceRef.current = new ApexCharts(applicationsChartRef.current, applicationsChartConfig);
-        applicationsChartInstanceRef.current.render();
-      }
-
-      // Views Chart Configuration
-      if (viewsChartRef.current && !viewsChartInstanceRef.current) {
-        const viewsChartConfig = {
-          series: [
-            {
-              data: [145, 132, 158, 148, 172, 165, 185, 175]
-            }
-          ],
-          chart: {
-            height: 215,
-            parentHeightOffset: 0,
-            parentWidthOffset: 0,
-            toolbar: {
-              show: false
-            },
-            type: 'area'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            width: 2,
-            curve: 'smooth'
-          },
-          legend: {
-            show: false
-          },
-          markers: {
-            size: 6,
-            colors: 'transparent',
-            strokeColors: 'transparent',
-            strokeWidth: 4,
-            discrete: [
-              {
-                fillColor: chartConfig.colors.white,
-                seriesIndex: 0,
-                dataPointIndex: 7,
-                strokeColor: chartConfig.colors.info,
-                strokeWidth: 2,
-                size: 6,
-                radius: 8
-              }
-            ],
-            hover: {
-              size: 7
-            }
-          },
-          colors: [chartConfig.colors.info],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: shadeColor,
-              shadeIntensity: 0.6,
-              opacityFrom: 0.5,
-              opacityTo: 0.25,
-              stops: [0, 95, 100]
-            }
-          },
-          grid: {
-            borderColor: borderColor,
-            strokeDashArray: 3,
-            padding: {
-              top: 10,
-              bottom: 10,
-              left: 15,
-              right: 15
-            }
-          },
-          xaxis: {
-            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            axisBorder: {
-              show: false
-            },
-            axisTicks: {
-              show: false
-            },
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              show: false
-            },
-            min: 120,
-            max: 200,
-            tickAmount: 4
-          }
-        };
-        viewsChartInstanceRef.current = new ApexCharts(viewsChartRef.current, viewsChartConfig);
-        viewsChartInstanceRef.current.render();
-      }
-
-      // Hires Chart Configuration
-      if (hiresChartRef.current && !hiresChartInstanceRef.current) {
-        const hiresChartConfig = {
-          series: [
-            {
-              data: [5, 4, 7, 6, 9, 8, 10, 9]
-            }
-          ],
-          chart: {
-            height: 215,
-            parentHeightOffset: 0,
-            parentWidthOffset: 0,
-            toolbar: {
-              show: false
-            },
-            type: 'area'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            width: 2,
-            curve: 'smooth'
-          },
-          legend: {
-            show: false
-          },
-          markers: {
-            size: 6,
-            colors: 'transparent',
-            strokeColors: 'transparent',
-            strokeWidth: 4,
-            discrete: [
-              {
-                fillColor: chartConfig.colors.white,
-                seriesIndex: 0,
-                dataPointIndex: 7,
-                strokeColor: chartConfig.colors.success,
-                strokeWidth: 2,
-                size: 6,
-                radius: 8
-              }
-            ],
-            hover: {
-              size: 7
-            }
-          },
-          colors: [chartConfig.colors.success],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: shadeColor,
-              shadeIntensity: 0.6,
-              opacityFrom: 0.5,
-              opacityTo: 0.25,
-              stops: [0, 95, 100]
-            }
-          },
-          grid: {
-            borderColor: borderColor,
-            strokeDashArray: 3,
-            padding: {
-              top: 10,
-              bottom: 10,
-              left: 15,
-              right: 15
-            }
-          },
-          xaxis: {
-            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            axisBorder: {
-              show: false
-            },
-            axisTicks: {
-              show: false
-            },
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              show: false
-            },
-            min: 3,
-            max: 12,
-            tickAmount: 4
-          }
-        };
-        hiresChartInstanceRef.current = new ApexCharts(hiresChartRef.current, hiresChartConfig);
-        hiresChartInstanceRef.current.render();
-      }
-
-      // Applications Week Radial Chart
-      if (applicationsWeekChartRef.current && !applicationsWeekChartInstanceRef.current) {
-        const applicationsWeekChartConfig = {
-          series: [68],
-          chart: {
-            width: 60,
-            height: 60,
-            type: 'radialBar'
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: 0,
-              endAngle: 360,
-              strokeWidth: '8',
-              hollow: {
-                margin: 2,
-                size: '45%'
-              },
-              track: {
-                strokeWidth: '50%',
-                background: borderColor
-              },
-              dataLabels: {
-                show: true,
-                name: {
-                  show: false
-                },
-                value: {
-                  formatter: function (val: number) {
-                    return parseInt(val.toString()) + '%';
-                  },
-                  offsetY: 5,
-                  color: '#697a8d',
-                  fontSize: '13px',
-                  show: true
-                }
-              }
-            }
-          },
-          fill: {
-            type: 'solid',
-            colors: chartConfig.colors.primary
-          },
-          stroke: {
-            lineCap: 'round'
-          },
-          grid: {
-            padding: {
-              top: -10,
-              bottom: -15,
-              left: -10,
-              right: -10
-            }
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        applicationsWeekChartInstanceRef.current = new ApexCharts(applicationsWeekChartRef.current, applicationsWeekChartConfig);
-        applicationsWeekChartInstanceRef.current.render();
-      }
-
-      // Views Week Radial Chart
-      if (viewsWeekChartRef.current && !viewsWeekChartInstanceRef.current) {
-        const viewsWeekChartConfig = {
-          series: [75],
-          chart: {
-            width: 60,
-            height: 60,
-            type: 'radialBar'
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: 0,
-              endAngle: 360,
-              strokeWidth: '8',
-              hollow: {
-                margin: 2,
-                size: '45%'
-              },
-              track: {
-                strokeWidth: '50%',
-                background: borderColor
-              },
-              dataLabels: {
-                show: true,
-                name: {
-                  show: false
-                },
-                value: {
-                  formatter: function (val: number) {
-                    return parseInt(val.toString()) + '%';
-                  },
-                  offsetY: 5,
-                  color: '#697a8d',
-                  fontSize: '13px',
-                  show: true
-                }
-              }
-            }
-          },
-          fill: {
-            type: 'solid',
-            colors: chartConfig.colors.info
-          },
-          stroke: {
-            lineCap: 'round'
-          },
-          grid: {
-            padding: {
-              top: -10,
-              bottom: -15,
-              left: -10,
-              right: -10
-            }
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        viewsWeekChartInstanceRef.current = new ApexCharts(viewsWeekChartRef.current, viewsWeekChartConfig);
-        viewsWeekChartInstanceRef.current.render();
-      }
-
-      // Hires Week Radial Chart
-      if (hiresWeekChartRef.current && !hiresWeekChartInstanceRef.current) {
-        const hiresWeekChartConfig = {
-          series: [62],
-          chart: {
-            width: 60,
-            height: 60,
-            type: 'radialBar'
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: 0,
-              endAngle: 360,
-              strokeWidth: '8',
-              hollow: {
-                margin: 2,
-                size: '45%'
-              },
-              track: {
-                strokeWidth: '50%',
-                background: borderColor
-              },
-              dataLabels: {
-                show: true,
-                name: {
-                  show: false
-                },
-                value: {
-                  formatter: function (val: number) {
-                    return parseInt(val.toString()) + '%';
-                  },
-                  offsetY: 5,
-                  color: '#697a8d',
-                  fontSize: '13px',
-                  show: true
-                }
-              }
-            }
-          },
-          fill: {
-            type: 'solid',
-            colors: chartConfig.colors.success
-          },
-          stroke: {
-            lineCap: 'round'
-          },
-          grid: {
-            padding: {
-              top: -10,
-              bottom: -15,
-              left: -10,
-              right: -10
-            }
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        hiresWeekChartInstanceRef.current = new ApexCharts(hiresWeekChartRef.current, hiresWeekChartConfig);
-        hiresWeekChartInstanceRef.current.render();
-      }
-
-      // Job Performance Chart Configuration
-      if (jobPerformanceChartRef.current && !jobPerformanceChartInstanceRef.current) {
-        const jobPerformanceChartOptions = {
-          series: [
-            {
-              name: '2025',
-              data: [12, 8, 15, 22, 18, 14, 10]
-            },
-            {
-              name: '2024',
-              data: [-8, -12, -6, -10, -5, -9, -7]
-            }
-          ],
-          chart: {
-            height: 300,
-            stacked: true,
-            type: 'bar',
-            toolbar: { show: false }
-          },
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              columnWidth: '33%',
-              borderRadius: 12,
-              startingShape: 'rounded',
-              endingShape: 'rounded'
-            }
-          },
-          colors: [chartConfig.colors.primary, chartConfig.colors.info],
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            curve: 'smooth',
-            width: 6,
-            lineCap: 'round',
-            colors: [cardColor]
-          },
-          legend: {
-            show: true,
-            horizontalAlign: 'left',
-            position: 'top',
-            markers: {
-              height: 8,
-              width: 8,
-              radius: 12,
-              offsetX: -3
-            },
-            labels: {
-              colors: axisColor
-            },
-            itemMargin: {
-              horizontal: 10
-            }
-          },
-          grid: {
-            borderColor: borderColor,
-            padding: {
-              top: 0,
-              bottom: -8,
-              left: 20,
-              right: 20
-            }
-          },
-          xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            labels: {
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            },
-            axisTicks: {
-              show: false
-            },
-            axisBorder: {
-              show: false
-            }
-          },
-          yaxis: {
-            labels: {
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            }
-          },
-          responsive: [
-            {
-              breakpoint: 1700,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '32%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1580,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '35%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1440,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '42%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1300,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '48%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1200,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '40%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1040,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 11,
-                    columnWidth: '48%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 991,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '30%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 840,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '35%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 768,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '28%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 640,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '32%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 576,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '37%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 480,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '45%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 420,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '52%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 380,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '60%'
-                  }
-                }
-              }
-            }
-          ],
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            },
-            active: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        jobPerformanceChartInstanceRef.current = new ApexCharts(jobPerformanceChartRef.current, jobPerformanceChartOptions);
-        jobPerformanceChartInstanceRef.current.render();
-      }
-
-      // Growth Chart Configuration
-      if (growthChartRef.current && !growthChartInstanceRef.current) {
-        const growthChartOptions = {
-          series: [82],
-          labels: ['Growth'],
-          chart: {
-            height: 240,
-            type: 'radialBar'
-          },
-          plotOptions: {
-            radialBar: {
-              size: 150,
-              offsetY: 10,
-              startAngle: -150,
-              endAngle: 150,
-              hollow: {
-                size: '55%'
-              },
-              track: {
-                background: cardColor,
-                strokeWidth: '100%'
-              },
-              dataLabels: {
-                name: {
-                  offsetY: 15,
-                  color: headingColor,
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  fontFamily: 'Public Sans'
-                },
-                value: {
-                  offsetY: -25,
-                  color: headingColor,
-                  fontSize: '22px',
-                  fontWeight: '500',
-                  fontFamily: 'Public Sans'
-                }
-              }
-            }
-          },
-          colors: [chartConfig.colors.primary],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: 'dark',
-              shadeIntensity: 0.5,
-              gradientToColors: [chartConfig.colors.primary],
-              inverseColors: true,
-              opacityFrom: 1,
-              opacityTo: 0.6,
-              stops: [30, 70, 100]
-            }
-          },
-          stroke: {
-            dashArray: 5
-          },
-          grid: {
-            padding: {
-              top: -35,
-              bottom: -10
-            }
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            },
-            active: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        growthChartInstanceRef.current = new ApexCharts(growthChartRef.current, growthChartOptions);
-        growthChartInstanceRef.current.render();
-      }
     };
 
     loadApexCharts();
-
-    // Cleanup function
-    return () => {
-      if (applicationsChartInstanceRef.current) {
-        applicationsChartInstanceRef.current.destroy();
-        applicationsChartInstanceRef.current = null;
-      }
-      if (viewsChartInstanceRef.current) {
-        viewsChartInstanceRef.current.destroy();
-        viewsChartInstanceRef.current = null;
-      }
-      if (hiresChartInstanceRef.current) {
-        hiresChartInstanceRef.current.destroy();
-        hiresChartInstanceRef.current = null;
-      }
-      if (applicationsWeekChartInstanceRef.current) {
-        applicationsWeekChartInstanceRef.current.destroy();
-        applicationsWeekChartInstanceRef.current = null;
-      }
-      if (viewsWeekChartInstanceRef.current) {
-        viewsWeekChartInstanceRef.current.destroy();
-        viewsWeekChartInstanceRef.current = null;
-      }
-      if (hiresWeekChartInstanceRef.current) {
-        hiresWeekChartInstanceRef.current.destroy();
-        hiresWeekChartInstanceRef.current = null;
-      }
-      if (jobPerformanceChartInstanceRef.current) {
-        jobPerformanceChartInstanceRef.current.destroy();
-        jobPerformanceChartInstanceRef.current = null;
-      }
-      if (growthChartInstanceRef.current) {
-        growthChartInstanceRef.current.destroy();
-        growthChartInstanceRef.current = null;
-      }
-    };
   }, []);
 
-  // Re-render chart when tab changes
+  // Force cards view on mobile
   useEffect(() => {
-    const ApexCharts = (window as any).ApexCharts;
-    if (!ApexCharts) return;
-
-    const timer = setTimeout(() => {
-      if (activeTab === 'applications' && applicationsChartRef.current && !applicationsChartInstanceRef.current) {
-        // Re-initialize if needed
-      } else if (activeTab === 'views' && viewsChartRef.current && !viewsChartInstanceRef.current) {
-        // Re-initialize if needed
-      } else if (activeTab === 'hires' && hiresChartRef.current && !hiresChartInstanceRef.current) {
-        // Re-initialize if needed
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setApplicationViewMode('cards');
       }
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [activeTab]);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const [recentApplications] = useState([
     {
@@ -1292,65 +415,338 @@ const EmployerDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Job Performance Section and Calendar Row */}
+      {/* Recent Applications Section and Calendar Row */}
       <div className="row mb-4">
         <div className="col-lg-6 col-md-12 mb-4 mb-lg-0">
           <div className="card h-100">
-            <div className="row row-bordered g-0">
-              <div className="col-md-8">
-                <h5 className="card-header m-0 me-2 pb-3">Job Performance</h5>
-                <div ref={jobPerformanceChartRef} id="jobPerformanceChart" className="px-2"></div>
+            <div className="card-header d-flex align-items-center justify-content-between">
+              <h5 className="card-title m-0 me-2">Recent Applications</h5>
+              <div className="d-flex align-items-center gap-2">
+                {/* View Toggle - Hidden on mobile */}
+                <div 
+                  className="d-none d-md-flex"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: '#FFFFFF',
+                    border: '1px solid #E7E5E4',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setApplicationViewMode('cards')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '8px 12px',
+                      border: 'none',
+                      background: applicationViewMode === 'cards' ? '#696cff' : 'transparent',
+                      color: applicationViewMode === 'cards' ? '#FFFFFF' : '#78716C',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (applicationViewMode !== 'cards') {
+                        e.currentTarget.style.background = '#F5F5F4';
+                        e.currentTarget.style.color = '#57534E';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (applicationViewMode !== 'cards') {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#78716C';
+                      }
+                    }}
+                  >
+                    <LayoutGrid size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setApplicationViewMode('table')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '8px 12px',
+                      border: 'none',
+                      background: applicationViewMode === 'table' ? '#696cff' : 'transparent',
+                      color: applicationViewMode === 'table' ? '#FFFFFF' : '#78716C',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (applicationViewMode !== 'table') {
+                        e.currentTarget.style.background = '#F5F5F4';
+                        e.currentTarget.style.color = '#57534E';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (applicationViewMode !== 'table') {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#78716C';
+                      }
+                    }}
+                  >
+                    <ListIcon size={16} />
+                  </button>
+                </div>
+                {/* View All Button */}
+                <Link 
+                  to="/employer/applications/all"
+                  className="group relative inline-block text-sm font-medium text-[#696cff] transition-colors duration-300 hover:text-[#5a5de0]"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <motion.span
+                    className="relative inline-block pb-1 flex items-center gap-1.5"
+                    whileHover={{ x: 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <ArrowRight size={14} />
+                    View All
+                    <span
+                      className="absolute bottom-0 left-0 h-[2px] bg-[#696cff] transition-all duration-300 group-hover:bg-[#5a5de0]"
+                      style={{
+                        width: 'calc(100% + 14px)',
+                        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                      }}
+                    />
+                  </motion.span>
+                </Link>
               </div>
-              <div className="col-md-4">
-                <div className="card-body">
-                  <div className="text-center">
-                    <div className="dropdown">
-                      <button
-                        className="btn btn-sm btn-outline-primary dropdown-toggle"
-                        type="button"
-                        id="growthReportId"
-                        data-bs-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        2025
-                      </button>
-                      <div className="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
-                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2024</a>
-                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2023</a>
-                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2022</a>
+            </div>
+            <div className="card-body p-0">
+              {recentApplications.length === 0 ? (
+                <div style={{ 
+                  padding: '48px 24px', 
+                  textAlign: 'center',
+                  background: '#FAFAF9',
+                  borderRadius: '0 0 10px 10px',
+                }}>
+                  <FileText size={48} style={{ color: '#A8A29E', margin: '0 auto 16px' }} />
+                  <h6 style={{
+                    fontFamily: "'Crimson Text', Georgia, serif",
+                    fontSize: '1.125rem',
+                    fontWeight: 600,
+                    color: '#1C1917',
+                    margin: '0 0 8px 0',
+                  }}>
+                    No applications yet
+                  </h6>
+                  <p style={{
+                    fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                    fontSize: '0.875rem',
+                    color: '#78716C',
+                    margin: '0 0 20px 0',
+                  }}>
+                    Applications will appear here as candidates apply to your jobs
+                  </p>
+                </div>
+              ) : (applicationViewMode === 'cards' || isMobile) ? (
+                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {recentApplications.slice(0, 5).map((app) => (
+                    <Link
+                      key={app.id}
+                      to={`/employer/applications/${app.id}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '20px',
+                        background: '#FFFFFF',
+                        border: '1px solid #E7E5E4',
+                        borderRadius: '10px',
+                        padding: '20px 24px',
+                        transition: 'all 0.2s ease',
+                        cursor: 'pointer',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#D6D3D1';
+                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.06)';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#E7E5E4';
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <div className="avatar flex-shrink-0">
+                        <div className="avatar-initial rounded-circle bg-label-primary" style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 600, color: '#696cff' }}>
+                          {app.candidateName.split(' ').map((n: string) => n[0]).join('')}
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h6 style={{
+                          fontFamily: "'Crimson Text', Georgia, serif",
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1C1917',
+                          margin: 0,
+                          marginBottom: '4px',
+                          lineHeight: '1.4',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                        }}>
+                          {app.candidateName}
+                        </h6>
+                        <p style={{
+                          fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                          fontSize: '0.8125rem',
+                          color: '#78716C',
+                          margin: 0,
+                          marginBottom: '4px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {app.jobTitle}
+                        </p>
+                        <p style={{
+                          fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                          fontSize: '0.75rem',
+                          color: '#A8A29E',
+                          margin: 0,
+                        }}>
+                          {app.appliedDate}
+                        </p>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        gap: '4px',
+                        flexShrink: 0,
+                      }}>
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '0.875rem',
+                          color: '#1C1917',
+                        }}>
+                          {app.matchScore}%
+                        </span>
+                        <span style={{
+                          fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                          fontSize: '0.75rem',
+                          color: '#78716C',
+                        }}>
+                          Match
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-                <div ref={growthChartRef} id="growthChart"></div>
-                <div className="text-center fw-semibold pt-3 mb-2">82% Growth Rate</div>
-
-                <div className="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
-                  <div className="d-flex">
-                    <div className="me-2">
-                      <span className="badge bg-label-primary p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}>
-                        <Briefcase size={16} color="#696cff" />
-                      </span>
-                    </div>
-                    <div className="d-flex flex-column">
-                      <small>2025</small>
-                      <h6 className="mb-0">12</h6>
-                    </div>
+              ) : (
+                <div style={{ 
+                  background: '#FFFFFF',
+                  border: '1px solid #E7E5E4',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 140px 120px 100px',
+                    alignItems: 'center',
+                    padding: '14px 20px',
+                    background: '#FAFAF9',
+                    borderBottom: '1px solid #E7E5E4',
+                    fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#78716C',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    <span>Candidate</span>
+                    <span style={{ textAlign: 'right' }}>Job Title</span>
+                    <span style={{ textAlign: 'right' }}>Match</span>
+                    <span style={{ textAlign: 'right' }}>Date</span>
                   </div>
-                  <div className="d-flex">
-                    <div className="me-2">
-                      <span className="badge bg-label-info p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}>
-                        <FileText size={16} color="#03c3ec" />
-                      </span>
-                    </div>
-                    <div className="d-flex flex-column">
-                      <small>2024</small>
-                      <h6 className="mb-0">8</h6>
-                    </div>
-                  </div>
+                  {recentApplications.slice(0, 5).map((app, index) => (
+                    <Link
+                      key={app.id}
+                      to={`/employer/applications/${app.id}`}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 140px 120px 100px',
+                        alignItems: 'center',
+                        padding: '16px 20px',
+                        background: index === 0 ? 'linear-gradient(90deg, rgba(105, 108, 255, 0.03) 0%, transparent 50%)' : '#FFFFFF',
+                        borderBottom: '1px solid #E7E5E4',
+                        transition: 'background-color 0.15s ease',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#FAFAF9';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = index === 0 ? 'linear-gradient(90deg, rgba(105, 108, 255, 0.03) 0%, transparent 50%)' : '#FFFFFF';
+                      }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <h6 style={{
+                          fontFamily: "'Crimson Text', Georgia, serif",
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          color: '#1C1917',
+                          margin: 0,
+                          marginBottom: '4px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {app.candidateName}
+                        </h6>
+                        <p style={{
+                          fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                          fontSize: '0.8125rem',
+                          color: '#78716C',
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {app.appliedDate}
+                        </p>
+                      </div>
+                      <div style={{
+                        fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                        fontSize: '0.875rem',
+                        color: '#78716C',
+                        textAlign: 'right',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {app.jobTitle}
+                      </div>
+                      <div style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: '0.9375rem',
+                        color: '#1C1917',
+                        textAlign: 'right',
+                      }}>
+                        {app.matchScore}%
+                      </div>
+                      <div style={{
+                        fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                        fontSize: '0.8125rem',
+                        color: '#78716C',
+                        textAlign: 'right',
+                      }}>
+                        {app.appliedDate}
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -1501,179 +897,6 @@ const EmployerDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-md-6 col-lg-4 order-1 mb-4">
-          <div className="card h-100">
-            <div className="card-header">
-              <ul className="nav nav-pills" role="tablist">
-                <li className="nav-item">
-                  <button 
-                    type="button" 
-                    className={`nav-link ${activeTab === 'applications' ? 'active' : ''}`} 
-                    role="tab"
-                    onClick={() => setActiveTab('applications')}
-                  >
-                    Applications
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button 
-                    type="button" 
-                    className={`nav-link ${activeTab === 'views' ? 'active' : ''}`} 
-                    role="tab"
-                    onClick={() => setActiveTab('views')}
-                  >
-                    Views
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button 
-                    type="button" 
-                    className={`nav-link ${activeTab === 'hires' ? 'active' : ''}`} 
-                    role="tab"
-                    onClick={() => setActiveTab('hires')}
-                  >
-                    Hires
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div className="card-body px-0">
-              <div className="tab-content p-0">
-                {/* Applications Tab */}
-                <div className={`tab-pane fade ${activeTab === 'applications' ? 'show active' : ''}`}>
-                  <div className="d-flex p-4 pt-3">
-                    <div className="avatar flex-shrink-0 me-3">
-                      <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-                        <FileText size={20} color="#696cff" />
-                      </div>
-                    </div>
-                    <div>
-                      <small className="text-muted d-block">Total Applications</small>
-                      <div className="d-flex align-items-center">
-                        <h6 className="mb-0 me-1">145</h6>
-                        <small className="text-success fw-semibold d-flex align-items-center gap-1">
-                          <ArrowUp size={12} style={{ display: 'inline-block' }} />
-                          28.4%
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                  <div ref={applicationsChartRef} id="applicationsChart" style={{ padding: '0 1rem' }}></div>
-                  <div className="d-flex justify-content-center pt-4 gap-2">
-                    <div className="flex-shrink-0">
-                      <div ref={applicationsWeekChartRef} id="applicationsWeekChart"></div>
-                    </div>
-                    <div>
-                      <p className="mb-n1 mt-1">Applications This Week</p>
-                      <small className="text-muted">18% more than last week</small>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Views Tab */}
-                <div className={`tab-pane fade ${activeTab === 'views' ? 'show active' : ''}`}>
-                  <div className="d-flex p-4 pt-3">
-                    <div className="avatar flex-shrink-0 me-3">
-                      <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-                        <Eye size={20} color="#03c3ec" />
-                      </div>
-                    </div>
-                    <div>
-                      <small className="text-muted d-block">Total Views</small>
-                      <div className="d-flex align-items-center">
-                        <h6 className="mb-0 me-1">1,240</h6>
-                        <small className="text-success fw-semibold d-flex align-items-center gap-1">
-                          <ArrowUp size={12} style={{ display: 'inline-block' }} />
-                          18.7%
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                  <div ref={viewsChartRef} id="viewsChart" style={{ padding: '0 1rem' }}></div>
-                  <div className="d-flex justify-content-center pt-4 gap-2">
-                    <div className="flex-shrink-0">
-                      <div ref={viewsWeekChartRef} id="viewsWeekChart"></div>
-                    </div>
-                    <div>
-                      <p className="mb-n1 mt-1">Views This Week</p>
-                      <small className="text-muted">25% more than last week</small>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Hires Tab */}
-                <div className={`tab-pane fade ${activeTab === 'hires' ? 'show active' : ''}`}>
-                  <div className="d-flex p-4 pt-3">
-                    <div className="avatar flex-shrink-0 me-3">
-                      <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-                        <UserCheck size={20} color="#71dd37" />
-                      </div>
-                    </div>
-                    <div>
-                      <small className="text-muted d-block">Total Hires</small>
-                      <div className="d-flex align-items-center">
-                        <h6 className="mb-0 me-1">8</h6>
-                        <small className="text-success fw-semibold d-flex align-items-center gap-1">
-                          <ArrowUp size={12} style={{ display: 'inline-block' }} />
-                          12.5%
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                  <div ref={hiresChartRef} id="hiresChart" style={{ padding: '0 1rem' }}></div>
-                  <div className="d-flex justify-content-center pt-4 gap-2">
-                    <div className="flex-shrink-0">
-                      <div ref={hiresWeekChartRef} id="hiresWeekChart"></div>
-                    </div>
-                    <div>
-                      <p className="mb-n1 mt-1">Hires This Week</p>
-                      <small className="text-muted">12% more than last week</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 col-lg-4 mb-4">
-          <div className="card h-100">
-            <div className="card-header d-flex align-items-center justify-content-between">
-              <h5 className="card-title m-0 me-2">Recent Applications</h5>
-              <Link to="/employer/applications/all" className="btn btn-sm btn-label-primary">
-                View All
-              </Link>
-            </div>
-            <div className="card-body">
-              <ul className="p-0 m-0">
-                {recentApplications.map((app) => (
-                  <li key={app.id} className="d-flex mb-4 pb-1">
-                    <div className="avatar flex-shrink-0 me-3">
-                      <div className="avatar-initial rounded-circle bg-label-primary" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 600, color: '#696cff' }}>
-                        {app.candidateName.split(' ').map(n => n[0]).join('')}
-                      </div>
-                    </div>
-                    <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                      <div className="me-2">
-                        <small className="text-muted d-block mb-1">{app.candidateName}</small>
-                        <h6 className="mb-0">{app.jobTitle}</h6>
-                        <small className="text-muted">{app.appliedDate}</small>
-                      </div>
-                      <div className="user-progress d-flex align-items-center gap-1">
-                        <span className={`badge ${app.matchScore >= 90 ? 'bg-label-success' : 'bg-label-warning'}`}>
-                          {app.matchScore}%
-                        </span>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </>
   );
 };

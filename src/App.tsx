@@ -114,6 +114,7 @@ import AccountSettings from "./pages/sneat/pages/AccountSettings";
 import { GenericPage, CardsPage, TablesPage, IconsPage, FormsBasicInputs, FormLayouts, ErrorPage, MaintenancePage } from "./pages/sneat/pages/SimplePages";
 import EmployerLayout from "./pages/employer/EmployerLayout";
 import EmployerDashboard from "./pages/employer/EmployerDashboard";
+import EmployerAuth from "./pages/employer/EmployerAuth";
 import PostNewJob from "./pages/employer/PostNewJob";
 import PostNewGig from "./pages/employer/PostNewGig";
 import EmployerAllJobs from "./pages/employer/AllJobs";
@@ -381,6 +382,9 @@ const App = () => (
             <Route path="misc/error" element={<ErrorPage />} />
             <Route path="misc/maintenance" element={<MaintenancePage />} />
           </Route>
+
+          {/* Employer Auth Route */}
+          <Route path="/employer/auth" element={<EmployerAuth />} />
 
           {/* Employer Dashboard Routes */}
           <Route path="/employer" element={<EmployerLayout />}>

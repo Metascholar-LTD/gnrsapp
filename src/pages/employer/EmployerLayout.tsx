@@ -985,7 +985,7 @@ const EmployerLayout: React.FC = () => {
                       <div className="dropdown-divider"></div>
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/join">
+                      <Link className="dropdown-item" to="/employer/auth">
                         <Icon icon="hugeicons:logout-01" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">Log Out</span>
                       </Link>

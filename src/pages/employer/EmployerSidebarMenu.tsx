@@ -111,6 +111,11 @@ const EmployerSidebarMenu: React.FC = () => {
         </ul>
       </li>
 
+      {/* APPLICATIONS & CANDIDATES SECTION */}
+      <li className="menu-header small text-uppercase mt-3">
+        <span className="menu-header-text">Applications & Candidates</span>
+      </li>
+
       {/* Applications */}
       <li className={`menu-item ${isMenuOpen('applications') ? 'open' : ''}`}>
         <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('applications', e)}>
@@ -142,11 +147,6 @@ const EmployerSidebarMenu: React.FC = () => {
         </ul>
       </li>
 
-      {/* CANDIDATES SECTION */}
-      <li className="menu-header small text-uppercase mt-3">
-        <span className="menu-header-text">Candidates</span>
-      </li>
-
       {/* Candidates */}
       <li className={`menu-item ${isMenuOpen('candidates') ? 'open' : ''}`}>
         <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('candidates', e)}>
@@ -156,7 +156,7 @@ const EmployerSidebarMenu: React.FC = () => {
         <ul className={`menu-sub ${isMenuOpen('candidates') ? 'show' : ''}`}>
           <li className="menu-item">
             <Link to="/employer/candidates/shortlist" className="menu-link">
-              <div data-i18n="Shortlist">Shortlist</div>
+              <div data-i18n="Browse Candidates">Browse Candidates</div>
             </Link>
           </li>
           <li className="menu-item">
@@ -170,14 +170,6 @@ const EmployerSidebarMenu: React.FC = () => {
             </Link>
           </li>
         </ul>
-      </li>
-
-      {/* Analytics */}
-      <li className="menu-item">
-        <Link to="/employer/analytics" className="menu-link">
-          <Icon icon="hugeicons:chart-03" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Analytics">Candidate Analytics</div>
-        </Link>
       </li>
 
       {/* ACCOUNT & SETTINGS SECTION */}
