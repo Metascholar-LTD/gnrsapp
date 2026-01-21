@@ -1,9 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { Button } from '@/components/ui/button';
-import { ArrowUp, ArrowDown, BookOpen, Download, Eye, Database, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+  ArrowUp, 
+  BookOpen, 
+  Download, 
+  Eye, 
+  FileText,
+  Briefcase,
+  Award,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  ArrowRight,
+  LayoutGrid,
+  List as ListIcon,
+  MessageSquare,
+  Calendar,
+  Star,
+  TrendingUp,
+  Loader2
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 dayjs.extend(isoWeek);
 dayjs.extend(localizedFormat);
@@ -159,963 +181,95 @@ const WeekCalendar: React.FC = () => {
 };
 
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'resources' | 'downloads' | 'views'>('resources');
-  const resourcesChartRef = useRef<HTMLDivElement>(null);
-  const downloadsChartRef = useRef<HTMLDivElement>(null);
-  const viewsChartRef = useRef<HTMLDivElement>(null);
-  const resourcesChartInstanceRef = useRef<any>(null);
-  const downloadsChartInstanceRef = useRef<any>(null);
-  const viewsChartInstanceRef = useRef<any>(null);
-  const resourcesWeekChartRef = useRef<HTMLDivElement>(null);
-  const downloadsWeekChartRef = useRef<HTMLDivElement>(null);
-  const viewsWeekChartRef = useRef<HTMLDivElement>(null);
-  const resourcesWeekChartInstanceRef = useRef<any>(null);
-  const downloadsWeekChartInstanceRef = useRef<any>(null);
-  const viewsWeekChartInstanceRef = useRef<any>(null);
-  const totalRevenueChartRef = useRef<HTMLDivElement>(null);
-  const growthChartRef = useRef<HTMLDivElement>(null);
-  const totalRevenueChartInstanceRef = useRef<any>(null);
-  const growthChartInstanceRef = useRef<any>(null);
+  const navigate = useNavigate();
+  const [applicationViewMode, setApplicationViewMode] = useState<'cards' | 'table'>('cards');
+  const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Chart configuration matching sneat-1.0.0 exactly
-  const chartConfig = {
-    colors: {
-      primary: '#696cff',
-      secondary: '#8592a3',
-      success: '#71dd37',
-      info: '#03c3ec',
-      warning: '#ffab00',
-      danger: '#ff3e1d',
-      dark: '#233446',
-      black: '#000',
-      white: '#fff',
-      body: '#f4f5fb',
-      headingColor: '#566a7f',
-      axisColor: '#a1acb8',
-      borderColor: '#eceef1'
-    }
+  // Mock data - In production, fetch from Supabase
+  const [recentApplications] = useState([
+    {
+      id: '1',
+      jobTitle: 'Software Developer',
+      company: 'Tech Solutions Inc.',
+      appliedDate: '2 days ago',
+      status: 'pending',
+      matchScore: 85
+    },
+    {
+      id: '2',
+      jobTitle: 'Marketing Manager',
+      company: 'Creative Agency Ltd',
+      appliedDate: '5 days ago',
+      status: 'shortlisted',
+      matchScore: 92
+    },
+    {
+      id: '3',
+      jobTitle: 'Data Analyst',
+      company: 'Analytics Pro',
+      appliedDate: '1 week ago',
+      status: 'pending',
+      matchScore: 78
+    },
+    {
+      id: '4',
+      jobTitle: 'Project Coordinator',
+      company: 'Global Enterprises',
+      appliedDate: '1 week ago',
+      status: 'rejected',
+      matchScore: 65
+    },
+  ]);
+
+  // Stats
+  const stats = {
+    totalApplications: 12,
+    pending: 5,
+    shortlisted: 4,
+    rejected: 3,
+    savedJobs: 8,
+    scholarshipApplications: 3,
+    coursesInProgress: 2,
+    completedCourses: 5,
   };
 
-  const cardColor = chartConfig.colors.white;
-  const headingColor = chartConfig.colors.headingColor;
-  const axisColor = chartConfig.colors.axisColor;
-  const borderColor = chartConfig.colors.borderColor;
-  const shadeColor = 'light'; // Default shade for light theme
-
   useEffect(() => {
-    // Load ApexCharts CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = '/sneat-assets/vendor/libs/apex-charts/apex-charts.css';
-    document.head.appendChild(link);
-
-    // Load ApexCharts dynamically
-    const loadApexCharts = async () => {
-      if (typeof window !== 'undefined' && !(window as any).ApexCharts) {
-        const script = document.createElement('script');
-        script.src = '/sneat-assets/vendor/libs/apex-charts/apexcharts.js';
-        script.onload = () => {
-          initializeCharts();
-        };
-        document.head.appendChild(script);
-      } else if ((window as any).ApexCharts) {
-        initializeCharts();
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setApplicationViewMode('cards');
       }
     };
-
-    const initializeCharts = () => {
-      const ApexCharts = (window as any).ApexCharts;
-      if (!ApexCharts) return;
-
-      // Resources Chart Configuration (exact copy from sneat-1.0.0)
-      if (resourcesChartRef.current && !resourcesChartInstanceRef.current) {
-        const resourcesChartConfig = {
-          series: [
-            {
-              data: [24, 21, 30, 22, 42, 26, 35, 29]
-            }
-          ],
-          chart: {
-            height: 215,
-            parentHeightOffset: 0,
-            parentWidthOffset: 0,
-            toolbar: {
-              show: false
-            },
-            type: 'area'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            width: 2,
-            curve: 'smooth'
-          },
-          legend: {
-            show: false
-          },
-          markers: {
-            size: 6,
-            colors: 'transparent',
-            strokeColors: 'transparent',
-            strokeWidth: 4,
-            discrete: [
-              {
-                fillColor: chartConfig.colors.white,
-                seriesIndex: 0,
-                dataPointIndex: 7,
-                strokeColor: chartConfig.colors.primary,
-                strokeWidth: 2,
-                size: 6,
-                radius: 8
-              }
-            ],
-            hover: {
-              size: 7
-            }
-          },
-          colors: [chartConfig.colors.primary],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: shadeColor,
-              shadeIntensity: 0.6,
-              opacityFrom: 0.5,
-              opacityTo: 0.25,
-              stops: [0, 95, 100]
-            }
-          },
-          grid: {
-            borderColor: borderColor,
-            strokeDashArray: 3,
-            padding: {
-              top: 10,
-              bottom: 10,
-              left: 15,
-              right: 15
-            }
-          },
-          xaxis: {
-            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            axisBorder: {
-              show: false
-            },
-            axisTicks: {
-              show: false
-            },
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              show: false
-            },
-            min: 10,
-            max: 50,
-            tickAmount: 4
-          }
-        };
-        resourcesChartInstanceRef.current = new ApexCharts(resourcesChartRef.current, resourcesChartConfig);
-        resourcesChartInstanceRef.current.render();
-      }
-
-      // Downloads Chart Configuration (same as resources)
-      if (downloadsChartRef.current && !downloadsChartInstanceRef.current) {
-        const downloadsChartConfig = {
-          series: [
-            {
-              data: [28, 25, 35, 28, 48, 32, 42, 35]
-            }
-          ],
-          chart: {
-            height: 215,
-            parentHeightOffset: 0,
-            parentWidthOffset: 0,
-            toolbar: {
-              show: false
-            },
-            type: 'area'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            width: 2,
-            curve: 'smooth'
-          },
-          legend: {
-            show: false
-          },
-          markers: {
-            size: 6,
-            colors: 'transparent',
-            strokeColors: 'transparent',
-            strokeWidth: 4,
-            discrete: [
-              {
-                fillColor: chartConfig.colors.white,
-                seriesIndex: 0,
-                dataPointIndex: 7,
-                strokeColor: chartConfig.colors.primary,
-                strokeWidth: 2,
-                size: 6,
-                radius: 8
-              }
-            ],
-            hover: {
-              size: 7
-            }
-          },
-          colors: [chartConfig.colors.primary],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: shadeColor,
-              shadeIntensity: 0.6,
-              opacityFrom: 0.5,
-              opacityTo: 0.25,
-              stops: [0, 95, 100]
-            }
-          },
-          grid: {
-            borderColor: borderColor,
-            strokeDashArray: 3,
-            padding: {
-              top: 10,
-              bottom: 10,
-              left: 15,
-              right: 15
-            }
-          },
-          xaxis: {
-            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            axisBorder: {
-              show: false
-            },
-            axisTicks: {
-              show: false
-            },
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              show: false
-            },
-            min: 10,
-            max: 50,
-            tickAmount: 4
-          }
-        };
-        downloadsChartInstanceRef.current = new ApexCharts(downloadsChartRef.current, downloadsChartConfig);
-        downloadsChartInstanceRef.current.render();
-      }
-
-      // Views Chart Configuration (same as resources)
-      if (viewsChartRef.current && !viewsChartInstanceRef.current) {
-        const viewsChartConfig = {
-          series: [
-            {
-              data: [32, 28, 38, 30, 52, 36, 46, 40]
-            }
-          ],
-          chart: {
-            height: 215,
-            parentHeightOffset: 0,
-            parentWidthOffset: 0,
-            toolbar: {
-              show: false
-            },
-            type: 'area'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            width: 2,
-            curve: 'smooth'
-          },
-          legend: {
-            show: false
-          },
-          markers: {
-            size: 6,
-            colors: 'transparent',
-            strokeColors: 'transparent',
-            strokeWidth: 4,
-            discrete: [
-              {
-                fillColor: chartConfig.colors.white,
-                seriesIndex: 0,
-                dataPointIndex: 7,
-                strokeColor: chartConfig.colors.primary,
-                strokeWidth: 2,
-                size: 6,
-                radius: 8
-              }
-            ],
-            hover: {
-              size: 7
-            }
-          },
-          colors: [chartConfig.colors.primary],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: shadeColor,
-              shadeIntensity: 0.6,
-              opacityFrom: 0.5,
-              opacityTo: 0.25,
-              stops: [0, 95, 100]
-            }
-          },
-          grid: {
-            borderColor: borderColor,
-            strokeDashArray: 3,
-            padding: {
-              top: 10,
-              bottom: 10,
-              left: 15,
-              right: 15
-            }
-          },
-          xaxis: {
-            categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            axisBorder: {
-              show: false
-            },
-            axisTicks: {
-              show: false
-            },
-            labels: {
-              show: true,
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              show: false
-            },
-            min: 10,
-            max: 50,
-            tickAmount: 4
-          }
-        };
-        viewsChartInstanceRef.current = new ApexCharts(viewsChartRef.current, viewsChartConfig);
-        viewsChartInstanceRef.current.render();
-      }
-
-      // Resources Week Radial Chart
-      if (resourcesWeekChartRef.current && !resourcesWeekChartInstanceRef.current) {
-        const resourcesWeekChartConfig = {
-          series: [65],
-          chart: {
-            width: 60,
-            height: 60,
-            type: 'radialBar'
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: 0,
-              endAngle: 360,
-              strokeWidth: '8',
-              hollow: {
-                margin: 2,
-                size: '45%'
-              },
-              track: {
-                strokeWidth: '50%',
-                background: borderColor
-              },
-              dataLabels: {
-                show: true,
-                name: {
-                  show: false
-                },
-                value: {
-                  formatter: function (val: number) {
-                    return parseInt(val.toString()) + '%';
-                  },
-                  offsetY: 5,
-                  color: '#697a8d',
-                  fontSize: '13px',
-                  show: true
-                }
-              }
-            }
-          },
-          fill: {
-            type: 'solid',
-            colors: chartConfig.colors.primary
-          },
-          stroke: {
-            lineCap: 'round'
-          },
-          grid: {
-            padding: {
-              top: -10,
-              bottom: -15,
-              left: -10,
-              right: -10
-            }
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        resourcesWeekChartInstanceRef.current = new ApexCharts(resourcesWeekChartRef.current, resourcesWeekChartConfig);
-        resourcesWeekChartInstanceRef.current.render();
-      }
-
-      // Downloads Week Radial Chart
-      if (downloadsWeekChartRef.current && !downloadsWeekChartInstanceRef.current) {
-        const downloadsWeekChartConfig = {
-          series: [72],
-          chart: {
-            width: 60,
-            height: 60,
-            type: 'radialBar'
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: 0,
-              endAngle: 360,
-              strokeWidth: '8',
-              hollow: {
-                margin: 2,
-                size: '45%'
-              },
-              track: {
-                strokeWidth: '50%',
-                background: borderColor
-              },
-              dataLabels: {
-                show: true,
-                name: {
-                  show: false
-                },
-                value: {
-                  formatter: function (val: number) {
-                    return parseInt(val.toString()) + '%';
-                  },
-                  offsetY: 5,
-                  color: '#697a8d',
-                  fontSize: '13px',
-                  show: true
-                }
-              }
-            }
-          },
-          fill: {
-            type: 'solid',
-            colors: chartConfig.colors.primary
-          },
-          stroke: {
-            lineCap: 'round'
-          },
-          grid: {
-            padding: {
-              top: -10,
-              bottom: -15,
-              left: -10,
-              right: -10
-            }
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        downloadsWeekChartInstanceRef.current = new ApexCharts(downloadsWeekChartRef.current, downloadsWeekChartConfig);
-        downloadsWeekChartInstanceRef.current.render();
-      }
-
-      // Views Week Radial Chart
-      if (viewsWeekChartRef.current && !viewsWeekChartInstanceRef.current) {
-        const viewsWeekChartConfig = {
-          series: [68],
-          chart: {
-            width: 60,
-            height: 60,
-            type: 'radialBar'
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: 0,
-              endAngle: 360,
-              strokeWidth: '8',
-              hollow: {
-                margin: 2,
-                size: '45%'
-              },
-              track: {
-                strokeWidth: '50%',
-                background: borderColor
-              },
-              dataLabels: {
-                show: true,
-                name: {
-                  show: false
-                },
-                value: {
-                  formatter: function (val: number) {
-                    return parseInt(val.toString()) + '%';
-                  },
-                  offsetY: 5,
-                  color: '#697a8d',
-                  fontSize: '13px',
-                  show: true
-                }
-              }
-            }
-          },
-          fill: {
-            type: 'solid',
-            colors: chartConfig.colors.primary
-          },
-          stroke: {
-            lineCap: 'round'
-          },
-          grid: {
-            padding: {
-              top: -10,
-              bottom: -15,
-              left: -10,
-              right: -10
-            }
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        viewsWeekChartInstanceRef.current = new ApexCharts(viewsWeekChartRef.current, viewsWeekChartConfig);
-        viewsWeekChartInstanceRef.current.render();
-      }
-
-      // Total Revenue Chart Configuration (exact copy from sneat-1.0.0)
-      if (totalRevenueChartRef.current && !totalRevenueChartInstanceRef.current) {
-        const totalRevenueChartOptions = {
-          series: [
-            {
-              name: '2025',
-              data: [18, 7, 15, 29, 18, 12, 9]
-            },
-            {
-              name: '2024',
-              data: [-13, -18, -9, -14, -5, -17, -15]
-            }
-          ],
-          chart: {
-            height: 300,
-            stacked: true,
-            type: 'bar',
-            toolbar: { show: false }
-          },
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              columnWidth: '33%',
-              borderRadius: 12,
-              startingShape: 'rounded',
-              endingShape: 'rounded'
-            }
-          },
-          colors: [chartConfig.colors.primary, chartConfig.colors.info],
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            curve: 'smooth',
-            width: 6,
-            lineCap: 'round',
-            colors: [cardColor]
-          },
-          legend: {
-            show: true,
-            horizontalAlign: 'left',
-            position: 'top',
-            markers: {
-              height: 8,
-              width: 8,
-              radius: 12,
-              offsetX: -3
-            },
-            labels: {
-              colors: axisColor
-            },
-            itemMargin: {
-              horizontal: 10
-            }
-          },
-          grid: {
-            borderColor: borderColor,
-            padding: {
-              top: 0,
-              bottom: -8,
-              left: 20,
-              right: 20
-            }
-          },
-          xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            labels: {
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            },
-            axisTicks: {
-              show: false
-            },
-            axisBorder: {
-              show: false
-            }
-          },
-          yaxis: {
-            labels: {
-              style: {
-                fontSize: '13px',
-                colors: axisColor
-              }
-            }
-          },
-          responsive: [
-            {
-              breakpoint: 1700,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '32%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1580,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '35%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1440,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '42%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1300,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '48%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1200,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '40%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 1040,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 11,
-                    columnWidth: '48%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 991,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '30%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 840,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '35%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 768,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '28%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 640,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '32%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 576,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '37%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 480,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '45%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 420,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '52%'
-                  }
-                }
-              }
-            },
-            {
-              breakpoint: 380,
-              options: {
-                plotOptions: {
-                  bar: {
-                    borderRadius: 10,
-                    columnWidth: '60%'
-                  }
-                }
-              }
-            }
-          ],
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            },
-            active: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        totalRevenueChartInstanceRef.current = new ApexCharts(totalRevenueChartRef.current, totalRevenueChartOptions);
-        totalRevenueChartInstanceRef.current.render();
-      }
-
-      // Growth Chart Configuration (exact copy from sneat-1.0.0)
-      if (growthChartRef.current && !growthChartInstanceRef.current) {
-        const growthChartOptions = {
-          series: [78],
-          labels: ['Growth'],
-          chart: {
-            height: 240,
-            type: 'radialBar'
-          },
-          plotOptions: {
-            radialBar: {
-              size: 150,
-              offsetY: 10,
-              startAngle: -150,
-              endAngle: 150,
-              hollow: {
-                size: '55%'
-              },
-              track: {
-                background: cardColor,
-                strokeWidth: '100%'
-              },
-              dataLabels: {
-                name: {
-                  offsetY: 15,
-                  color: headingColor,
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  fontFamily: 'Public Sans'
-                },
-                value: {
-                  offsetY: -25,
-                  color: headingColor,
-                  fontSize: '22px',
-                  fontWeight: '500',
-                  fontFamily: 'Public Sans'
-                }
-              }
-            }
-          },
-          colors: [chartConfig.colors.primary],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: 'dark',
-              shadeIntensity: 0.5,
-              gradientToColors: [chartConfig.colors.primary],
-              inverseColors: true,
-              opacityFrom: 1,
-              opacityTo: 0.6,
-              stops: [30, 70, 100]
-            }
-          },
-          stroke: {
-            dashArray: 5
-          },
-          grid: {
-            padding: {
-              top: -35,
-              bottom: -10
-            }
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            },
-            active: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        };
-        growthChartInstanceRef.current = new ApexCharts(growthChartRef.current, growthChartOptions);
-        growthChartInstanceRef.current.render();
-      }
-    };
-
-    loadApexCharts();
-
-    // Cleanup function
-    return () => {
-      if (resourcesChartInstanceRef.current) {
-        resourcesChartInstanceRef.current.destroy();
-        resourcesChartInstanceRef.current = null;
-      }
-      if (downloadsChartInstanceRef.current) {
-        downloadsChartInstanceRef.current.destroy();
-        downloadsChartInstanceRef.current = null;
-      }
-      if (viewsChartInstanceRef.current) {
-        viewsChartInstanceRef.current.destroy();
-        viewsChartInstanceRef.current = null;
-      }
-      if (resourcesWeekChartInstanceRef.current) {
-        resourcesWeekChartInstanceRef.current.destroy();
-        resourcesWeekChartInstanceRef.current = null;
-      }
-      if (downloadsWeekChartInstanceRef.current) {
-        downloadsWeekChartInstanceRef.current.destroy();
-        downloadsWeekChartInstanceRef.current = null;
-      }
-      if (viewsWeekChartInstanceRef.current) {
-        viewsWeekChartInstanceRef.current.destroy();
-        viewsWeekChartInstanceRef.current = null;
-      }
-      if (totalRevenueChartInstanceRef.current) {
-        totalRevenueChartInstanceRef.current.destroy();
-        totalRevenueChartInstanceRef.current = null;
-      }
-      if (growthChartInstanceRef.current) {
-        growthChartInstanceRef.current.destroy();
-        growthChartInstanceRef.current = null;
-      }
-    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    // Simulate loading
+    setTimeout(() => setLoading(false), 500);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Re-render chart when tab changes
-  useEffect(() => {
-    const ApexCharts = (window as any).ApexCharts;
-    if (!ApexCharts) return;
-
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      if (activeTab === 'resources' && resourcesChartRef.current && !resourcesChartInstanceRef.current) {
-        // Re-initialize if needed
-      } else if (activeTab === 'downloads' && downloadsChartRef.current && !downloadsChartInstanceRef.current) {
-        // Re-initialize if needed
-      } else if (activeTab === 'views' && viewsChartRef.current && !viewsChartInstanceRef.current) {
-        // Re-initialize if needed
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [activeTab]);
+  if (loading) {
+    return (
+      <div className="container-fluid p-0">
+        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
+          <div className="text-center">
+            <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite' }} />
+            <p>Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
+    <div className="container-fluid p-0">
+      <h1 className="h3 mb-3">
+        <strong>User</strong> Dashboard
+      </h1>
+
       {/* Welcome Card and Metrics Row */}
       <div className="row mb-4">
         {/* Welcome Card - Left Side */}
@@ -1126,20 +280,20 @@ const Dashboard: React.FC = () => {
                 <div className="card-body">
                   <h5 className="card-title text-primary">Welcome Back! 🎉</h5>
                   <p className="mb-4">
-                    Your dashboard is ready. Check your analytics and performance metrics below.
+                    Track your job applications, manage your learning progress, and explore new opportunities all in one place.
                   </p>
                   <Button 
                     variant="default" 
                     size="default"
                     onClick={(e) => {
                       e.preventDefault();
-                      // Add your navigation logic here
+                      navigate('/jobs');
                     }}
                     style={{
                       fontFamily: "'Plus Jakarta Sans', sans-serif",
                     }}
                   >
-                    View Details
+                    Browse Jobs
                   </Button>
                 </div>
               </div>
@@ -1148,7 +302,7 @@ const Dashboard: React.FC = () => {
                   <img
                     src="/sneat-assets/img/illustrations/man-with-laptop-light.png"
                     height="140"
-                    alt="View Badge User"
+                    alt="User Dashboard"
                   />
                 </div>
               </div>
@@ -1164,14 +318,16 @@ const Dashboard: React.FC = () => {
                 <div className="card-body">
                   <div className="card-title d-flex align-items-start justify-content-between">
                     <div className="avatar flex-shrink-0">
-                      <img src="/sneat-assets/img/icons/unicons/chart-success.png" alt="chart success" className="rounded" />
+                      <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(105, 108, 255, 0.1)', borderRadius: '8px' }}>
+                        <Briefcase size={24} color="#696cff" />
+                      </div>
                     </div>
                   </div>
-                  <span className="fw-semibold d-block mb-1">Profit</span>
-                  <h3 className="card-title mb-2">$12,628</h3>
+                  <span className="fw-semibold d-block mb-1">Job Applications</span>
+                  <h3 className="card-title mb-2">{stats.totalApplications}</h3>
                   <small className="text-success fw-semibold d-flex align-items-center gap-1">
                     <ArrowUp size={14} style={{ display: 'inline-block' }} />
-                    +72.80%
+                    +25%
                   </small>
                 </div>
               </div>
@@ -1181,14 +337,16 @@ const Dashboard: React.FC = () => {
                 <div className="card-body">
                   <div className="card-title d-flex align-items-start justify-content-between">
                     <div className="avatar flex-shrink-0">
-                      <img src="/sneat-assets/img/icons/unicons/wallet-info.png" alt="wallet" className="rounded" />
+                      <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 171, 0, 0.1)', borderRadius: '8px' }}>
+                        <Award size={24} color="#ffab00" />
+                      </div>
                     </div>
                   </div>
-                  <span>Sales</span>
-                  <h3 className="card-title text-nowrap mb-1">$4,679</h3>
+                  <span className="fw-semibold d-block mb-1">Scholarships</span>
+                  <h3 className="card-title mb-2">{stats.scholarshipApplications}</h3>
                   <small className="text-success fw-semibold d-flex align-items-center gap-1">
                     <ArrowUp size={14} style={{ display: 'inline-block' }} />
-                    +28.42%
+                    +10%
                   </small>
                 </div>
               </div>
@@ -1198,14 +356,15 @@ const Dashboard: React.FC = () => {
                 <div className="card-body">
                   <div className="card-title d-flex align-items-start justify-content-between">
                     <div className="avatar flex-shrink-0">
-                      <img src="/sneat-assets/img/icons/unicons/paypal.png" alt="paypal" className="rounded" />
+                      <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(3, 195, 236, 0.1)', borderRadius: '8px' }}>
+                        <BookOpen size={24} color="#03c3ec" />
+                      </div>
                     </div>
                   </div>
-                  <span className="d-block mb-1">Payments</span>
-                  <h3 className="card-title text-nowrap mb-2">$2,456</h3>
-                  <small className="text-danger fw-semibold d-flex align-items-center gap-1">
-                    <ArrowDown size={14} style={{ display: 'inline-block' }} />
-                    -14.82%
+                  <span className="d-block mb-1">Courses</span>
+                  <h3 className="card-title text-nowrap mb-2">{stats.coursesInProgress} Active</h3>
+                  <small className="text-muted fw-semibold">
+                    {stats.completedCourses} Completed
                   </small>
                 </div>
               </div>
@@ -1215,14 +374,16 @@ const Dashboard: React.FC = () => {
                 <div className="card-body">
                   <div className="card-title d-flex align-items-start justify-content-between">
                     <div className="avatar flex-shrink-0">
-                      <img src="/sneat-assets/img/icons/unicons/cc-primary.png" alt="credit card" className="rounded" />
+                      <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(45, 90, 71, 0.1)', borderRadius: '8px' }}>
+                        <Star size={24} color="#2D5A47" />
+                      </div>
                     </div>
                   </div>
-                  <span className="fw-semibold d-block mb-1">Transactions</span>
-                  <h3 className="card-title mb-2">$14,857</h3>
+                  <span className="fw-semibold d-block mb-1">Saved Jobs</span>
+                  <h3 className="card-title mb-2">{stats.savedJobs}</h3>
                   <small className="text-success fw-semibold d-flex align-items-center gap-1">
-                    <ArrowUp size={14} style={{ display: 'inline-block' }} />
-                    +28.14%
+                    <TrendingUp size={14} style={{ display: 'inline-block' }} />
+                    Keep saving!
                   </small>
                 </div>
               </div>
@@ -1231,204 +392,473 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Total Resources Section and Calendar Row */}
+      {/* Recent Applications & Calendar Row */}
       <div className="row mb-4">
+        {/* Recent Applications Section */}
         <div className="col-lg-6 col-md-12 mb-4 mb-lg-0">
           <div className="card h-100">
-            <div className="row row-bordered g-0">
-              <div className="col-md-8">
-                <h5 className="card-header m-0 me-2 pb-3">Total Resources</h5>
-                <div ref={totalRevenueChartRef} id="totalRevenueChart" className="px-2"></div>
-              </div>
-              <div className="col-md-4">
-                <div className="card-body">
-                  <div className="text-center">
-                    <div className="dropdown">
-                      <button
-                        className="btn btn-sm btn-outline-primary dropdown-toggle"
-                        type="button"
-                        id="growthReportId"
-                        data-bs-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        2025
-                      </button>
-                      <div className="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
-                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2024</a>
-                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2023</a>
-                        <a className="dropdown-item" href="#" onClick={(e) => e.preventDefault()} role="button">2022</a>
-                      </div>
-                    </div>
-                  </div>
+            <div className="card-header d-flex align-items-center justify-content-between">
+              <h5 className="card-title m-0 me-2">Recent Applications</h5>
+              <div className="d-flex align-items-center gap-2">
+                {/* View Toggle - Hidden on mobile */}
+                <div
+                  className="d-none d-md-flex"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: '#FFFFFF',
+                    border: '1px solid #E7E5E4',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setApplicationViewMode('cards')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '8px 12px',
+                      border: 'none',
+                      background: applicationViewMode === 'cards' ? '#696cff' : 'transparent',
+                      color: applicationViewMode === 'cards' ? '#FFFFFF' : '#78716C',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <LayoutGrid size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setApplicationViewMode('table')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '8px 12px',
+                      border: 'none',
+                      background: applicationViewMode === 'table' ? '#696cff' : 'transparent',
+                      color: applicationViewMode === 'table' ? '#FFFFFF' : '#78716C',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <ListIcon size={16} />
+                  </button>
                 </div>
-                <div ref={growthChartRef} id="growthChart"></div>
-                <div className="text-center fw-semibold pt-3 mb-2">78% Platform Growth</div>
+                <Link
+                  to="/userprofile/jobs/applications"
+                  className="group relative inline-block text-sm font-medium text-[#696cff] transition-colors duration-300 hover:text-[#5a5de0]"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <motion.span
+                    className="relative inline-block pb-1 flex items-center gap-1.5"
+                    whileHover={{ x: 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <ArrowRight size={14} />
+                    View All
+                    <span
+                      className="absolute bottom-0 left-0 h-[2px] bg-[#696cff] transition-all duration-300 group-hover:bg-[#5a5de0]"
+                      style={{
+                        width: 'calc(100% + 14px)',
+                        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                      }}
+                    />
+                  </motion.span>
+                </Link>
+              </div>
+            </div>
+            <div className="card-body p-0">
+              {recentApplications.length === 0 ? (
+                <div style={{
+                  padding: '48px 24px',
+                  textAlign: 'center',
+                  background: '#FAFAF9',
+                  borderRadius: '0 0 10px 10px',
+                }}>
+                  <Briefcase size={48} style={{ color: '#A8A29E', margin: '0 auto 16px' }} />
+                  <h6 style={{
+                    fontFamily: "'Crimson Text', Georgia, serif",
+                    fontSize: '1.125rem',
+                    fontWeight: 600,
+                    color: '#1C1917',
+                    margin: '0 0 8px 0',
+                  }}>
+                    No applications yet
+                  </h6>
+                  <p style={{
+                    fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                    fontSize: '0.875rem',
+                    color: '#78716C',
+                    margin: '0 0 20px 0',
+                  }}>
+                    Start applying to jobs to track your progress here!
+                  </p>
+                  <Link
+                    to="/jobs"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 20px',
+                      background: '#696cff',
+                      color: '#FFFFFF',
+                      borderRadius: '8px',
+                      textDecoration: 'none',
+                      fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      transition: 'background 0.2s ease',
+                    }}
+                  >
+                    Browse Jobs
+                  </Link>
+                </div>
+              ) : (applicationViewMode === 'cards' || isMobile) ? (
+                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {recentApplications.slice(0, 5).map((app) => (
+                    <Link
+                      key={app.id}
+                      to={`/userprofile/jobs/applications/${app.id}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '20px',
+                        background: '#FFFFFF',
+                        border: '1px solid #E7E5E4',
+                        borderRadius: '10px',
+                        padding: '20px 24px',
+                        transition: 'all 0.2s ease',
+                        cursor: 'pointer',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#D6D3D1';
+                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.06)';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#E7E5E4';
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <div className="avatar flex-shrink-0" style={{ width: '40px', height: '40px' }}>
+                        <div className="avatar-initial rounded-circle bg-label-primary" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 600, color: '#696cff' }}>
+                          {app.company.split(' ').map(n => n[0]).join('')}
+                        </div>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h6 style={{
+                          fontFamily: "'Crimson Text', Georgia, serif",
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: '#1C1917',
+                          margin: 0,
+                          marginBottom: '4px',
+                          lineHeight: '1.4',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                        }}>
+                          {app.jobTitle}
+                        </h6>
+                        <p style={{
+                          fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                          fontSize: '0.8125rem',
+                          color: '#78716C',
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {app.company}
+                        </p>
+                        <p style={{
+                          fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                          fontSize: '0.75rem',
+                          color: '#A8A29E',
+                          margin: '4px 0 0 0',
+                        }}>
+                          {app.appliedDate}
+                        </p>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        gap: '4px',
+                        flexShrink: 0,
+                      }}>
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '0.875rem',
+                          color: '#1C1917',
+                        }}>
+                          {app.matchScore}%
+                        </span>
+                        <span style={{
+                          fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                          fontSize: '0.75rem',
+                          color: '#78716C',
+                        }}>
+                          Match
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E7E5E4',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 120px 100px',
+                    alignItems: 'center',
+                    padding: '14px 20px',
+                    background: '#FAFAF9',
+                    borderBottom: '1px solid #E7E5E4',
+                    fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#78716C',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    <span>Application</span>
+                    <span style={{ textAlign: 'right' }}>Match</span>
+                    <span style={{ textAlign: 'right' }}>Status</span>
+                  </div>
+                  {recentApplications.slice(0, 5).map((app, index) => (
+                    <Link
+                      key={app.id}
+                      to={`/userprofile/jobs/applications/${app.id}`}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 120px 100px',
+                        alignItems: 'center',
+                        padding: '16px 20px',
+                        background: index === 0 ? 'linear-gradient(90deg, rgba(105, 108, 255, 0.03) 0%, transparent 50%)' : '#FFFFFF',
+                        borderBottom: '1px solid #E7E5E4',
+                        transition: 'background-color 0.15s ease',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#FAFAF9';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = index === 0 ? 'linear-gradient(90deg, rgba(105, 108, 255, 0.03) 0%, transparent 50%)' : '#FFFFFF';
+                      }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <h6 style={{
+                          fontFamily: "'Crimson Text', Georgia, serif",
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          color: '#1C1917',
+                          margin: 0,
+                          marginBottom: '4px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {app.jobTitle}
+                        </h6>
+                        <p style={{
+                          fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                          fontSize: '0.8125rem',
+                          color: '#78716C',
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {app.company}
+                        </p>
+                      </div>
+                      <div style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: '0.9375rem',
+                        color: '#1C1917',
+                        textAlign: 'right',
+                      }}>
+                        {app.matchScore}%
+                      </div>
+                      <div style={{
+                        fontFamily: "'Source Sans Pro', system-ui, sans-serif",
+                        fontSize: '0.8125rem',
+                        color: '#78716C',
+                        textAlign: 'right',
+                        textTransform: 'capitalize',
+                      }}>
+                        {app.status}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-                <div className="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
-                  <div className="d-flex">
-                    <div className="me-2">
-                      <span className="badge bg-label-primary p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}>
-                        <Database size={16} color="#696cff" />
-                      </span>
-                    </div>
-                    <div className="d-flex flex-column">
-                      <small>2025</small>
-                      <h6 className="mb-0">12.8k</h6>
-                    </div>
-                  </div>
-                  <div className="d-flex">
-                    <div className="me-2">
-                      <span className="badge bg-label-info p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}>
-                        <FileText size={16} color="#03c3ec" />
-                      </span>
-                    </div>
-                    <div className="d-flex flex-column">
-                      <small>2024</small>
-                      <h6 className="mb-0">8.2k</h6>
-                    </div>
-                  </div>
+        <div className="col-lg-6 col-md-12">
+          <div className="row g-3">
+            <div className="col-12">
+              <WeekCalendar />
+            </div>
+            <div className="col-12">
+              <div
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '0.75rem',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
+                <h5 style={{
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#141522',
+                  margin: 0,
+                  marginBottom: '0.25rem'
+                }}>
+                  Quick Actions
+                </h5>
+                <div className="d-flex gap-2" style={{ flexWrap: 'wrap' }}>
+                  <Link
+                    to="/jobs"
+                    className="btn"
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '0.5rem 0.75rem',
+                      whiteSpace: 'nowrap',
+                      backgroundColor: '#696cff',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.375rem',
+                      textDecoration: 'none',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <Briefcase size={14} />
+                    Browse Jobs
+                  </Link>
+                  <Link
+                    to="/scholarship-hub"
+                    className="btn"
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '0.5rem 0.75rem',
+                      whiteSpace: 'nowrap',
+                      backgroundColor: '#ffab00',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.375rem',
+                      textDecoration: 'none',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <Award size={14} />
+                    Scholarships
+                  </Link>
+                  <Link
+                    to="/userprofile/courses"
+                    className="btn"
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '0.5rem 0.75rem',
+                      whiteSpace: 'nowrap',
+                      backgroundColor: '#03c3ec',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.375rem',
+                      textDecoration: 'none',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <BookOpen size={14} />
+                    My Courses
+                  </Link>
+                  <Link
+                    to="/jobs/cv-builder"
+                    className="btn"
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '0.5rem 0.75rem',
+                      whiteSpace: 'nowrap',
+                      backgroundColor: '#71dd37',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.375rem',
+                      textDecoration: 'none',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <FileText size={14} />
+                    CV Builder
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="col-lg-6 col-md-12">
-          <WeekCalendar />
-        </div>
       </div>
 
-
+      {/* Application Status Summary & Activity Summary Row */}
       <div className="row">
-        <div className="col-md-6 col-lg-4 order-1 mb-4">
+        <div className="col-md-6 col-lg-4 mb-4">
           <div className="card h-100">
-            <div className="card-header">
-              <ul className="nav nav-pills" role="tablist">
-                <li className="nav-item">
-                  <button 
-                    type="button" 
-                    className={`nav-link ${activeTab === 'resources' ? 'active' : ''}`} 
-                    role="tab"
-                    onClick={() => setActiveTab('resources')}
-                  >
-                    Resources
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button 
-                    type="button" 
-                    className={`nav-link ${activeTab === 'downloads' ? 'active' : ''}`} 
-                    role="tab"
-                    onClick={() => setActiveTab('downloads')}
-                  >
-                    Downloads
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button 
-                    type="button" 
-                    className={`nav-link ${activeTab === 'views' ? 'active' : ''}`} 
-                    role="tab"
-                    onClick={() => setActiveTab('views')}
-                  >
-                    Views
-                  </button>
-                </li>
-              </ul>
+            <div className="card-header d-flex align-items-center justify-content-between">
+              <h5 className="card-title m-0 me-2">Application Status</h5>
             </div>
-            <div className="card-body px-0">
-              <div className="tab-content p-0">
-                {/* Resources Tab */}
-                <div className={`tab-pane fade ${activeTab === 'resources' ? 'show active' : ''}`}>
-                  <div className="d-flex p-4 pt-3">
-                    <div className="avatar flex-shrink-0 me-3">
-                      <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-                        <BookOpen size={20} color="#696cff" />
-                      </div>
-                    </div>
-                    <div>
-                      <small className="text-muted d-block">Total Resources</small>
-                      <div className="d-flex align-items-center">
-                        <h6 className="mb-0 me-1">1,247</h6>
-                        <small className="text-success fw-semibold d-flex align-items-center gap-1">
-                          <ArrowUp size={12} style={{ display: 'inline-block' }} />
-                          18.2%
-                        </small>
-                      </div>
-                    </div>
+            <div className="card-body">
+              <div className="d-flex flex-column gap-3">
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="d-flex align-items-center gap-2">
+                    <Clock size={18} color="#ffab00" />
+                    <span className="fw-semibold">Pending</span>
                   </div>
-                  <div ref={resourcesChartRef} id="resourcesChart" style={{ padding: '0 1rem' }}></div>
-                  <div className="d-flex justify-content-center pt-4 gap-2">
-                    <div className="flex-shrink-0">
-                      <div ref={resourcesWeekChartRef} id="resourcesWeekChart"></div>
-                    </div>
-                    <div>
-                      <p className="mb-n1 mt-1">Resources This Week</p>
-                      <small className="text-muted">$39k less than last week</small>
-                    </div>
-                  </div>
+                  <span className="badge bg-label-warning rounded-pill">{stats.pending}</span>
                 </div>
-                
-                {/* Downloads Tab */}
-                <div className={`tab-pane fade ${activeTab === 'downloads' ? 'show active' : ''}`}>
-                  <div className="d-flex p-4 pt-3">
-                    <div className="avatar flex-shrink-0 me-3">
-                      <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-                        <Download size={20} color="#696cff" />
-                      </div>
-                    </div>
-                    <div>
-                      <small className="text-muted d-block">Total Downloads</small>
-                      <div className="d-flex align-items-center">
-                        <h6 className="mb-0 me-1">8,459</h6>
-                        <small className="text-success fw-semibold d-flex align-items-center gap-1">
-                          <ArrowUp size={12} style={{ display: 'inline-block' }} />
-                          24.8%
-                        </small>
-                      </div>
-                    </div>
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="d-flex align-items-center gap-2">
+                    <CheckCircle2 size={18} color="#71dd37" />
+                    <span className="fw-semibold">Shortlisted</span>
                   </div>
-                  <div ref={downloadsChartRef} id="downloadsChart" style={{ padding: '0 1rem' }}></div>
-                  <div className="d-flex justify-content-center pt-4 gap-2">
-                    <div className="flex-shrink-0">
-                      <div ref={downloadsWeekChartRef} id="downloadsWeekChart"></div>
-                    </div>
-                    <div>
-                      <p className="mb-n1 mt-1">Downloads This Week</p>
-                      <small className="text-muted">$39k less than last week</small>
-                    </div>
-                  </div>
+                  <span className="badge bg-label-success rounded-pill">{stats.shortlisted}</span>
                 </div>
-                
-                {/* Views Tab */}
-                <div className={`tab-pane fade ${activeTab === 'views' ? 'show active' : ''}`}>
-                  <div className="d-flex p-4 pt-3">
-                    <div className="avatar flex-shrink-0 me-3">
-                      <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-                        <Eye size={20} color="#696cff" />
-                      </div>
-                    </div>
-                    <div>
-                      <small className="text-muted d-block">Total Views</small>
-                      <div className="d-flex align-items-center">
-                        <h6 className="mb-0 me-1">12,834</h6>
-                        <small className="text-success fw-semibold d-flex align-items-center gap-1">
-                          <ArrowUp size={12} style={{ display: 'inline-block' }} />
-                          32.5%
-                        </small>
-                      </div>
-                    </div>
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="d-flex align-items-center gap-2">
+                    <XCircle size={18} color="#ff3e1d" />
+                    <span className="fw-semibold">Rejected</span>
                   </div>
-                  <div ref={viewsChartRef} id="viewsChart" style={{ padding: '0 1rem' }}></div>
-                  <div className="d-flex justify-content-center pt-4 gap-2">
-                    <div className="flex-shrink-0">
-                      <div ref={viewsWeekChartRef} id="viewsWeekChart"></div>
-                    </div>
-                    <div>
-                      <p className="mb-n1 mt-1">Views This Week</p>
-                      <small className="text-muted">$39k less than last week</small>
-                    </div>
-                  </div>
+                  <span className="badge bg-label-danger rounded-pill">{stats.rejected}</span>
                 </div>
               </div>
             </div>
@@ -1438,38 +868,41 @@ const Dashboard: React.FC = () => {
         <div className="col-md-6 col-lg-4 mb-4">
           <div className="card h-100">
             <div className="card-header d-flex align-items-center justify-content-between">
-              <h5 className="card-title m-0 me-2">Transactions</h5>
+              <h5 className="card-title m-0 me-2">Activity Summary</h5>
             </div>
             <div className="card-body">
-              <ul className="p-0 m-0">
-                <li className="d-flex mb-4 pb-1">
+              <ul className="p-0 m-0" style={{ listStyle: 'none' }}>
+                <li className="d-flex mb-3 pb-2 align-items-start" style={{ borderBottom: '1px solid #eceef1' }}>
                   <div className="avatar flex-shrink-0 me-3">
-                    <img src="/sneat-assets/img/icons/unicons/paypal.png" alt="paypal" className="rounded" />
+                    <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(105, 108, 255, 0.1)', borderRadius: '8px' }}>
+                      <Briefcase size={16} color="#696cff" />
+                    </div>
                   </div>
-                  <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                    <div className="me-2">
-                      <small className="text-muted d-block mb-1">Paypal</small>
-                      <h6 className="mb-0">Send money</h6>
-                    </div>
-                    <div className="user-progress d-flex align-items-center gap-1">
-                      <h6 className="mb-0">+82.6</h6>
-                      <span className="text-muted">USD</span>
-                    </div>
+                  <div className="d-flex flex-column flex-grow-1">
+                    <span className="fw-semibold" style={{ fontSize: '0.875rem' }}>New job application</span>
+                    <small className="text-muted">2 days ago</small>
                   </div>
                 </li>
-                <li className="d-flex mb-4 pb-1">
+                <li className="d-flex mb-3 pb-2 align-items-start" style={{ borderBottom: '1px solid #eceef1' }}>
                   <div className="avatar flex-shrink-0 me-3">
-                    <img src="/sneat-assets/img/icons/unicons/wallet.png" alt="wallet" className="rounded" />
+                    <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 171, 0, 0.1)', borderRadius: '8px' }}>
+                      <Award size={16} color="#ffab00" />
+                    </div>
                   </div>
-                  <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                    <div className="me-2">
-                      <small className="text-muted d-block mb-1">Wallet</small>
-                      <h6 className="mb-0">Purchase</h6>
+                  <div className="d-flex flex-column flex-grow-1">
+                    <span className="fw-semibold" style={{ fontSize: '0.875rem' }}>Scholarship saved</span>
+                    <small className="text-muted">5 days ago</small>
+                  </div>
+                </li>
+                <li className="d-flex align-items-start">
+                  <div className="avatar flex-shrink-0 me-3">
+                    <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(3, 195, 236, 0.1)', borderRadius: '8px' }}>
+                      <BookOpen size={16} color="#03c3ec" />
                     </div>
-                    <div className="user-progress d-flex align-items-center gap-1">
-                      <h6 className="mb-0">+270.69</h6>
-                      <span className="text-muted">USD</span>
-                    </div>
+                  </div>
+                  <div className="d-flex flex-column flex-grow-1">
+                    <span className="fw-semibold" style={{ fontSize: '0.875rem' }}>Course completed</span>
+                    <small className="text-muted">1 week ago</small>
                   </div>
                 </li>
               </ul>
@@ -1477,7 +910,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -74,11 +74,11 @@ const SidebarMenu: React.FC = () => {
         <span className="menu-header-text">Learning</span>
       </li>
       
-      {/* My Courses */}
+      {/* My Resources */}
       <li className="menu-item">
         <Link to="/userprofile/courses" className="menu-link">
-          <Icon icon="hugeicons:book-open-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="My Courses">My Courses</div>
+          <Icon icon="hugeicons:download-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
+          <div data-i18n="My Resources">My Resources</div>
         </Link>
       </li>
 
@@ -90,11 +90,11 @@ const SidebarMenu: React.FC = () => {
         </Link>
       </li>
 
-      {/* Saved Questions */}
+      {/* Saved Resources */}
       <li className="menu-item">
         <Link to="/userprofile/saved-questions" className="menu-link">
           <Icon icon="hugeicons:bookmark-02" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Saved Questions">Saved Questions</div>
+          <div data-i18n="Saved Resources">Saved Resources</div>
         </Link>
       </li>
 
@@ -122,11 +122,6 @@ const SidebarMenu: React.FC = () => {
             }}>
               Career & Employment
             </div>
-          </li>
-          <li className="menu-item">
-            <Link to="/jobs" className="menu-link">
-              <div data-i18n="Browse Jobs">Browse Jobs</div>
-            </Link>
           </li>
           <li className="menu-item">
             <Link to="/userprofile/jobs/applications" className="menu-link">
@@ -166,11 +161,6 @@ const SidebarMenu: React.FC = () => {
           
           {/* Local Jobs & Gigs Section */}
           <li className="menu-item">
-            <Link to="/local-job-gigs" className="menu-link">
-              <div data-i18n="Browse Local Jobs">Browse Local Jobs</div>
-            </Link>
-          </li>
-          <li className="menu-item">
             <Link to="/userprofile/jobs/local-applications" className="menu-link">
               <div data-i18n="My Local Applications">My Local Applications</div>
               <span className="badge bg-label-info rounded-pill ms-auto" style={{ fontSize: '0.65rem' }}>5</span>
@@ -179,11 +169,6 @@ const SidebarMenu: React.FC = () => {
           <li className="menu-item">
             <Link to="/userprofile/jobs/artisan-profile" className="menu-link">
               <div data-i18n="My Artisan Profile">My Artisan Profile</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/skilled-workers/join" className="menu-link">
-              <div data-i18n="Become an Artisan">Become an Artisan</div>
             </Link>
           </li>
         </ul>
@@ -196,11 +181,6 @@ const SidebarMenu: React.FC = () => {
           <div data-i18n="Scholarships">Scholarships</div>
         </a>
         <ul className={`menu-sub ${isMenuOpen('scholarships') ? 'show' : ''}`}>
-          <li className="menu-item">
-            <Link to="/userprofile/scholarships/browse" className="menu-link">
-              <div data-i18n="Browse Scholarships">Browse Scholarships</div>
-            </Link>
-          </li>
           <li className="menu-item">
             <Link to="/userprofile/scholarships/applications" className="menu-link">
               <div data-i18n="My Applications">My Applications</div>
@@ -268,11 +248,6 @@ const SidebarMenu: React.FC = () => {
           <li className="menu-item">
             <Link to="/userprofile/services/manage" className="menu-link">
               <div data-i18n="Manage Services">Manage Services</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/services/create" className="menu-link">
-              <div data-i18n="Post Service">Post Service/Job</div>
             </Link>
           </li>
           <li className="menu-item">
