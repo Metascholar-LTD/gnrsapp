@@ -14,7 +14,13 @@ const SidebarMenu: React.FC = () => {
     const path = location.pathname;
     const menusToOpen = new Set<string>();
     
-    if (path.startsWith('/userprofile/jobs/')) {
+    // Jobs menu - expand for jobs and local-job-gigs related paths
+    if (path.startsWith('/userprofile/jobs/') || 
+        path === '/jobs' || 
+        path.startsWith('/jobs/') || 
+        path === '/local-job-gigs' || 
+        path.startsWith('/local-job-gigs/') ||
+        path.startsWith('/skilled-workers/')) {
       menusToOpen.add('jobs');
     }
     if (path.startsWith('/userprofile/scholarships/')) {
@@ -23,7 +29,9 @@ const SidebarMenu: React.FC = () => {
     if (path.startsWith('/userprofile/mentorship/')) {
       menusToOpen.add('mentorship');
     }
-    if (path.startsWith('/userprofile/services/')) {
+    if (path.startsWith('/userprofile/services/') || 
+        path.startsWith('/userprofile/ratings') ||
+        path.startsWith('/userprofile/analytics')) {
       menusToOpen.add('services');
     }
     if (path.startsWith('/userprofile/subscription/')) {
@@ -95,21 +103,87 @@ const SidebarMenu: React.FC = () => {
         <span className="menu-header-text">Opportunities</span>
       </li>
 
-      {/* Job Board */}
+      {/* Jobs - Career & Employment + Local Jobs */}
       <li className={`menu-item ${isMenuOpen('jobs') ? 'open' : ''}`}>
         <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('jobs', e)}>
           <Icon icon="hugeicons:briefcase-02" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Jobs">Jobs</div>
         </a>
         <ul className={`menu-sub ${isMenuOpen('jobs') ? 'show' : ''}`}>
+          {/* Career & Employment Section */}
+          <li className="menu-item" style={{ marginTop: '0.5rem' }}>
+            <div style={{ 
+              padding: '0.5rem 1rem', 
+              fontSize: '0.7rem', 
+              fontWeight: 600, 
+              color: '#8E92BC', 
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Career & Employment
+            </div>
+          </li>
           <li className="menu-item">
-            <Link to="/userprofile/jobs/my-jobs" className="menu-link">
-              <div data-i18n="My Jobs">My Jobs</div>
+            <Link to="/jobs" className="menu-link">
+              <div data-i18n="Browse Jobs">Browse Jobs</div>
             </Link>
           </li>
           <li className="menu-item">
-            <Link to="/userprofile/jobs/service-requests" className="menu-link">
-              <div data-i18n="Service Requests">Service Requests</div>
+            <Link to="/userprofile/jobs/applications" className="menu-link">
+              <div data-i18n="My Applications">My Applications</div>
+              <span className="badge bg-label-primary rounded-pill ms-auto" style={{ fontSize: '0.65rem' }}>12</span>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/userprofile/jobs/saved-jobs" className="menu-link">
+              <div data-i18n="Saved Jobs">Saved Jobs</div>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/userprofile/jobs/job-alerts" className="menu-link">
+              <div data-i18n="Job Alerts">Job Alerts</div>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/jobs/cv-builder" className="menu-link">
+              <div data-i18n="CV Builder">CV Builder</div>
+            </Link>
+          </li>
+
+          {/* Divider */}
+          <li className="menu-item" style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #e4e6ef' }}>
+            <div style={{ 
+              padding: '0.5rem 1rem', 
+              fontSize: '0.7rem', 
+              fontWeight: 600, 
+              color: '#8E92BC', 
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Local Jobs & Gigs
+            </div>
+          </li>
+          
+          {/* Local Jobs & Gigs Section */}
+          <li className="menu-item">
+            <Link to="/local-job-gigs" className="menu-link">
+              <div data-i18n="Browse Local Jobs">Browse Local Jobs</div>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/userprofile/jobs/local-applications" className="menu-link">
+              <div data-i18n="My Local Applications">My Local Applications</div>
+              <span className="badge bg-label-info rounded-pill ms-auto" style={{ fontSize: '0.65rem' }}>5</span>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/userprofile/jobs/artisan-profile" className="menu-link">
+              <div data-i18n="My Artisan Profile">My Artisan Profile</div>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/skilled-workers/join" className="menu-link">
+              <div data-i18n="Become an Artisan">Become an Artisan</div>
             </Link>
           </li>
         </ul>
@@ -140,42 +214,9 @@ const SidebarMenu: React.FC = () => {
         </ul>
       </li>
 
-      {/* COMMUNITY SECTION */}
+      {/* ACTIVITIES SECTION */}
       <li className="menu-header small text-uppercase mt-3">
-        <span className="menu-header-text">Community</span>
-      </li>
-
-      {/* Networking Hub */}
-      <li className="menu-item">
-        <Link to="/userprofile/networking" className="menu-link">
-          <Icon icon="mynaui:user-hexagon" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Networking Hub">Networking Hub</div>
-        </Link>
-      </li>
-
-      {/* Mentorship Program */}
-      <li className={`menu-item ${isMenuOpen('mentorship') ? 'open' : ''}`}>
-        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('mentorship', e)}>
-          <Icon icon="hugeicons:user-group" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Mentorship">Mentorship</div>
-        </a>
-        <ul className={`menu-sub ${isMenuOpen('mentorship') ? 'show' : ''}`}>
-          <li className="menu-item">
-            <Link to="/userprofile/mentorship/find-mentor" className="menu-link">
-              <div data-i18n="Find a Mentor">Find a Mentor</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/mentorship/become-mentor" className="menu-link">
-              <div data-i18n="Become a Mentor">Become a Mentor</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/mentorship/my-sessions" className="menu-link">
-              <div data-i18n="My Sessions">My Sessions</div>
-            </Link>
-          </li>
-        </ul>
+        <span className="menu-header-text">Activities</span>
       </li>
 
       {/* Messages */}
@@ -187,7 +228,32 @@ const SidebarMenu: React.FC = () => {
         </Link>
       </li>
 
-      {/* MY BUSINESS SECTION */}
+      {/* Mentorship Program */}
+      <li className={`menu-item ${isMenuOpen('mentorship') ? 'open' : ''}`}>
+        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('mentorship', e)}>
+          <Icon icon="hugeicons:user-group" className="menu-icon" style={{ fontSize: '1.5rem' }} />
+          <div data-i18n="Mentorship">Mentorship</div>
+        </a>
+        <ul className={`menu-sub ${isMenuOpen('mentorship') ? 'show' : ''}`}>
+          <li className="menu-item">
+            <Link to="/userprofile/mentorship/my-sessions" className="menu-link">
+              <div data-i18n="My Sessions">My Sessions</div>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/userprofile/mentorship/find-mentor" className="menu-link">
+              <div data-i18n="Find a Mentor">Find a Mentor</div>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/userprofile/mentorship/become-mentor" className="menu-link">
+              <div data-i18n="Become a Mentor">Become a Mentor</div>
+            </Link>
+          </li>
+        </ul>
+      </li>
+
+      {/* MY BUSINESS SECTION - Only for service providers/artisans */}
       <li className="menu-header small text-uppercase mt-3">
         <span className="menu-header-text">My Business</span>
       </li>
@@ -214,31 +280,17 @@ const SidebarMenu: React.FC = () => {
               <div data-i18n="Customer Inquiries">Customer Inquiries</div>
             </Link>
           </li>
+          <li className="menu-item">
+            <Link to="/userprofile/ratings" className="menu-link">
+              <div data-i18n="Ratings">Ratings & Reviews</div>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/userprofile/analytics" className="menu-link">
+              <div data-i18n="Analytics">Performance Analytics</div>
+            </Link>
+          </li>
         </ul>
-      </li>
-
-      {/* Performance Analytics */}
-      <li className="menu-item">
-        <Link to="/userprofile/analytics" className="menu-link">
-          <Icon icon="hugeicons:chart-03" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Analytics">Performance Analytics</div>
-        </Link>
-      </li>
-
-      {/* Nearby Map */}
-      <li className="menu-item">
-        <Link to="/userprofile/nearby-map" className="menu-link">
-          <Icon icon="hugeicons:location-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Nearby Map">Nearby Clients & Jobs</div>
-        </Link>
-      </li>
-
-      {/* Ratings & Reviews */}
-      <li className="menu-item">
-        <Link to="/userprofile/ratings" className="menu-link">
-          <Icon icon="hugeicons:star" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Ratings">Ratings & Reviews</div>
-        </Link>
       </li>
 
       {/* ACCOUNT & SETTINGS SECTION */}

@@ -434,8 +434,8 @@ const EmployerDashboard: React.FC = () => {
                     overflow: 'hidden',
                   }}
                 >
-                  <button
-                    type="button"
+                      <button
+                        type="button"
                     onClick={() => setApplicationViewMode('cards')}
                     style={{
                       display: 'flex',
@@ -462,7 +462,7 @@ const EmployerDashboard: React.FC = () => {
                     }}
                   >
                     <LayoutGrid size={16} />
-                  </button>
+                      </button>
                   <button
                     type="button"
                     onClick={() => setApplicationViewMode('table')}
@@ -492,7 +492,7 @@ const EmployerDashboard: React.FC = () => {
                   >
                     <ListIcon size={16} />
                   </button>
-                </div>
+                      </div>
                 {/* View All Button */}
                 <Link 
                   to="/employer/applications/all"
@@ -515,8 +515,8 @@ const EmployerDashboard: React.FC = () => {
                     />
                   </motion.span>
                 </Link>
-              </div>
-            </div>
+                    </div>
+                  </div>
             <div className="card-body p-0">
               {recentApplications.length === 0 ? (
                 <div style={{ 
@@ -577,8 +577,8 @@ const EmployerDashboard: React.FC = () => {
                       <div className="avatar flex-shrink-0">
                         <div className="avatar-initial rounded-circle bg-label-primary" style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 600, color: '#696cff' }}>
                           {app.candidateName.split(' ').map((n: string) => n[0]).join('')}
-                        </div>
-                      </div>
+                    </div>
+                    </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <h6 style={{
                           fontFamily: "'Crimson Text', Georgia, serif",
@@ -616,7 +616,7 @@ const EmployerDashboard: React.FC = () => {
                         }}>
                           {app.appliedDate}
                         </p>
-                      </div>
+                  </div>
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -637,11 +637,11 @@ const EmployerDashboard: React.FC = () => {
                           color: '#78716C',
                         }}>
                           Match
-                        </span>
-                      </div>
+                      </span>
+                    </div>
                     </Link>
                   ))}
-                </div>
+                    </div>
               ) : (
                 <div style={{ 
                   background: '#FFFFFF',
@@ -715,7 +715,7 @@ const EmployerDashboard: React.FC = () => {
                         }}>
                           {app.appliedDate}
                         </p>
-                      </div>
+                </div>
                       <div style={{
                         fontFamily: "'Source Sans Pro', system-ui, sans-serif",
                         fontSize: '0.875rem',
@@ -726,7 +726,7 @@ const EmployerDashboard: React.FC = () => {
                         whiteSpace: 'nowrap',
                       }}>
                         {app.jobTitle}
-                      </div>
+              </div>
                       <div style={{
                         fontFamily: "'JetBrains Mono', monospace",
                         fontSize: '0.9375rem',
@@ -734,7 +734,7 @@ const EmployerDashboard: React.FC = () => {
                         textAlign: 'right',
                       }}>
                         {app.matchScore}%
-                      </div>
+            </div>
                       <div style={{
                         fontFamily: "'Source Sans Pro', system-ui, sans-serif",
                         fontSize: '0.8125rem',

@@ -168,6 +168,7 @@ const PostNewGig: React.FC = () => {
       align-items: start;
     }
 
+    /* Desktop: 1200px and above */
     @media (min-width: 1200px) {
       .epng-content-grid {
         grid-template-columns: 5fr 7fr;
@@ -177,22 +178,20 @@ const PostNewGig: React.FC = () => {
     }
 
     .epng-animation-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: sticky;
-      top: 50%;
-      transform: translateY(-50%);
-      align-self: center;
-      height: fit-content;
+      display: none;
     }
 
     @media (min-width: 1200px) {
       .epng-animation-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         position: sticky;
         top: 50%;
         transform: translateY(-50%);
+        align-self: center;
+        height: fit-content;
       }
     }
 
@@ -202,6 +201,12 @@ const PostNewGig: React.FC = () => {
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    @media (min-width: 1200px) {
+      .epng-animation-wrapper {
+        max-width: 400px;
+      }
     }
 
     .epng-header {
@@ -661,17 +666,19 @@ const PostNewGig: React.FC = () => {
       flex-shrink: 0;
     }
 
+    /* Mobile: 0px - 767px */
     @media (max-width: 767px) {
       .epng-page {
         padding: 1rem;
       }
 
       .epng-content-grid {
-        gap: 2rem;
+        gap: 1.5rem;
+        grid-template-columns: 1fr;
       }
 
-      .epng-animation-wrapper {
-        max-width: 280px;
+      .epng-animation-section {
+        display: none;
       }
 
       .epng-title {
@@ -721,6 +728,22 @@ const PostNewGig: React.FC = () => {
       .epng-review-label {
         font-weight: 600;
         margin-bottom: 0.25rem;
+      }
+    }
+
+    /* Tablet: 768px - 1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .epng-animation-section {
+        display: none;
+      }
+
+      .epng-content-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .epng-form-card {
+        padding: 2rem;
       }
     }
   `;
@@ -1087,7 +1110,7 @@ const PostNewGig: React.FC = () => {
                   src="https://lottie.host/77544918-85d9-418f-9560-7b0a7478be23/Q6uZTcW8D4.lottie"
                   loop
                   autoplay
-                  style={{ height: '400px', width: '400px' }}
+                  style={{ width: '100%', height: '100%', maxWidth: '400px', maxHeight: '400px' }}
                 />
               </div>
               <div className="epng-header">

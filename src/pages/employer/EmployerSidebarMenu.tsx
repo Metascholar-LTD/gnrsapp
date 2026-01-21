@@ -185,16 +185,6 @@ const EmployerSidebarMenu: React.FC = () => {
         </a>
         <ul className={`menu-sub ${isMenuOpen('subscription') ? 'show' : ''}`}>
           <li className="menu-item">
-            <Link to="/employer/subscription/current" className="menu-link">
-              <div data-i18n="Current Plan">Current Plan</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/employer/subscription/upgrade" className="menu-link">
-              <div data-i18n="Upgrade Plan">Upgrade Plan</div>
-            </Link>
-          </li>
-          <li className="menu-item">
             <Link to="/employer/subscription/billing" className="menu-link">
               <div data-i18n="Billing History">Billing History</div>
             </Link>
