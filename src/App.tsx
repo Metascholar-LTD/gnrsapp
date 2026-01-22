@@ -112,6 +112,28 @@ import SneatLayout from "./pages/sneat/SneatLayout";
 import Dashboard from "./pages/sneat/Dashboard";
 import AccountSettings from "./pages/sneat/pages/AccountSettings";
 import { GenericPage, CardsPage, TablesPage, IconsPage, FormsBasicInputs, FormLayouts, ErrorPage, MaintenancePage } from "./pages/sneat/pages/SimplePages";
+// User Profile Pages
+import UserMyResources from "./pages/sneat/pages/MyResources";
+import PastQuestionsPage from "./pages/sneat/pages/PastQuestionsPage";
+import SavedResources from "./pages/sneat/pages/SavedResources";
+import ScholarshipApplications from "./pages/sneat/pages/ScholarshipApplications";
+import ScholarshipRecommendations from "./pages/sneat/pages/ScholarshipRecommendations";
+import Messages from "./pages/sneat/pages/Messages";
+import MentorshipSessions from "./pages/sneat/pages/MentorshipSessions";
+import FindMentor from "./pages/sneat/pages/FindMentor";
+import BecomeMentor from "./pages/sneat/pages/BecomeMentor";
+import ManageServices from "./pages/sneat/pages/ManageServices";
+import CustomerInquiries from "./pages/sneat/pages/CustomerInquiries";
+import RatingsReviews from "./pages/sneat/pages/RatingsReviews";
+import PerformanceAnalytics from "./pages/sneat/pages/PerformanceAnalytics";
+import UserProfile from "./pages/sneat/pages/MyProfile";
+import CurrentPlan from "./pages/sneat/pages/CurrentPlan";
+import UpgradePlan from "./pages/sneat/pages/UpgradePlan";
+import PaymentHistory from "./pages/sneat/pages/PaymentHistory";
+import PrivacySettings from "./pages/sneat/pages/PrivacySettings";
+import NotificationSettings from "./pages/sneat/pages/NotificationSettings";
+import ProfileVisibility from "./pages/sneat/pages/ProfileVisibility";
+import HelpSupport from "./pages/sneat/pages/HelpSupport";
 import EmployerLayout from "./pages/employer/EmployerLayout";
 import EmployerDashboard from "./pages/employer/EmployerDashboard";
 import EmployerAuth from "./pages/employer/EmployerAuth";
@@ -325,10 +347,52 @@ const App = () => (
           {/* Sneat User Profile Routes */}
           <Route path="/userprofile" element={<SneatLayout />}>
             <Route index element={<Dashboard />} />
-            
-            {/* Account Settings */}
+
+            {/* Learning Section */}
+            <Route path="courses" element={<UserMyResources />} />
+            <Route path="past-questions" element={<PastQuestionsPage />} />
+            <Route path="saved-questions" element={<SavedResources />} />
+
+            {/* Scholarships */}
+            <Route path="scholarships/applications" element={<ScholarshipApplications />} />
+            <Route path="scholarships/recommendations" element={<ScholarshipRecommendations />} />
+
+            {/* Messages */}
+            <Route path="messages" element={<Messages />} />
+
+            {/* Mentorship */}
+            <Route path="mentorship/my-sessions" element={<MentorshipSessions />} />
+            <Route path="mentorship/find-mentor" element={<FindMentor />} />
+            <Route path="mentorship/become-mentor" element={<BecomeMentor />} />
+
+            {/* Services (for providers) */}
+            <Route path="services/manage" element={<ManageServices />} />
+            <Route path="services/inquiries" element={<CustomerInquiries />} />
+
+            {/* Ratings & Analytics */}
+            <Route path="ratings" element={<RatingsReviews />} />
+            <Route path="analytics" element={<PerformanceAnalytics />} />
+
+            {/* Profile */}
+            <Route path="profile" element={<UserProfile />} />
+
+            {/* Subscription */}
+            <Route path="subscription/current" element={<CurrentPlan />} />
+            <Route path="subscription/upgrade" element={<UpgradePlan />} />
+            <Route path="subscription/history" element={<PaymentHistory />} />
+
+            {/* Settings */}
+            <Route path="settings/account" element={<AccountSettings />} />
+            <Route path="settings/privacy" element={<PrivacySettings />} />
+            <Route path="settings/notifications" element={<NotificationSettings />} />
+            <Route path="settings/visibility" element={<ProfileVisibility />} />
+
+            {/* Help & Support */}
+            <Route path="support" element={<HelpSupport />} />
+
+            {/* Legacy Account Settings Routes */}
             <Route path="account-settings/account" element={<AccountSettings />} />
-            <Route path="account-settings/notifications" element={<AccountSettings />} />
+            <Route path="account-settings/notifications" element={<NotificationSettings />} />
             <Route path="account-settings/connections" element={<AccountSettings />} />
             
             {/* Layout Pages */}
