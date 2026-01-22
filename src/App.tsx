@@ -116,6 +116,7 @@ import { GenericPage, CardsPage, TablesPage, IconsPage, FormsBasicInputs, FormLa
 import UserMyResources from "./pages/sneat/pages/MyResources";
 import SavedResources from "./pages/sneat/pages/SavedResources";
 import SavedScholarships from "./pages/sneat/pages/SavedScholarships";
+import MyArtisanProfile from "./pages/sneat/pages/MyArtisanProfile";
 import Messages from "./pages/sneat/pages/Messages";
 import ComingSoon from "./pages/sneat/pages/ComingSoon";
 import MentorshipSessions from "./pages/sneat/pages/MentorshipSessions";
@@ -349,6 +350,9 @@ const App = () => (
 
             {/* Scholarships */}
             <Route path="scholarships/saved" element={<SavedScholarships />} />
+
+            {/* Jobs */}
+            <Route path="jobs/artisan-profile" element={<MyArtisanProfile />} />
 
             {/* Messages */}
             <Route path="messages" element={<Messages />} />
