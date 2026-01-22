@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Briefcase,
@@ -7,15 +7,18 @@ import {
   Plus,
   Eye,
   Edit2,
-  MoreVertical,
+  Trash2,
   CheckCircle,
   Clock,
   XCircle,
   Calendar,
   MapPin,
   Users,
-  CreditCard
+  CreditCard,
+  Loader2
 } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Gig {
   id: string;
@@ -34,34 +37,136 @@ const AllGigs: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [gigs, setGigs] = useState<Gig[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [gigToDelete, setGigToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  // Mock data - replace with Supabase later
-  const [gigs] = useState<Gig[]>([
-    {
-      id: '1',
-      title: 'Event Setup Assistant',
-      employer_name: 'Community Events Ghana',
-      status: 'active',
-      applications: 15,
-      views: 120,
-      postedDate: '2024-01-15',
-      location: 'Accra, Greater Accra',
-      payment_amount: 150,
-      payment_type: 'fixed'
-    },
-    {
-      id: '2',
-      title: 'Delivery Driver Needed',
-      employer_name: 'Quick Delivery Services',
-      status: 'pending',
-      applications: 8,
-      views: 45,
-      postedDate: '2024-01-20',
-      location: 'Kumasi, Ashanti',
-      payment_amount: 200,
-      payment_type: 'daily'
+  useEffect(() => {
+    loadGigs();
+  }, []);
+
+  const loadGigs = async () => {
+    setLoading(true);
+    try {
+      // Get logged-in employer's information
+      let employerName: string | null = null;
+      let employerEmail: string | null = null;
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Get employer profile
+          const { data: employerProfile, error: profileError } = await supabase
+            .from('employers' as any)
+            .select('full_name, company_name, email')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (profileError) {
+            console.warn("Error fetching employer profile:", profileError);
+          } else if (employerProfile) {
+            employerName = employerProfile.full_name || employerProfile.company_name;
+            employerEmail = employerProfile.email || user.email;
+          } else {
+            // Fallback to user email
+            employerEmail = user.email || null;
+          }
+        }
+      } catch (authError) {
+        console.warn("Auth error:", authError);
+      }
+
+      // If no employer info found, show empty state
+      if (!employerName && !employerEmail) {
+        setGigs([]);
+        setLoading(false);
+        return;
+      }
+
+      // Load all gigs and filter in memory by employer_name or employer_email
+      const { data: gigsData, error: gigsError } = await supabase
+        .from('local_job_gigs' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (gigsError) {
+        console.error("Error loading gigs:", gigsError);
+        toast.error("Failed to load gigs");
+        setGigs([]);
+        return;
+      }
+
+      // Filter gigs by employer (case-insensitive)
+      const filteredGigs = (gigsData || []).filter((gig: any) => {
+        if (employerName) {
+          return gig.employer_name && gig.employer_name.toLowerCase().trim() === employerName.toLowerCase().trim();
+        } else if (employerEmail) {
+          return gig.employer_email && gig.employer_email.toLowerCase().trim() === employerEmail.toLowerCase().trim();
+        }
+        return false;
+      });
+
+      // Transform to Gig interface
+      const transformedGigs: Gig[] = filteredGigs.map((gig: any) => ({
+        id: gig.id,
+        title: gig.title,
+        employer_name: gig.employer_name,
+        status: gig.status || 'pending',
+        applications: gig.applications || 0,
+        views: gig.views || 0,
+        postedDate: gig.created_at || new Date().toISOString(),
+        location: gig.location || 'Not specified',
+        payment_amount: gig.payment_amount || 0,
+        payment_type: gig.payment_type || 'negotiable'
+      }));
+
+      setGigs(transformedGigs);
+    } catch (error: any) {
+      console.error("Error loading gigs:", error);
+      toast.error("Failed to load gigs");
+      setGigs([]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  const openDeleteModal = (gigId: string, gigTitle: string) => {
+    setGigToDelete({ id: gigId, title: gigTitle });
+    setDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (!deleting) {
+      setDeleteModalOpen(false);
+      setGigToDelete(null);
+    }
+  };
+
+  const handleDeleteGig = async () => {
+    if (!gigToDelete) return;
+
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('local_job_gigs' as any)
+        .delete()
+        .eq('id', gigToDelete.id);
+
+      if (error) throw error;
+
+      toast.success('Gig deleted successfully');
+      setDeleteModalOpen(false);
+      setGigToDelete(null);
+      loadGigs(); // Reload the list
+    } catch (error: any) {
+      console.error('Error deleting gig:', error);
+      toast.error(`Failed to delete gig: ${error.message || 'Unknown error'}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const styles = {
@@ -551,11 +656,28 @@ const AllGigs: React.FC = () => {
               </div>
             </div>
 
-            {filteredGigs.length === 0 ? (
+            {loading ? (
+              <div className="ej-empty">
+                <Loader2 className="ej-empty-icon" style={{ animation: 'spin 1s linear infinite' }} />
+                <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Loading gigs...</p>
+              </div>
+            ) : filteredGigs.length === 0 ? (
               <div className="ej-empty">
                 <Briefcase className="ej-empty-icon" />
-                <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>No gigs found</p>
-                <p style={{ fontSize: '0.875rem' }}>Try adjusting your search or filters</p>
+                <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                  {gigs.length === 0 ? 'No gigs posted yet' : 'No gigs found'}
+                </p>
+                <p style={{ fontSize: '0.875rem' }}>
+                  {gigs.length === 0 
+                    ? 'Start by posting your first gig' 
+                    : 'Try adjusting your search or filters'}
+                </p>
+                {gigs.length === 0 && (
+                  <Link to="/employer/gigs-listing/post" className="ej-btn-primary" style={{ marginTop: '1rem' }}>
+                    <Plus size={16} />
+                    Post Your First Gig
+                  </Link>
+                )}
               </div>
             ) : (
               <>
@@ -618,14 +740,13 @@ const AllGigs: React.FC = () => {
                         </td>
                         <td>
                           <div className="ej-actions" style={{ justifyContent: 'flex-end' }}>
-                            <button className="ej-action-btn" title="View">
-                              <Eye size={14} />
-                            </button>
-                            <button className="ej-action-btn" title="Edit">
-                              <Edit2 size={14} />
-                            </button>
-                            <button className="ej-action-btn" title="More">
-                              <MoreVertical size={14} />
+                            <button 
+                              className="ej-action-btn" 
+                              title="Delete"
+                              onClick={() => openDeleteModal(gig.id, gig.title)}
+                              style={{ color: '#ff3e1d' }}
+                            >
+                              <Trash2 size={14} />
                             </button>
                           </div>
                         </td>
@@ -656,6 +777,36 @@ const AllGigs: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && (
+        <div className="ej-modal-overlay" onClick={closeDeleteModal}>
+          <div className="ej-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="ej-modal-header">
+              <h3 className="ej-modal-title">Delete Gig</h3>
+              <p className="ej-modal-message">
+                Are you sure you want to delete <span className="ej-modal-gig-title">"{gigToDelete?.title}"</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="ej-modal-actions">
+              <button
+                className="ej-modal-btn ej-modal-btn-cancel"
+                onClick={closeDeleteModal}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="ej-modal-btn ej-modal-btn-delete"
+                onClick={handleDeleteGig}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

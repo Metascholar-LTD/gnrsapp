@@ -80,7 +80,6 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
         }
       } catch (authError) {
         // Auth not connected yet - will work when auth is connected
-        console.log("Auth not available, will show empty state");
       }
 
       // If no company found, show empty state
@@ -174,10 +173,6 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
         return;
       }
 
-      // Debug: Log what we found
-      if (jobsData && jobsData.length > 0) {
-        console.log(`Found ${jobsData.length} jobs for company:`, { companyId, companyName });
-      }
 
       // Load internships - filter in memory to avoid URL encoding issues with company names
       const { data: internshipsData, error: internshipsError } = await internshipsQuery;

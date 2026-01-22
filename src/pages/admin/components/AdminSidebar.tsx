@@ -22,6 +22,7 @@ const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
+  const [pendingGigsCount, setPendingGigsCount] = useState(0);
 
   const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -31,7 +32,7 @@ const AdminSidebar = () => {
     navigate('/admin/sign-in');
   };
 
-  // Fetch pending approvals count
+  // Fetch pending approvals count for jobs
   useEffect(() => {
     const fetchPendingCount = async () => {
       try {
@@ -63,6 +64,48 @@ const AdminSidebar = () => {
     }
 
     return () => clearInterval(interval);
+  }, [location.pathname]);
+
+  // Fetch pending gigs count
+  useEffect(() => {
+    const fetchPendingGigsCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('local_job_gigs' as any)
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
+
+        if (error) {
+          console.error('Error fetching pending gigs count:', error);
+          return;
+        }
+
+        setPendingGigsCount(count || 0);
+      } catch (error) {
+        console.error('Error fetching pending gigs count:', error);
+      }
+    };
+
+    fetchPendingGigsCount();
+    
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchPendingGigsCount, 30000);
+
+    // Also refresh when navigating to/from local job gigs page
+    if (location.pathname === '/admin/local-job-gigs') {
+      fetchPendingGigsCount();
+    }
+
+    // Listen for custom event to refresh count immediately after approval/rejection
+    const handleGigApprovalUpdate = () => {
+      fetchPendingGigsCount();
+    };
+    window.addEventListener('adminGigApprovalUpdate', handleGigApprovalUpdate);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('adminGigApprovalUpdate', handleGigApprovalUpdate);
+    };
   }, [location.pathname]);
 
   useEffect(() => {
@@ -241,6 +284,23 @@ const AdminSidebar = () => {
                               }}
                             >
                               {pendingApprovalsCount > 99 ? '99+' : pendingApprovalsCount}
+                            </span>
+                          )}
+                          {item.label === "Local Job Gigs" && pendingGigsCount > 0 && (
+                            <span 
+                              className="badge bg-danger rounded-pill ms-auto"
+                              style={{
+                                fontSize: '0.7rem',
+                                padding: '0.2rem 0.5rem',
+                                minWidth: '1.25rem',
+                                height: '1.25rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 600
+                              }}
+                            >
+                              {pendingGigsCount > 99 ? '99+' : pendingGigsCount}
                             </span>
                           )}
                         </Link>

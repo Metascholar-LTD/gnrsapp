@@ -283,6 +283,9 @@ const AdminLocalJobGigs = () => {
       if (error) throw error;
       
       await loadGigs();
+      
+      // Dispatch event to update sidebar count
+      window.dispatchEvent(new CustomEvent('adminGigApprovalUpdate'));
     } catch (error: any) {
       console.error('Error approving gig:', error);
       alert('Error approving gig: ' + (error.message || 'Unknown error'));
