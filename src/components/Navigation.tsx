@@ -118,11 +118,8 @@ export const Navigation = React.memo(() => {
           ]}
         ],
         engagement: [
-          { title: 'Community', items: [
-            { to: '/education/discussion-forums', label: 'Discussion Forums', icon: 'fa-comments' },
-            { to: '/education/study-groups', label: 'Study Groups', icon: 'fa-users' },
-            { to: '/education/alumni-connect', label: 'Alumni Connect', icon: 'fa-network-wired' },
-            { to: '/education/mentorship', label: 'Mentorship Program', icon: 'fa-user-friends' }
+          { title: 'Student Engagement', items: [
+            { to: '/education/ai-tutor', label: 'AI Study Tutor', icon: 'fa-robot' }
           ]}
         ],
         tools: [

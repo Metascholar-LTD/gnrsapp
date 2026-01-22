@@ -230,7 +230,7 @@ const Dashboard: React.FC = () => {
     shortlisted: 4,
     rejected: 3,
     savedJobs: 8,
-    scholarshipApplications: 3,
+    savedScholarships: 6,
     coursesInProgress: 2,
     completedCourses: 5,
   };
@@ -345,8 +345,8 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <span className="fw-semibold d-block mb-1">Scholarships</span>
-                  <h3 className="card-title mb-2">{stats.scholarshipApplications}</h3>
+                  <span className="fw-semibold d-block mb-1">Saved Scholarships</span>
+                  <h3 className="card-title mb-2">{stats.savedScholarships}</h3>
                   <small className="text-success fw-semibold d-flex align-items-center gap-1">
                     <ArrowUp size={14} style={{ display: 'inline-block' }} />
                     +10%
@@ -828,6 +828,153 @@ const Dashboard: React.FC = () => {
                   </Link>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Saved Scholarships Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card">
+            <div className="card-header d-flex align-items-center justify-content-between">
+              <h5 className="card-title m-0 me-2">Saved Scholarships</h5>
+              <Link
+                to="/userprofile/scholarships/saved"
+                className="group relative inline-block text-sm font-medium text-[#696cff] transition-colors duration-300 hover:text-[#5a5de0]"
+                style={{ textDecoration: 'none' }}
+              >
+                <motion.span
+                  className="relative inline-block pb-1 flex items-center gap-1.5"
+                  whileHover={{ x: 2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <ArrowRight size={14} />
+                  View All
+                  <span
+                    className="absolute bottom-0 left-0 h-[2px] bg-[#696cff] transition-all duration-300 group-hover:bg-[#5a5de0]"
+                    style={{
+                      width: 'calc(100% + 14px)',
+                      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                    }}
+                  />
+                </motion.span>
+              </Link>
+            </div>
+            <div className="card-body">
+              {stats.savedScholarships === 0 ? (
+                <div style={{
+                  padding: '48px 24px',
+                  textAlign: 'center',
+                  background: '#FAFAF9',
+                  borderRadius: '8px',
+                }}>
+                  <Award size={48} style={{ color: '#A8A29E', margin: '0 auto 16px' }} />
+                  <h6 style={{
+                    fontFamily: "'Crimson Text', Georgia, serif",
+                    fontSize: '1.125rem',
+                    fontWeight: 600,
+                    color: '#1C1917',
+                    margin: '0 0 8px 0',
+                  }}>
+                    No saved scholarships yet
+                  </h6>
+                  <p style={{
+                    fontFamily: "'Source Sans Pro', sans-serif",
+                    fontSize: '0.875rem',
+                    color: '#78716C',
+                    margin: '0 0 16px 0',
+                  }}>
+                    Start saving scholarships you're interested in for quick access
+                  </p>
+                  <Link
+                    to="/scholarships"
+                    className="btn"
+                    style={{
+                      fontSize: '0.875rem',
+                      padding: '0.625rem 1.25rem',
+                      backgroundColor: colors.primary,
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <Award size={16} />
+                    Browse Scholarships
+                  </Link>
+                </div>
+              ) : (
+                <div className="row g-3">
+                  {/* Mock saved scholarships - replace with actual data */}
+                  {[
+                    { id: '1', title: 'Mastercard Foundation Scholars Program', provider: 'Mastercard Foundation', deadline: '2024-03-15' },
+                    { id: '2', title: 'Chevening Scholarships', provider: 'UK Government', deadline: '2024-11-01' },
+                    { id: '3', title: 'Ghana Education Trust Fund (GETFund)', provider: 'GETFund', deadline: '2024-05-30' },
+                  ].slice(0, 3).map((scholarship) => (
+                    <div key={scholarship.id} className="col-md-4 col-sm-6">
+                      <div className="card h-100" style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.boxShadow = 'none';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        <div className="card-body">
+                          <div className="d-flex align-items-start justify-content-between mb-2">
+                            <div style={{
+                              width: '40px',
+                              height: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: 'rgba(105, 108, 255, 0.1)',
+                              borderRadius: '8px',
+                              flexShrink: 0
+                            }}>
+                              <Award size={20} style={{ color: colors.primary }} />
+                            </div>
+                          </div>
+                          <h6 style={{
+                            fontFamily: "'Crimson Text', Georgia, serif",
+                            fontSize: '0.9375rem',
+                            fontWeight: 600,
+                            color: '#1C1917',
+                            marginBottom: '4px',
+                            lineHeight: 1.4,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden'
+                          }}>
+                            {scholarship.title}
+                          </h6>
+                          <p style={{
+                            fontSize: '0.75rem',
+                            color: '#78716C',
+                            marginBottom: '8px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {scholarship.provider}
+                          </p>
+                          <div className="d-flex align-items-center gap-2" style={{ fontSize: '0.75rem', color: '#A8A29E' }}>
+                            <Calendar size={12} />
+                            <span>Deadline: {new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -114,18 +114,16 @@ import AccountSettings from "./pages/sneat/pages/AccountSettings";
 import { GenericPage, CardsPage, TablesPage, IconsPage, FormsBasicInputs, FormLayouts, ErrorPage, MaintenancePage } from "./pages/sneat/pages/SimplePages";
 // User Profile Pages
 import UserMyResources from "./pages/sneat/pages/MyResources";
-import PastQuestionsPage from "./pages/sneat/pages/PastQuestionsPage";
 import SavedResources from "./pages/sneat/pages/SavedResources";
-import ScholarshipApplications from "./pages/sneat/pages/ScholarshipApplications";
-import ScholarshipRecommendations from "./pages/sneat/pages/ScholarshipRecommendations";
+import SavedScholarships from "./pages/sneat/pages/SavedScholarships";
 import Messages from "./pages/sneat/pages/Messages";
+import ComingSoon from "./pages/sneat/pages/ComingSoon";
 import MentorshipSessions from "./pages/sneat/pages/MentorshipSessions";
 import FindMentor from "./pages/sneat/pages/FindMentor";
 import BecomeMentor from "./pages/sneat/pages/BecomeMentor";
 import ManageServices from "./pages/sneat/pages/ManageServices";
 import CustomerInquiries from "./pages/sneat/pages/CustomerInquiries";
 import RatingsReviews from "./pages/sneat/pages/RatingsReviews";
-import PerformanceAnalytics from "./pages/sneat/pages/PerformanceAnalytics";
 import UserProfile from "./pages/sneat/pages/MyProfile";
 import PrivacySettings from "./pages/sneat/pages/PrivacySettings";
 import NotificationSettings from "./pages/sneat/pages/NotificationSettings";
@@ -347,28 +345,29 @@ const App = () => (
 
             {/* Learning Section */}
             <Route path="courses" element={<UserMyResources />} />
-            <Route path="past-questions" element={<PastQuestionsPage />} />
             <Route path="saved-questions" element={<SavedResources />} />
 
             {/* Scholarships */}
-            <Route path="scholarships/applications" element={<ScholarshipApplications />} />
-            <Route path="scholarships/recommendations" element={<ScholarshipRecommendations />} />
+            <Route path="scholarships/saved" element={<SavedScholarships />} />
 
             {/* Messages */}
             <Route path="messages" element={<Messages />} />
 
-            {/* Mentorship */}
-            <Route path="mentorship/my-sessions" element={<MentorshipSessions />} />
-            <Route path="mentorship/find-mentor" element={<FindMentor />} />
-            <Route path="mentorship/become-mentor" element={<BecomeMentor />} />
+            {/* Community */}
+            <Route path="community/discussion-forums" element={<ComingSoon />} />
+            <Route path="community/study-groups" element={<ComingSoon />} />
+            <Route path="community/alumni-connect" element={<ComingSoon />} />
+            <Route path="community/mentorship" element={<ComingSoon />} />
+            <Route path="community/mentorship/my-sessions" element={<MentorshipSessions />} />
+            <Route path="community/mentorship/find-mentor" element={<FindMentor />} />
+            <Route path="community/mentorship/become-mentor" element={<BecomeMentor />} />
 
             {/* Services (for providers) */}
             <Route path="services/manage" element={<ManageServices />} />
             <Route path="services/inquiries" element={<CustomerInquiries />} />
 
-            {/* Ratings & Analytics */}
+            {/* Ratings */}
             <Route path="ratings" element={<RatingsReviews />} />
-            <Route path="analytics" element={<PerformanceAnalytics />} />
 
             {/* Profile */}
             <Route path="profile" element={<UserProfile />} />

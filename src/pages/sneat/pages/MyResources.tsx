@@ -240,88 +240,6 @@ const MyResources: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-4 col-sm-6">
-          <div className="card h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center gap-3">
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: colors.bgLight,
-                  borderRadius: '10px'
-                }}>
-                  <Download size={24} style={{ color: colors.textSecondary }} />
-                </div>
-                <div>
-                  <p style={{ margin: 0, fontSize: '0.875rem', color: '#78716C' }}>Total Resources</p>
-                  <h4 style={{ margin: 0, fontWeight: 600, color: '#1C1917' }}>{stats.total}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4 col-sm-6">
-          <div className="card h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center gap-3">
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: colors.bgLight,
-                  borderRadius: '10px'
-                }}>
-                  <HardDrive size={24} style={{ color: colors.textSecondary }} />
-                </div>
-                <div>
-                  <p style={{ margin: 0, fontSize: '0.875rem', color: '#78716C' }}>Storage Used</p>
-                  <h4 style={{ margin: 0, fontWeight: 600, color: '#1C1917' }}>{stats.storageUsed}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4 col-sm-12">
-          <div className="card h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center gap-3">
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: colors.bgLight,
-                  borderRadius: '10px'
-                }}>
-                  <TrendingUp size={24} style={{ color: colors.textSecondary }} />
-                </div>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <p style={{ margin: 0, fontSize: '0.875rem', color: '#78716C' }}>Most Accessed</p>
-                  <h6 style={{
-                    margin: 0,
-                    fontWeight: 600,
-                    color: '#1C1917',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {stats.mostAccessed}
-                  </h6>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Category Tabs */}
       <div className="card mb-4">
         <div className="card-body p-0">
@@ -943,40 +861,26 @@ const MyResources: React.FC = () => {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FAFAF9'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: colors.bgLight,
-                    borderRadius: '8px',
-                    flexShrink: 0
+                <div style={{ minWidth: 0 }}>
+                  <h6 style={{
+                    fontFamily: "'Crimson Text', Georgia, serif",
+                    fontSize: '0.9375rem',
+                    fontWeight: 600,
+                    color: '#1C1917',
+                    margin: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}>
-                    <FileText size={20} style={{ color: colors.textSecondary }} />
-                  </div>
-                  <div style={{ minWidth: 0 }}>
-                    <h6 style={{
-                      fontFamily: "'Crimson Text', Georgia, serif",
-                      fontSize: '0.9375rem',
-                      fontWeight: 600,
-                      color: '#1C1917',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {resource.title}
-                    </h6>
-                    <p style={{
-                      fontSize: '0.75rem',
-                      color: '#78716C',
-                      margin: 0
-                    }}>
-                      {resource.lastAccessed}
-                    </p>
-                  </div>
+                    {resource.title}
+                  </h6>
+                  <p style={{
+                    fontSize: '0.75rem',
+                    color: '#78716C',
+                    margin: 0
+                  }}>
+                    {resource.lastAccessed}
+                  </p>
                 </div>
                 <span style={{
                   display: 'inline-block',

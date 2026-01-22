@@ -26,12 +26,15 @@ const SidebarMenu: React.FC = () => {
     if (path.startsWith('/userprofile/scholarships/')) {
       menusToOpen.add('scholarships');
     }
-    if (path.startsWith('/userprofile/mentorship/')) {
-      menusToOpen.add('mentorship');
+    if (path.startsWith('/userprofile/community/')) {
+      menusToOpen.add('community');
+      // Also open mentorship submenu if on mentorship pages
+      if (path.includes('/mentorship/')) {
+        menusToOpen.add('mentorship');
+      }
     }
     if (path.startsWith('/userprofile/services/') || 
-        path.startsWith('/userprofile/ratings') ||
-        path.startsWith('/userprofile/analytics')) {
+        path.startsWith('/userprofile/ratings')) {
       menusToOpen.add('services');
     }
     if (path.startsWith('/userprofile/settings/')) {
@@ -76,14 +79,6 @@ const SidebarMenu: React.FC = () => {
         <Link to="/userprofile/courses" className="menu-link">
           <Icon icon="hugeicons:download-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="My Resources">My Resources</div>
-        </Link>
-      </li>
-
-      {/* Past Questions */}
-      <li className="menu-item">
-        <Link to="/userprofile/past-questions" className="menu-link">
-          <Icon icon="hugeicons:file-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Past Questions">Past Questions</div>
         </Link>
       </li>
 
@@ -172,23 +167,11 @@ const SidebarMenu: React.FC = () => {
       </li>
 
       {/* Scholarships */}
-      <li className={`menu-item ${isMenuOpen('scholarships') ? 'open' : ''}`}>
-        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('scholarships', e)}>
+      <li className="menu-item">
+        <Link to="/userprofile/scholarships/saved" className="menu-link">
           <Icon icon="hugeicons:school-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Scholarships">Scholarships</div>
-        </a>
-        <ul className={`menu-sub ${isMenuOpen('scholarships') ? 'show' : ''}`}>
-          <li className="menu-item">
-            <Link to="/userprofile/scholarships/applications" className="menu-link">
-              <div data-i18n="My Applications">My Applications</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/scholarships/recommendations" className="menu-link">
-              <div data-i18n="Recommendations">Recommendations</div>
-            </Link>
-          </li>
-        </ul>
+          <div data-i18n="Saved Scholarships">Saved Scholarships</div>
+        </Link>
       </li>
 
       {/* ACTIVITIES SECTION */}
@@ -205,27 +188,49 @@ const SidebarMenu: React.FC = () => {
         </Link>
       </li>
 
-      {/* Mentorship Program */}
-      <li className={`menu-item ${isMenuOpen('mentorship') ? 'open' : ''}`}>
-        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('mentorship', e)}>
+      {/* Community */}
+      <li className={`menu-item ${isMenuOpen('community') ? 'open' : ''}`}>
+        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('community', e)}>
           <Icon icon="hugeicons:user-group" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Mentorship">Mentorship</div>
+          <div data-i18n="Community">Community</div>
         </a>
-        <ul className={`menu-sub ${isMenuOpen('mentorship') ? 'show' : ''}`}>
+        <ul className={`menu-sub ${isMenuOpen('community') ? 'show' : ''}`}>
           <li className="menu-item">
-            <Link to="/userprofile/mentorship/my-sessions" className="menu-link">
-              <div data-i18n="My Sessions">My Sessions</div>
+            <Link to="/userprofile/community/discussion-forums" className="menu-link">
+              <div data-i18n="Discussion Forums">Discussion Forums</div>
             </Link>
           </li>
           <li className="menu-item">
-            <Link to="/userprofile/mentorship/find-mentor" className="menu-link">
-              <div data-i18n="Find a Mentor">Find a Mentor</div>
+            <Link to="/userprofile/community/study-groups" className="menu-link">
+              <div data-i18n="Study Groups">Study Groups</div>
             </Link>
           </li>
           <li className="menu-item">
-            <Link to="/userprofile/mentorship/become-mentor" className="menu-link">
-              <div data-i18n="Become a Mentor">Become a Mentor</div>
+            <Link to="/userprofile/community/alumni-connect" className="menu-link">
+              <div data-i18n="Alumni Connect">Alumni Connect</div>
             </Link>
+          </li>
+          <li className={`menu-item ${isMenuOpen('mentorship') ? 'open' : ''}`}>
+            <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('mentorship', e)}>
+              <div data-i18n="Mentorship Program">Mentorship Program</div>
+            </a>
+            <ul className={`menu-sub ${isMenuOpen('mentorship') ? 'show' : ''}`}>
+              <li className="menu-item">
+                <Link to="/userprofile/community/mentorship/my-sessions" className="menu-link">
+                  <div data-i18n="My Sessions">My Sessions</div>
+                </Link>
+              </li>
+              <li className="menu-item">
+                <Link to="/userprofile/community/mentorship/find-mentor" className="menu-link">
+                  <div data-i18n="Find a Mentor">Find a Mentor</div>
+                </Link>
+              </li>
+              <li className="menu-item">
+                <Link to="/userprofile/community/mentorship/become-mentor" className="menu-link">
+                  <div data-i18n="Become a Mentor">Become a Mentor</div>
+                </Link>
+              </li>
+            </ul>
           </li>
         </ul>
       </li>
@@ -255,11 +260,6 @@ const SidebarMenu: React.FC = () => {
           <li className="menu-item">
             <Link to="/userprofile/ratings" className="menu-link">
               <div data-i18n="Ratings">Ratings & Reviews</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/analytics" className="menu-link">
-              <div data-i18n="Analytics">Performance Analytics</div>
             </Link>
           </li>
         </ul>

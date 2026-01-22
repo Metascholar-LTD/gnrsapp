@@ -20,7 +20,9 @@ import {
   GraduationCap,
   Loader2,
   X,
-  Check
+  Check,
+  Calendar,
+  Target
 } from 'lucide-react';
 
 // Types
@@ -33,6 +35,8 @@ interface SavedResource {
   lastAccessed: string;
   collection?: string;
   thumbnail?: string;
+  size?: string;
+  year?: string;
 }
 
 interface Collection {
@@ -51,7 +55,9 @@ const mockResources: SavedResource[] = [
     subject: 'Mathematics',
     savedDate: '2024-01-15',
     lastAccessed: '2 hours ago',
-    collection: 'Exam Prep'
+    collection: 'Exam Prep',
+    size: '2.4 MB',
+    year: '2023'
   },
   {
     id: '2',
@@ -60,7 +66,8 @@ const mockResources: SavedResource[] = [
     subject: 'Computer Science',
     savedDate: '2024-01-12',
     lastAccessed: '1 day ago',
-    collection: 'CS Notes'
+    collection: 'CS Notes',
+    size: '5.2 MB'
   },
   {
     id: '3',
@@ -68,7 +75,8 @@ const mockResources: SavedResource[] = [
     type: 'ebook',
     subject: 'Mathematics',
     savedDate: '2024-01-10',
-    lastAccessed: '3 days ago'
+    lastAccessed: '3 days ago',
+    size: '12.8 MB'
   },
   {
     id: '4',
@@ -77,7 +85,9 @@ const mockResources: SavedResource[] = [
     subject: 'English',
     savedDate: '2024-01-08',
     lastAccessed: '1 week ago',
-    collection: 'Exam Prep'
+    collection: 'Exam Prep',
+    size: '1.8 MB',
+    year: '2022'
   },
   {
     id: '5',
@@ -85,7 +95,8 @@ const mockResources: SavedResource[] = [
     type: 'trial-question',
     subject: 'Physics',
     savedDate: '2024-01-05',
-    lastAccessed: '2 weeks ago'
+    lastAccessed: '2 weeks ago',
+    size: '3.1 MB'
   },
   {
     id: '6',
@@ -94,7 +105,8 @@ const mockResources: SavedResource[] = [
     subject: 'Chemistry',
     savedDate: '2024-01-03',
     lastAccessed: '2 weeks ago',
-    collection: 'Chemistry'
+    collection: 'Chemistry',
+    size: '4.5 MB'
   }
 ];
 
@@ -369,59 +381,6 @@ const SavedResources: React.FC = () => {
               </button>
             </div>
           </div>
-
-          {/* Quick Access */}
-          <div className="card mt-4">
-            <div className="card-header">
-              <h6 className="card-title m-0">Quick Access</h6>
-            </div>
-            <div className="card-body">
-              <p style={{ fontSize: '0.8125rem', color: '#78716C', marginBottom: '12px' }}>Recently saved</p>
-              {resources.slice(0, 3).map(resource => (
-                <div
-                  key={resource.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '8px 0',
-                    borderBottom: '1px solid #F5F5F5',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: getTypeBgColor(resource.type),
-                    borderRadius: '6px',
-                    color: getTypeColor(resource.type),
-                    flexShrink: 0
-                  }}>
-                    {getTypeIcon(resource.type)}
-                  </div>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <p style={{
-                      fontSize: '0.8125rem',
-                      fontWeight: 500,
-                      color: '#1C1917',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {resource.title}
-                    </p>
-                    <p style={{ fontSize: '0.75rem', color: '#A8A29E', margin: 0 }}>
-                      {resource.lastAccessed}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Main Content */}
@@ -514,158 +473,463 @@ const SavedResources: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="row g-3">
-              {filteredResources.map((resource, index) => (
-                <motion.div
-                  key={resource.id}
-                  className="col-lg-4 col-md-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <div
-                    className="card h-100"
-                    style={{ cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = 'none';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                  >
-                    {/* Thumbnail */}
-                    <div style={{
-                      height: '100px',
-                      backgroundColor: getTypeBgColor(resource.type),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '10px 10px 0 0',
-                      color: getTypeColor(resource.type)
-                    }}>
-                      {React.cloneElement(getTypeIcon(resource.type) as React.ReactElement, { size: 40 })}
-                    </div>
+            <div className="saved-resources-grid">
+              {filteredResources.map((resource, index) => {
+                // Determine category from type
+                const getCategory = (type: string, title: string): 'university-past-questions' | 'shs-bece' | 'lecture-notes' | 'ebooks' | 'trial-questions' => {
+                  if (type === 'past-question') {
+                    // Check if it's SHS/BECE based on title
+                    const titleLower = title.toLowerCase();
+                    if (titleLower.includes('bece') || titleLower.includes('shs') || titleLower.includes('wassce')) {
+                      return 'shs-bece';
+                    }
+                    return 'university-past-questions';
+                  }
+                  if (type === 'lecture-note') return 'lecture-notes';
+                  if (type === 'ebook') return 'ebooks';
+                  if (type === 'trial-question') return 'trial-questions';
+                  return 'university-past-questions';
+                };
 
-                    {/* Context Menu Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setContextMenu({ id: resource.id, x: e.clientX, y: e.clientY });
-                      }}
-                      style={{
-                        position: 'absolute',
-                        top: '8px',
-                        right: '8px',
-                        width: '32px',
-                        height: '32px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'rgba(255,255,255,0.9)',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        color: '#78716C'
-                      }}
+                const category = getCategory(resource.type, resource.title);
+
+                // Render Past Questions card (University Past Questions & SHS/BECE)
+                if (category === 'university-past-questions' || category === 'shs-bece') {
+                  const examType = category === 'shs-bece' ? 'SHS' : 'End of Semester';
+                  const borderColor = examType === "SHS" 
+                    ? "border-yellow-500" 
+                    : "border-[hsl(40_20%_88%)]";
+                  const accentColor = examType === "SHS"
+                    ? "bg-yellow-500"
+                    : "bg-[hsl(40_20%_88%)]";
+                  
+                  return (
+                    <motion.div
+                      key={resource.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
                     >
-                      <MoreVertical size={16} />
-                    </button>
+                      <div className={`relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg ${borderColor}`}>
+                        {/* Top accent bar */}
+                        <div className={`h-1 w-full ${accentColor}`} />
+                        <div className="flex flex-col">
+                          {/* Content Section */}
+                          <div className="relative z-10 flex h-full flex-col p-4">
+                            {/* Badge */}
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-1.5">
+                                <span className="px-2 py-1 text-xs font-bold rounded-md border-0 bg-gray-100 text-black">
+                                  {resource.subject || resource.type}
+                                </span>
+                                {examType === "SHS" && (
+                                  <span className="px-2 py-1 text-xs font-semibold rounded-md bg-yellow-500 text-yellow-900">
+                                    {examType}
+                                  </span>
+                                )}
+                              </div>
+                              {/* Context Menu Button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setContextMenu({ id: resource.id, x: e.clientX, y: e.clientY });
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  color: '#78716C'
+                                }}
+                              >
+                                <MoreVertical size={16} />
+                              </button>
+                            </div>
+                            
+                            {/* Title */}
+                            <div className="mb-3">
+                              <h3 className="mb-2 text-base font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2">
+                                {resource.title}
+                              </h3>
+                            </div>
 
-                    <div className="card-body">
-                      {/* Type & Collection Badge */}
-                      <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <span style={{
-                          padding: '3px 8px',
-                          backgroundColor: getTypeBgColor(resource.type),
-                          color: getTypeColor(resource.type),
-                          borderRadius: '4px',
-                          fontSize: '0.7rem',
-                          fontWeight: 600
-                        }}>
-                          {getTypeLabel(resource.type)}
-                        </span>
-                        {resource.collection && (
-                          <span style={{
-                            padding: '3px 8px',
-                            backgroundColor: '#F5F5F5',
-                            color: '#78716C',
-                            borderRadius: '4px',
-                            fontSize: '0.7rem',
-                            fontWeight: 500,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}>
-                            <Folder size={10} />
-                            {resource.collection}
-                          </span>
-                        )}
+                            {/* Metadata */}
+                            <div className="mb-4 flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5" />
+                                <span>{resource.year || new Date().getFullYear()}</span>
+                                {resource.size && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{resource.size}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Action Button - only Preview */}
+                            <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                                className="group relative inline-block text-xs font-medium text-slate-700 transition-colors duration-300 hover:text-blue-600"
+                                style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                              >
+                                <motion.span
+                                  className="relative inline-block pb-0.5 flex items-center gap-1"
+                                  whileHover={{ x: 1 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  Preview
+                                  <span
+                                    className="absolute bottom-0 left-0 h-[1px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                                    style={{
+                                      width: 'calc(100% + 8px)',
+                                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                    }}
+                                  />
+                                </motion.span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnsave(resource.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  color: '#ff3e1d'
+                                }}
+                              >
+                                <BookmarkMinus size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
+                    </motion.div>
+                  );
+                }
 
-                      {/* Title */}
-                      <h6 style={{
-                        fontFamily: "'Crimson Text', Georgia, serif",
-                        fontSize: '0.9375rem',
-                        fontWeight: 600,
-                        color: '#1C1917',
-                        marginBottom: '8px',
-                        lineHeight: 1.4,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {resource.title}
-                      </h6>
+                // Render Lecture Notes card
+                if (category === 'lecture-notes') {
+                  return (
+                    <motion.div
+                      key={resource.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg"
+                        style={{ borderColor: "hsl(40 20% 88%)" }}
+                      >
+                        {/* Top accent bar */}
+                        <div className="h-1 w-full bg-[#bd9f67]" />
+                        <div className="flex flex-col">
+                          {/* Content Section */}
+                          <div className="relative z-10 flex h-full flex-col p-4">
+                            {/* Title and Type */}
+                            <div className="mb-3 flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="mb-1 text-xs font-medium text-[hsl(220_15%_45%)] uppercase tracking-wide">
+                                  {resource.type}
+                                </p>
+                                <h3 className="mb-2 text-base font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2">
+                                  {resource.title}
+                                </h3>
+                              </div>
+                              {/* Context Menu Button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setContextMenu({ id: resource.id, x: e.clientX, y: e.clientY });
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  color: '#78716C',
+                                  marginLeft: '8px'
+                                }}
+                              >
+                                <MoreVertical size={16} />
+                              </button>
+                            </div>
 
-                      {/* Meta */}
-                      <div className="d-flex align-items-center gap-2" style={{ fontSize: '0.75rem', color: '#A8A29E' }}>
-                        <Clock size={12} />
-                        <span>{resource.lastAccessed}</span>
+                            {/* Metadata */}
+                            <div className="mb-4 flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                              <div className="flex items-center gap-1.5">
+                                <FileText className="w-3.5 h-3.5" />
+                                <span>{resource.size || 'N/A'}</span>
+                              </div>
+                            </div>
+
+                            {/* Action Button - only Preview */}
+                            <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                                className="group relative inline-block text-xs font-medium text-slate-700 transition-colors duration-300 hover:text-blue-600"
+                                style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                              >
+                                <motion.span
+                                  className="relative inline-block pb-0.5 flex items-center gap-1"
+                                  whileHover={{ x: 1 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  Preview
+                                  <span
+                                    className="absolute bottom-0 left-0 h-[1px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                                    style={{
+                                      width: 'calc(100% + 8px)',
+                                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                    }}
+                                  />
+                                </motion.span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnsave(resource.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  color: '#ff3e1d'
+                                }}
+                              >
+                                <BookmarkMinus size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
+                    </motion.div>
+                  );
+                }
 
-                      {/* Actions */}
-                      <div className="d-flex gap-2 mt-3">
-                        <button
-                          style={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '6px',
-                            padding: '8px',
-                            backgroundColor: '#696cff',
-                            color: '#FFFFFF',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '0.8125rem',
-                            fontWeight: 500,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <Eye size={14} />
-                          View
-                        </button>
-                        <button
-                          onClick={() => handleUnsave(resource.id)}
-                          style={{
-                            padding: '8px 12px',
-                            backgroundColor: 'transparent',
-                            border: '1px solid #E7E5E4',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            color: '#ff3e1d'
-                          }}
-                        >
-                          <BookmarkMinus size={14} />
-                        </button>
+                // Render Trial Questions card
+                if (category === 'trial-questions') {
+                  return (
+                    <motion.div
+                      key={resource.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg"
+                        style={{ borderColor: "hsl(40 20% 88%)" }}
+                      >
+                        {/* Top accent bar */}
+                        <div className="h-1 w-full bg-[hsl(40_20%_88%)]" />
+                        <div className="flex flex-col">
+                          {/* Content Section */}
+                          <div className="relative z-10 flex h-full flex-col p-4">
+                            {/* Badge and Title */}
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-1.5">
+                                <span className="px-2 py-1 text-xs font-bold rounded-md border-0 bg-gray-100 text-black">
+                                  {resource.subject || resource.type}
+                                </span>
+                              </div>
+                              {/* Context Menu Button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setContextMenu({ id: resource.id, x: e.clientX, y: e.clientY });
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  color: '#78716C'
+                                }}
+                              >
+                                <MoreVertical size={16} />
+                              </button>
+                            </div>
+                            <div className="mb-3">
+                              <h3 className="mb-2 text-base font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2">
+                                {resource.title}
+                              </h3>
+                            </div>
+
+                            {/* Metadata */}
+                            <div className="mb-4 flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                              <div className="flex items-center gap-1.5">
+                                <Target className="w-3.5 h-3.5" />
+                                <span>{resource.size || 'N/A'}</span>
+                                {resource.year && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{resource.year}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Action Button - only Preview */}
+                            <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                                className="group relative inline-block text-xs font-medium text-slate-700 transition-colors duration-300 hover:text-blue-600"
+                                style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                              >
+                                <motion.span
+                                  className="relative inline-block pb-0.5 flex items-center gap-1"
+                                  whileHover={{ x: 1 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  Preview
+                                  <span
+                                    className="absolute bottom-0 left-0 h-[1px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                                    style={{
+                                      width: 'calc(100% + 8px)',
+                                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                    }}
+                                  />
+                                </motion.span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnsave(resource.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  color: '#ff3e1d'
+                                }}
+                              >
+                                <BookmarkMinus size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                    </motion.div>
+                  );
+                }
+
+                // Render E-books card
+                if (category === 'ebooks') {
+                  return (
+                    <motion.div
+                      key={resource.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg"
+                        style={{ borderColor: "hsl(40 20% 88%)" }}
+                      >
+                        {/* Top accent bar */}
+                        <div className="h-1 w-full bg-[hsl(40_20%_88%)]" />
+                        <div className="flex flex-col">
+                          {/* Content Section */}
+                          <div className="relative z-10 flex h-full flex-col p-4">
+                            {/* Title and Type */}
+                            <div className="mb-3 flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="mb-1 text-xs font-medium text-[hsl(220_15%_45%)] uppercase tracking-wide">
+                                  {resource.type}
+                                </p>
+                                <h3 className="mb-2 text-base font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2">
+                                  {resource.title}
+                                </h3>
+                              </div>
+                              {/* Context Menu Button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setContextMenu({ id: resource.id, x: e.clientX, y: e.clientY });
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  color: '#78716C',
+                                  marginLeft: '8px'
+                                }}
+                              >
+                                <MoreVertical size={16} />
+                              </button>
+                            </div>
+
+                            {/* Metadata */}
+                            <div className="mb-4 flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                              <div className="flex items-center gap-1.5">
+                                <BookOpen className="w-3.5 h-3.5" />
+                                <span>{resource.size || 'N/A'}</span>
+                              </div>
+                            </div>
+
+                            {/* Action Button - only Preview */}
+                            <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                                className="group relative inline-block text-xs font-medium text-slate-700 transition-colors duration-300 hover:text-blue-600"
+                                style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                              >
+                                <motion.span
+                                  className="relative inline-block pb-0.5 flex items-center gap-1"
+                                  whileHover={{ x: 1 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  Preview
+                                  <span
+                                    className="absolute bottom-0 left-0 h-[1px] bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
+                                    style={{
+                                      width: 'calc(100% + 8px)',
+                                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)'
+                                    }}
+                                  />
+                                </motion.span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnsave(resource.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  color: '#ff3e1d'
+                                }}
+                              >
+                                <BookmarkMinus size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                }
+
+                return null;
+              })}
             </div>
           )}
         </div>
@@ -865,6 +1129,34 @@ const SavedResources: React.FC = () => {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        
+        .saved-resources-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+          margin-top: 2rem;
+        }
+
+        @media (min-width: 640px) {
+          .saved-resources-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .saved-resources-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+          }
+        }
+
+        @media (min-width: 1280px) {
+          .saved-resources-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+          }
         }
       `}</style>
     </div>
