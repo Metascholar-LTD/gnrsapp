@@ -15,6 +15,7 @@ const EmployerAuth = () => {
   // Form state for sign in
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
+  const [signInError, setSignInError] = useState("");
   
   // Form state for sign up
   const [signUpName, setSignUpName] = useState("");
@@ -23,6 +24,7 @@ const EmployerAuth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, feedback: [] as string[] });
   const [passwordMismatch, setPasswordMismatch] = useState(false);
+  const [signUpError, setSignUpError] = useState("");
 
   // Prevent scrolling on auth page
   useEffect(() => {
@@ -46,6 +48,7 @@ const EmployerAuth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setSignInError("");
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -53,7 +56,24 @@ const EmployerAuth = () => {
         password: signInPassword,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Provide user-friendly error messages
+        let errorMessage = "Failed to sign in. Please check your credentials.";
+        
+        if (error.message.includes("Invalid login credentials") || error.message.includes("Email not confirmed")) {
+          errorMessage = "Invalid email or password. Please check and try again.";
+        } else if (error.message.includes("Email rate limit exceeded")) {
+          errorMessage = "Too many login attempts. Please try again later.";
+        } else if (error.message.includes("User not found")) {
+          errorMessage = "No account found with this email address.";
+        } else {
+          errorMessage = error.message || errorMessage;
+        }
+        
+        setSignInError(errorMessage);
+        setIsLoading(false);
+        return;
+      }
 
       if (data.user) {
         // Check if employer profile exists
@@ -61,7 +81,7 @@ const EmployerAuth = () => {
           .from('employers' as any)
           .select('id, user_id, company_id, company_name')
           .eq('user_id', data.user.id)
-          .single();
+          .maybeSingle();
 
         // If profile doesn't exist, create one (shouldn't happen, but handle it)
         if (profileError || !employerProfile) {
@@ -88,7 +108,9 @@ const EmployerAuth = () => {
         }, 1000);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign in. Please check your credentials.");
+      const errorMessage = error.message || "An unexpected error occurred. Please try again.";
+      setSignInError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -162,9 +184,11 @@ const EmployerAuth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSignUpError("");
     
     // Validate password strength
     if (passwordStrength.score < 4) {
+      setSignUpError("Password is too weak. Please use a stronger password.");
       toast.error("Password is too weak. Please use a stronger password.");
       return;
     }
@@ -172,6 +196,7 @@ const EmployerAuth = () => {
     // Validate password match
     if (signUpPassword !== confirmPassword) {
       setPasswordMismatch(true);
+      setSignUpError("Passwords do not match. Please check and try again.");
       toast.error("Passwords do not match. Please check and try again.");
       return;
     }
@@ -191,7 +216,25 @@ const EmployerAuth = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Provide user-friendly error messages
+        let errorMessage = "Failed to create account. Please try again.";
+        
+        if (error.message.includes("User already registered")) {
+          errorMessage = "An account with this email already exists. Please sign in instead.";
+        } else if (error.message.includes("Password")) {
+          errorMessage = "Password does not meet requirements. Please use a stronger password.";
+        } else if (error.message.includes("Email")) {
+          errorMessage = "Invalid email address. Please check and try again.";
+        } else {
+          errorMessage = error.message || errorMessage;
+        }
+        
+        setSignUpError(errorMessage);
+        toast.error(errorMessage);
+        setIsLoading(false);
+        return;
+      }
 
       if (data.user) {
         // Step 2: Create employer profile in employers table
@@ -229,7 +272,9 @@ const EmployerAuth = () => {
       }
     } catch (error: any) {
       console.error("Sign up error:", error);
-      toast.error(error.message || "Failed to create account. Please try again.");
+      const errorMessage = error.message || "An unexpected error occurred. Please try again.";
+      setSignUpError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -857,24 +902,36 @@ const EmployerAuth = () => {
                 {/* Sign In Form */}
                 <form className="employer-sign-in-form" onSubmit={handleSignIn}>
                   <h2 className="employer-title">Sign in</h2>
-                  <div className="employer-input-field">
+                  <div className="employer-input-field" style={{
+                    borderColor: signInError ? '#ff3e1d' : undefined,
+                    borderWidth: signInError ? '2px' : undefined
+                  }}>
                     <Mail className="employer-input-icon" />
                     <input
                       type="email"
                       placeholder="Email"
                       value={signInEmail}
-                      onChange={(e) => setSignInEmail(e.target.value)}
+                      onChange={(e) => {
+                        setSignInEmail(e.target.value);
+                        if (signInError) setSignInError("");
+                      }}
                       required
                       disabled={isLoading}
                     />
                   </div>
-                  <div className="employer-input-field">
+                  <div className="employer-input-field" style={{
+                    borderColor: signInError ? '#ff3e1d' : undefined,
+                    borderWidth: signInError ? '2px' : undefined
+                  }}>
                     <Lock className="employer-input-icon" />
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
                       value={signInPassword}
-                      onChange={(e) => setSignInPassword(e.target.value)}
+                      onChange={(e) => {
+                        setSignInPassword(e.target.value);
+                        if (signInError) setSignInError("");
+                      }}
                       required
                       disabled={isLoading}
                     />
@@ -887,6 +944,19 @@ const EmployerAuth = () => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {signInError && (
+                    <div style={{
+                      color: '#ff3e1d',
+                      fontSize: '0.875rem',
+                      marginTop: '-8px',
+                      marginBottom: '8px',
+                      paddingLeft: '4px',
+                      textAlign: 'left',
+                      width: '100%'
+                    }}>
+                      {signInError}
+                    </div>
+                  )}
                   <button
                     type="submit"
                     className="employer-btn employer-solid"
@@ -914,24 +984,36 @@ const EmployerAuth = () => {
                 {/* Sign Up Form */}
                 <form className="employer-sign-up-form" onSubmit={handleSignUp}>
                   <h2 className="employer-title">Sign up</h2>
-                  <div className="employer-input-field">
+                  <div className="employer-input-field" style={{
+                    borderColor: signUpError ? '#ff3e1d' : undefined,
+                    borderWidth: signUpError ? '2px' : undefined
+                  }}>
                     <User className="employer-input-icon" />
                     <input
                       type="text"
                       placeholder="Company/Full Name"
                       value={signUpName}
-                      onChange={(e) => setSignUpName(e.target.value)}
+                      onChange={(e) => {
+                        setSignUpName(e.target.value);
+                        if (signUpError) setSignUpError("");
+                      }}
                       required
                       disabled={isLoading}
                     />
                   </div>
-                  <div className="employer-input-field">
+                  <div className="employer-input-field" style={{
+                    borderColor: signUpError ? '#ff3e1d' : undefined,
+                    borderWidth: signUpError ? '2px' : undefined
+                  }}>
                     <Mail className="employer-input-icon" />
                     <input
                       type="email"
                       placeholder="Email"
                       value={signUpEmail}
-                      onChange={(e) => setSignUpEmail(e.target.value)}
+                      onChange={(e) => {
+                        setSignUpEmail(e.target.value);
+                        if (signUpError) setSignUpError("");
+                      }}
                       required
                       disabled={isLoading}
                     />
@@ -1011,6 +1093,19 @@ const EmployerAuth = () => {
                       paddingLeft: '4px'
                     }}>
                       Passwords do not match
+                    </div>
+                  )}
+                  {signUpError && (
+                    <div style={{
+                      color: '#ff3e1d',
+                      fontSize: '0.875rem',
+                      marginTop: '-8px',
+                      marginBottom: '8px',
+                      paddingLeft: '4px',
+                      textAlign: 'left',
+                      width: '100%'
+                    }}>
+                      {signUpError}
                     </div>
                   )}
                   <button
