@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import {
   Briefcase,
@@ -15,9 +15,11 @@ import {
   X,
   ArrowLeft,
   ArrowRight,
-  Building2
+  Building2,
+  Loader2
 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const PAYMENT_TYPES = [
   { value: 'fixed', label: 'Fixed Amount' },
@@ -36,8 +38,11 @@ const STEPS = [
 
 const PostNewGig: React.FC = () => {
   const navigate = useNavigate();
+  const { gigId } = useParams<{ gigId?: string }>();
   const [currentStep, setCurrentStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -55,8 +60,17 @@ const PostNewGig: React.FC = () => {
 
   const [requirements, setRequirements] = useState<string[]>(['']);
 
-  // Auto-populate employer info from profile
+  // Load gig for editing if gigId is present
   useEffect(() => {
+    if (gigId && !isEditing) {
+      loadGigForEdit(gigId);
+    }
+  }, [gigId]);
+
+  // Auto-populate employer info from profile (only if not editing)
+  useEffect(() => {
+    if (isEditing) return; // Don't auto-populate if editing
+    
     const loadEmployerInfo = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -88,7 +102,7 @@ const PostNewGig: React.FC = () => {
     };
 
     loadEmployerInfo();
-  }, []);
+  }, [isEditing]);
 
   const updateRequirement = (index: number, value: string) => {
     const updated = [...requirements];
@@ -140,43 +154,113 @@ const PostNewGig: React.FC = () => {
     }
   };
 
+  const loadGigForEdit = async (id: string) => {
+    setLoading(true);
+    setIsEditing(true);
+    try {
+      const { data: gigData, error: gigError } = await supabase
+        .from('local_job_gigs' as any)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (gigError) throw gigError;
+
+      if (gigData) {
+        const gig = gigData as any;
+        
+        // Parse requirements if it's a string
+        let requirementsArray: string[] = [''];
+        if (gig.requirements) {
+          if (typeof gig.requirements === 'string') {
+            requirementsArray = gig.requirements.split('\n').filter(Boolean);
+            if (requirementsArray.length === 0) requirementsArray = [''];
+          } else if (Array.isArray(gig.requirements)) {
+            requirementsArray = gig.requirements.filter(Boolean);
+            if (requirementsArray.length === 0) requirementsArray = [''];
+          }
+        }
+
+        setFormData({
+          title: gig.title || '',
+          description: gig.description || '',
+          location: gig.location || '',
+          employer_name: gig.employer_name || '',
+          employer_phone: gig.employer_phone || '',
+          employer_email: gig.employer_email || '',
+          payment_type: gig.payment_type || '',
+          payment_amount: gig.payment_amount ? gig.payment_amount.toString() : '',
+          start_date: gig.start_date || '',
+          end_date: gig.end_date || '',
+          requirements: gig.requirements ? (typeof gig.requirements === 'string' ? gig.requirements : gig.requirements.join('\n')) : '',
+          what_to_expect: gig.what_to_expect || ''
+        });
+
+        setRequirements(requirementsArray);
+      }
+    } catch (error: any) {
+      console.error('Error loading gig for edit:', error);
+      toast.error('Failed to load gig data');
+      navigate('/employer/gigs-listing/all');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canProceed() || !isStepComplete(1) || !isStepComplete(2)) return;
 
     setSubmitting(true);
     try {
-      const { data, error } = await supabase
-        .from('local_job_gigs' as any)
-        .insert({
-          title: formData.title,
-          description: formData.description || null,
-          location: formData.location,
-          employer_name: formData.employer_name,
-          employer_phone: formData.employer_phone,
-          employer_email: formData.employer_email || null,
-          payment_type: formData.payment_type,
-          payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null,
-          start_date: formData.start_date || null,
-          end_date: formData.end_date || null,
-          requirements: formData.requirements || null,
-          what_to_expect: formData.what_to_expect || null,
-          status: 'pending',
-          verified: false,
-          views: 0,
-          applications: 0,
-          created_at: new Date().toISOString()
-        })
-        .select();
+      const payload = {
+        title: formData.title,
+        description: formData.description || null,
+        location: formData.location,
+        employer_name: formData.employer_name,
+        employer_phone: formData.employer_phone,
+        employer_email: formData.employer_email || null,
+        payment_type: formData.payment_type,
+        payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
+        requirements: formData.requirements || null,
+        what_to_expect: formData.what_to_expect || null,
+      };
 
-      if (error) throw error;
+      if (isEditing && gigId) {
+        // Update existing gig
+        const { error } = await supabase
+          .from('local_job_gigs' as any)
+          .update(payload)
+          .eq('id', gigId);
 
-      navigate('/employer/gigs-listing/all', { 
-        state: { message: 'Gig posted successfully! It will be reviewed before going live.' } 
-      });
+        if (error) throw error;
+
+        toast.success('Gig updated successfully!');
+        navigate('/employer/gigs-listing/all');
+      } else {
+        // Insert new gig
+        const { data, error } = await supabase
+          .from('local_job_gigs' as any)
+          .insert({
+            ...payload,
+            status: 'pending',
+            verified: false,
+            views: 0,
+            applications: 0,
+            created_at: new Date().toISOString()
+          })
+          .select();
+
+        if (error) throw error;
+
+        toast.success('Gig posted successfully! It will be reviewed before going live.');
+        navigate('/employer/gigs-listing/all');
+      }
     } catch (error: any) {
-      console.error('Error posting gig:', error);
-      alert('Error posting gig. Please try again.');
+      console.error('Error posting/updating gig:', error);
+      toast.error(error.message || 'Error saving gig. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -1132,6 +1216,20 @@ const PostNewGig: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <>
+        <style>{isolatedStyles}</style>
+        <div className="epng-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <Loader2 style={{ width: '2rem', height: '2rem', animation: 'spin 1s linear infinite', color: '#696cff', margin: '0 auto 1rem' }} />
+            <p style={{ color: '#54577A', fontSize: '0.9375rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Loading gig data...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <style>{isolatedStyles}</style>
@@ -1149,9 +1247,9 @@ const PostNewGig: React.FC = () => {
                 />
               </div>
               <div className="epng-header">
-                <h1 className="epng-title">Post a Gig</h1>
+                <h1 className="epng-title">{isEditing ? 'Edit Gig' : 'Post a Gig'}</h1>
                 <p className="epng-subtitle">
-                  Share your opportunity and connect with skilled workers in your area
+                  {isEditing ? 'Update your gig listing details' : 'Share your opportunity and connect with skilled workers in your area'}
                 </p>
               </div>
             </div>

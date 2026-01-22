@@ -459,6 +459,7 @@ const App = () => (
             <Route path="job-listings/*" element={<GenericPage title="Job Listings" description="Post and manage job listings" />} />
             <Route path="company" element={<EmployerCompanyManagement />} />
             <Route path="gigs-listing/post" element={<PostNewGig />} />
+            <Route path="gigs-listing/edit/:gigId" element={<PostNewGig />} />
             <Route path="gigs-listing/all" element={<AllGigs />} />
             <Route path="gigs-listing/*" element={<GenericPage title="Gigs Listing" description="Post and manage gig listings" />} />
             <Route path="applications/all" element={<Applications status="all" />} />

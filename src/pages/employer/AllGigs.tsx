@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Briefcase,
   Search,
@@ -34,6 +34,7 @@ interface Gig {
 }
 
 const AllGigs: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -872,6 +873,13 @@ const AllGigs: React.FC = () => {
                         </td>
                         <td>
                           <div className="ej-actions" style={{ justifyContent: 'flex-end' }}>
+                            <button 
+                              className="ej-action-btn" 
+                              title="Edit"
+                              onClick={() => navigate(`/employer/gigs-listing/edit/${gig.id}`)}
+                            >
+                              <Edit2 size={14} />
+                            </button>
                             <button 
                               className="ej-action-btn" 
                               title="Delete"
