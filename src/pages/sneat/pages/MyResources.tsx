@@ -19,8 +19,13 @@ import {
   ChevronDown,
   X,
   Loader2,
-  FolderOpen
+  FolderOpen,
+  Calendar,
+  User,
+  CheckCircle2,
+  Target
 } from 'lucide-react';
+import PageWrapper, { colors } from './shared/PageWrapper';
 
 // Types
 interface Resource {
@@ -206,19 +211,23 @@ const MyResources: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid p-0">
+      <PageWrapper>
         <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
           <div className="text-center">
-            <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: '#78716C', fontFamily: "'Source Sans Pro', sans-serif" }}>Loading resources...</p>
+            <Loader2
+              size={32}
+              className="mb-3"
+              style={{ animation: 'spin 1s linear infinite', color: colors.primary }}
+            />
+            <p style={{ color: colors.textSecondary, fontFamily: "'Source Sans Pro', sans-serif" }}>Loading resources...</p>
           </div>
         </div>
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="container-fluid p-0">
+    <PageWrapper>
       {/* Page Header */}
       <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4">
         <div>
@@ -243,10 +252,10 @@ const MyResources: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(105, 108, 255, 0.1)',
+                  backgroundColor: colors.bgLight,
                   borderRadius: '10px'
                 }}>
-                  <Download size={24} color="#696cff" />
+                  <Download size={24} style={{ color: colors.textSecondary }} />
                 </div>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.875rem', color: '#78716C' }}>Total Resources</p>
@@ -266,10 +275,10 @@ const MyResources: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(255, 171, 0, 0.1)',
+                  backgroundColor: colors.bgLight,
                   borderRadius: '10px'
                 }}>
-                  <HardDrive size={24} color="#ffab00" />
+                  <HardDrive size={24} style={{ color: colors.textSecondary }} />
                 </div>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.875rem', color: '#78716C' }}>Storage Used</p>
@@ -289,10 +298,10 @@ const MyResources: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(113, 221, 55, 0.1)',
+                  backgroundColor: colors.bgLight,
                   borderRadius: '10px'
                 }}>
-                  <TrendingUp size={24} color="#71dd37" />
+                  <TrendingUp size={24} style={{ color: colors.textSecondary }} />
                 </div>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <p style={{ margin: 0, fontSize: '0.875rem', color: '#78716C' }}>Most Accessed</p>
@@ -586,215 +595,311 @@ const MyResources: React.FC = () => {
           </div>
         </div>
       ) : viewMode === 'grid' || isMobile ? (
-        <div className="row g-3">
-          {filteredResources.map((resource, index) => (
-            <motion.div
-              key={resource.id}
-              className="col-lg-4 col-md-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <div
-                className="card h-100"
-                style={{
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {/* Thumbnail */}
-                <div style={{
-                  height: '140px',
-                  backgroundColor: getCategoryBgColor(resource.category),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '10px 10px 0 0',
-                  position: 'relative'
-                }}>
-                  {resource.category === 'ebooks' ? (
-                    <BookOpen size={48} color={getCategoryColor(resource.category)} />
-                  ) : (
-                    <FileText size={48} color={getCategoryColor(resource.category)} />
-                  )}
-                  {resource.progress !== undefined && (
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '12px',
-                      left: '12px',
-                      right: '12px',
-                      height: '4px',
-                      backgroundColor: 'rgba(255,255,255,0.5)',
-                      borderRadius: '2px',
-                      overflow: 'hidden'
-                    }}>
-                      <div style={{
-                        width: `${resource.progress}%`,
-                        height: '100%',
-                        backgroundColor: getCategoryColor(resource.category),
-                        borderRadius: '2px'
-                      }} />
-                    </div>
-                  )}
-                </div>
+        <div className="my-resources-grid">
+          {filteredResources.map((resource, index) => {
+            // Render Past Questions card (University Past Questions & SHS/BECE) - EXACT same size as ExamPaperCard
+            if (resource.category === 'university-past-questions' || resource.category === 'shs-bece') {
+              const examType = resource.category === 'shs-bece' ? 'SHS' : 'End of Semester';
+              const borderColor = examType === "SHS" 
+                ? "border-yellow-500" 
+                : "border-[hsl(40_20%_88%)]";
+              const accentColor = examType === "SHS"
+                ? "bg-yellow-500"
+                : "bg-[hsl(40_20%_88%)]";
+              
+              return (
+                <motion.div
+                  key={resource.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div className={`relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg ${borderColor}`}>
+                    {/* Top accent bar */}
+                    <div className={`h-1 w-full ${accentColor}`} />
+                    <div className="flex flex-col">
+                      {/* Content Section - same padding as ExamPaperCard */}
+                      <div className="relative z-10 flex h-full flex-col p-6">
+                        {/* Badge */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-2 py-1 text-xs font-bold rounded-md border-0 bg-gray-100 text-black">
+                              {resource.subject || resource.type}
+                            </span>
+                            {examType === "SHS" && (
+                              <span className="px-2 py-1 text-xs font-semibold rounded-md bg-yellow-500 text-yellow-900">
+                                {examType}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Title */}
+                        <div className="mb-3">
+                          <h3 className="mb-2 text-lg font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2">
+                            {resource.title}
+                          </h3>
+                        </div>
 
-                <div className="card-body">
-                  {/* Category Badge */}
-                  <span style={{
-                    display: 'inline-block',
-                    padding: '4px 10px',
-                    backgroundColor: getCategoryBgColor(resource.category),
-                    color: getCategoryColor(resource.category),
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    fontFamily: "'Source Sans Pro', sans-serif",
-                    marginBottom: '12px'
-                  }}>
-                    {resource.type}
-                  </span>
+                        {/* Metadata */}
+                        <div className="mb-4 flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>{resource.year || new Date().getFullYear()}</span>
+                            <span>•</span>
+                            <span>{resource.size}</span>
+                          </div>
+                        </div>
 
-                  {/* Title */}
-                  <h6 style={{
-                    fontFamily: "'Crimson Text', Georgia, serif",
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    color: '#1C1917',
-                    marginBottom: '8px',
-                    lineHeight: 1.4,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden'
-                  }}>
-                    {resource.title}
-                  </h6>
-
-                  {/* Meta Info */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    marginBottom: '16px',
-                    flexWrap: 'wrap'
-                  }}>
-                    <span style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '0.75rem',
-                      color: '#78716C'
-                    }}>
-                      <Clock size={12} />
-                      {resource.lastAccessed}
-                    </span>
-                    <span style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '0.75rem',
-                      color: '#78716C'
-                    }}>
-                      <HardDrive size={12} />
-                      {resource.size}
-                    </span>
-                  </div>
-
-                  {/* Progress */}
-                  {resource.progress !== undefined && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '4px'
-                      }}>
-                        <span style={{ fontSize: '0.75rem', color: '#78716C' }}>Progress</span>
-                        <span style={{ fontSize: '0.75rem', color: '#1C1917', fontWeight: 600 }}>
-                          {resource.progress}%
-                        </span>
-                      </div>
-                      <div style={{
-                        height: '6px',
-                        backgroundColor: '#F5F5F5',
-                        borderRadius: '3px',
-                        overflow: 'hidden'
-                      }}>
-                        <div style={{
-                          width: `${resource.progress}%`,
-                          height: '100%',
-                          backgroundColor: resource.progress === 100 ? '#71dd37' : '#696cff',
-                          borderRadius: '3px',
-                          transition: 'width 0.3s ease'
-                        }} />
+                        {/* Action Button - only Preview, no Download */}
+                        <div className="mt-auto flex items-center justify-end">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            className="group relative inline-block text-xs font-medium text-[hsl(220_30%_15%)] transition-colors duration-300 hover:text-[hsl(220_20%_40%)]"
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          >
+                            <motion.span
+                              className="relative inline-block pb-1 flex items-center gap-1.5"
+                              whileHover={{ x: 2 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              Preview
+                              <span
+                                className="absolute bottom-0 left-0 h-[2px] bg-[#60a5fa] transition-all duration-300 group-hover:bg-[#3b82f6]"
+                                style={{
+                                  width: 'calc(100% + 14px)',
+                                  clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                                }}
+                              />
+                            </motion.span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  )}
-
-                  {/* Actions */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    borderTop: '1px solid #F5F5F5',
-                    paddingTop: '12px',
-                    marginTop: 'auto'
-                  }}>
-                    <button
-                      style={{
-                        flex: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        padding: '8px',
-                        border: 'none',
-                        borderRadius: '6px',
-                        backgroundColor: '#696cff',
-                        color: '#FFFFFF',
-                        fontSize: '0.8125rem',
-                        fontWeight: 500,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Eye size={14} />
-                      View
-                    </button>
-                    <button
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #E7E5E4',
-                        borderRadius: '6px',
-                        backgroundColor: 'transparent',
-                        color: '#78716C',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Download size={14} />
-                    </button>
-                    <button
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #E7E5E4',
-                        borderRadius: '6px',
-                        backgroundColor: 'transparent',
-                        color: '#78716C',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Share2 size={14} />
-                    </button>
                   </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+                </motion.div>
+              );
+            }
+
+            // Render Lecture Notes card - EXACT same size as ExamPaperCard
+            if (resource.category === 'lecture-notes') {
+              return (
+                <motion.div
+                  key={resource.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg"
+                    style={{ borderColor: "hsl(40 20% 88%)" }}
+                  >
+                    {/* Top accent bar - same as ExamPaperCard */}
+                    <div className="h-1 w-full bg-[#bd9f67]" />
+                    <div className="flex flex-col">
+                      {/* Content Section - same padding as ExamPaperCard */}
+                      <div className="relative z-10 flex h-full flex-col p-6">
+                        {/* Title and Type */}
+                        <div className="mb-3">
+                          <p className="mb-1 text-xs font-medium text-[hsl(220_15%_45%)] uppercase tracking-wide">
+                            {resource.type}
+                          </p>
+                          <h3 className="mb-2 text-lg font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2">
+                            {resource.title}
+                          </h3>
+                        </div>
+
+                        {/* Metadata */}
+                        <div className="mb-4 flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                          <div className="flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>{resource.size}</span>
+                          </div>
+                        </div>
+
+                        {/* Action Button - only Preview, no Download */}
+                        <div className="mt-auto flex items-center justify-end">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            className="group relative inline-block text-xs font-medium text-[hsl(220_30%_15%)] transition-colors duration-300 hover:text-[hsl(220_20%_40%)]"
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          >
+                            <motion.span
+                              className="relative inline-block pb-1 flex items-center gap-1.5"
+                              whileHover={{ x: 2 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              Preview
+                              <span
+                                className="absolute bottom-0 left-0 h-[2px] bg-[#60a5fa] transition-all duration-300 group-hover:bg-[#3b82f6]"
+                                style={{
+                                  width: 'calc(100% + 14px)',
+                                  clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                                }}
+                              />
+                            </motion.span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            }
+
+            // Render Trial Questions card - EXACT same size as ExamPaperCard
+            if (resource.category === 'trial-questions') {
+              return (
+                <motion.div
+                  key={resource.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg"
+                    style={{ borderColor: "hsl(40 20% 88%)" }}
+                  >
+                    {/* Top accent bar - same as ExamPaperCard */}
+                    <div className="h-1 w-full bg-[hsl(40_20%_88%)]" />
+                    <div className="flex flex-col">
+                      {/* Content Section - same padding as ExamPaperCard */}
+                      <div className="relative z-10 flex h-full flex-col p-6">
+                        {/* Badge and Title */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-2 py-1 text-xs font-bold rounded-md border-0 bg-gray-100 text-black">
+                              {resource.subject || resource.type}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mb-3">
+                          <h3 className="mb-2 text-lg font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2">
+                            {resource.title}
+                          </h3>
+                        </div>
+
+                        {/* Metadata */}
+                        <div className="mb-4 flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                          <div className="flex items-center gap-1.5">
+                            <Target className="w-3.5 h-3.5" />
+                            <span>{resource.size}</span>
+                            {resource.year && (
+                              <>
+                                <span>•</span>
+                                <span>{resource.year}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Button - only Preview, no Download */}
+                        <div className="mt-auto flex items-center justify-end">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            className="group relative inline-block text-xs font-medium text-[hsl(220_30%_15%)] transition-colors duration-300 hover:text-[hsl(220_20%_40%)]"
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          >
+                            <motion.span
+                              className="relative inline-block pb-1 flex items-center gap-1.5"
+                              whileHover={{ x: 2 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              Preview
+                              <span
+                                className="absolute bottom-0 left-0 h-[2px] bg-[#60a5fa] transition-all duration-300 group-hover:bg-[#3b82f6]"
+                                style={{
+                                  width: 'calc(100% + 14px)',
+                                  clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                                }}
+                              />
+                            </motion.span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            }
+
+            // Render E-books card - EXACT same size as ExamPaperCard
+            if (resource.category === 'ebooks') {
+              return (
+                <motion.div
+                  key={resource.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 bg-white text-[hsl(220_30%_15%)] shadow-lg"
+                    style={{ borderColor: "hsl(40 20% 88%)" }}
+                  >
+                    {/* Top accent bar - same as ExamPaperCard */}
+                    <div className="h-1 w-full bg-[hsl(40_20%_88%)]" />
+                    <div className="flex flex-col">
+                      {/* Content Section - same padding as ExamPaperCard */}
+                      <div className="relative z-10 flex h-full flex-col p-6">
+                        {/* Title and Type */}
+                        <div className="mb-3">
+                          <p className="mb-1 text-xs font-medium text-[hsl(220_15%_45%)] uppercase tracking-wide">
+                            {resource.type}
+                          </p>
+                          <h3 className="mb-2 text-lg font-bold tracking-tight text-[hsl(220_30%_15%)] line-clamp-2">
+                            {resource.title}
+                          </h3>
+                        </div>
+
+                        {/* Metadata */}
+                        <div className="mb-4 flex items-center gap-3 text-xs text-[hsl(220_20%_40%)]">
+                          <div className="flex items-center gap-1.5">
+                            <BookOpen className="w-3.5 h-3.5" />
+                            <span>{resource.size}</span>
+                          </div>
+                        </div>
+
+                        {/* Action Button - only Preview, no Download */}
+                        <div className="mt-auto flex items-center justify-end">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            className="group relative inline-block text-xs font-medium text-[hsl(220_30%_15%)] transition-colors duration-300 hover:text-[hsl(220_20%_40%)]"
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          >
+                            <motion.span
+                              className="relative inline-block pb-1 flex items-center gap-1.5"
+                              whileHover={{ x: 2 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              Preview
+                              <span
+                                className="absolute bottom-0 left-0 h-[2px] bg-[#60a5fa] transition-all duration-300 group-hover:bg-[#3b82f6]"
+                                style={{
+                                  width: 'calc(100% + 14px)',
+                                  clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                                }}
+                              />
+                            </motion.span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            }
+
+            return null;
+          })}
         </div>
       ) : (
         <div className="card">
@@ -845,11 +950,11 @@ const MyResources: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: getCategoryBgColor(resource.category),
+                    backgroundColor: colors.bgLight,
                     borderRadius: '8px',
                     flexShrink: 0
                   }}>
-                    <FileText size={20} color={getCategoryColor(resource.category)} />
+                    <FileText size={20} style={{ color: colors.textSecondary }} />
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <h6 style={{
@@ -876,8 +981,8 @@ const MyResources: React.FC = () => {
                 <span style={{
                   display: 'inline-block',
                   padding: '4px 8px',
-                  backgroundColor: getCategoryBgColor(resource.category),
-                  color: getCategoryColor(resource.category),
+                  backgroundColor: colors.bgLight,
+                  color: colors.textSecondary,
                   borderRadius: '4px',
                   fontSize: '0.75rem',
                   fontWeight: 500
@@ -892,14 +997,14 @@ const MyResources: React.FC = () => {
                     <div style={{
                       width: '60px',
                       height: '6px',
-                      backgroundColor: '#F5F5F5',
+                      backgroundColor: colors.borderLight,
                       borderRadius: '3px',
                       overflow: 'hidden'
                     }}>
                       <div style={{
                         width: `${resource.progress}%`,
                         height: '100%',
-                        backgroundColor: resource.progress === 100 ? '#71dd37' : '#696cff',
+                        backgroundColor: colors.primary,
                         borderRadius: '3px'
                       }} />
                     </div>
@@ -913,7 +1018,7 @@ const MyResources: React.FC = () => {
                       padding: '6px 10px',
                       border: 'none',
                       borderRadius: '6px',
-                      backgroundColor: '#696cff',
+                      backgroundColor: colors.primary,
                       color: '#FFFFFF',
                       cursor: 'pointer',
                       display: 'flex',
@@ -928,26 +1033,14 @@ const MyResources: React.FC = () => {
                   <button
                     style={{
                       padding: '6px 8px',
-                      border: '1px solid #E7E5E4',
+                      border: `1px solid ${colors.border}`,
                       borderRadius: '6px',
                       backgroundColor: 'transparent',
-                      color: '#78716C',
+                      color: colors.textSecondary,
                       cursor: 'pointer'
                     }}
                   >
-                    <Download size={14} />
-                  </button>
-                  <button
-                    style={{
-                      padding: '6px 8px',
-                      border: '1px solid #E7E5E4',
-                      borderRadius: '6px',
-                      backgroundColor: 'transparent',
-                      color: '#ff3e1d',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Trash2 size={14} />
+                    <Trash2 size={14} style={{ color: colors.textMuted }} />
                   </button>
                 </div>
               </motion.div>
@@ -956,7 +1049,7 @@ const MyResources: React.FC = () => {
         </div>
       )}
 
-      {/* CSS for hiding scrollbar */}
+      {/* CSS for hiding scrollbar and grid layout */}
       <style>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
@@ -969,8 +1062,36 @@ const MyResources: React.FC = () => {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        
+        .my-resources-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+          margin-top: 2rem;
+        }
+
+        @media (min-width: 640px) {
+          .my-resources-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .my-resources-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+          }
+        }
+
+        @media (min-width: 1280px) {
+          .my-resources-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+          }
+        }
       `}</style>
-    </div>
+    </PageWrapper>
   );
 };
 

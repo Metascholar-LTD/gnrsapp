@@ -127,9 +127,6 @@ import CustomerInquiries from "./pages/sneat/pages/CustomerInquiries";
 import RatingsReviews from "./pages/sneat/pages/RatingsReviews";
 import PerformanceAnalytics from "./pages/sneat/pages/PerformanceAnalytics";
 import UserProfile from "./pages/sneat/pages/MyProfile";
-import CurrentPlan from "./pages/sneat/pages/CurrentPlan";
-import UpgradePlan from "./pages/sneat/pages/UpgradePlan";
-import PaymentHistory from "./pages/sneat/pages/PaymentHistory";
 import PrivacySettings from "./pages/sneat/pages/PrivacySettings";
 import NotificationSettings from "./pages/sneat/pages/NotificationSettings";
 import ProfileVisibility from "./pages/sneat/pages/ProfileVisibility";
@@ -375,11 +372,6 @@ const App = () => (
 
             {/* Profile */}
             <Route path="profile" element={<UserProfile />} />
-
-            {/* Subscription */}
-            <Route path="subscription/current" element={<CurrentPlan />} />
-            <Route path="subscription/upgrade" element={<UpgradePlan />} />
-            <Route path="subscription/history" element={<PaymentHistory />} />
 
             {/* Settings */}
             <Route path="settings/account" element={<AccountSettings />} />

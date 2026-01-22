@@ -21,6 +21,7 @@ import {
   Calendar,
   Loader2
 } from 'lucide-react';
+import PageWrapper, { colors } from './shared/PageWrapper';
 
 const AccountSettings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -99,17 +100,19 @@ const AccountSettings: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#696cff' }} />
-          <p style={{ color: '#8592a3' }}>Loading settings...</p>
-        </motion.div>
-      </div>
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: colors.primary }} />
+            <p style={{ color: colors.textSecondary }}>Loading settings...</p>
+          </motion.div>
+        </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <PageWrapper className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-bold" style={{ color: '#566a7f', fontFamily: 'Crimson Text, serif' }}>Account Settings</h1>
         <p style={{ color: '#8592a3' }} className="mt-1">Manage your account information and security</p>
@@ -346,7 +349,7 @@ const AccountSettings: React.FC = () => {
           </div>
         </motion.div>
       )}
-    </div>
+    </PageWrapper>
   );
 };
 

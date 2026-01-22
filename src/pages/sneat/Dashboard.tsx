@@ -26,6 +26,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { colors } from './pages/shared/PageWrapper';
 
 dayjs.extend(isoWeek);
 dayjs.extend(localizedFormat);
@@ -253,19 +254,21 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid p-0">
-        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
-          <div className="text-center">
-            <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite' }} />
-            <p>Loading dashboard...</p>
-          </div>
+      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
+        <div className="text-center">
+          <Loader2
+            size={32}
+            className="mb-3"
+            style={{ animation: 'spin 1s linear infinite', color: colors.primary }}
+          />
+          <p style={{ color: colors.textSecondary }}>Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container-fluid p-0">
+    <>
       <h1 className="h3 mb-3">
         <strong>User</strong> Dashboard
       </h1>
@@ -319,7 +322,7 @@ const Dashboard: React.FC = () => {
                   <div className="card-title d-flex align-items-start justify-content-between">
                     <div className="avatar flex-shrink-0">
                       <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(105, 108, 255, 0.1)', borderRadius: '8px' }}>
-                        <Briefcase size={24} color="#696cff" />
+                        <Briefcase size={24} style={{ color: colors.textSecondary }} />
                       </div>
                     </div>
                   </div>
@@ -338,7 +341,7 @@ const Dashboard: React.FC = () => {
                   <div className="card-title d-flex align-items-start justify-content-between">
                     <div className="avatar flex-shrink-0">
                       <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 171, 0, 0.1)', borderRadius: '8px' }}>
-                        <Award size={24} color="#ffab00" />
+                        <Award size={24} style={{ color: colors.textSecondary }} />
                       </div>
                     </div>
                   </div>
@@ -357,7 +360,7 @@ const Dashboard: React.FC = () => {
                   <div className="card-title d-flex align-items-start justify-content-between">
                     <div className="avatar flex-shrink-0">
                       <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(3, 195, 236, 0.1)', borderRadius: '8px' }}>
-                        <BookOpen size={24} color="#03c3ec" />
+                        <BookOpen size={24} style={{ color: colors.textSecondary }} />
                       </div>
                     </div>
                   </div>
@@ -375,7 +378,7 @@ const Dashboard: React.FC = () => {
                   <div className="card-title d-flex align-items-start justify-content-between">
                     <div className="avatar flex-shrink-0">
                       <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(45, 90, 71, 0.1)', borderRadius: '8px' }}>
-                        <Star size={24} color="#2D5A47" />
+                        <Star size={24} style={{ color: colors.textSecondary }} />
                       </div>
                     </div>
                   </div>
@@ -547,7 +550,7 @@ const Dashboard: React.FC = () => {
                       }}
                     >
                       <div className="avatar flex-shrink-0" style={{ width: '40px', height: '40px' }}>
-                        <div className="avatar-initial rounded-circle bg-label-primary" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 600, color: '#696cff' }}>
+                        <div className="avatar-initial rounded-circle" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 600, backgroundColor: colors.bgLight, color: colors.textSecondary }}>
                           {app.company.split(' ').map(n => n[0]).join('')}
                         </div>
                       </div>
@@ -647,7 +650,7 @@ const Dashboard: React.FC = () => {
                         gridTemplateColumns: '1fr 120px 100px',
                         alignItems: 'center',
                         padding: '16px 20px',
-                        background: index === 0 ? 'linear-gradient(90deg, rgba(105, 108, 255, 0.03) 0%, transparent 50%)' : '#FFFFFF',
+                        background: '#FFFFFF',
                         borderBottom: '1px solid #E7E5E4',
                         transition: 'background-color 0.15s ease',
                         textDecoration: 'none',
@@ -657,7 +660,7 @@ const Dashboard: React.FC = () => {
                         e.currentTarget.style.background = '#FAFAF9';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = index === 0 ? 'linear-gradient(90deg, rgba(105, 108, 255, 0.03) 0%, transparent 50%)' : '#FFFFFF';
+                        e.currentTarget.style.background = '#FFFFFF';
                       }}
                     >
                       <div style={{ minWidth: 0 }}>
@@ -746,7 +749,7 @@ const Dashboard: React.FC = () => {
                       fontSize: '0.75rem',
                       padding: '0.5rem 0.75rem',
                       whiteSpace: 'nowrap',
-                      backgroundColor: '#696cff',
+                      backgroundColor: colors.primary,
                       color: '#fff',
                       border: 'none',
                       borderRadius: '0.5rem',
@@ -767,7 +770,7 @@ const Dashboard: React.FC = () => {
                       fontSize: '0.75rem',
                       padding: '0.5rem 0.75rem',
                       whiteSpace: 'nowrap',
-                      backgroundColor: '#ffab00',
+                      backgroundColor: colors.primary,
                       color: '#fff',
                       border: 'none',
                       borderRadius: '0.5rem',
@@ -788,7 +791,7 @@ const Dashboard: React.FC = () => {
                       fontSize: '0.75rem',
                       padding: '0.5rem 0.75rem',
                       whiteSpace: 'nowrap',
-                      backgroundColor: '#03c3ec',
+                      backgroundColor: colors.primary,
                       color: '#fff',
                       border: 'none',
                       borderRadius: '0.5rem',
@@ -809,7 +812,7 @@ const Dashboard: React.FC = () => {
                       fontSize: '0.75rem',
                       padding: '0.5rem 0.75rem',
                       whiteSpace: 'nowrap',
-                      backgroundColor: '#71dd37',
+                      backgroundColor: colors.primary,
                       color: '#fff',
                       border: 'none',
                       borderRadius: '0.5rem',
@@ -830,87 +833,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Application Status Summary & Activity Summary Row */}
-      <div className="row">
-        <div className="col-md-6 col-lg-4 mb-4">
-          <div className="card h-100">
-            <div className="card-header d-flex align-items-center justify-content-between">
-              <h5 className="card-title m-0 me-2">Application Status</h5>
-            </div>
-            <div className="card-body">
-              <div className="d-flex flex-column gap-3">
-                <div className="d-flex align-items-center justify-content-between">
-                  <div className="d-flex align-items-center gap-2">
-                    <Clock size={18} color="#ffab00" />
-                    <span className="fw-semibold">Pending</span>
-                  </div>
-                  <span className="badge bg-label-warning rounded-pill">{stats.pending}</span>
-                </div>
-                <div className="d-flex align-items-center justify-content-between">
-                  <div className="d-flex align-items-center gap-2">
-                    <CheckCircle2 size={18} color="#71dd37" />
-                    <span className="fw-semibold">Shortlisted</span>
-                  </div>
-                  <span className="badge bg-label-success rounded-pill">{stats.shortlisted}</span>
-                </div>
-                <div className="d-flex align-items-center justify-content-between">
-                  <div className="d-flex align-items-center gap-2">
-                    <XCircle size={18} color="#ff3e1d" />
-                    <span className="fw-semibold">Rejected</span>
-                  </div>
-                  <span className="badge bg-label-danger rounded-pill">{stats.rejected}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 col-lg-4 mb-4">
-          <div className="card h-100">
-            <div className="card-header d-flex align-items-center justify-content-between">
-              <h5 className="card-title m-0 me-2">Activity Summary</h5>
-            </div>
-            <div className="card-body">
-              <ul className="p-0 m-0" style={{ listStyle: 'none' }}>
-                <li className="d-flex mb-3 pb-2 align-items-start" style={{ borderBottom: '1px solid #eceef1' }}>
-                  <div className="avatar flex-shrink-0 me-3">
-                    <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(105, 108, 255, 0.1)', borderRadius: '8px' }}>
-                      <Briefcase size={16} color="#696cff" />
-                    </div>
-                  </div>
-                  <div className="d-flex flex-column flex-grow-1">
-                    <span className="fw-semibold" style={{ fontSize: '0.875rem' }}>New job application</span>
-                    <small className="text-muted">2 days ago</small>
-                  </div>
-                </li>
-                <li className="d-flex mb-3 pb-2 align-items-start" style={{ borderBottom: '1px solid #eceef1' }}>
-                  <div className="avatar flex-shrink-0 me-3">
-                    <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 171, 0, 0.1)', borderRadius: '8px' }}>
-                      <Award size={16} color="#ffab00" />
-                    </div>
-                  </div>
-                  <div className="d-flex flex-column flex-grow-1">
-                    <span className="fw-semibold" style={{ fontSize: '0.875rem' }}>Scholarship saved</span>
-                    <small className="text-muted">5 days ago</small>
-                  </div>
-                </li>
-                <li className="d-flex align-items-start">
-                  <div className="avatar flex-shrink-0 me-3">
-                    <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(3, 195, 236, 0.1)', borderRadius: '8px' }}>
-                      <BookOpen size={16} color="#03c3ec" />
-                    </div>
-                  </div>
-                  <div className="d-flex flex-column flex-grow-1">
-                    <span className="fw-semibold" style={{ fontSize: '0.875rem' }}>Course completed</span>
-                    <small className="text-muted">1 week ago</small>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 

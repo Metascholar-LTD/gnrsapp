@@ -42,9 +42,11 @@ export const colors = {
 export const PageWrapper: React.FC<PageWrapperProps> = ({ children, className = '' }) => {
   return (
     <div
-      className={`w-full mx-auto px-4 sm:px-6 lg:px-8 ${className}`}
+      className={className}
       style={{
-        maxWidth: '1400px',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '16px 16px 32px',
         minHeight: '100%'
       }}
     >

@@ -25,6 +25,7 @@ import {
   MapPin,
   Users
 } from 'lucide-react';
+import PageWrapper, { colors } from './shared/PageWrapper';
 
 // Types
 interface Scholarship {
@@ -224,9 +225,7 @@ const ScholarshipRecommendations: React.FC = () => {
     });
 
   const getMatchScoreColor = (score: number) => {
-    if (score >= 80) return '#71dd37';
-    if (score >= 60) return '#ffab00';
-    return '#ff3e1d';
+    return colors.primary;
   };
 
   const getDaysRemaining = (deadline: string) => {
@@ -237,19 +236,23 @@ const ScholarshipRecommendations: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid p-0">
+      <PageWrapper>
         <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
           <div className="text-center">
-            <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: '#78716C', fontFamily: "'Source Sans Pro', sans-serif" }}>Finding best matches...</p>
+            <Loader2
+              size={32}
+              className="mb-3"
+              style={{ animation: 'spin 1s linear infinite', color: colors.primary }}
+            />
+            <p style={{ color: colors.textSecondary, fontFamily: "'Source Sans Pro', sans-serif" }}>Finding best matches...</p>
           </div>
         </div>
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="container-fluid p-0">
+    <PageWrapper>
       {/* Page Header */}
       <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4">
         <div>
@@ -300,10 +303,10 @@ const ScholarshipRecommendations: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(255, 171, 0, 0.1)',
+                  backgroundColor: colors.bgLight,
                   borderRadius: '10px'
                 }}>
-                  <AlertCircle size={20} color="#ffab00" />
+                  <AlertCircle size={20} style={{ color: colors.textSecondary }} />
                 </div>
                 <div>
                   <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1C1917', margin: 0 }}>
@@ -318,10 +321,10 @@ const ScholarshipRecommendations: React.FC = () => {
                 <div style={{ width: '120px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                     <span style={{ fontSize: '0.75rem', color: '#78716C' }}>Progress</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ffab00' }}>{profileComplete}%</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: colors.textSecondary }}>{profileComplete}%</span>
                   </div>
-                  <div style={{ height: '6px', backgroundColor: 'rgba(255, 171, 0, 0.2)', borderRadius: '3px' }}>
-                    <div style={{ width: `${profileComplete}%`, height: '100%', backgroundColor: '#ffab00', borderRadius: '3px' }} />
+                  <div style={{ height: '6px', backgroundColor: colors.borderLight, borderRadius: '3px' }}>
+                    <div style={{ width: `${profileComplete}%`, height: '100%', backgroundColor: colors.primary, borderRadius: '3px' }} />
                   </div>
                 </div>
                 <Link
@@ -331,7 +334,7 @@ const ScholarshipRecommendations: React.FC = () => {
                     alignItems: 'center',
                     gap: '6px',
                     padding: '8px 16px',
-                    backgroundColor: '#ffab00',
+                    backgroundColor: colors.primary,
                     color: '#FFFFFF',
                     borderRadius: '6px',
                     textDecoration: 'none',
@@ -350,7 +353,7 @@ const ScholarshipRecommendations: React.FC = () => {
 
       {/* Stats Summary */}
       <div className="row g-3 mb-4">
-        <div className="col-md-4">
+            <div className="col-md-4">
           <div className="card h-100">
             <div className="card-body">
               <div className="d-flex align-items-center gap-3">
@@ -360,10 +363,10 @@ const ScholarshipRecommendations: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(105, 108, 255, 0.1)',
+                  backgroundColor: colors.primaryLight,
                   borderRadius: '10px'
                 }}>
-                  <Sparkles size={24} color="#696cff" />
+                  <Sparkles size={24} color={colors.primary} />
                 </div>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.75rem', color: '#78716C' }}>Total Matches</p>
@@ -383,10 +386,10 @@ const ScholarshipRecommendations: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(113, 221, 55, 0.1)',
+                  backgroundColor: colors.primaryLight,
                   borderRadius: '10px'
                 }}>
-                  <Target size={24} color="#71dd37" />
+                  <Target size={24} color={colors.primary} />
                 </div>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.75rem', color: '#78716C' }}>High Matches (80%+)</p>
@@ -408,10 +411,10 @@ const ScholarshipRecommendations: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(255, 171, 0, 0.1)',
+                  backgroundColor: colors.primaryLight,
                   borderRadius: '10px'
                 }}>
-                  <Clock size={24} color="#ffab00" />
+                  <Clock size={24} color={colors.primary} />
                 </div>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.75rem', color: '#78716C' }}>Closing Soon</p>
@@ -560,7 +563,7 @@ const ScholarshipRecommendations: React.FC = () => {
                   className="card"
                   style={{
                     transition: 'all 0.2s ease',
-                    border: scholarship.matchScore >= 90 ? '1px solid rgba(113, 221, 55, 0.3)' : '1px solid #E7E5E4'
+                    border: '1px solid #E7E5E4'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)';
@@ -616,13 +619,13 @@ const ScholarshipRecommendations: React.FC = () => {
                                   alignItems: 'center',
                                   gap: '4px',
                                   padding: '3px 8px',
-                                  backgroundColor: 'rgba(113, 221, 55, 0.1)',
-                                  color: '#71dd37',
+                                  backgroundColor: colors.bgLight,
+                                  color: colors.textSecondary,
                                   borderRadius: '4px',
                                   fontSize: '0.7rem',
                                   fontWeight: 600
                                 }}>
-                                  <Sparkles size={12} />
+                                  <Sparkles size={12} style={{ color: colors.textMuted }} />
                                   Top Match
                                 </span>
                               )}
@@ -674,13 +677,13 @@ const ScholarshipRecommendations: React.FC = () => {
                                 alignItems: 'center',
                                 gap: '4px',
                                 padding: '4px 10px',
-                                backgroundColor: 'rgba(105, 108, 255, 0.08)',
-                                color: '#696cff',
+                                backgroundColor: colors.bgLight,
+                                color: colors.textSecondary,
                                 borderRadius: '4px',
                                 fontSize: '0.75rem'
                               }}
                             >
-                              <CheckCircle2 size={12} />
+                              <CheckCircle2 size={12} style={{ color: colors.textMuted }} />
                               {reason}
                             </span>
                           ))}
@@ -695,11 +698,11 @@ const ScholarshipRecommendations: React.FC = () => {
                           <span className="d-flex align-items-center gap-1">
                             <Calendar size={14} />
                             {daysRemaining > 0 ? (
-                              <span style={{ color: daysRemaining <= 14 ? '#ff3e1d' : daysRemaining <= 30 ? '#ffab00' : '#78716C' }}>
+                              <span style={{ color: colors.textSecondary }}>
                                 {daysRemaining} days left
                               </span>
                             ) : (
-                              <span style={{ color: '#ff3e1d' }}>Expired</span>
+                              <span style={{ color: colors.textMuted }}>Expired</span>
                             )}
                           </span>
                           <span className="d-flex align-items-center gap-1">
@@ -834,7 +837,7 @@ const ScholarshipRecommendations: React.FC = () => {
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
-    </div>
+    </PageWrapper>
   );
 };
 

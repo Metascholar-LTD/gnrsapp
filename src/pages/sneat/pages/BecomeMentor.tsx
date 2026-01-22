@@ -166,7 +166,7 @@ const BecomeMentor: React.FC = () => {
       {!showForm ? (
         <>
           {/* Hero Section */}
-          <div className="card mb-4" style={{ background: 'linear-gradient(135deg, #696cff 0%, #5a5de0 100%)', color: '#FFFFFF' }}>
+          <div className="card mb-4" style={{ backgroundColor: '#5c6bc0', color: '#FFFFFF' }}>
             <div className="card-body py-5">
               <div className="row align-items-center">
                 <div className="col-lg-8">

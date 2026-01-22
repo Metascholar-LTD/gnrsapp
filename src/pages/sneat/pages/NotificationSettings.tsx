@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Mail, Smartphone, MessageSquare, Calendar, DollarSign, Users, Star, Briefcase, Shield, CheckCircle2, Save, Loader2 } from 'lucide-react';
+import PageWrapper, { colors } from './shared/PageWrapper';
 
 const NotificationSettings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,40 +32,42 @@ const NotificationSettings: React.FC = () => {
   };
 
   const ToggleSwitch = ({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
-    <button onClick={onToggle} className="relative w-12 h-6 rounded-full transition-colors" style={{ backgroundColor: enabled ? '#696cff' : '#e7e7e8' }}>
+    <button onClick={onToggle} className="relative w-12 h-6 rounded-full transition-colors" style={{ backgroundColor: enabled ? colors.primary : '#e7e7e8' }}>
       <motion.div animate={{ x: enabled ? 24 : 2 }} className="absolute top-1 w-4 h-4 rounded-full bg-white shadow" />
     </button>
   );
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#696cff' }} />
-          <p style={{ color: '#8592a3' }}>Loading notification settings...</p>
-        </motion.div>
-      </div>
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: colors.primary }} />
+            <p style={{ color: colors.textSecondary }}>Loading notification settings...</p>
+          </motion.div>
+        </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <PageWrapper className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-bold" style={{ color: '#566a7f', fontFamily: 'Crimson Text, serif' }}>Notification Settings</h1>
-        <p style={{ color: '#8592a3' }} className="mt-1">Manage how you receive notifications</p>
+        <h1 className="text-2xl font-bold" style={{ color: colors.textPrimary, fontFamily: 'Crimson Text, serif' }}>Notification Settings</h1>
+        <p style={{ color: colors.textSecondary }} className="mt-1">Manage how you receive notifications</p>
       </motion.div>
 
       {saveSuccess && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-4 rounded-lg" style={{ backgroundColor: '#e8faef' }}>
-          <CheckCircle2 size={20} style={{ color: '#71dd37' }} />
-          <span style={{ color: '#71dd37' }}>Notification preferences saved!</span>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-4 rounded-lg" style={{ backgroundColor: colors.successLight }}>
+          <CheckCircle2 size={20} style={{ color: colors.success }} />
+          <span style={{ color: colors.success }}>Notification preferences saved!</span>
         </motion.div>
       )}
 
       {/* Email Notifications */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-xl p-6" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-lg" style={{ backgroundColor: '#696cff15' }}><Mail size={20} style={{ color: '#696cff' }} /></div>
+          <div className="p-2.5 rounded-lg" style={{ backgroundColor: colors.primaryLight }}><Mail size={20} style={{ color: colors.primary }} /></div>
           <div>
             <h3 className="font-semibold" style={{ color: '#566a7f' }}>Email Notifications</h3>
             <p className="text-sm" style={{ color: '#8592a3' }}>Receive updates via email</p>
@@ -96,7 +99,7 @@ const NotificationSettings: React.FC = () => {
       {/* Push Notifications */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-xl p-6" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-lg" style={{ backgroundColor: '#03c3ec15' }}><Bell size={20} style={{ color: '#03c3ec' }} /></div>
+          <div className="p-2.5 rounded-lg" style={{ backgroundColor: colors.infoLight }}><Bell size={20} style={{ color: colors.info }} /></div>
           <div>
             <h3 className="font-semibold" style={{ color: '#566a7f' }}>Push Notifications</h3>
             <p className="text-sm" style={{ color: '#8592a3' }}>Real-time notifications on your device</p>
@@ -125,7 +128,7 @@ const NotificationSettings: React.FC = () => {
       {/* SMS Notifications */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-xl p-6" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-lg" style={{ backgroundColor: '#71dd3715' }}><Smartphone size={20} style={{ color: '#71dd37' }} /></div>
+          <div className="p-2.5 rounded-lg" style={{ backgroundColor: colors.successLight }}><Smartphone size={20} style={{ color: colors.success }} /></div>
           <div>
             <h3 className="font-semibold" style={{ color: '#566a7f' }}>SMS Notifications</h3>
             <p className="text-sm" style={{ color: '#8592a3' }}>Text message alerts</p>
@@ -151,7 +154,7 @@ const NotificationSettings: React.FC = () => {
       {/* Quiet Hours */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-xl p-6" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-lg" style={{ backgroundColor: '#ffab0015' }}><Shield size={20} style={{ color: '#ffab00' }} /></div>
+          <div className="p-2.5 rounded-lg" style={{ backgroundColor: colors.warningLight }}><Shield size={20} style={{ color: colors.warning }} /></div>
           <div>
             <h3 className="font-semibold" style={{ color: '#566a7f' }}>Quiet Hours</h3>
             <p className="text-sm" style={{ color: '#8592a3' }}>Pause notifications during specific times</p>
@@ -172,12 +175,12 @@ const NotificationSettings: React.FC = () => {
 
       {/* Save Button */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="flex justify-end">
-        <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors" style={{ backgroundColor: '#696cff', color: 'white' }}>
+        <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors" style={{ backgroundColor: colors.primary, color: 'white' }}>
           {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
           Save Notification Settings
         </button>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 };
 

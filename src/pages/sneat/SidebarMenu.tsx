@@ -34,9 +34,6 @@ const SidebarMenu: React.FC = () => {
         path.startsWith('/userprofile/analytics')) {
       menusToOpen.add('services');
     }
-    if (path.startsWith('/userprofile/subscription/')) {
-      menusToOpen.add('subscription');
-    }
     if (path.startsWith('/userprofile/settings/')) {
       menusToOpen.add('settings');
     }
@@ -279,31 +276,6 @@ const SidebarMenu: React.FC = () => {
           <Icon icon="hugeicons:user-circle" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="My Profile">My Profile</div>
         </Link>
-      </li>
-
-      {/* Subscription */}
-      <li className={`menu-item ${isMenuOpen('subscription') ? 'open' : ''}`}>
-        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('subscription', e)}>
-          <Icon icon="hugeicons:wallet-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="Subscription">Subscription</div>
-        </a>
-        <ul className={`menu-sub ${isMenuOpen('subscription') ? 'show' : ''}`}>
-          <li className="menu-item">
-            <Link to="/userprofile/subscription/current" className="menu-link">
-              <div data-i18n="Current Plan">Current Plan</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/subscription/upgrade" className="menu-link">
-              <div data-i18n="Upgrade Plan">Upgrade Plan</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/subscription/history" className="menu-link">
-              <div data-i18n="Payment History">Payment History</div>
-            </Link>
-          </li>
-        </ul>
       </li>
 
       {/* Settings */}

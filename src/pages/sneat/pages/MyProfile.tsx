@@ -25,6 +25,7 @@ import {
   Building2,
   Link as LinkIcon
 } from 'lucide-react';
+import PageWrapper, { colors } from './shared/PageWrapper';
 
 // Types
 interface Education {
@@ -190,27 +191,30 @@ const MyProfile: React.FC = () => {
 
   if (loading || !profile) {
     return (
-      <div className="container-fluid p-0">
+      <PageWrapper>
         <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
           <div className="text-center">
-            <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: '#78716C', fontFamily: "'Source Sans Pro', sans-serif" }}>Loading profile...</p>
+            <Loader2
+              size={32}
+              className="mb-3"
+              style={{ animation: 'spin 1s linear infinite', color: colors.primary }}
+            />
+            <p style={{ color: colors.textSecondary, fontFamily: "'Source Sans Pro', sans-serif" }}>Loading profile...</p>
           </div>
         </div>
-      </div>
+      </PageWrapper>
     );
   }
 
   const completeness = calculateCompleteness();
 
   return (
-    <div className="container-fluid p-0">
+    <PageWrapper>
       {/* Cover Photo & Avatar */}
       <div className="card mb-4" style={{ overflow: 'hidden' }}>
         <div style={{
           height: '180px',
-          backgroundColor: 'linear-gradient(135deg, #696cff 0%, #03c3ec 100%)',
-          background: 'linear-gradient(135deg, #696cff 0%, #03c3ec 100%)',
+          backgroundColor: colors.primaryLight,
           position: 'relative'
         }}>
           <button style={{
@@ -244,19 +248,21 @@ const MyProfile: React.FC = () => {
             backgroundColor: '#FFFFFF',
             padding: '4px'
           }}>
-            <div style={{
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(105, 108, 255, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#696cff',
-              fontSize: '2.5rem',
-              fontWeight: 600,
-              position: 'relative'
-            }}>
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                backgroundColor: colors.primaryLight,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: colors.primary,
+                fontSize: '2.5rem',
+                fontWeight: 600,
+                position: 'relative'
+              }}
+            >
               {profile.firstName[0]}{profile.lastName[0]}
               <button style={{
                 position: 'absolute',
@@ -305,15 +311,15 @@ const MyProfile: React.FC = () => {
               <div style={{ padding: '16px', backgroundColor: '#FAFAF9', borderRadius: '8px' }}>
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Profile Completeness</span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: completeness >= 80 ? '#71dd37' : completeness >= 50 ? '#ffab00' : '#ff3e1d' }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: completeness >= 80 ? colors.success : completeness >= 50 ? colors.warning : colors.error }}>
                     {completeness}%
                   </span>
                 </div>
-                <div style={{ height: '8px', backgroundColor: '#E7E5E4', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: '8px', backgroundColor: colors.borderLight, borderRadius: '4px', overflow: 'hidden' }}>
                   <div style={{
                     width: `${completeness}%`,
                     height: '100%',
-                    backgroundColor: completeness >= 80 ? '#71dd37' : completeness >= 50 ? '#ffab00' : '#ff3e1d',
+                    backgroundColor: completeness >= 80 ? colors.success : completeness >= 50 ? colors.warning : colors.error,
                     borderRadius: '4px',
                     transition: 'width 0.3s ease'
                   }} />
@@ -572,7 +578,7 @@ const MyProfile: React.FC = () => {
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
-    </div>
+    </PageWrapper>
   );
 };
 

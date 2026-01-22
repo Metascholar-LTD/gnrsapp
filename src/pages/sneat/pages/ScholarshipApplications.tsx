@@ -22,6 +22,7 @@ import {
   Upload,
   AlertTriangle
 } from 'lucide-react';
+import PageWrapper, { colors } from './shared/PageWrapper';
 
 // Types
 interface Application {
@@ -206,22 +207,17 @@ const ScholarshipApplications: React.FC = () => {
 
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { icon: React.ReactNode; color: string; bg: string; label: string }> = {
-      'applied': { icon: <Clock size={14} />, color: '#8592a3', bg: 'rgba(133, 146, 163, 0.1)', label: 'Applied' },
-      'under-review': { icon: <AlertCircle size={14} />, color: '#03c3ec', bg: 'rgba(3, 195, 236, 0.1)', label: 'Under Review' },
-      'shortlisted': { icon: <Award size={14} />, color: '#ffab00', bg: 'rgba(255, 171, 0, 0.1)', label: 'Shortlisted' },
-      'accepted': { icon: <CheckCircle2 size={14} />, color: '#71dd37', bg: 'rgba(113, 221, 55, 0.1)', label: 'Accepted' },
-      'rejected': { icon: <XCircle size={14} />, color: '#ff3e1d', bg: 'rgba(255, 62, 29, 0.1)', label: 'Rejected' }
+      'applied': { icon: <Clock size={14} />, color: colors.textSecondary, bg: colors.bgLight, label: 'Applied' },
+      'under-review': { icon: <AlertCircle size={14} />, color: colors.textSecondary, bg: colors.bgLight, label: 'Under Review' },
+      'shortlisted': { icon: <Award size={14} />, color: colors.textSecondary, bg: colors.bgLight, label: 'Shortlisted' },
+      'accepted': { icon: <CheckCircle2 size={14} />, color: colors.textSecondary, bg: colors.bgLight, label: 'Accepted' },
+      'rejected': { icon: <XCircle size={14} />, color: colors.textSecondary, bg: colors.bgLight, label: 'Rejected' }
     };
     return configs[status] || configs['applied'];
   };
 
   const getDocumentStatusColor = (status: string) => {
-    switch (status) {
-      case 'uploaded': return '#71dd37';
-      case 'pending': return '#ffab00';
-      case 'expired': return '#ff3e1d';
-      default: return '#8592a3';
-    }
+    return colors.textMuted;
   };
 
   const getDaysRemaining = (deadline: string) => {
@@ -240,19 +236,23 @@ const ScholarshipApplications: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container-fluid p-0">
+      <PageWrapper>
         <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
           <div className="text-center">
-            <Loader2 size={32} className="mb-3" style={{ animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: '#78716C', fontFamily: "'Source Sans Pro', sans-serif" }}>Loading applications...</p>
+            <Loader2
+              size={32}
+              className="mb-3"
+              style={{ animation: 'spin 1s linear infinite', color: colors.primary }}
+            />
+            <p style={{ color: colors.textSecondary, fontFamily: "'Source Sans Pro', sans-serif" }}>Loading applications...</p>
           </div>
         </div>
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="container-fluid p-0">
+    <PageWrapper>
       {/* Page Header */}
       <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4">
         <div>
@@ -517,13 +517,13 @@ const ScholarshipApplications: React.FC = () => {
                                   alignItems: 'center',
                                   gap: '4px',
                                   padding: '3px 8px',
-                                  backgroundColor: 'rgba(255, 171, 0, 0.1)',
-                                  color: '#ffab00',
+                                  backgroundColor: colors.bgLight,
+                                  color: colors.textSecondary,
                                   borderRadius: '4px',
                                   fontSize: '0.75rem',
                                   fontWeight: 500
                                 }}>
-                                  <AlertTriangle size={12} />
+                                  <AlertTriangle size={12} style={{ color: colors.textMuted }} />
                                   {pendingDocs} docs pending
                                 </span>
                               )}
@@ -575,10 +575,10 @@ const ScholarshipApplications: React.FC = () => {
                             alignItems: 'center',
                             gap: '4px',
                             fontSize: '0.75rem',
-                            color: daysRemaining <= 7 ? '#ff3e1d' : daysRemaining <= 30 ? '#ffab00' : '#71dd37',
+                            color: colors.textSecondary,
                             marginTop: '4px'
                           }}>
-                            <Clock size={12} />
+                            <Clock size={12} style={{ color: colors.textMuted }} />
                             {daysRemaining} days left
                           </span>
                         )}
@@ -647,23 +647,23 @@ const ScholarshipApplications: React.FC = () => {
                               alignItems: 'center',
                               gap: '8px',
                               padding: '6px 12px',
-                              backgroundColor: event.status === 'completed' ? 'rgba(113, 221, 55, 0.1)' : event.status === 'current' ? 'rgba(105, 108, 255, 0.1)' : '#F5F5F5',
+                              backgroundColor: colors.bgLight,
                               borderRadius: '20px',
                               whiteSpace: 'nowrap'
                             }}>
-                              {event.status === 'completed' && <CheckCircle2 size={14} color="#71dd37" />}
-                              {event.status === 'current' && <Clock size={14} color="#696cff" />}
-                              {event.status === 'upcoming' && <Calendar size={14} color="#A8A29E" />}
+                              {event.status === 'completed' && <CheckCircle2 size={14} style={{ color: colors.textMuted }} />}
+                              {event.status === 'current' && <Clock size={14} style={{ color: colors.textMuted }} />}
+                              {event.status === 'upcoming' && <Calendar size={14} style={{ color: colors.textMuted }} />}
                               <span style={{
                                 fontSize: '0.75rem',
                                 fontWeight: event.status === 'current' ? 600 : 400,
-                                color: event.status === 'completed' ? '#71dd37' : event.status === 'current' ? '#696cff' : '#78716C'
+                                color: colors.textSecondary
                               }}>
                                 {event.event}
                               </span>
                             </div>
                             {i < app.timeline.length - 1 && (
-                              <ChevronRight size={16} color="#D6D3D1" style={{ flexShrink: 0 }} />
+                              <ChevronRight size={16} style={{ color: colors.border, flexShrink: 0 }} />
                             )}
                           </React.Fragment>
                         ))}
@@ -788,17 +788,17 @@ const ScholarshipApplications: React.FC = () => {
                         padding: '12px 16px',
                         backgroundColor: '#FAFAF9',
                         borderRadius: '8px',
-                        border: doc.status === 'pending' ? '1px dashed #ffab00' : '1px solid transparent'
+                        border: doc.status === 'pending' ? `1px dashed ${colors.border}` : `1px solid ${colors.borderLight}`
                       }}
                     >
                       <div className="d-flex align-items-center gap-3">
-                        <FileText size={18} color={getDocumentStatusColor(doc.status)} />
+                        <FileText size={18} style={{ color: colors.textMuted }} />
                         <span style={{ fontSize: '0.875rem', color: '#1C1917' }}>{doc.name}</span>
                       </div>
                       <div className="d-flex align-items-center gap-2">
                         {doc.status === 'uploaded' && (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: '#71dd37' }}>
-                            <CheckCircle2 size={14} />
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: colors.textSecondary }}>
+                            <CheckCircle2 size={14} style={{ color: colors.textMuted }} />
                             Uploaded
                           </span>
                         )}
@@ -808,7 +808,7 @@ const ScholarshipApplications: React.FC = () => {
                             alignItems: 'center',
                             gap: '4px',
                             padding: '6px 12px',
-                            backgroundColor: '#ffab00',
+                            backgroundColor: colors.primary,
                             color: '#FFFFFF',
                             border: 'none',
                             borderRadius: '4px',
@@ -840,7 +840,7 @@ const ScholarshipApplications: React.FC = () => {
                           top: '24px',
                           bottom: 0,
                           width: '2px',
-                          backgroundColor: event.status === 'completed' ? '#71dd37' : '#E7E5E4'
+                          backgroundColor: colors.borderLight
                         }} />
                       )}
                       {/* Dot */}
@@ -851,15 +851,15 @@ const ScholarshipApplications: React.FC = () => {
                         width: '10px',
                         height: '10px',
                         borderRadius: '50%',
-                        backgroundColor: event.status === 'completed' ? '#71dd37' : event.status === 'current' ? '#696cff' : '#E7E5E4',
-                        border: event.status === 'current' ? '3px solid rgba(105, 108, 255, 0.2)' : 'none'
+                        backgroundColor: event.status === 'current' ? colors.primary : colors.borderLight,
+                        border: event.status === 'current' ? `3px solid ${colors.primaryLight}` : 'none'
                       }} />
                       {/* Content */}
                       <div>
                         <p style={{
                           fontSize: '0.875rem',
                           fontWeight: event.status === 'current' ? 600 : 400,
-                          color: event.status === 'upcoming' ? '#A8A29E' : '#1C1917',
+                          color: event.status === 'upcoming' ? colors.textMuted : '#1C1917',
                           margin: '0 0 4px 0'
                         }}>
                           {event.event}
@@ -921,7 +921,7 @@ const ScholarshipApplications: React.FC = () => {
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
-    </div>
+    </PageWrapper>
   );
 };
 

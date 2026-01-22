@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, Users, MapPin, Phone, Mail, Calendar, Briefcase, Lock, Globe, AlertCircle, CheckCircle2, Save, Loader2 } from 'lucide-react';
+import PageWrapper, { colors } from './shared/PageWrapper';
 
 const PrivacySettings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,39 +40,41 @@ const PrivacySettings: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#696cff' }} />
-          <p style={{ color: '#8592a3' }}>Loading privacy settings...</p>
-        </motion.div>
-      </div>
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: colors.primary }} />
+            <p style={{ color: colors.textSecondary }}>Loading privacy settings...</p>
+          </motion.div>
+        </div>
+      </PageWrapper>
     );
   }
 
   const ToggleSwitch = ({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
-    <button onClick={onToggle} className="relative w-12 h-6 rounded-full transition-colors" style={{ backgroundColor: enabled ? '#696cff' : '#e7e7e8' }}>
+    <button onClick={onToggle} className="relative w-12 h-6 rounded-full transition-colors" style={{ backgroundColor: enabled ? colors.primary : '#e7e7e8' }}>
       <motion.div animate={{ x: enabled ? 24 : 2 }} className="absolute top-1 w-4 h-4 rounded-full bg-white shadow" />
     </button>
   );
 
   return (
-    <div className="space-y-6">
+    <PageWrapper className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-bold" style={{ color: '#566a7f', fontFamily: 'Crimson Text, serif' }}>Privacy Settings</h1>
-        <p style={{ color: '#8592a3' }} className="mt-1">Control who can see your information</p>
+        <h1 className="text-2xl font-bold" style={{ color: colors.textPrimary, fontFamily: 'Crimson Text, serif' }}>Privacy Settings</h1>
+        <p style={{ color: colors.textSecondary }} className="mt-1">Control who can see your information</p>
       </motion.div>
 
       {saveSuccess && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-4 rounded-lg" style={{ backgroundColor: '#e8faef' }}>
-          <CheckCircle2 size={20} style={{ color: '#71dd37' }} />
-          <span style={{ color: '#71dd37' }}>Privacy settings updated successfully!</span>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 p-4 rounded-lg" style={{ backgroundColor: colors.successLight }}>
+          <CheckCircle2 size={20} style={{ color: colors.success }} />
+          <span style={{ color: colors.success }}>Privacy settings updated successfully!</span>
         </motion.div>
       )}
 
       {/* Profile Visibility */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-xl p-6" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-lg" style={{ backgroundColor: '#696cff15' }}><Globe size={20} style={{ color: '#696cff' }} /></div>
+          <div className="p-2.5 rounded-lg" style={{ backgroundColor: colors.primaryLight }}><Globe size={20} style={{ color: colors.primary }} /></div>
           <div>
             <h3 className="font-semibold" style={{ color: '#566a7f' }}>Profile Visibility</h3>
             <p className="text-sm" style={{ color: '#8592a3' }}>Choose who can view your profile</p>
@@ -95,7 +98,7 @@ const PrivacySettings: React.FC = () => {
       {/* Information Visibility */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-xl p-6" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-lg" style={{ backgroundColor: '#03c3ec15' }}><Eye size={20} style={{ color: '#03c3ec' }} /></div>
+          <div className="p-2.5 rounded-lg" style={{ backgroundColor: colors.infoLight }}><Eye size={20} style={{ color: colors.info }} /></div>
           <div>
             <h3 className="font-semibold" style={{ color: '#566a7f' }}>Information Visibility</h3>
             <p className="text-sm" style={{ color: '#8592a3' }}>Control what information others can see</p>
@@ -126,7 +129,7 @@ const PrivacySettings: React.FC = () => {
       {/* Activity & Data */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-xl p-6" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-lg" style={{ backgroundColor: '#71dd3715' }}><Shield size={20} style={{ color: '#71dd37' }} /></div>
+          <div className="p-2.5 rounded-lg" style={{ backgroundColor: colors.successLight }}><Shield size={20} style={{ color: colors.success }} /></div>
           <div>
             <h3 className="font-semibold" style={{ color: '#566a7f' }}>Activity & Data</h3>
             <p className="text-sm" style={{ color: '#8592a3' }}>Manage your data and activity settings</p>
@@ -167,12 +170,12 @@ const PrivacySettings: React.FC = () => {
 
       {/* Save Button */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="flex justify-end">
-        <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors" style={{ backgroundColor: '#696cff', color: 'white' }}>
+        <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors" style={{ backgroundColor: colors.primary, color: 'white' }}>
           {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
           Save Privacy Settings
         </button>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { HelpCircle, Search, MessageCircle, Phone, Mail, FileText, ChevronDown, ChevronRight, Book, Video, Users, Zap, Shield, CreditCard, Settings, ExternalLink, Send, Loader2 } from 'lucide-react';
+import PageWrapper, { colors } from './shared/PageWrapper';
 
 const HelpSupport: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -17,12 +18,12 @@ const HelpSupport: React.FC = () => {
   }, []);
 
   const categories = [
-    { id: 'getting-started', label: 'Getting Started', icon: Zap, color: '#696cff' },
-    { id: 'account', label: 'Account & Profile', icon: Users, color: '#03c3ec' },
-    { id: 'services', label: 'Services & Bookings', icon: Book, color: '#71dd37' },
-    { id: 'payments', label: 'Payments & Billing', icon: CreditCard, color: '#ffab00' },
-    { id: 'security', label: 'Security & Privacy', icon: Shield, color: '#ff3e1d' },
-    { id: 'technical', label: 'Technical Issues', icon: Settings, color: '#8592a3' }
+    { id: 'getting-started', label: 'Getting Started', icon: Zap },
+    { id: 'account', label: 'Account & Profile', icon: Users },
+    { id: 'services', label: 'Services & Bookings', icon: Book },
+    { id: 'payments', label: 'Payments & Billing', icon: CreditCard },
+    { id: 'security', label: 'Security & Privacy', icon: Shield },
+    { id: 'technical', label: 'Technical Issues', icon: Settings }
   ];
 
   const faqs = [
@@ -56,26 +57,28 @@ const HelpSupport: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#696cff' }} />
-          <p style={{ color: '#8592a3' }}>Loading help center...</p>
-        </motion.div>
-      </div>
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: colors.primary }} />
+            <p style={{ color: colors.textSecondary }}>Loading help center...</p>
+          </motion.div>
+        </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <PageWrapper className="space-y-6">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-        <h1 className="text-2xl font-bold" style={{ color: '#566a7f', fontFamily: 'Crimson Text, serif' }}>Help & Support</h1>
-        <p style={{ color: '#8592a3' }} className="mt-1">Find answers or get in touch with our team</p>
+        <h1 className="text-2xl font-bold" style={{ color: colors.textPrimary, fontFamily: 'Crimson Text, serif' }}>Help & Support</h1>
+        <p style={{ color: colors.textSecondary }} className="mt-1">Find answers or get in touch with our team</p>
       </motion.div>
 
       {/* Search */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative max-w-2xl mx-auto">
-        <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#8592a3' }} />
+        <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: colors.textSecondary }} />
         <input type="text" placeholder="Search for help articles, FAQs, or topics..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-4 rounded-xl border focus:outline-none focus:ring-2 text-lg" style={{ borderColor: '#e7e7e8' }} />
       </motion.div>
 
@@ -88,8 +91,8 @@ const HelpSupport: React.FC = () => {
         ].map((option, index) => (
           <button key={option.label} className="bg-white rounded-xl p-5 text-left hover:shadow-md transition-shadow" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
             <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl" style={{ backgroundColor: `${option.color}15` }}>
-                <option.icon size={24} style={{ color: option.color }} />
+              <div className="p-3 rounded-xl" style={{ backgroundColor: colors.primaryLight }}>
+                <option.icon size={24} style={{ color: colors.primary }} />
               </div>
               <div className="flex-1">
                 <p className="font-semibold" style={{ color: '#566a7f' }}>{option.label}</p>
@@ -106,9 +109,26 @@ const HelpSupport: React.FC = () => {
         <h2 className="font-semibold mb-4" style={{ color: '#566a7f' }}>Browse by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {categories.map((cat) => (
-            <button key={cat.id} onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)} className={`p-4 rounded-xl border-2 text-center transition-all ${selectedCategory === cat.id ? 'border-2' : 'hover:bg-gray-50'}`} style={{ borderColor: selectedCategory === cat.id ? cat.color : '#e7e7e8' }}>
-              <cat.icon size={24} className="mx-auto mb-2" style={{ color: selectedCategory === cat.id ? cat.color : '#8592a3' }} />
-              <p className="text-sm font-medium" style={{ color: selectedCategory === cat.id ? cat.color : '#566a7f' }}>{cat.label}</p>
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+              className="p-4 rounded-xl border-2 text-center transition-all"
+              style={{
+                borderColor: selectedCategory === cat.id ? '#8592a3' : colors.borderLight,
+                backgroundColor: selectedCategory === cat.id ? '#f5f5f9' : '#f7f7f9'
+              }}
+            >
+              <cat.icon
+                size={24}
+                className="mx-auto mb-2"
+                style={{ color: selectedCategory === cat.id ? '#8592a3' : '#8592a3' }}
+              />
+              <p
+                className="text-sm font-medium"
+                style={{ color: colors.textPrimary }}
+              >
+                {cat.label}
+              </p>
             </button>
           ))}
         </div>
@@ -151,7 +171,7 @@ const HelpSupport: React.FC = () => {
       {/* Submit Ticket */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white rounded-xl p-6" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-lg" style={{ backgroundColor: '#696cff15' }}><FileText size={20} style={{ color: '#696cff' }} /></div>
+          <div className="p-2.5 rounded-lg" style={{ backgroundColor: colors.primaryLight }}><FileText size={20} style={{ color: colors.primary }} /></div>
           <div>
             <h3 className="font-semibold" style={{ color: '#566a7f' }}>Submit a Support Ticket</h3>
             <p className="text-sm" style={{ color: '#8592a3' }}>Can't find what you're looking for? Send us a message.</p>
@@ -194,7 +214,7 @@ const HelpSupport: React.FC = () => {
           <button className="flex items-center gap-2 text-sm font-medium" style={{ color: '#71dd37' }}>View Docs<ExternalLink size={14} /></button>
         </div>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 };
 
