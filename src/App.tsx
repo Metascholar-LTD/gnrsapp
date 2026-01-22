@@ -142,6 +142,7 @@ import AllGigs from "./pages/employer/AllGigs";
 import Applications from "./pages/employer/Applications";
 import ApplicationDetail from "./pages/employer/ApplicationDetail";
 import Drafts from "./pages/employer/Drafts";
+import EmployerProfileSettings from "./pages/employer/EmployerProfileSettings";
 // Scholarly Ranking Platform
 import ScholarlyIndex from "./pages/scholarly/Index";
 import ScholarlyRankings from "./pages/scholarly/Rankings";
@@ -468,6 +469,7 @@ const App = () => (
             <Route path="candidates/*" element={<GenericPage title="Candidates" description="Shortlist and message candidates" />} />
             <Route path="analytics" element={<GenericPage title="Analytics" description="View candidate analytics" />} />
             <Route path="subscription/*" element={<GenericPage title="Subscription & Billing" description="Manage subscription and billing" />} />
+            <Route path="settings/account" element={<EmployerProfileSettings />} />
             <Route path="settings/*" element={<GenericPage title="Settings" description="Account settings" />} />
             <Route path="support" element={<GenericPage title="Support" description="Help & Support" />} />
             <Route path="*" element={<GenericPage title="Page" />} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Briefcase,
@@ -15,8 +15,11 @@ import {
   Calendar,
   MapPin,
   Users,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Job {
   id: string;
@@ -28,60 +31,216 @@ interface Job {
   postedDate: string;
   location: string;
   category: string;
+  is_draft?: boolean;
 }
 
-const AllJobs: React.FC = () => {
+interface AllJobsProps {
+  showDraftsOnly?: boolean;
+}
+
+const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with Supabase later
-  const [jobs] = useState<Job[]>([
-    {
-      id: '1',
-      title: 'Senior Marketing Manager',
-      company: 'Tech Solutions Ltd',
-      status: 'active',
-      applications: 24,
-      views: 156,
-      postedDate: '2024-01-15',
-      location: 'Accra, Greater Accra',
-      category: 'Marketing'
-    },
-    {
-      id: '2',
-      title: 'Frontend Developer',
-      company: 'Digital Innovations',
-      status: 'pending',
-      applications: 12,
-      views: 89,
-      postedDate: '2024-01-20',
-      location: 'Kumasi, Ashanti',
-      category: 'IT'
-    },
-    {
-      id: '3',
-      title: 'HR Specialist',
-      company: 'Global Corp',
-      status: 'active',
-      applications: 8,
-      views: 67,
-      postedDate: '2024-01-18',
-      location: 'Accra, Greater Accra',
-      category: 'HR'
-    },
-    {
-      id: '4',
-      title: 'Sales Executive',
-      company: 'Retail Plus',
-      status: 'draft',
-      applications: 0,
-      views: 0,
-      postedDate: '2024-01-22',
-      location: 'Tamale, Northern',
-      category: 'Sales'
+  useEffect(() => {
+    loadJobs();
+  }, [showDraftsOnly]);
+
+  const loadJobs = async () => {
+    setLoading(true);
+    try {
+      // Get employer's company
+      let companyId: string | null = null;
+      let companyName: string | null = null;
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Get employer profile to find associated company
+          const { data: employerProfile } = await supabase
+            .from('employers' as any)
+            .select('company_id, company_name')
+            .eq('user_id', user.id)
+            .single();
+
+          if (employerProfile) {
+            companyId = employerProfile.company_id;
+            companyName = employerProfile.company_name;
+          }
+        }
+      } catch (authError) {
+        // Auth not connected yet - will work when auth is connected
+        console.log("Auth not available, will show empty state");
+      }
+
+      // If no company found, show empty state
+      if (!companyId && !companyName) {
+        setJobs([]);
+        setLoading(false);
+        return;
+      }
+
+      // Build queries filtered by company
+      let jobsQuery = supabase
+        .from('jobs' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      let internshipsQuery = supabase
+        .from('internships' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      let nssQuery = supabase
+        .from('nss_programs' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      let graduateQuery = supabase
+        .from('graduate_programs' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Filter by company_id if available, otherwise by company name
+      if (companyId) {
+        jobsQuery = jobsQuery.eq('company_id', companyId);
+        // For other tables, filter by company name since they might not have company_id
+        if (companyName) {
+          internshipsQuery = internshipsQuery.eq('company', companyName);
+          nssQuery = nssQuery.eq('company', companyName);
+          graduateQuery = graduateQuery.eq('company', companyName);
+        }
+      } else if (companyName) {
+        // Fallback: filter by company name
+        jobsQuery = jobsQuery.eq('company', companyName);
+        internshipsQuery = internshipsQuery.eq('company', companyName);
+        nssQuery = nssQuery.eq('company', companyName);
+        graduateQuery = graduateQuery.eq('company', companyName);
+      }
+
+      // Load jobs from jobs table
+      const { data: jobsData, error: jobsError } = await jobsQuery;
+
+      if (jobsError) {
+        console.error("Error loading jobs:", jobsError);
+        toast.error("Failed to load jobs");
+        setJobs([]);
+        return;
+      }
+
+      // Load internships
+      const { data: internshipsData, error: internshipsError } = await internshipsQuery;
+
+      // Load NSS programs
+      const { data: nssData, error: nssError } = await nssQuery;
+
+      // Load graduate programs
+      const { data: graduateData, error: graduateError } = await graduateQuery;
+
+      // Transform all jobs into unified format
+      const allJobs: Job[] = [];
+
+      // Transform jobs
+      if (jobsData) {
+        jobsData.forEach((item: any) => {
+          // Determine status
+          let status: 'active' | 'pending' | 'draft' | 'closed' = 'pending';
+          if (item.is_draft) {
+            status = 'draft';
+          } else if (item.verified) {
+            status = 'active';
+          } else {
+            status = 'pending';
+          }
+
+          allJobs.push({
+            id: item.id,
+            title: item.title,
+            company: item.company,
+            status,
+            applications: 0, // TODO: Get from applications table
+            views: 0, // TODO: Track views
+            postedDate: item.date || item.created_at,
+            location: `${item.region || ''}${item.city ? `, ${item.city}` : ''}`.trim() || 'Not specified',
+            category: item.job_category || 'Other',
+            is_draft: item.is_draft || false
+          });
+        });
+      }
+
+      // Transform internships
+      if (internshipsData) {
+        internshipsData.forEach((item: any) => {
+          allJobs.push({
+            id: item.id,
+            title: item.title,
+            company: item.company,
+            status: item.is_draft ? 'draft' : 'pending',
+            applications: 0,
+            views: 0,
+            postedDate: item.posted || item.created_at,
+            location: item.location || 'Not specified',
+            category: 'Internship',
+            is_draft: item.is_draft || false
+          });
+        });
+      }
+
+      // Transform NSS programs
+      if (nssData) {
+        nssData.forEach((item: any) => {
+          allJobs.push({
+            id: item.id,
+            title: item.title,
+            company: item.company,
+            status: item.is_draft ? 'draft' : 'pending',
+            applications: 0,
+            views: 0,
+            postedDate: item.posted || item.created_at,
+            location: item.location || 'Not specified',
+            category: 'NSS Program',
+            is_draft: item.is_draft || false
+          });
+        });
+      }
+
+      // Transform graduate programs
+      if (graduateData) {
+        graduateData.forEach((item: any) => {
+          allJobs.push({
+            id: item.id,
+            title: item.title,
+            company: item.company,
+            status: item.is_draft ? 'draft' : 'pending',
+            applications: 0,
+            views: 0,
+            postedDate: item.posted || item.created_at,
+            location: item.location || 'Not specified',
+            category: 'Graduate Program',
+            is_draft: item.is_draft || false
+          });
+        });
+      }
+
+      // Filter based on showDraftsOnly prop
+      if (showDraftsOnly) {
+        // Only show drafts
+        setJobs(allJobs.filter(job => job.is_draft === true || job.status === 'draft'));
+      } else {
+        // Filter out drafts from "all" view (drafts should only appear in Drafts page)
+        setJobs(allJobs.filter(job => !job.is_draft && job.status !== 'draft'));
+      }
+    } catch (error: any) {
+      console.error("Error loading jobs:", error);
+      toast.error("Failed to load jobs");
+      setJobs([]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
   const getStatusBadge = (status: string) => {
     const styles = {
@@ -111,7 +270,14 @@ const AllJobs: React.FC = () => {
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          job.company.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || job.status === statusFilter;
+    // If showing drafts only, always show all drafts regardless of status filter
+    if (showDraftsOnly) {
+      return matchesSearch;
+    }
+    // Filter out drafts from "all" view - drafts should only appear in Drafts page
+    const matchesStatus = statusFilter === 'all' 
+      ? (job.status !== 'draft') // Exclude drafts from "all" view
+      : job.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -461,6 +627,11 @@ const AllJobs: React.FC = () => {
           font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
           .ej-table-wrapper {
             display: none;
@@ -474,8 +645,8 @@ const AllJobs: React.FC = () => {
       <div className="ej-page">
         <div className="ej-header">
           <div>
-            <h1 className="ej-title">All Jobs</h1>
-            <p className="ej-subtitle">Manage and track all your job postings</p>
+            <h1 className="ej-title">{showDraftsOnly ? 'Drafts' : 'All Jobs'}</h1>
+            <p className="ej-subtitle">{showDraftsOnly ? 'Continue editing your saved drafts' : 'Manage and track all your job postings'}</p>
           </div>
           <Link to="/employer/job-listings/post" className="ej-btn-primary">
             <Plus size={16} />
@@ -568,11 +739,28 @@ const AllJobs: React.FC = () => {
               </div>
             </div>
 
-            {filteredJobs.length === 0 ? (
+            {loading ? (
+              <div className="ej-empty">
+                <Loader2 className="ej-empty-icon" style={{ animation: 'spin 1s linear infinite' }} />
+                <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Loading jobs...</p>
+              </div>
+            ) : filteredJobs.length === 0 ? (
               <div className="ej-empty">
                 <Briefcase className="ej-empty-icon" />
-                <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>No jobs found</p>
-                <p style={{ fontSize: '0.875rem' }}>Try adjusting your search or filters</p>
+                <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                  {jobs.length === 0 ? 'No jobs posted yet' : 'No jobs found'}
+                </p>
+                <p style={{ fontSize: '0.875rem' }}>
+                  {jobs.length === 0 
+                    ? 'Start by posting your first job listing' 
+                    : 'Try adjusting your search or filters'}
+                </p>
+                {jobs.length === 0 && (
+                  <Link to="/employer/job-listings/post" className="ej-btn-primary" style={{ marginTop: '1rem' }}>
+                    <Plus size={16} />
+                    Post Your First Job
+                  </Link>
+                )}
               </div>
             ) : (
               <>

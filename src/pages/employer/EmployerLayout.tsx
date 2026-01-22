@@ -1,14 +1,170 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import NotificationMenu from '../sneat/components/NotificationMenu';
 import EmployerSidebarMenu from './EmployerSidebarMenu';
 
 const EmployerLayout: React.FC = () => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuCollapsed, setMenuCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('Employer');
+  const [user, setUser] = useState<any>(null);
+  const [imageError, setImageError] = useState(false);
   const location = useLocation();
+
+  const getInitials = (name: string) => {
+    if (!name) return 'E';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error || !user) {
+          // Not authenticated, redirect to auth page
+          setIsAuthenticated(false);
+          setIsCheckingAuth(false);
+          navigate('/employer/auth', { 
+            state: { from: location.pathname },
+            replace: true 
+          });
+          return;
+        }
+
+        // Check if employer profile exists and load profile data
+        const { data: employerProfile, error: profileError } = await supabase
+          .from('employers' as any)
+          .select('id, user_id, full_name, profile_image, company_name')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError || !employerProfile) {
+          // Profile doesn't exist - this shouldn't happen, but handle it
+          console.warn("Employer profile not found for user:", user.id);
+          // Still allow access - profile can be created later
+        } else {
+          // Load profile image and name
+          if (employerProfile.profile_image) {
+            setProfileImage(employerProfile.profile_image);
+          }
+          if (employerProfile.full_name) {
+            setUserName(employerProfile.full_name);
+          } else if (employerProfile.company_name) {
+            setUserName(employerProfile.company_name);
+          } else if (user.email) {
+            setUserName(user.email.split('@')[0]);
+          }
+        }
+
+        setUser(user);
+        setIsAuthenticated(true);
+        setIsCheckingAuth(false);
+      } catch (error) {
+        console.error("Auth check error:", error);
+        setIsAuthenticated(false);
+        setIsCheckingAuth(false);
+        navigate('/employer/auth', { 
+          state: { from: location.pathname },
+          replace: true 
+        });
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setIsAuthenticated(false);
+        navigate('/employer/auth', { replace: true });
+      } else if (event === 'SIGNED_IN' && session) {
+        setIsAuthenticated(true);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, location.pathname]);
+
+  // Load profile image and name when user changes
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const loadProfile = async () => {
+      try {
+        const { data: employerProfile } = await supabase
+          .from('employers' as any)
+          .select('full_name, profile_image, company_name')
+          .eq('user_id', user.id)
+          .single();
+
+        if (employerProfile) {
+          if (employerProfile.profile_image) {
+            setProfileImage(employerProfile.profile_image);
+            setImageError(false); // Reset error state when new image is loaded
+          }
+          if (employerProfile.full_name) {
+            setUserName(employerProfile.full_name);
+          } else if (employerProfile.company_name) {
+            setUserName(employerProfile.company_name);
+          } else if (user.email) {
+            setUserName(user.email.split('@')[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    };
+
+    loadProfile();
+  }, [user?.id, location.pathname]);
+
+  // Listen for profile update events
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      if (user?.id) {
+        supabase
+          .from('employers' as any)
+          .select('full_name, profile_image, company_name')
+          .eq('user_id', user.id)
+          .single()
+          .then(({ data: profile }) => {
+            if (profile) {
+              if (profile.profile_image) {
+                setProfileImage(profile.profile_image);
+                setImageError(false); // Reset error state when new image is loaded
+              }
+              if (profile.full_name) {
+                setUserName(profile.full_name);
+              } else if (profile.company_name) {
+                setUserName(profile.company_name);
+              }
+            }
+          });
+      }
+    };
+
+    window.addEventListener('employerProfileUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('employerProfileUpdated', handleProfileUpdate);
+    };
+  }, [user?.id]);
 
   // Check if mobile on mount and handle responsive behavior
   useEffect(() => {
@@ -97,6 +253,43 @@ const EmployerLayout: React.FC = () => {
   const toggleMenuCollapse = () => {
     setMenuCollapsed(!menuCollapsed);
   };
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontFamily: "'Plus Jakarta Sans', sans-serif"
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #f3f3f3',
+            borderTop: '4px solid #696cff',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }}></div>
+          <p style={{ color: '#54577A', fontSize: '0.875rem' }}>Loading...</p>
+        </div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Don't render layout if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
@@ -938,7 +1131,19 @@ const EmployerLayout: React.FC = () => {
                 <li className="nav-item navbar-dropdown dropdown-user dropdown">
                   <a className="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown">
                     <div className="avatar avatar-online">
-                      <img src="/sneat-assets/img/avatars/1.png" alt="" className="w-px-40 h-auto rounded-circle" />
+                      {profileImage && !imageError ? (
+                        <img 
+                          src={profileImage} 
+                          alt={userName} 
+                          className="w-px-40 h-auto rounded-circle" 
+                          style={{ objectFit: 'cover' }}
+                          onError={() => setImageError(true)}
+                        />
+                      ) : (
+                        <div className="w-px-40 h-px-40 rounded-circle d-flex align-items-center justify-content-center" style={{ backgroundColor: '#696cff', color: '#fff', fontSize: '0.875rem', fontWeight: 600 }}>
+                          {getInitials(userName)}
+                        </div>
+                      )}
                     </div>
                   </a>
                   <ul className="dropdown-menu dropdown-menu-end">
@@ -947,11 +1152,23 @@ const EmployerLayout: React.FC = () => {
                         <div className="d-flex">
                           <div className="flex-shrink-0 me-3">
                             <div className="avatar avatar-online">
-                              <img src="/sneat-assets/img/avatars/1.png" alt="" className="w-px-40 h-auto rounded-circle" />
+                              {profileImage && !imageError ? (
+                                <img 
+                                  src={profileImage} 
+                                  alt={userName} 
+                                  className="w-px-40 h-auto rounded-circle" 
+                                  style={{ objectFit: 'cover' }}
+                                  onError={() => setImageError(true)}
+                                />
+                              ) : (
+                                <div className="w-px-40 h-px-40 rounded-circle d-flex align-items-center justify-content-center" style={{ backgroundColor: '#696cff', color: '#fff', fontSize: '0.875rem', fontWeight: 600 }}>
+                                  {getInitials(userName)}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="flex-grow-1">
-                            <span className="fw-semibold d-block">Employer</span>
+                            <span className="fw-semibold d-block">{userName}</span>
                             <small className="text-muted">Business Account</small>
                           </div>
                         </div>
@@ -961,10 +1178,10 @@ const EmployerLayout: React.FC = () => {
                       <div className="dropdown-divider"></div>
                     </li>
                     <li>
-                      <a className="dropdown-item" href="#">
+                      <Link className="dropdown-item" to="/employer/settings/account">
                         <Icon icon="hugeicons:user-circle" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">My Profile</span>
-                      </a>
+                      </Link>
                     </li>
                     <li>
                       <a className="dropdown-item" href="#">
@@ -985,10 +1202,24 @@ const EmployerLayout: React.FC = () => {
                       <div className="dropdown-divider"></div>
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/employer/auth">
+                      <a 
+                        className="dropdown-item" 
+                        href="#"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          try {
+                            await supabase.auth.signOut();
+                            toast.success("Logged out successfully");
+                            navigate('/employer/auth', { replace: true });
+                          } catch (error) {
+                            console.error("Logout error:", error);
+                            toast.error("Failed to log out");
+                          }
+                        }}
+                      >
                         <Icon icon="hugeicons:logout-01" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">Log Out</span>
-                      </Link>
+                      </a>
                     </li>
                   </ul>
                 </li>

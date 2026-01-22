@@ -240,20 +240,36 @@ const EmployerCompanyManagement = () => {
         if (error) throw error;
         toast.success("Company updated successfully");
       } else {
+        // Get current user to link company to employer
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast.error("Please log in to create a company");
+          setSaving(false);
+          return;
+        }
+
         const { data, error } = await (supabase as any)
           .from('companies')
           .insert([payload])
           .select();
         if (error) throw error;
         
-        // If company was created, we could update employer profile here
-        // But auth is not connected yet, so we'll do this later
-        // if (data && data[0] && user) {
-        //   await supabase
-        //     .from('employers' as any)
-        //     .update({ company_id: data[0].id, company_name: data[0].name })
-        //     .eq('user_id', user.id);
-        // }
+        // Link the created company to the employer profile
+        if (data && data[0] && user) {
+          const { error: updateError } = await supabase
+            .from('employers' as any)
+            .update({ 
+              company_id: data[0].id, 
+              company_name: data[0].name 
+            })
+            .eq('user_id', user.id);
+
+          if (updateError) {
+            console.error("Error linking company to employer:", updateError);
+            // Don't fail the whole operation, just log the error
+            toast.warning("Company created but failed to link to your profile. Please contact support.");
+          }
+        }
         
         toast.success("Company created successfully");
       }

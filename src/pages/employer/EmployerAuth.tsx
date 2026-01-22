@@ -56,6 +56,31 @@ const EmployerAuth = () => {
       if (error) throw error;
 
       if (data.user) {
+        // Check if employer profile exists
+        const { data: employerProfile, error: profileError } = await supabase
+          .from('employers' as any)
+          .select('id, user_id, company_id, company_name')
+          .eq('user_id', data.user.id)
+          .single();
+
+        // If profile doesn't exist, create one (shouldn't happen, but handle it)
+        if (profileError || !employerProfile) {
+          // Create employer profile
+          const { error: createError } = await supabase
+            .from('employers' as any)
+            .insert([{
+              user_id: data.user.id,
+              company_name: data.user.user_metadata?.full_name || 'My Company',
+              email: signInEmail,
+              created_at: new Date().toISOString()
+            }]);
+
+          if (createError) {
+            console.error("Error creating employer profile:", createError);
+            // Continue anyway - profile can be created later
+          }
+        }
+
         toast.success("Welcome back! Redirecting to your dashboard...");
         const redirectPath = getRedirectPath();
         setTimeout(() => {
@@ -154,6 +179,7 @@ const EmployerAuth = () => {
     setIsLoading(true);
     
     try {
+      // Step 1: Create auth user
       const { data, error } = await supabase.auth.signUp({
         email: signUpEmail,
         password: signUpPassword,
@@ -168,12 +194,41 @@ const EmployerAuth = () => {
       if (error) throw error;
 
       if (data.user) {
-        toast.success("Account created! Please check your email to verify your account.");
-        setTimeout(() => {
-          navigate("/employer");
-        }, 2000);
+        // Step 2: Create employer profile in employers table
+        // This ensures new accounts get a fresh start with no existing data
+        const { error: profileError } = await supabase
+          .from('employers' as any)
+          .insert([{
+            user_id: data.user.id,
+            company_name: signUpName || 'My Company',
+            email: signUpEmail,
+            created_at: new Date().toISOString()
+          }]);
+
+        if (profileError) {
+          console.error("Error creating employer profile:", profileError);
+          // If profile creation fails, still allow signup but show warning
+          toast.warning("Account created, but profile setup incomplete. Please contact support.");
+        } else {
+          toast.success("Account created successfully! Welcome to your fresh dashboard.");
+        }
+
+        // Check if user is automatically signed in (email confirmation disabled)
+        if (data.session) {
+          // User is automatically signed in, redirect to dashboard
+          setTimeout(() => {
+            navigate("/employer");
+          }, 1500);
+        } else {
+          // Email confirmation required
+          toast.info("Please check your email to verify your account.");
+          setTimeout(() => {
+            navigate("/employer");
+          }, 2000);
+        }
       }
     } catch (error: any) {
+      console.error("Sign up error:", error);
       toast.error(error.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);

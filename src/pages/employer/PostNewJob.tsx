@@ -15,7 +15,8 @@ import {
   Plus,
   AlertCircle,
   ExternalLink,
-  UserCheck
+  UserCheck,
+  Clock
 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -131,47 +132,48 @@ const PostNewJob: React.FC = () => {
   const loadCompanies = async () => {
     setLoadingCompanies(true);
     try {
-      // Auth check removed - will be connected later
-      // const { data: { user } } = await supabase.auth.getUser();
-      // if (!user) {
-      //   toast.error("Please log in to post jobs");
-      //   navigate('/employer/auth');
-      //   return;
-      // }
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        toast.error("Please log in to post jobs");
+        navigate('/employer/auth');
+        return;
+      }
 
       // Get employer profile to find associated company
-      // Temporarily disabled - auth not connected yet
-      // const { data: { user } } = await supabase.auth.getUser();
-      // const { data: employerProfile } = await supabase
-      //   .from('employers' as any)
-      //   .select('company_id, company_name')
-      //   .eq('user_id', user.id)
-      //   .single();
-      
-      const employerProfile = null; // Temporary - will be connected later
+      const { data: employerProfile, error: profileError } = await supabase
+        .from('employers' as any)
+        .select('company_id, company_name')
+        .eq('user_id', user.id)
+        .single();
 
-      // Only load the employer's company - limit to one company
+      if (profileError || !employerProfile) {
+        console.error("Error loading employer profile:", profileError);
+        setCompanies([]);
+        setShowNoCompanyAlert(true);
+        setLoadingCompanies(false);
+        return;
+      }
+
+      // Build query to get only the employer's company
       let query = supabase
         .from('companies' as any)
-        .select('id, name, logo_url, industry')
-        .order('created_at', { ascending: false })
-        .limit(1); // Limit to only one company
+        .select('id, name, logo_url, industry');
 
-      // If employer has a company_id, filter by it
       const profile = employerProfile as any;
+
+      // Filter by company_id if available (preferred method)
       if (profile?.company_id) {
         query = query.eq('id', profile.company_id);
+      } else if (profile?.company_name) {
+        // Fallback: filter by company name
+        query = query.eq('name', profile.company_name);
       } else {
-        // If no company_id, try to find by company_name
-        if (profile?.company_name) {
-          query = query.eq('name', profile.company_name);
-        } else {
-          // No company associated - load all companies for now (temporary)
-          // setCompanies([]);
-          // setLoadingCompanies(false);
-          // setShowNoCompanyAlert(true);
-          // return;
-        }
+        // No company associated - show alert to create one
+        setCompanies([]);
+        setShowNoCompanyAlert(true);
+        setLoadingCompanies(false);
+        return;
       }
 
       const { data, error } = await query;
@@ -180,13 +182,14 @@ const PostNewJob: React.FC = () => {
         console.error("Error loading companies:", error);
         toast.error("Failed to load companies");
         setCompanies([]);
+        setShowNoCompanyAlert(true);
         return;
       }
 
       if (data && data.length > 0) {
         const companiesData = (data as unknown) as Company[];
         setCompanies(companiesData);
-        // Auto-select first company if only one exists
+        // Auto-select the company (should only be one)
         if (companiesData.length === 1) {
           setFormData(prev => ({
             ...prev,
@@ -196,6 +199,7 @@ const PostNewJob: React.FC = () => {
           }));
         }
       } else {
+        // No company found - employer needs to create one
         setCompanies([]);
         setShowNoCompanyAlert(true);
       }
@@ -218,6 +222,184 @@ const PostNewJob: React.FC = () => {
         companyId: selectedCompany.id,
         companyLogo: selectedCompany.logo_url || ''
       }));
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    // Save as draft - no validation required
+    setSubmitting(true);
+    try {
+      // Common data transformation
+      const parseFieldOpsGroups = () => {
+        if (!formData.fieldOpsGroups) return [];
+        try {
+          return JSON.parse(formData.fieldOpsGroups);
+        } catch {
+          return [];
+        }
+      };
+
+      // Save to appropriate table based on job type
+      if (jobType === 'job-listing') {
+        // Professional job listing - save to jobs table as draft
+        const jobData = {
+          title: formData.title || 'Untitled Job',
+          company: formData.company || 'Unknown Company',
+          company_id: formData.companyId || null,
+          company_logo: formData.companyLogo || null,
+          description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+          impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
+          impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
+          field_ops_groups: parseFieldOpsGroups(),
+          skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+          skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+          skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
+          skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
+          behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+          culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
+          opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+          job_category: formData.jobCategory || null,
+          industry: formData.industry || null,
+          education_level: formData.educationLevel || null,
+          experience_level: formData.experienceLevel || null,
+          contract_type: formData.contractType || null,
+          region: formData.region || null,
+          city: formData.city || null,
+          salary: formData.salary || null,
+          image_url: formData.imageUrl || null,
+          application_url: formData.applicationUrl || null,
+          verified: false,
+          featured: false,
+          is_draft: true, // Mark as draft
+          date: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+          .from('jobs' as any)
+          .insert(jobData);
+
+        if (error) throw error;
+        toast.success('Draft saved successfully!');
+        navigate('/employer/job-listings/drafts');
+      } else if (jobType === 'internship') {
+        // Internship - save to internships table as draft
+        const internshipData = {
+          title: formData.title || 'Untitled Internship',
+          company: formData.company || 'Unknown Company',
+          company_logo: formData.companyLogo || null,
+          description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+          impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
+          impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
+          field_ops_groups: parseFieldOpsGroups(),
+          skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+          skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+          skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
+          skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
+          behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+          culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
+          opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+          location: formData.region ? (formData.region + (formData.city ? `, ${formData.city}` : '')) : null,
+          duration: formData.duration || null,
+          type: formData.type || null,
+          stipend: formData.stipend || null,
+          requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
+          image_url: formData.imageUrl || null,
+          application_url: formData.applicationUrl || null,
+          is_draft: true, // Mark as draft
+          posted: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+          .from('internships' as any)
+          .insert(internshipData);
+
+        if (error) throw error;
+        toast.success('Draft saved successfully!');
+        navigate('/employer/job-listings/drafts');
+      } else if (jobType === 'nss') {
+        // National Service Support - save to nss_programs table as draft
+        const nssData = {
+          title: formData.title || 'Untitled NSS Program',
+          company: formData.company || 'Unknown Company',
+          company_logo: formData.companyLogo || null,
+          description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+          impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
+          impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
+          field_ops_groups: parseFieldOpsGroups(),
+          skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+          skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+          skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
+          skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
+          behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+          culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
+          opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+          location: formData.region ? (formData.region + (formData.city ? `, ${formData.city}` : '')) : null,
+          duration: formData.duration || null,
+          type: formData.type || null,
+          salary: formData.salary || null,
+          requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
+          image_url: formData.imageUrl || null,
+          application_url: formData.applicationUrl || null,
+          is_draft: true, // Mark as draft
+          posted: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+          .from('nss_programs' as any)
+          .insert(nssData);
+
+        if (error) throw error;
+        toast.success('Draft saved successfully!');
+        navigate('/employer/job-listings/drafts');
+      } else if (jobType === 'graduate-recruitment') {
+        // Graduate Recruitment - save to graduate_programs table as draft
+        const graduateData = {
+          title: formData.title || 'Untitled Graduate Program',
+          company: formData.company || 'Unknown Company',
+          company_logo: formData.companyLogo || null,
+          description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+          impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
+          impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
+          field_ops_groups: parseFieldOpsGroups(),
+          skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+          skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+          skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
+          skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
+          behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+          culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
+          opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+          location: formData.region ? (formData.region + (formData.city ? `, ${formData.city}` : '')) : null,
+          duration: formData.duration || null,
+          type: formData.type || null,
+          salary: formData.salary || null,
+          requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
+          image_url: formData.imageUrl || null,
+          application_url: formData.applicationUrl || null,
+          is_draft: true, // Mark as draft
+          posted: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+          .from('graduate_programs' as any)
+          .insert(graduateData);
+
+        if (error) throw error;
+        toast.success('Draft saved successfully!');
+        navigate('/employer/job-listings/drafts');
+      }
+    } catch (error: any) {
+      console.error('Error saving draft:', error);
+      toast.error('Error saving draft. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -283,6 +465,7 @@ const PostNewJob: React.FC = () => {
           application_url: formData.applicationUrl || null,
           verified: false,
           featured: false,
+          is_draft: false, // Not a draft
           date: new Date().toISOString().split('T')[0],
           created_at: new Date().toISOString()
         };
@@ -319,6 +502,7 @@ const PostNewJob: React.FC = () => {
           requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
           image_url: formData.imageUrl || null,
           application_url: formData.applicationUrl || null,
+          is_draft: false, // Not a draft
           posted: new Date().toISOString().split('T')[0],
           created_at: new Date().toISOString()
         };
@@ -355,6 +539,7 @@ const PostNewJob: React.FC = () => {
           requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
           image_url: formData.imageUrl || null,
           application_url: formData.applicationUrl || null,
+          is_draft: false, // Not a draft
           posted: new Date().toISOString().split('T')[0],
           created_at: new Date().toISOString()
         };
@@ -391,6 +576,7 @@ const PostNewJob: React.FC = () => {
           requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
           image_url: formData.imageUrl || null,
           application_url: formData.applicationUrl || null,
+          is_draft: false, // Not a draft
           posted: new Date().toISOString().split('T')[0],
           created_at: new Date().toISOString()
         };
@@ -1789,6 +1975,22 @@ const PostNewJob: React.FC = () => {
                 onClick={() => navigate('/employer/job-listings/all')}
               >
                 Cancel
+              </button>
+              <button
+                type="button"
+                className="epnj-btn epnj-btn-secondary"
+                onClick={handleSaveDraft}
+                disabled={submitting}
+                style={{ marginRight: '0.5rem' }}
+              >
+                {submitting ? (
+                  <>Saving...</>
+                ) : (
+                  <>
+                    <Clock size={16} />
+                    Save as Draft
+                  </>
+                )}
               </button>
               <button
                 type="submit"
