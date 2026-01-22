@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Briefcase,
@@ -12,9 +12,12 @@ import {
   CheckCircle,
   CheckCircle2,
   ArrowLeft,
-  Plus
+  Plus,
+  AlertCircle,
+  ExternalLink
 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Constants from admin
 const jobCategories = [
@@ -59,15 +62,26 @@ const experienceLevels = [
   "5 to 10 years", "More than 10 years"
 ];
 
+interface Company {
+  id: string;
+  name: string;
+  logo_url?: string;
+  industry: string;
+}
+
 const PostNewJob: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'description' | 'impact' | 'field-ops' | 'skills' | 'culture'>('description');
   const [submitting, setSubmitting] = useState(false);
   const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
+  const [showNoCompanyAlert, setShowNoCompanyAlert] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
     company: '',
+    companyId: '',
     companyLogo: '',
     descriptionParagraphs: '',
     impactParagraphs: '',
@@ -101,10 +115,106 @@ const PostNewJob: React.FC = () => {
     { id: 'culture' as const, label: 'Culture & Apply', icon: Users },
   ];
 
+  // Load employer's companies
+  useEffect(() => {
+    loadCompanies();
+  }, []);
+
+  const loadCompanies = async () => {
+    setLoadingCompanies(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please log in to post jobs");
+        navigate('/employer/auth');
+        return;
+      }
+
+      // Get employer profile to find associated company
+      const { data: employerProfile } = await supabase
+        .from('employers')
+        .select('company_id, company_name')
+        .eq('user_id', user.id)
+        .single();
+
+      // Only load the employer's company - limit to one company
+      let query = supabase
+        .from('companies')
+        .select('id, name, logo_url, industry')
+        .order('created_at', { ascending: false })
+        .limit(1); // Limit to only one company
+
+      // If employer has a company_id, filter by it
+      if (employerProfile?.company_id) {
+        query = query.eq('id', employerProfile.company_id);
+      } else {
+        // If no company_id, try to find by company_name
+        if (employerProfile?.company_name) {
+          query = query.eq('name', employerProfile.company_name);
+        } else {
+          // No company associated
+          setCompanies([]);
+          setLoadingCompanies(false);
+          setShowNoCompanyAlert(true);
+          return;
+        }
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error loading companies:", error);
+        toast.error("Failed to load companies");
+        setCompanies([]);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setCompanies(data);
+        // Auto-select first company if only one exists
+        if (data.length === 1) {
+          setFormData(prev => ({
+            ...prev,
+            company: data[0].name,
+            companyId: data[0].id,
+            companyLogo: data[0].logo_url || ''
+          }));
+        }
+      } else {
+        setCompanies([]);
+        setShowNoCompanyAlert(true);
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error("Failed to load companies");
+      setCompanies([]);
+      setShowNoCompanyAlert(true);
+    } finally {
+      setLoadingCompanies(false);
+    }
+  };
+
+  const handleCompanyChange = (companyId: string) => {
+    const selectedCompany = companies.find(c => c.id === companyId);
+    if (selectedCompany) {
+      setFormData(prev => ({
+        ...prev,
+        company: selectedCompany.name,
+        companyId: selectedCompany.id,
+        companyLogo: selectedCompany.logo_url || ''
+      }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.company || !formData.jobCategory || !formData.industry) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (!formData.companyId) {
+      toast.error('Please select a company. If you don\'t have one, add it first in Company Management.');
       return;
     }
 
@@ -114,6 +224,7 @@ const PostNewJob: React.FC = () => {
       const jobData = {
         title: formData.title,
         company: formData.company,
+        company_id: formData.companyId,
         company_logo: formData.companyLogo || null,
         description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
         impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
@@ -150,12 +261,11 @@ const PostNewJob: React.FC = () => {
 
       if (error) throw error;
 
-      navigate('/employer/job-listings/all', { 
-        state: { message: 'Job posted successfully! It will be reviewed before going live.' } 
-      });
+      toast.success('Job posted successfully! It will be reviewed before going live.');
+      navigate('/employer/job-listings/all');
     } catch (error: any) {
       console.error('Error posting job:', error);
-      alert('Error posting job. Please try again.');
+      toast.error('Error posting job. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -527,14 +637,56 @@ const PostNewJob: React.FC = () => {
                         <label className="epnj-form-label">
                           Company <span className="epnj-form-label-required">*</span>
                         </label>
-                        <input
-                          type="text"
-                          className="epnj-form-input"
-                          placeholder="e.g., Microsoft"
-                          value={formData.company}
-                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          required
-                        />
+                        {loadingCompanies ? (
+                          <div className="epnj-form-input flex items-center gap-2 text-slate-500">
+                            <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>
+                            Loading companies...
+                          </div>
+                        ) : companies.length === 0 ? (
+                          <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-lg">
+                            <div className="flex items-start gap-3">
+                              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold text-amber-900 mb-1">
+                                  No Company Found
+                                </p>
+                                <p className="text-xs text-amber-700 mb-3">
+                                  You need to add a company before posting a job. Jobs must be affiliated with a company.
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => navigate('/employer/company')}
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  Add Company
+                                  <ExternalLink className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <select
+                              className="epnj-form-select"
+                              value={formData.companyId}
+                              onChange={(e) => handleCompanyChange(e.target.value)}
+                              required
+                            >
+                              <option value="">Select Company</option>
+                              {companies.map(company => (
+                                <option key={company.id} value={company.id}>
+                                  {company.name}
+                                </option>
+                              ))}
+                            </select>
+                            {formData.companyId && (
+                              <p className="text-xs text-slate-500 mt-1">
+                                Selected: <span className="font-medium">{formData.company}</span>
+                              </p>
+                            )}
+                          </>
+                        )}
                       </div>
                       <div className="epnj-form-group">
                         <label className="epnj-form-label">Company Logo URL</label>
@@ -544,8 +696,39 @@ const PostNewJob: React.FC = () => {
                           placeholder="https://..."
                           value={formData.companyLogo}
                           onChange={(e) => setFormData({ ...formData, companyLogo: e.target.value })}
+                          disabled={!!formData.companyId}
                         />
+                        {formData.companyId && formData.companyLogo && (
+                          <div className="mt-2 p-2 bg-slate-50 rounded-lg inline-block">
+                            <img 
+                              src={formData.companyLogo} 
+                              alt="Company logo" 
+                              className="h-12 w-12 object-contain"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                        {formData.companyId && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Logo is auto-filled from company profile. You can override it if needed.
+                          </p>
+                        )}
                       </div>
+                      {companies.length > 0 && (
+                        <div className="epnj-form-group full-width">
+                          <button
+                            type="button"
+                            onClick={() => navigate('/employer/company')}
+                            className="text-sm text-slate-600 hover:text-slate-900 underline flex items-center gap-1"
+                          >
+                            <Building2 className="w-4 h-4" />
+                            Manage Companies
+                            <ExternalLink className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
                       <div className="epnj-form-group">
                         <label className="epnj-form-label">Salary</label>
                         <input

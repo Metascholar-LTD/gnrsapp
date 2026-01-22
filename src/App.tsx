@@ -136,6 +136,7 @@ import EmployerAuth from "./pages/employer/EmployerAuth";
 import PostNewJob from "./pages/employer/PostNewJob";
 import PostNewGig from "./pages/employer/PostNewGig";
 import EmployerAllJobs from "./pages/employer/AllJobs";
+import EmployerCompanyManagement from "./pages/employer/EmployerCompanyManagement";
 import AllGigs from "./pages/employer/AllGigs";
 import Applications from "./pages/employer/Applications";
 import ApplicationDetail from "./pages/employer/ApplicationDetail";
@@ -452,6 +453,7 @@ const App = () => (
             <Route path="job-listings/all" element={<EmployerAllJobs />} />
             <Route path="job-listings/drafts" element={<Drafts />} />
             <Route path="job-listings/*" element={<GenericPage title="Job Listings" description="Post and manage job listings" />} />
+            <Route path="company" element={<EmployerCompanyManagement />} />
             <Route path="gigs-listing/post" element={<PostNewGig />} />
             <Route path="gigs-listing/all" element={<AllGigs />} />
             <Route path="gigs-listing/*" element={<GenericPage title="Gigs Listing" description="Post and manage gig listings" />} />

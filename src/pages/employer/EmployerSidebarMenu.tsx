@@ -20,6 +20,9 @@ const EmployerSidebarMenu: React.FC = () => {
     if (path.startsWith('/employer/gigs-listing/')) {
       menusToOpen.add('gigs-listing');
     }
+    if (path.startsWith('/employer/company')) {
+      menusToOpen.add('company');
+    }
     if (path.startsWith('/employer/applications/')) {
       menusToOpen.add('applications');
     }
@@ -109,6 +112,14 @@ const EmployerSidebarMenu: React.FC = () => {
             </Link>
           </li>
         </ul>
+      </li>
+
+      {/* Company Management */}
+      <li className={`menu-item ${isActive('/employer/company') ? 'active' : ''}`}>
+        <Link to="/employer/company" className="menu-link">
+          <Icon icon="hugeicons:building-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
+          <div data-i18n="Company">Company</div>
+        </Link>
       </li>
 
       {/* APPLICATIONS & CANDIDATES SECTION */}
