@@ -50,13 +50,16 @@ const EmployerLayout: React.FC = () => {
           .from('employers' as any)
           .select('id, user_id, full_name, profile_image, company_name')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle() to avoid errors if profile doesn't exist
 
-        if (profileError || !employerProfile) {
-          // Profile doesn't exist - this shouldn't happen, but handle it
-          console.warn("Employer profile not found for user:", user.id);
+        if (profileError) {
+          console.warn("Error fetching employer profile:", profileError);
           // Still allow access - profile can be created later
-        } else {
+          // Use fallback values
+          if (user.email) {
+            setUserName(user.email.split('@')[0]);
+          }
+        } else if (employerProfile) {
           // Load profile image and name
           if (employerProfile.profile_image) {
             setProfileImage(employerProfile.profile_image);
@@ -66,6 +69,11 @@ const EmployerLayout: React.FC = () => {
           } else if (employerProfile.company_name) {
             setUserName(employerProfile.company_name);
           } else if (user.email) {
+            setUserName(user.email.split('@')[0]);
+          }
+        } else {
+          // No profile found - use fallback
+          if (user.email) {
             setUserName(user.email.split('@')[0]);
           }
         }
@@ -107,11 +115,16 @@ const EmployerLayout: React.FC = () => {
 
     const loadProfile = async () => {
       try {
-        const { data: employerProfile } = await supabase
+        const { data: employerProfile, error: profileError } = await supabase
           .from('employers' as any)
           .select('full_name, profile_image, company_name')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle() to avoid errors if profile doesn't exist
+
+        if (profileError) {
+          console.warn("Error loading employer profile:", profileError);
+          return;
+        }
 
         if (employerProfile) {
           if (employerProfile.profile_image) {
@@ -142,7 +155,7 @@ const EmployerLayout: React.FC = () => {
           .from('employers' as any)
           .select('full_name, profile_image, company_name')
           .eq('user_id', user.id)
-          .single()
+          .maybeSingle() // Use maybeSingle() to avoid errors if profile doesn't exist
           .then(({ data: profile }) => {
             if (profile) {
               if (profile.profile_image) {
@@ -204,6 +217,13 @@ const EmployerLayout: React.FC = () => {
 
     const loadScript = (src: string) => {
       return new Promise<void>((resolve, reject) => {
+        // Check if script already exists
+        const existingScript = document.querySelector(`script[src="${src}"]`);
+        if (existingScript) {
+          resolve(); // Script already loaded
+          return;
+        }
+
         const script = document.createElement('script');
         script.src = src;
         script.async = false;

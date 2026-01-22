@@ -133,11 +133,11 @@ const EmployerCompanyManagement = () => {
         return;
       }
 
-      const { data: employerProfile } = await (supabase as any)
-        .from('employers')
-        .select('company_id, company_name')
-        .eq('user_id', user.id)
-        .single();
+          const { data: employerProfile } = await (supabase as any)
+            .from('employers')
+            .select('company_id, company_name')
+            .eq('user_id', user.id)
+            .maybeSingle(); // Use maybeSingle() to avoid errors if profile doesn't exist
 
       let query = (supabase as any)
         .from('companies')

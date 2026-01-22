@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Briefcase,
   MapPin,
@@ -12,6 +12,7 @@ import {
   CheckCircle,
   CheckCircle2,
   ArrowLeft,
+  ArrowRight,
   Plus,
   AlertCircle,
   ExternalLink,
@@ -73,12 +74,18 @@ interface Company {
 
 const PostNewJob: React.FC = () => {
   const navigate = useNavigate();
+  const { jobId } = useParams<{ jobId?: string }>();
   const [activeTab, setActiveTab] = useState<'description' | 'impact' | 'field-ops' | 'skills' | 'culture'>('description');
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [activeInlineEditor, setActiveInlineEditor] = useState<{ field: string; index: number } | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [showNoCompanyAlert, setShowNoCompanyAlert] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingJobType, setEditingJobType] = useState<'job-listing' | 'internship' | 'nss' | 'graduate-recruitment'>('job-listing');
+  const [wasVerified, setWasVerified] = useState(false);
+  const [originalJobData, setOriginalJobData] = useState<any>(null);
   
   const [jobType, setJobType] = useState<'job-listing' | 'internship' | 'nss' | 'graduate-recruitment'>('job-listing');
   
@@ -124,10 +131,53 @@ const PostNewJob: React.FC = () => {
     { id: 'culture' as const, label: 'Culture & Apply', icon: Users },
   ];
 
+  // Get current tab index
+  const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
+  const isLastTab = currentTabIndex >= 0 && currentTabIndex === tabs.length - 1;
+
+  // Handle Next button - move to next tab
+  const handleNext = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    // Double-check we're not on the last tab
+    const currentIdx = tabs.findIndex(tab => tab.id === activeTab);
+    if (currentIdx >= 0 && currentIdx < tabs.length - 1) {
+      const nextTab = tabs[currentIdx + 1];
+      setActiveTab(nextTab.id);
+      setActiveInlineEditor(null);
+      // Scroll to top of form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // Load employer's companies
   useEffect(() => {
     loadCompanies();
   }, []);
+
+  // Load job for editing if jobId is present
+  useEffect(() => {
+    if (jobId && !isEditing) {
+      loadJobForEdit(jobId);
+    }
+  }, [jobId]);
+
+  // After companies are loaded and we're editing, match company by name if needed
+  useEffect(() => {
+    if (isEditing && !loadingCompanies && companies.length > 0 && formData.company && !formData.companyId) {
+      const matchedCompany = companies.find(c => c.name === formData.company);
+      if (matchedCompany) {
+        setFormData(prev => ({
+          ...prev,
+          companyId: matchedCompany.id,
+          companyLogo: matchedCompany.logo_url || prev.companyLogo
+        }));
+      }
+    }
+  }, [isEditing, loadingCompanies, companies, formData.company, formData.companyId]);
 
   const loadCompanies = async () => {
     setLoadingCompanies(true);
@@ -145,10 +195,17 @@ const PostNewJob: React.FC = () => {
         .from('employers' as any)
         .select('company_id, company_name')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle() to avoid errors if profile doesn't exist
 
-      if (profileError || !employerProfile) {
+      if (profileError) {
         console.error("Error loading employer profile:", profileError);
+        setCompanies([]);
+        setShowNoCompanyAlert(true);
+        setLoadingCompanies(false);
+        return;
+      }
+
+      if (!employerProfile) {
         setCompanies([]);
         setShowNoCompanyAlert(true);
         setLoadingCompanies(false);
@@ -222,6 +279,299 @@ const PostNewJob: React.FC = () => {
         companyId: selectedCompany.id,
         companyLogo: selectedCompany.logo_url || ''
       }));
+    }
+  };
+
+  const loadJobForEdit = async (id: string) => {
+    setLoading(true);
+    setIsEditing(true);
+    try {
+      // Try to load from jobs table first
+      let { data: jobData, error: jobError } = await supabase
+        .from('jobs' as any)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!jobError && jobData) {
+        const job = jobData as any;
+        setEditingJobType('job-listing');
+        setJobType('job-listing');
+        setWasVerified(job.verified || false);
+        
+        // Store original data for comparison
+        setOriginalJobData({
+          title: job.title || '',
+          company: job.company || '',
+          company_id: job.company_id || '',
+          job_category: job.job_category || '',
+          industry: job.industry || '',
+          salary: job.salary || '',
+          region: job.region || '',
+          city: job.city || '',
+          application_url: job.application_url || ''
+        });
+        
+        setFormData({
+          title: job.title || '',
+          company: job.company || '',
+          companyId: job.company_id || '',
+          companyLogo: job.company_logo || '',
+          descriptionParagraphs: Array.isArray(job.description_paragraphs) ? job.description_paragraphs.join('\n\n') : '',
+          impactParagraphs: Array.isArray(job.impact_paragraphs) ? job.impact_paragraphs.join('\n') : '',
+          impactHighlights: Array.isArray(job.impact_highlights) ? job.impact_highlights.join('\n') : '',
+          fieldOpsGroups: job.field_ops_groups ? JSON.stringify(job.field_ops_groups, null, 2) : '',
+          skillsFormalQualifications: Array.isArray(job.skills_formal_qualifications) ? job.skills_formal_qualifications.join('\n') : '',
+          skillsAdditionalKnowledge: Array.isArray(job.skills_additional_knowledge) ? job.skills_additional_knowledge.join('\n') : '',
+          skillsExperience: Array.isArray(job.skills_experience) ? job.skills_experience.join('\n') : '',
+          skillsTechnical: Array.isArray(job.skills_technical) ? job.skills_technical.join('\n') : '',
+          behavioralAttributes: Array.isArray(job.behavioral_attributes) ? job.behavioral_attributes.join('\n') : '',
+          skills: Array.isArray(job.skills) ? job.skills.join(', ') : '',
+          cultureParagraphs: Array.isArray(job.culture_paragraphs) ? job.culture_paragraphs.join('\n') : '',
+          opportunityParagraphs: Array.isArray(job.opportunity_paragraphs) ? job.opportunity_paragraphs.join('\n') : '',
+          jobCategory: job.job_category || '',
+          industry: job.industry || '',
+          educationLevel: job.education_level || 'Bachelor',
+          experienceLevel: job.experience_level || '2 to 5 years',
+          contractType: job.contract_type || 'Permanent contract',
+          region: job.region || 'Greater Accra',
+          city: job.city || '',
+          salary: job.salary || '',
+          imageUrl: job.image_url || '',
+          applicationUrl: job.application_url || '',
+          duration: '',
+          type: 'Full-time',
+          stipend: '',
+          requirements: ''
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Try internships table
+      let { data: internshipData, error: internshipError } = await supabase
+        .from('internships' as any)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!internshipError && internshipData) {
+        const internship = internshipData as any;
+        setEditingJobType('internship');
+        setJobType('internship');
+        setWasVerified(false);
+        
+        // Store original data for internships (they don't have verified field, but store for consistency)
+        setOriginalJobData({
+          title: internship.title || '',
+          company: internship.company || '',
+          location: internship.location || '',
+          application_url: internship.application_url || ''
+        });
+        
+        const locationParts = (internship.location || '').split(',');
+        // Try to find company by name if company_id not available
+        let companyId = '';
+        let companyLogo = internship.company_logo || '';
+        if (internship.company && companies.length > 0) {
+          const matchedCompany = companies.find(c => c.name === internship.company);
+          if (matchedCompany) {
+            companyId = matchedCompany.id;
+            companyLogo = matchedCompany.logo_url || companyLogo;
+          }
+        }
+        
+        setFormData({
+          title: internship.title || '',
+          company: internship.company || '',
+          companyId: companyId,
+          companyLogo: companyLogo,
+          descriptionParagraphs: Array.isArray(internship.description_paragraphs) ? internship.description_paragraphs.join('\n\n') : '',
+          impactParagraphs: Array.isArray(internship.impact_paragraphs) ? internship.impact_paragraphs.join('\n') : '',
+          impactHighlights: Array.isArray(internship.impact_highlights) ? internship.impact_highlights.join('\n') : '',
+          fieldOpsGroups: internship.field_ops_groups ? JSON.stringify(internship.field_ops_groups, null, 2) : '',
+          skillsFormalQualifications: Array.isArray(internship.skills_formal_qualifications) ? internship.skills_formal_qualifications.join('\n') : '',
+          skillsAdditionalKnowledge: Array.isArray(internship.skills_additional_knowledge) ? internship.skills_additional_knowledge.join('\n') : '',
+          skillsExperience: Array.isArray(internship.skills_experience) ? internship.skills_experience.join('\n') : '',
+          skillsTechnical: Array.isArray(internship.skills_technical) ? internship.skills_technical.join('\n') : '',
+          behavioralAttributes: Array.isArray(internship.behavioral_attributes) ? internship.behavioral_attributes.join('\n') : '',
+          skills: Array.isArray(internship.skills) ? internship.skills.join(', ') : '',
+          cultureParagraphs: Array.isArray(internship.culture_paragraphs) ? internship.culture_paragraphs.join('\n') : '',
+          opportunityParagraphs: Array.isArray(internship.opportunity_paragraphs) ? internship.opportunity_paragraphs.join('\n') : '',
+          jobCategory: '',
+          industry: '',
+          educationLevel: 'Bachelor',
+          experienceLevel: '2 to 5 years',
+          contractType: 'Permanent contract',
+          region: locationParts[0]?.trim() || 'Greater Accra',
+          city: locationParts[1]?.trim() || '',
+          salary: '',
+          imageUrl: internship.image_url || '',
+          applicationUrl: internship.application_url || '',
+          duration: internship.duration || '',
+          type: internship.type || 'Full-time',
+          stipend: internship.stipend || '',
+          requirements: Array.isArray(internship.requirements) ? internship.requirements.join('\n') : ''
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Try nss_programs table
+      let { data: nssData, error: nssError } = await supabase
+        .from('nss_programs' as any)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!nssError && nssData) {
+        const nss = nssData as any;
+        setEditingJobType('nss');
+        setJobType('nss');
+        setWasVerified(false);
+        
+        // Store original data
+        setOriginalJobData({
+          title: nss.title || '',
+          company: nss.company || '',
+          location: nss.location || '',
+          salary: nss.salary || '',
+          duration: nss.duration || '',
+          type: nss.type || '',
+          application_url: nss.application_url || ''
+        });
+        
+        const locationParts = (nss.location || '').split(',');
+        
+        // Try to find company by name if company_id not available
+        let companyId = '';
+        let companyLogo = nss.company_logo || '';
+        if (nss.company) {
+          const matchedCompany = companies.find(c => c.name === nss.company);
+          if (matchedCompany) {
+            companyId = matchedCompany.id;
+            companyLogo = matchedCompany.logo_url || companyLogo;
+          }
+        }
+        
+        setFormData({
+          title: nss.title || '',
+          company: nss.company || '',
+          companyId: companyId,
+          companyLogo: companyLogo,
+          descriptionParagraphs: Array.isArray(nss.description_paragraphs) ? nss.description_paragraphs.join('\n\n') : '',
+          impactParagraphs: Array.isArray(nss.impact_paragraphs) ? nss.impact_paragraphs.join('\n') : '',
+          impactHighlights: Array.isArray(nss.impact_highlights) ? nss.impact_highlights.join('\n') : '',
+          fieldOpsGroups: nss.field_ops_groups ? JSON.stringify(nss.field_ops_groups, null, 2) : '',
+          skillsFormalQualifications: Array.isArray(nss.skills_formal_qualifications) ? nss.skills_formal_qualifications.join('\n') : '',
+          skillsAdditionalKnowledge: Array.isArray(nss.skills_additional_knowledge) ? nss.skills_additional_knowledge.join('\n') : '',
+          skillsExperience: Array.isArray(nss.skills_experience) ? nss.skills_experience.join('\n') : '',
+          skillsTechnical: Array.isArray(nss.skills_technical) ? nss.skills_technical.join('\n') : '',
+          behavioralAttributes: Array.isArray(nss.behavioral_attributes) ? nss.behavioral_attributes.join('\n') : '',
+          skills: Array.isArray(nss.skills) ? nss.skills.join(', ') : '',
+          cultureParagraphs: Array.isArray(nss.culture_paragraphs) ? nss.culture_paragraphs.join('\n') : '',
+          opportunityParagraphs: Array.isArray(nss.opportunity_paragraphs) ? nss.opportunity_paragraphs.join('\n') : '',
+          jobCategory: '',
+          industry: '',
+          educationLevel: 'Bachelor',
+          experienceLevel: '2 to 5 years',
+          contractType: 'Permanent contract',
+          region: locationParts[0]?.trim() || 'Greater Accra',
+          city: locationParts[1]?.trim() || '',
+          salary: nss.salary || '',
+          imageUrl: nss.image_url || '',
+          applicationUrl: nss.application_url || '',
+          duration: nss.duration || '',
+          type: nss.type || '',
+          stipend: '',
+          requirements: Array.isArray(nss.requirements) ? nss.requirements.join('\n') : ''
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Try graduate_programs table
+      let { data: graduateData, error: graduateError } = await supabase
+        .from('graduate_programs' as any)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!graduateError && graduateData) {
+        const graduate = graduateData as any;
+        setEditingJobType('graduate-recruitment');
+        setJobType('graduate-recruitment');
+        setWasVerified(false);
+        
+        // Store original data
+        setOriginalJobData({
+          title: graduate.title || '',
+          company: graduate.company || '',
+          location: graduate.location || '',
+          salary: graduate.salary || '',
+          duration: graduate.duration || '',
+          type: graduate.type || '',
+          application_url: graduate.application_url || ''
+        });
+        
+        const locationParts = (graduate.location || '').split(',');
+        
+        // Try to find company by name if company_id not available
+        let companyId = '';
+        let companyLogo = graduate.company_logo || '';
+        if (graduate.company) {
+          const matchedCompany = companies.find(c => c.name === graduate.company);
+          if (matchedCompany) {
+            companyId = matchedCompany.id;
+            companyLogo = matchedCompany.logo_url || companyLogo;
+          }
+        }
+        
+        setFormData({
+          title: graduate.title || '',
+          company: graduate.company || '',
+          companyId: companyId,
+          companyLogo: companyLogo,
+          descriptionParagraphs: Array.isArray(graduate.description_paragraphs) ? graduate.description_paragraphs.join('\n\n') : '',
+          impactParagraphs: Array.isArray(graduate.impact_paragraphs) ? graduate.impact_paragraphs.join('\n') : '',
+          impactHighlights: Array.isArray(graduate.impact_highlights) ? graduate.impact_highlights.join('\n') : '',
+          fieldOpsGroups: graduate.field_ops_groups ? JSON.stringify(graduate.field_ops_groups, null, 2) : '',
+          skillsFormalQualifications: Array.isArray(graduate.skills_formal_qualifications) ? graduate.skills_formal_qualifications.join('\n') : '',
+          skillsAdditionalKnowledge: Array.isArray(graduate.skills_additional_knowledge) ? graduate.skills_additional_knowledge.join('\n') : '',
+          skillsExperience: Array.isArray(graduate.skills_experience) ? graduate.skills_experience.join('\n') : '',
+          skillsTechnical: Array.isArray(graduate.skills_technical) ? graduate.skills_technical.join('\n') : '',
+          behavioralAttributes: Array.isArray(graduate.behavioral_attributes) ? graduate.behavioral_attributes.join('\n') : '',
+          skills: Array.isArray(graduate.skills) ? graduate.skills.join(', ') : '',
+          cultureParagraphs: Array.isArray(graduate.culture_paragraphs) ? graduate.culture_paragraphs.join('\n') : '',
+          opportunityParagraphs: Array.isArray(graduate.opportunity_paragraphs) ? graduate.opportunity_paragraphs.join('\n') : '',
+          jobCategory: '',
+          industry: '',
+          educationLevel: 'Bachelor',
+          experienceLevel: '2 to 5 years',
+          contractType: 'Permanent contract',
+          region: locationParts[0]?.trim() || 'Greater Accra',
+          city: locationParts[1]?.trim() || '',
+          salary: graduate.salary || '',
+          imageUrl: graduate.image_url || '',
+          applicationUrl: graduate.application_url || '',
+          duration: graduate.duration || '',
+          type: graduate.type || '',
+          stipend: '',
+          requirements: Array.isArray(graduate.requirements) ? graduate.requirements.join('\n') : ''
+        });
+        setLoading(false);
+        return;
+      }
+
+      // If we get here, job not found in any table
+      toast.error('Job not found');
+      navigate('/employer/job-listings/all');
+    } catch (error: any) {
+      console.error('Error loading job:', error);
+      toast.error('Failed to load job for editing');
+      navigate('/employer/job-listings/all');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -470,13 +820,52 @@ const PostNewJob: React.FC = () => {
           created_at: new Date().toISOString()
         };
 
-        const { data, error } = await supabase
-          .from('jobs' as any)
-          .insert(jobData)
-          .select();
+        if (isEditing && jobId) {
+          // Check if critical fields changed - only require re-approval if critical fields changed
+          const criticalFieldsChanged = originalJobData && wasVerified ? (
+            originalJobData.title !== formData.title ||
+            originalJobData.company !== formData.company ||
+            originalJobData.company_id !== formData.companyId ||
+            originalJobData.job_category !== formData.jobCategory ||
+            originalJobData.industry !== formData.industry ||
+            originalJobData.salary !== formData.salary ||
+            originalJobData.region !== formData.region ||
+            originalJobData.city !== formData.city ||
+            originalJobData.application_url !== formData.applicationUrl
+          ) : false;
 
-        if (error) throw error;
-        toast.success('Job listing posted successfully! It will be reviewed before going live.');
+          // Only set verified to false if it was verified AND critical fields changed
+          if (wasVerified && criticalFieldsChanged) {
+            jobData.verified = false;
+          } else if (wasVerified) {
+            // Keep verified status if only non-critical fields changed
+            jobData.verified = true;
+          }
+
+          const { data, error } = await supabase
+            .from('jobs' as any)
+            .update(jobData)
+            .eq('id', jobId)
+            .select();
+
+          if (error) throw error;
+          
+          if (wasVerified && criticalFieldsChanged) {
+            toast.success('Job updated successfully! Since you changed critical information, it will be reviewed again before going live.');
+          } else if (wasVerified) {
+            toast.success('Job updated successfully! Your changes have been saved and the job remains active.');
+          } else {
+            toast.success('Job updated successfully!');
+          }
+        } else {
+          const { data, error } = await supabase
+            .from('jobs' as any)
+            .insert(jobData)
+            .select();
+
+          if (error) throw error;
+          toast.success('Job listing posted successfully! It will be reviewed before going live.');
+        }
       } else if (jobType === 'internship') {
         // Internship - save to internships table
         const internshipData = {
@@ -507,13 +896,35 @@ const PostNewJob: React.FC = () => {
           created_at: new Date().toISOString()
         };
 
-        const { data, error } = await supabase
-          .from('internships' as any)
-          .insert(internshipData)
-          .select();
+        if (isEditing && jobId) {
+          const { data, error } = await supabase
+            .from('internships' as any)
+            .update(internshipData)
+            .eq('id', jobId)
+            .select();
 
-        if (error) throw error;
-        toast.success('Internship listing posted successfully! It will be reviewed before going live.');
+          if (error) throw error;
+          toast.success('Internship updated successfully!');
+        } else {
+        if (isEditing && jobId) {
+          const { data, error } = await supabase
+            .from('internships' as any)
+            .update(internshipData)
+            .eq('id', jobId)
+            .select();
+
+          if (error) throw error;
+          toast.success('Internship updated successfully!');
+        } else {
+          const { data, error } = await supabase
+            .from('internships' as any)
+            .insert(internshipData)
+            .select();
+
+          if (error) throw error;
+          toast.success('Internship listing posted successfully! It will be reviewed before going live.');
+        }
+        }
       } else if (jobType === 'nss') {
         // National Service Support - save to nss_programs table
         const nssData = {
@@ -544,13 +955,35 @@ const PostNewJob: React.FC = () => {
           created_at: new Date().toISOString()
         };
 
-        const { data, error } = await supabase
-          .from('nss_programs' as any)
-          .insert(nssData)
-          .select();
+        if (isEditing && jobId) {
+          const { data, error } = await supabase
+            .from('nss_programs' as any)
+            .update(nssData)
+            .eq('id', jobId)
+            .select();
 
-        if (error) throw error;
-        toast.success('NSS program posted successfully! It will be reviewed before going live.');
+          if (error) throw error;
+          toast.success('NSS program updated successfully!');
+        } else {
+        if (isEditing && jobId) {
+          const { data, error } = await supabase
+            .from('nss_programs' as any)
+            .update(nssData)
+            .eq('id', jobId)
+            .select();
+
+          if (error) throw error;
+          toast.success('NSS program updated successfully!');
+        } else {
+          const { data, error } = await supabase
+            .from('nss_programs' as any)
+            .insert(nssData)
+            .select();
+
+          if (error) throw error;
+          toast.success('NSS program posted successfully! It will be reviewed before going live.');
+        }
+        }
       } else if (jobType === 'graduate-recruitment') {
         // Graduate Recruitment - save to graduate_programs table
         const graduateData = {
@@ -581,13 +1014,24 @@ const PostNewJob: React.FC = () => {
           created_at: new Date().toISOString()
         };
 
-        const { data, error } = await supabase
-          .from('graduate_programs' as any)
-          .insert(graduateData)
-          .select();
+        if (isEditing && jobId) {
+          const { data, error } = await supabase
+            .from('graduate_programs' as any)
+            .update(graduateData)
+            .eq('id', jobId)
+            .select();
 
-        if (error) throw error;
-        toast.success('Graduate program posted successfully! It will be reviewed before going live.');
+          if (error) throw error;
+          toast.success('Graduate program updated successfully!');
+        } else {
+          const { data, error } = await supabase
+            .from('graduate_programs' as any)
+            .insert(graduateData)
+            .select();
+
+          if (error) throw error;
+          toast.success('Graduate program posted successfully! It will be reviewed before going live.');
+        }
       }
 
       navigate('/employer/job-listings/all');
@@ -932,11 +1376,16 @@ const PostNewJob: React.FC = () => {
               Back to Jobs
             </button>
           </div>
-          <h1 className="epnj-title">Post New Job</h1>
-          <p className="epnj-subtitle">Create a comprehensive job listing for candidates to apply</p>
+          <h1 className="epnj-title">{isEditing ? 'Edit Job' : 'Post New Job'}</h1>
+          <p className="epnj-subtitle">{isEditing ? 'Update your job listing details' : 'Create a comprehensive job listing for candidates to apply'}</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} onKeyDown={(e) => {
+          // Prevent Enter key from submitting form when not on last tab
+          if (e.key === 'Enter' && !isLastTab) {
+            e.preventDefault();
+          }
+        }}>
           <div className="epnj-card">
             <div className="epnj-tabs">
               {tabs.map((tab) => {
@@ -975,7 +1424,7 @@ const PostNewJob: React.FC = () => {
                           onChange={(e) => setJobType(e.target.value as 'job-listing' | 'internship' | 'nss' | 'graduate-recruitment')}
                           required
                         >
-                          <option value="job-listing">Job Listing</option>
+                          <option value="job-listing">Professional Job</option>
                           <option value="internship">Internship Listings</option>
                           <option value="nss">National Service Support</option>
                           <option value="graduate-recruitment">Graduate Recruitment</option>
@@ -1992,20 +2441,35 @@ const PostNewJob: React.FC = () => {
                   </>
                 )}
               </button>
-              <button
-                type="submit"
-                className="epnj-btn epnj-btn-primary"
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>Submitting...</>
-                ) : (
-                  <>
-                    <CheckCircle size={16} />
-                    Post Job
-                  </>
-                )}
-              </button>
+              {isLastTab ? (
+                <button
+                  type="submit"
+                  className="epnj-btn epnj-btn-primary"
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>Submitting...</>
+                  ) : (
+                    <>
+                      <CheckCircle size={16} />
+                      Post Job
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="epnj-btn epnj-btn-primary"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleNext(e);
+                  }}
+                >
+                  <ArrowRight size={16} />
+                  Next
+                </button>
+              )}
             </div>
           </div>
         </form>

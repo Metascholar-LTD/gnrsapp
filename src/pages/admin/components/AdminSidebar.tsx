@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import feather from "feather-icons";
 import { Hotel } from "lucide-react";
 import { getValidIconName } from "../utils/iconMap";
 import { initializeSidebar } from "../modules/sidebar";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SidebarItem {
   icon: string;
@@ -20,6 +21,7 @@ interface SidebarSection {
 const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
 
   const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -28,6 +30,40 @@ const AdminSidebar = () => {
     // sessionStorage.clear();
     navigate('/admin/sign-in');
   };
+
+  // Fetch pending approvals count
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('jobs' as any)
+          .select('*', { count: 'exact', head: true })
+          .eq('verified', false)
+          .eq('is_draft', false);
+
+        if (error) {
+          console.error('Error fetching pending approvals:', error);
+          return;
+        }
+
+        setPendingApprovalsCount(count || 0);
+      } catch (error) {
+        console.error('Error fetching pending approvals:', error);
+      }
+    };
+
+    fetchPendingCount();
+    
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchPendingCount, 30000);
+
+    // Also refresh when navigating to/from approvals page
+    if (location.pathname === '/admin/jobs/approvals') {
+      fetchPendingCount();
+    }
+
+    return () => clearInterval(interval);
+  }, [location.pathname]);
 
   useEffect(() => {
     // Initialize sidebar scroll and collapse after component mounts
@@ -190,6 +226,23 @@ const AdminSidebar = () => {
                             <i className="align-middle" data-feather={getValidIconName(item.icon)}></i>
                           )}
                           <span className="align-middle">{item.label}</span>
+                          {item.label === "Jobs Approvals" && pendingApprovalsCount > 0 && (
+                            <span 
+                              className="badge bg-danger rounded-pill ms-auto"
+                              style={{
+                                fontSize: '0.7rem',
+                                padding: '0.2rem 0.5rem',
+                                minWidth: '1.25rem',
+                                height: '1.25rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 600
+                              }}
+                            >
+                              {pendingApprovalsCount > 99 ? '99+' : pendingApprovalsCount}
+                            </span>
+                          )}
                         </Link>
                       )}
                     </li>

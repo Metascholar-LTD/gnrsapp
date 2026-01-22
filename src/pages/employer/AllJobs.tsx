@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Briefcase,
   Search,
@@ -39,11 +39,15 @@ interface AllJobsProps {
 }
 
 const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<{ id: string; category: string; title: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadJobs();
@@ -60,13 +64,16 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           // Get employer profile to find associated company
-          const { data: employerProfile } = await supabase
+          const { data: employerProfile, error: profileError } = await supabase
             .from('employers' as any)
             .select('company_id, company_name')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors if no profile exists
 
-          if (employerProfile) {
+          if (profileError) {
+            console.warn("Error fetching employer profile:", profileError);
+            // Continue without company filter - will show empty state
+          } else if (employerProfile) {
             companyId = employerProfile.company_id;
             companyName = employerProfile.company_name;
           }
@@ -83,61 +90,102 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
         return;
       }
 
-      // Build queries filtered by company
+      // Build queries filtered by company and exclude drafts
       let jobsQuery = supabase
         .from('jobs' as any)
         .select('*')
+        .eq('is_draft', false) // Exclude drafts at database level
         .order('created_at', { ascending: false });
 
+      // For tables without company_id, we'll load all and filter in memory to avoid URL encoding issues
       let internshipsQuery = supabase
         .from('internships' as any)
         .select('*')
+        .eq('is_draft', false) // Exclude drafts at database level
         .order('created_at', { ascending: false });
 
       let nssQuery = supabase
         .from('nss_programs' as any)
         .select('*')
+        .eq('is_draft', false) // Exclude drafts at database level
         .order('created_at', { ascending: false });
 
       let graduateQuery = supabase
         .from('graduate_programs' as any)
         .select('*')
+        .eq('is_draft', false) // Exclude drafts at database level
         .order('created_at', { ascending: false });
 
       // Filter by company_id if available, otherwise by company name
-      if (companyId) {
+      // For jobs table, try both company_id and company name to ensure we catch all jobs
+      if (companyId && companyName) {
+        // Try company_id first (more reliable), then fallback to company name if needed
         jobsQuery = jobsQuery.eq('company_id', companyId);
-        // For other tables, filter by company name since they might not have company_id
-        if (companyName) {
-          internshipsQuery = internshipsQuery.eq('company', companyName);
-          nssQuery = nssQuery.eq('company', companyName);
-          graduateQuery = graduateQuery.eq('company', companyName);
-        }
+        // For other tables, don't filter at DB level - we'll filter in memory to avoid URL encoding issues
+      } else if (companyId) {
+        // Only company_id available
+        jobsQuery = jobsQuery.eq('company_id', companyId);
       } else if (companyName) {
-        // Fallback: filter by company name
+        // Only company name available - try exact match for jobs table
         jobsQuery = jobsQuery.eq('company', companyName);
-        internshipsQuery = internshipsQuery.eq('company', companyName);
-        nssQuery = nssQuery.eq('company', companyName);
-        graduateQuery = graduateQuery.eq('company', companyName);
+        // For other tables, don't filter at DB level - we'll filter in memory
       }
 
       // Load jobs from jobs table
-      const { data: jobsData, error: jobsError } = await jobsQuery;
+      let jobsData: any[] = [];
+      let jobsError: any = null;
+      
+      // Try querying by company_id first
+      if (companyId) {
+        const result = await jobsQuery;
+        jobsData = result.data || [];
+        jobsError = result.error;
+        
+        // If no results with company_id and we have companyName, try company name as fallback
+        if ((!jobsData || jobsData.length === 0) && companyName && !jobsError) {
+          const fallbackQuery = supabase
+            .from('jobs' as any)
+            .select('*')
+            .eq('is_draft', false)
+            .eq('company', companyName)
+            .order('created_at', { ascending: false });
+          const fallbackResult = await fallbackQuery;
+          if (fallbackResult.data) {
+            jobsData = fallbackResult.data;
+          }
+          if (fallbackResult.error) {
+            jobsError = fallbackResult.error;
+          }
+        }
+      } else {
+        // No company_id, use the query as is
+        const result = await jobsQuery;
+        jobsData = result.data || [];
+        jobsError = result.error;
+      }
 
       if (jobsError) {
         console.error("Error loading jobs:", jobsError);
-        toast.error("Failed to load jobs");
+        // Don't show error toast if it's just a filtering issue (no company found)
+        if (jobsError.code !== 'PGRST116') {
+          toast.error("Failed to load jobs");
+        }
         setJobs([]);
         return;
       }
 
-      // Load internships
+      // Debug: Log what we found
+      if (jobsData && jobsData.length > 0) {
+        console.log(`Found ${jobsData.length} jobs for company:`, { companyId, companyName });
+      }
+
+      // Load internships - filter in memory to avoid URL encoding issues with company names
       const { data: internshipsData, error: internshipsError } = await internshipsQuery;
-
-      // Load NSS programs
+      
+      // Load NSS programs - filter in memory to avoid URL encoding issues with company names
       const { data: nssData, error: nssError } = await nssQuery;
-
-      // Load graduate programs
+      
+      // Load graduate programs - filter in memory to avoid URL encoding issues with company names
       const { data: graduateData, error: graduateError } = await graduateQuery;
 
       // Transform all jobs into unified format
@@ -171,58 +219,84 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
         });
       }
 
-      // Transform internships
+      // Transform internships - filter by company name in memory
       if (internshipsData) {
-        internshipsData.forEach((item: any) => {
-          allJobs.push({
-            id: item.id,
-            title: item.title,
-            company: item.company,
-            status: item.is_draft ? 'draft' : 'pending',
-            applications: 0,
-            views: 0,
-            postedDate: item.posted || item.created_at,
-            location: item.location || 'Not specified',
-            category: 'Internship',
-            is_draft: item.is_draft || false
+        internshipsData
+          .filter((item: any) => {
+            // If we have a company name, filter by it (case-insensitive)
+            if (companyName) {
+              return item.company && item.company.toLowerCase().trim() === companyName.toLowerCase().trim();
+            }
+            // If we have company_id, we can't filter these tables by it (they don't have that column)
+            // So we'll include all if only company_id is available
+            return true;
+          })
+          .forEach((item: any) => {
+            allJobs.push({
+              id: item.id,
+              title: item.title,
+              company: item.company,
+              status: item.is_draft ? 'draft' : 'pending',
+              applications: 0,
+              views: 0,
+              postedDate: item.posted || item.created_at,
+              location: item.location || 'Not specified',
+              category: 'Internship',
+              is_draft: item.is_draft || false
+            });
           });
-        });
       }
 
-      // Transform NSS programs
+      // Transform NSS programs - filter by company name in memory
       if (nssData) {
-        nssData.forEach((item: any) => {
-          allJobs.push({
-            id: item.id,
-            title: item.title,
-            company: item.company,
-            status: item.is_draft ? 'draft' : 'pending',
-            applications: 0,
-            views: 0,
-            postedDate: item.posted || item.created_at,
-            location: item.location || 'Not specified',
-            category: 'NSS Program',
-            is_draft: item.is_draft || false
+        nssData
+          .filter((item: any) => {
+            // If we have a company name, filter by it (case-insensitive)
+            if (companyName) {
+              return item.company && item.company.toLowerCase().trim() === companyName.toLowerCase().trim();
+            }
+            return true;
+          })
+          .forEach((item: any) => {
+            allJobs.push({
+              id: item.id,
+              title: item.title,
+              company: item.company,
+              status: item.is_draft ? 'draft' : 'pending',
+              applications: 0,
+              views: 0,
+              postedDate: item.posted || item.created_at,
+              location: item.location || 'Not specified',
+              category: 'NSS Program',
+              is_draft: item.is_draft || false
+            });
           });
-        });
       }
 
-      // Transform graduate programs
+      // Transform graduate programs - filter by company name in memory
       if (graduateData) {
-        graduateData.forEach((item: any) => {
-          allJobs.push({
-            id: item.id,
-            title: item.title,
-            company: item.company,
-            status: item.is_draft ? 'draft' : 'pending',
-            applications: 0,
-            views: 0,
-            postedDate: item.posted || item.created_at,
-            location: item.location || 'Not specified',
-            category: 'Graduate Program',
-            is_draft: item.is_draft || false
+        graduateData
+          .filter((item: any) => {
+            // If we have a company name, filter by it (case-insensitive)
+            if (companyName) {
+              return item.company && item.company.toLowerCase().trim() === companyName.toLowerCase().trim();
+            }
+            return true;
+          })
+          .forEach((item: any) => {
+            allJobs.push({
+              id: item.id,
+              title: item.title,
+              company: item.company,
+              status: item.is_draft ? 'draft' : 'pending',
+              applications: 0,
+              views: 0,
+              postedDate: item.posted || item.created_at,
+              location: item.location || 'Not specified',
+              category: 'Graduate Program',
+              is_draft: item.is_draft || false
+            });
           });
-        });
       }
 
       // Filter based on showDraftsOnly prop
@@ -283,6 +357,52 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
 
   const getInitials = (text: string) => {
     return text.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const openDeleteModal = (jobId: string, jobCategory: string, jobTitle: string) => {
+    setJobToDelete({ id: jobId, category: jobCategory, title: jobTitle });
+    setDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (!deleting) {
+      setDeleteModalOpen(false);
+      setJobToDelete(null);
+    }
+  };
+
+  const handleDeleteJob = async () => {
+    if (!jobToDelete) return;
+
+    setDeleting(true);
+    try {
+      // Determine which table to delete from based on job category
+      let tableName = 'jobs';
+      if (jobToDelete.category === 'Internship') {
+        tableName = 'internships';
+      } else if (jobToDelete.category === 'NSS Program') {
+        tableName = 'nss_programs';
+      } else if (jobToDelete.category === 'Graduate Program') {
+        tableName = 'graduate_programs';
+      }
+
+      const { error } = await supabase
+        .from(tableName as any)
+        .delete()
+        .eq('id', jobToDelete.id);
+
+      if (error) throw error;
+
+      toast.success('Job deleted successfully');
+      setDeleteModalOpen(false);
+      setJobToDelete(null);
+      loadJobs(); // Reload the list
+    } catch (error: any) {
+      console.error('Error deleting job:', error);
+      toast.error(`Failed to delete job: ${error.message || 'Unknown error'}`);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -493,6 +613,12 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
           color: #696cff;
         }
 
+        .ej-action-btn[style*="color: #ff3e1d"]:hover {
+          background: rgba(255, 62, 29, 0.1);
+          border-color: #ff3e1d;
+          color: #ff3e1d;
+        }
+
         .ej-btn-primary {
           display: inline-flex;
           align-items: center;
@@ -640,6 +766,110 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
           .ej-mobile-view {
             display: block;
           }
+        }
+
+        /* Delete Modal Styles */
+        .ej-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 1rem;
+        }
+
+        .ej-modal-content {
+          background: #fff;
+          border-radius: 0.75rem;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+          max-width: 400px;
+          width: 100%;
+          padding: 1.5rem;
+          animation: ej-modal-fade-in 0.2s ease-out;
+        }
+
+        @keyframes ej-modal-fade-in {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .ej-modal-header {
+          margin-bottom: 1rem;
+        }
+
+        .ej-modal-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #141522;
+          margin: 0 0 0.5rem 0;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .ej-modal-message {
+          font-size: 0.875rem;
+          color: #54577A;
+          margin: 0;
+          line-height: 1.5;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .ej-modal-job-title {
+          font-weight: 600;
+          color: #141522;
+        }
+
+        .ej-modal-actions {
+          display: flex;
+          gap: 0.75rem;
+          margin-top: 1.5rem;
+          justify-content: flex-end;
+        }
+
+        .ej-modal-btn {
+          padding: 0.625rem 1.25rem;
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: 1px solid transparent;
+        }
+
+        .ej-modal-btn-cancel {
+          background: #f5f5f9;
+          color: #54577A;
+          border-color: #d9dee3;
+        }
+
+        .ej-modal-btn-cancel:hover {
+          background: #eceef1;
+          border-color: #c5c9d0;
+        }
+
+        .ej-modal-btn-delete {
+          background: #ff3e1d;
+          color: #fff;
+        }
+
+        .ej-modal-btn-delete:hover {
+          background: #e6351a;
+        }
+
+        .ej-modal-btn-delete:disabled {
+          background: #ff9a8a;
+          cursor: not-allowed;
         }
       `}</style>
       <div className="ej-page">
@@ -820,14 +1050,20 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
                             </td>
                             <td>
                               <div className="ej-actions" style={{ justifyContent: 'flex-end' }}>
-                                <button className="ej-action-btn" title="View">
-                                  <Eye size={14} />
-                                </button>
-                                <button className="ej-action-btn" title="Edit">
+                                <button 
+                                  className="ej-action-btn" 
+                                  title="Edit"
+                                  onClick={() => navigate(`/employer/job-listings/edit/${job.id}`)}
+                                >
                                   <Edit2 size={14} />
                                 </button>
-                                <button className="ej-action-btn" title="More">
-                                  <MoreVertical size={14} />
+                                <button 
+                                  className="ej-action-btn" 
+                                  title="Delete"
+                                  onClick={() => openDeleteModal(job.id, job.category, job.title)}
+                                  style={{ color: '#ff3e1d' }}
+                                >
+                                  <Trash2 size={14} />
                                 </button>
                               </div>
                             </td>
@@ -858,6 +1094,36 @@ const AllJobs: React.FC<AllJobsProps> = ({ showDraftsOnly = false }) => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && (
+        <div className="ej-modal-overlay" onClick={closeDeleteModal}>
+          <div className="ej-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="ej-modal-header">
+              <h3 className="ej-modal-title">Delete Job</h3>
+              <p className="ej-modal-message">
+                Are you sure you want to delete <span className="ej-modal-job-title">"{jobToDelete?.title}"</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="ej-modal-actions">
+              <button
+                className="ej-modal-btn ej-modal-btn-cancel"
+                onClick={closeDeleteModal}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="ej-modal-btn ej-modal-btn-delete"
+                onClick={handleDeleteJob}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

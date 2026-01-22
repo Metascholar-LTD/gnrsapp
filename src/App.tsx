@@ -453,6 +453,7 @@ const App = () => (
           <Route path="/employer" element={<EmployerLayout />}>
             <Route index element={<EmployerDashboard />} />
             <Route path="job-listings/post" element={<PostNewJob />} />
+            <Route path="job-listings/edit/:jobId" element={<PostNewJob />} />
             <Route path="job-listings/all" element={<EmployerAllJobs />} />
             <Route path="job-listings/drafts" element={<Drafts />} />
             <Route path="job-listings/*" element={<GenericPage title="Job Listings" description="Post and manage job listings" />} />
