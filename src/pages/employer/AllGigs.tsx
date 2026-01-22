@@ -53,6 +53,7 @@ const AllGigs: React.FC = () => {
       // Get logged-in employer's information
       let employerName: string | null = null;
       let employerEmail: string | null = null;
+      let employerProfileData: any = null;
 
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -67,8 +68,9 @@ const AllGigs: React.FC = () => {
           if (profileError) {
             console.warn("Error fetching employer profile:", profileError);
           } else if (employerProfile) {
-            employerName = employerProfile.full_name || employerProfile.company_name;
-            employerEmail = employerProfile.email || user.email;
+            employerProfileData = employerProfile;
+            employerName = (employerProfile as any).full_name || (employerProfile as any).company_name;
+            employerEmail = (employerProfile as any).email || user.email;
           } else {
             // Fallback to user email
             employerEmail = user.email || null;
@@ -98,13 +100,39 @@ const AllGigs: React.FC = () => {
         return;
       }
 
-      // Filter gigs by employer (case-insensitive)
+      // Filter gigs by employer (case-insensitive, try multiple matching strategies)
       const filteredGigs = (gigsData || []).filter((gig: any) => {
-        if (employerName) {
-          return gig.employer_name && gig.employer_name.toLowerCase().trim() === employerName.toLowerCase().trim();
-        } else if (employerEmail) {
-          return gig.employer_email && gig.employer_email.toLowerCase().trim() === employerEmail.toLowerCase().trim();
+        if (!gig.employer_name && !gig.employer_email) {
+          return false;
         }
+
+        // Strategy 1: Try email match first (most reliable)
+        if (employerEmail && gig.employer_email) {
+          const gigEmail = gig.employer_email.toLowerCase().trim();
+          const profileEmail = employerEmail.toLowerCase().trim();
+          if (gigEmail === profileEmail) {
+            return true;
+          }
+        }
+        
+        // Strategy 2: Try name match with full_name
+        if (employerName && gig.employer_name) {
+          const gigName = gig.employer_name.toLowerCase().trim();
+          const profileName = employerName.toLowerCase().trim();
+          if (gigName === profileName) {
+            return true;
+          }
+        }
+        
+        // Strategy 3: Try matching by company_name if available
+        if (employerProfileData?.company_name && gig.employer_name) {
+          const gigName = gig.employer_name.toLowerCase().trim();
+          const companyName = (employerProfileData.company_name as string).toLowerCase().trim();
+          if (gigName === companyName) {
+            return true;
+          }
+        }
+        
         return false;
       });
 
@@ -567,6 +595,110 @@ const AllGigs: React.FC = () => {
             display: block;
           }
         }
+
+        /* Delete Modal Styles */
+        .ej-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 1rem;
+        }
+
+        .ej-modal-content {
+          background: #fff;
+          border-radius: 0.75rem;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+          max-width: 400px;
+          width: 100%;
+          padding: 1.5rem;
+          animation: ej-modal-fade-in 0.2s ease-out;
+        }
+
+        @keyframes ej-modal-fade-in {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .ej-modal-header {
+          margin-bottom: 1rem;
+        }
+
+        .ej-modal-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #141522;
+          margin: 0 0 0.5rem 0;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .ej-modal-message {
+          font-size: 0.875rem;
+          color: #54577A;
+          margin: 0;
+          line-height: 1.5;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .ej-modal-job-title {
+          font-weight: 600;
+          color: #141522;
+        }
+
+        .ej-modal-actions {
+          display: flex;
+          gap: 0.75rem;
+          margin-top: 1.5rem;
+          justify-content: flex-end;
+        }
+
+        .ej-modal-btn {
+          padding: 0.625rem 1.25rem;
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: 1px solid transparent;
+        }
+
+        .ej-modal-btn-cancel {
+          background: #f5f5f9;
+          color: #54577A;
+          border-color: #d9dee3;
+        }
+
+        .ej-modal-btn-cancel:hover {
+          background: #eceef1;
+          border-color: #c5c9d0;
+        }
+
+        .ej-modal-btn-delete {
+          background: #ff3e1d;
+          color: #fff;
+        }
+
+        .ej-modal-btn-delete:hover {
+          background: #e6351a;
+        }
+
+        .ej-modal-btn-delete:disabled {
+          background: #ff9a8a;
+          cursor: not-allowed;
+        }
       `}</style>
       <div className="ej-page">
         <div className="ej-header">
@@ -785,7 +917,7 @@ const AllGigs: React.FC = () => {
             <div className="ej-modal-header">
               <h3 className="ej-modal-title">Delete Gig</h3>
               <p className="ej-modal-message">
-                Are you sure you want to delete <span className="ej-modal-gig-title">"{gigToDelete?.title}"</span>? This action cannot be undone.
+                Are you sure you want to delete <span className="ej-modal-job-title">"{gigToDelete?.title}"</span>? This action cannot be undone.
               </p>
             </div>
             <div className="ej-modal-actions">

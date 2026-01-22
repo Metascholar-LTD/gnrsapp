@@ -306,6 +306,9 @@ const AdminLocalJobGigs = () => {
       if (error) throw error;
       
       await loadGigs();
+      
+      // Dispatch event to update sidebar count
+      window.dispatchEvent(new CustomEvent('adminGigApprovalUpdate'));
     } catch (error: any) {
       console.error('Error rejecting gig:', error);
       alert('Error rejecting gig: ' + (error.message || 'Unknown error'));
@@ -324,6 +327,10 @@ const AdminLocalJobGigs = () => {
       if (error) throw error;
       
       await loadGigs();
+      
+      // Dispatch event to update sidebar count if deleted gig was pending
+      window.dispatchEvent(new CustomEvent('adminGigApprovalUpdate'));
+      
       setDeleteTarget(null);
       setShowDeleteConfirm(false);
     } catch (error: any) {
@@ -1183,6 +1190,7 @@ const AdminLocalJobGigs = () => {
       <div id="aljg-tabs-container" ref={tabsContainerRef}>
         {tabs.map(tab => {
           const Icon = tab.icon;
+          const pendingGigsCount = tab.id === "approval" ? gigs.filter(g => g.status === 'pending').length : 0;
           return (
             <button
               key={tab.id}
@@ -1191,6 +1199,23 @@ const AdminLocalJobGigs = () => {
             >
               <Icon className="aljg-tab-icon" />
               {tab.label}
+              {tab.id === "approval" && pendingGigsCount > 0 && (
+                <span 
+                  className="badge bg-danger rounded-pill ms-2"
+                  style={{
+                    fontSize: '0.7rem',
+                    padding: '0.2rem 0.5rem',
+                    minWidth: '1.25rem',
+                    height: '1.25rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 600
+                  }}
+                >
+                  {pendingGigsCount > 99 ? '99+' : pendingGigsCount}
+                </span>
+              )}
             </button>
           );
         })}

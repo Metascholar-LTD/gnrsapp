@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import {
@@ -54,6 +54,41 @@ const PostNewGig: React.FC = () => {
   });
 
   const [requirements, setRequirements] = useState<string[]>(['']);
+
+  // Auto-populate employer info from profile
+  useEffect(() => {
+    const loadEmployerInfo = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: employerProfile } = await supabase
+            .from('employers' as any)
+            .select('full_name, company_name, email')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (employerProfile) {
+            // Auto-populate form with employer profile data
+            setFormData(prev => ({
+              ...prev,
+              employer_name: (employerProfile as any).full_name || (employerProfile as any).company_name || prev.employer_name,
+              employer_email: (employerProfile as any).email || user.email || prev.employer_email
+            }));
+          } else if (user.email) {
+            // Fallback to user email if no profile
+            setFormData(prev => ({
+              ...prev,
+              employer_email: user.email || prev.employer_email
+            }));
+          }
+        }
+      } catch (error) {
+        console.warn("Error loading employer info:", error);
+      }
+    };
+
+    loadEmployerInfo();
+  }, []);
 
   const updateRequirement = (index: number, value: string) => {
     const updated = [...requirements];
