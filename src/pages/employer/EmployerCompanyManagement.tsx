@@ -240,10 +240,21 @@ const EmployerCompanyManagement = () => {
         if (error) throw error;
         toast.success("Company updated successfully");
       } else {
-        const { error } = await (supabase as any)
+        const { data, error } = await (supabase as any)
           .from('companies')
-          .insert([payload]);
+          .insert([payload])
+          .select();
         if (error) throw error;
+        
+        // If company was created, we could update employer profile here
+        // But auth is not connected yet, so we'll do this later
+        // if (data && data[0] && user) {
+        //   await supabase
+        //     .from('employers' as any)
+        //     .update({ company_id: data[0].id, company_name: data[0].name })
+        //     .eq('user_id', user.id);
+        // }
+        
         toast.success("Company created successfully");
       }
 

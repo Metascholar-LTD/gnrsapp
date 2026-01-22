@@ -14,7 +14,8 @@ import {
   ArrowLeft,
   Plus,
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  UserCheck
 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -78,6 +79,8 @@ const PostNewJob: React.FC = () => {
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [showNoCompanyAlert, setShowNoCompanyAlert] = useState(false);
   
+  const [jobType, setJobType] = useState<'job-listing' | 'internship' | 'nss' | 'graduate-recruitment'>('job-listing');
+  
   const [formData, setFormData] = useState({
     title: '',
     company: '',
@@ -104,7 +107,12 @@ const PostNewJob: React.FC = () => {
     city: '',
     salary: '',
     imageUrl: '',
-    applicationUrl: ''
+    applicationUrl: '',
+    // Additional fields for different job types
+    duration: '',
+    type: 'Full-time',
+    stipend: '',
+    requirements: ''
   });
 
   const tabs = [
@@ -123,40 +131,46 @@ const PostNewJob: React.FC = () => {
   const loadCompanies = async () => {
     setLoadingCompanies(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please log in to post jobs");
-        navigate('/employer/auth');
-        return;
-      }
+      // Auth check removed - will be connected later
+      // const { data: { user } } = await supabase.auth.getUser();
+      // if (!user) {
+      //   toast.error("Please log in to post jobs");
+      //   navigate('/employer/auth');
+      //   return;
+      // }
 
       // Get employer profile to find associated company
-      const { data: employerProfile } = await supabase
-        .from('employers')
-        .select('company_id, company_name')
-        .eq('user_id', user.id)
-        .single();
+      // Temporarily disabled - auth not connected yet
+      // const { data: { user } } = await supabase.auth.getUser();
+      // const { data: employerProfile } = await supabase
+      //   .from('employers' as any)
+      //   .select('company_id, company_name')
+      //   .eq('user_id', user.id)
+      //   .single();
+      
+      const employerProfile = null; // Temporary - will be connected later
 
       // Only load the employer's company - limit to one company
       let query = supabase
-        .from('companies')
+        .from('companies' as any)
         .select('id, name, logo_url, industry')
         .order('created_at', { ascending: false })
         .limit(1); // Limit to only one company
 
       // If employer has a company_id, filter by it
-      if (employerProfile?.company_id) {
-        query = query.eq('id', employerProfile.company_id);
+      const profile = employerProfile as any;
+      if (profile?.company_id) {
+        query = query.eq('id', profile.company_id);
       } else {
         // If no company_id, try to find by company_name
-        if (employerProfile?.company_name) {
-          query = query.eq('name', employerProfile.company_name);
+        if (profile?.company_name) {
+          query = query.eq('name', profile.company_name);
         } else {
-          // No company associated
-          setCompanies([]);
-          setLoadingCompanies(false);
-          setShowNoCompanyAlert(true);
-          return;
+          // No company associated - load all companies for now (temporary)
+          // setCompanies([]);
+          // setLoadingCompanies(false);
+          // setShowNoCompanyAlert(true);
+          // return;
         }
       }
 
@@ -170,14 +184,15 @@ const PostNewJob: React.FC = () => {
       }
 
       if (data && data.length > 0) {
-        setCompanies(data);
+        const companiesData = (data as unknown) as Company[];
+        setCompanies(companiesData);
         // Auto-select first company if only one exists
-        if (data.length === 1) {
+        if (companiesData.length === 1) {
           setFormData(prev => ({
             ...prev,
-            company: data[0].name,
-            companyId: data[0].id,
-            companyLogo: data[0].logo_url || ''
+            company: companiesData[0].name,
+            companyId: companiesData[0].id,
+            companyLogo: companiesData[0].logo_url || ''
           }));
         }
       } else {
@@ -208,7 +223,7 @@ const PostNewJob: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.company || !formData.jobCategory || !formData.industry) {
+    if (!formData.title || !formData.company) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -218,50 +233,177 @@ const PostNewJob: React.FC = () => {
       return;
     }
 
+    // Validate based on job type
+    if (jobType === 'job-listing' && (!formData.jobCategory || !formData.industry)) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      // Transform data for Supabase
-      const jobData = {
-        title: formData.title,
-        company: formData.company,
-        company_id: formData.companyId,
-        company_logo: formData.companyLogo || null,
-        description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
-        impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
-        impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
-        field_ops_groups: formData.fieldOpsGroups ? JSON.parse(formData.fieldOpsGroups) : [],
-        skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
-        skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
-        skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
-        skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
-        behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
-        skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
-        culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
-        opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
-        job_category: formData.jobCategory,
-        industry: formData.industry,
-        education_level: formData.educationLevel,
-        experience_level: formData.experienceLevel,
-        contract_type: formData.contractType,
-        region: formData.region,
-        city: formData.city || null,
-        salary: formData.salary || null,
-        image_url: formData.imageUrl || null,
-        application_url: formData.applicationUrl || null,
-        verified: false,
-        featured: false,
-        date: new Date().toISOString().split('T')[0],
-        created_at: new Date().toISOString()
+      // Common data transformation
+      const parseFieldOpsGroups = () => {
+        if (!formData.fieldOpsGroups) return [];
+        try {
+          return JSON.parse(formData.fieldOpsGroups);
+        } catch {
+          return [];
+        }
       };
 
-      const { data, error } = await supabase
-        .from('jobs' as any)
-        .insert(jobData)
-        .select();
+      // Save to appropriate table based on job type
+      if (jobType === 'job-listing') {
+        // Professional job listing - save to jobs table
+        const jobData = {
+          title: formData.title,
+          company: formData.company,
+          company_id: formData.companyId,
+          company_logo: formData.companyLogo || null,
+          description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+          impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
+          impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
+          field_ops_groups: parseFieldOpsGroups(),
+          skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+          skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+          skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
+          skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
+          behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+          culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
+          opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+          job_category: formData.jobCategory,
+          industry: formData.industry,
+          education_level: formData.educationLevel,
+          experience_level: formData.experienceLevel,
+          contract_type: formData.contractType,
+          region: formData.region,
+          city: formData.city || null,
+          salary: formData.salary || null,
+          image_url: formData.imageUrl || null,
+          application_url: formData.applicationUrl || null,
+          verified: false,
+          featured: false,
+          date: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        };
 
-      if (error) throw error;
+        const { data, error } = await supabase
+          .from('jobs' as any)
+          .insert(jobData)
+          .select();
 
-      toast.success('Job posted successfully! It will be reviewed before going live.');
+        if (error) throw error;
+        toast.success('Job listing posted successfully! It will be reviewed before going live.');
+      } else if (jobType === 'internship') {
+        // Internship - save to internships table
+        const internshipData = {
+          title: formData.title,
+          company: formData.company,
+          company_logo: formData.companyLogo || null,
+          description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+          impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
+          impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
+          field_ops_groups: parseFieldOpsGroups(),
+          skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+          skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+          skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
+          skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
+          behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+          culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
+          opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+          location: formData.region + (formData.city ? `, ${formData.city}` : ''),
+          duration: formData.duration || null,
+          type: formData.type || 'Full-time',
+          stipend: formData.stipend || null,
+          requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
+          image_url: formData.imageUrl || null,
+          application_url: formData.applicationUrl || null,
+          posted: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+          .from('internships' as any)
+          .insert(internshipData)
+          .select();
+
+        if (error) throw error;
+        toast.success('Internship listing posted successfully! It will be reviewed before going live.');
+      } else if (jobType === 'nss') {
+        // National Service Support - save to nss_programs table
+        const nssData = {
+          title: formData.title,
+          company: formData.company,
+          company_logo: formData.companyLogo || null,
+          description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+          impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
+          impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
+          field_ops_groups: parseFieldOpsGroups(),
+          skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+          skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+          skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
+          skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
+          behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+          culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
+          opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+          location: formData.region + (formData.city ? `, ${formData.city}` : ''),
+          duration: formData.duration || null,
+          type: formData.type || null,
+          salary: formData.salary || null,
+          requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
+          image_url: formData.imageUrl || null,
+          application_url: formData.applicationUrl || null,
+          posted: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+          .from('nss_programs' as any)
+          .insert(nssData)
+          .select();
+
+        if (error) throw error;
+        toast.success('NSS program posted successfully! It will be reviewed before going live.');
+      } else if (jobType === 'graduate-recruitment') {
+        // Graduate Recruitment - save to graduate_programs table
+        const graduateData = {
+          title: formData.title,
+          company: formData.company,
+          company_logo: formData.companyLogo || null,
+          description_paragraphs: formData.descriptionParagraphs ? formData.descriptionParagraphs.split('\n').filter(Boolean) : [],
+          impact_paragraphs: formData.impactParagraphs ? formData.impactParagraphs.split('\n').filter(Boolean) : [],
+          impact_highlights: formData.impactHighlights ? formData.impactHighlights.split('\n').filter(Boolean) : [],
+          field_ops_groups: parseFieldOpsGroups(),
+          skills_formal_qualifications: formData.skillsFormalQualifications ? formData.skillsFormalQualifications.split('\n').filter(Boolean) : [],
+          skills_additional_knowledge: formData.skillsAdditionalKnowledge ? formData.skillsAdditionalKnowledge.split('\n').filter(Boolean) : [],
+          skills_experience: formData.skillsExperience ? formData.skillsExperience.split('\n').filter(Boolean) : [],
+          skills_technical: formData.skillsTechnical ? formData.skillsTechnical.split('\n').filter(Boolean) : [],
+          behavioral_attributes: formData.behavioralAttributes ? formData.behavioralAttributes.split('\n').filter(Boolean) : [],
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+          culture_paragraphs: formData.cultureParagraphs ? formData.cultureParagraphs.split('\n').filter(Boolean) : [],
+          opportunity_paragraphs: formData.opportunityParagraphs ? formData.opportunityParagraphs.split('\n').filter(Boolean) : [],
+          location: formData.region + (formData.city ? `, ${formData.city}` : ''),
+          duration: formData.duration || null,
+          type: formData.type || null,
+          salary: formData.salary || null,
+          requirements: formData.requirements ? formData.requirements.split('\n').filter(Boolean) : [],
+          image_url: formData.imageUrl || null,
+          application_url: formData.applicationUrl || null,
+          posted: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+          .from('graduate_programs' as any)
+          .insert(graduateData)
+          .select();
+
+        if (error) throw error;
+        toast.success('Graduate program posted successfully! It will be reviewed before going live.');
+      }
+
       navigate('/employer/job-listings/all');
     } catch (error: any) {
       console.error('Error posting job:', error);
@@ -297,6 +439,16 @@ const PostNewJob: React.FC = () => {
       <style>{`
         .epnj-page {
           font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Desktop: 1024px and above */
+        @media (min-width: 1024px) {
+          .epnj-page {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+          }
         }
 
         .epnj-header {
@@ -392,6 +544,13 @@ const PostNewJob: React.FC = () => {
 
         .epnj-form-container {
           padding: 2rem 1.5rem;
+        }
+
+        /* Desktop: 1024px and above */
+        @media (min-width: 1024px) {
+          .epnj-form-container {
+            padding: 2rem 3rem;
+          }
         }
 
         .epnj-form-grid {
@@ -622,6 +781,22 @@ const PostNewJob: React.FC = () => {
                     <div className="epnj-form-grid">
                       <div className="epnj-form-group full-width">
                         <label className="epnj-form-label">
+                          Job Type <span className="epnj-form-label-required">*</span>
+                        </label>
+                        <select
+                          className="epnj-form-select"
+                          value={jobType}
+                          onChange={(e) => setJobType(e.target.value as 'job-listing' | 'internship' | 'nss' | 'graduate-recruitment')}
+                          required
+                        >
+                          <option value="job-listing">Job Listing</option>
+                          <option value="internship">Internship Listings</option>
+                          <option value="nss">National Service Support</option>
+                          <option value="graduate-recruitment">Graduate Recruitment</option>
+                        </select>
+                      </div>
+                      <div className="epnj-form-group full-width">
+                        <label className="epnj-form-label">
                           Job Title <span className="epnj-form-label-required">*</span>
                         </label>
                         <input
@@ -739,74 +914,120 @@ const PostNewJob: React.FC = () => {
                           onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                         />
                       </div>
-                      <div className="epnj-form-group">
-                        <label className="epnj-form-label">
-                          Job Category <span className="epnj-form-label-required">*</span>
-                        </label>
-                        <select
-                          className="epnj-form-select"
-                          value={formData.jobCategory}
-                          onChange={(e) => setFormData({ ...formData, jobCategory: e.target.value })}
-                          required
-                        >
-                          <option value="">Select Job Category</option>
-                          {jobCategories.map(category => (
-                            <option key={category} value={category}>{category}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="epnj-form-group">
-                        <label className="epnj-form-label">
-                          Industry <span className="epnj-form-label-required">*</span>
-                        </label>
-                        <select
-                          className="epnj-form-select"
-                          value={formData.industry}
-                          onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                          required
-                        >
-                          <option value="">Select Industry</option>
-                          {industries.map(industry => (
-                            <option key={industry} value={industry}>{industry}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="epnj-form-group">
-                        <label className="epnj-form-label">Education Level</label>
-                        <select
-                          className="epnj-form-select"
-                          value={formData.educationLevel}
-                          onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value })}
-                        >
-                          {educationLevels.map(level => (
-                            <option key={level} value={level}>{level}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="epnj-form-group">
-                        <label className="epnj-form-label">Experience Level</label>
-                        <select
-                          className="epnj-form-select"
-                          value={formData.experienceLevel}
-                          onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value })}
-                        >
-                          {experienceLevels.map(level => (
-                            <option key={level} value={level}>{level}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="epnj-form-group">
-                        <label className="epnj-form-label">Contract Type</label>
-                        <select
-                          className="epnj-form-select"
-                          value={formData.contractType}
-                          onChange={(e) => setFormData({ ...formData, contractType: e.target.value })}
-                        >
-                          {contractTypes.map(type => (
-                            <option key={type} value={type}>{type}</option>
-                          ))}
-                        </select>
-                      </div>
+                      {/* Job Category and Industry - Only for Job Listing */}
+                      {jobType === 'job-listing' && (
+                        <>
+                          <div className="epnj-form-group">
+                            <label className="epnj-form-label">
+                              Job Category <span className="epnj-form-label-required">*</span>
+                            </label>
+                            <select
+                              className="epnj-form-select"
+                              value={formData.jobCategory}
+                              onChange={(e) => setFormData({ ...formData, jobCategory: e.target.value })}
+                              required
+                            >
+                              <option value="">Select Job Category</option>
+                              {jobCategories.map(category => (
+                                <option key={category} value={category}>{category}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="epnj-form-group">
+                            <label className="epnj-form-label">
+                              Industry <span className="epnj-form-label-required">*</span>
+                            </label>
+                            <select
+                              className="epnj-form-select"
+                              value={formData.industry}
+                              onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                              required
+                            >
+                              <option value="">Select Industry</option>
+                              {industries.map(industry => (
+                                <option key={industry} value={industry}>{industry}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="epnj-form-group">
+                            <label className="epnj-form-label">Education Level</label>
+                            <select
+                              className="epnj-form-select"
+                              value={formData.educationLevel}
+                              onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value })}
+                            >
+                              {educationLevels.map(level => (
+                                <option key={level} value={level}>{level}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="epnj-form-group">
+                            <label className="epnj-form-label">Experience Level</label>
+                            <select
+                              className="epnj-form-select"
+                              value={formData.experienceLevel}
+                              onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value })}
+                            >
+                              {experienceLevels.map(level => (
+                                <option key={level} value={level}>{level}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="epnj-form-group">
+                            <label className="epnj-form-label">Contract Type</label>
+                            <select
+                              className="epnj-form-select"
+                              value={formData.contractType}
+                              onChange={(e) => setFormData({ ...formData, contractType: e.target.value })}
+                            >
+                              {contractTypes.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Duration, Type, Stipend - For Internship, NSS, Graduate */}
+                      {jobType !== 'job-listing' && (
+                        <>
+                          <div className="epnj-form-group">
+                            <label className="epnj-form-label">Duration</label>
+                            <input
+                              type="text"
+                              className="epnj-form-input"
+                              placeholder={jobType === 'internship' ? 'e.g., 3-6 months' : 'e.g., 12 months'}
+                              value={formData.duration}
+                              onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                            />
+                          </div>
+                          <div className="epnj-form-group">
+                            <label className="epnj-form-label">Type</label>
+                            <select
+                              className="epnj-form-select"
+                              value={formData.type}
+                              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                            >
+                              <option value="Full-time">Full-time</option>
+                              <option value="Part-time">Part-time</option>
+                              <option value="Remote">Remote</option>
+                              <option value="Hybrid">Hybrid</option>
+                            </select>
+                          </div>
+                          {jobType === 'internship' && (
+                            <div className="epnj-form-group">
+                              <label className="epnj-form-label">Stipend</label>
+                              <input
+                                type="text"
+                                className="epnj-form-input"
+                                placeholder="e.g., GHS 500/month"
+                                value={formData.stipend}
+                                onChange={(e) => setFormData({ ...formData, stipend: e.target.value })}
+                              />
+                            </div>
+                          )}
+                        </>
+                      )}
                       <div className="epnj-form-group">
                         <label className="epnj-form-label">Region</label>
                         <select

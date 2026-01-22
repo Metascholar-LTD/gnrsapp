@@ -92,6 +92,7 @@ const AdminSidebar = () => {
       items: [
         { icon: "briefcase", label: "Jobs", path: "/admin/jobs" },
         { icon: "building", label: "Companies", path: "/admin/jobs/companies" },
+        { icon: "clock", label: "Jobs Approvals", path: "/admin/jobs/approvals" },
       ],
     },
     {

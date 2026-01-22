@@ -103,6 +103,7 @@ import AdminUniversities from "./pages/admin/AdminUniversities";
 import AdminTrialQuestionManage from "./pages/admin/components/AdminTrialQuestionManage";
 import AdminJobsHub from "./pages/admin/AdminJobsHub";
 import CompanyManager from "./pages/admin/components/CompanyManager";
+import JobsApprovalsManager from "./pages/admin/components/JobsApprovalsManager";
 import AdminUsersList from "./pages/admin/AdminUsersList";
 import AdminAuth from "./pages/admin/AdminAuth";
 import AdminSkilledWorkers from "./pages/admin/AdminSkilledWorkers";
@@ -314,6 +315,7 @@ const App = () => (
             <Route path="jobs/graduate-recruitment" element={<AdminJobsHub />} />
             <Route path="jobs/yea" element={<AdminJobsHub />} />
             <Route path="jobs/companies" element={<CompanyManager />} />
+            <Route path="jobs/approvals" element={<JobsApprovalsManager />} />
             <Route path="education" element={<AdminEducationHub />} />
             <Route path="education/trial-questions/:id/manage" element={<AdminTrialQuestionManage />} />
             <Route path="directories" element={<AdminDashboard />} />
