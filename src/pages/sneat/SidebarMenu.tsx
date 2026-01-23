@@ -33,14 +33,12 @@ const SidebarMenu: React.FC = () => {
         menusToOpen.add('mentorship');
       }
     }
-    if (path.startsWith('/userprofile/services/') || 
+    if (path.startsWith('/userprofile/services/') ||
         path.startsWith('/userprofile/ratings')) {
       menusToOpen.add('services');
     }
-    if (path.startsWith('/userprofile/settings/')) {
-      menusToOpen.add('settings');
-    }
-    
+    // Settings is now a unified page, no need to expand submenu
+
     setOpenMenus(menusToOpen);
   }, [location.pathname]);
   
@@ -270,42 +268,12 @@ const SidebarMenu: React.FC = () => {
         <span className="menu-header-text">Account & Settings</span>
       </li>
 
-      {/* My Profile */}
-      <li className="menu-item">
-        <Link to="/userprofile/profile" className="menu-link">
-          <Icon icon="hugeicons:user-circle" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="My Profile">My Profile</div>
-        </Link>
-      </li>
-
-      {/* Settings */}
-      <li className={`menu-item ${isMenuOpen('settings') ? 'open' : ''}`}>
-        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('settings', e)}>
+      {/* Settings - Unified Pinterest-style settings page */}
+      <li className={`menu-item ${location.pathname.startsWith('/userprofile/settings') ? 'active' : ''}`}>
+        <Link to="/userprofile/settings" className="menu-link">
           <Icon icon="hugeicons:settings-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Settings">Settings</div>
-        </a>
-        <ul className={`menu-sub ${isMenuOpen('settings') ? 'show' : ''}`}>
-          <li className="menu-item">
-            <Link to="/userprofile/settings/account" className="menu-link">
-              <div data-i18n="Account Settings">Account Settings</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/settings/privacy" className="menu-link">
-              <div data-i18n="Privacy">Privacy Settings</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/settings/notifications" className="menu-link">
-              <div data-i18n="Notifications">Notification Settings</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/userprofile/settings/visibility" className="menu-link">
-              <div data-i18n="Visibility">Profile Visibility</div>
-            </Link>
-          </li>
-        </ul>
+        </Link>
       </li>
 
       {/* Help & Support */}

@@ -126,10 +126,10 @@ import BecomeMentor from "./pages/sneat/pages/BecomeMentor";
 import ManageServices from "./pages/sneat/pages/ManageServices";
 import CustomerInquiries from "./pages/sneat/pages/CustomerInquiries";
 import RatingsReviews from "./pages/sneat/pages/RatingsReviews";
-import UserProfile from "./pages/sneat/pages/MyProfile";
 import PrivacySettings from "./pages/sneat/pages/PrivacySettings";
 import NotificationSettings from "./pages/sneat/pages/NotificationSettings";
 import ProfileVisibility from "./pages/sneat/pages/ProfileVisibility";
+import UnifiedSettings from "./pages/sneat/pages/UnifiedSettings";
 import HelpSupport from "./pages/sneat/pages/HelpSupport";
 import EmployerLayout from "./pages/employer/EmployerLayout";
 import EmployerDashboard from "./pages/employer/EmployerDashboard";
@@ -377,22 +377,15 @@ const App = () => (
             {/* Ratings */}
             <Route path="ratings" element={<RatingsReviews />} />
 
-            {/* Profile */}
-            <Route path="profile" element={<UserProfile />} />
-
-            {/* Settings */}
-            <Route path="settings/account" element={<AccountSettings />} />
-            <Route path="settings/privacy" element={<PrivacySettings />} />
-            <Route path="settings/notifications" element={<NotificationSettings />} />
-            <Route path="settings/visibility" element={<ProfileVisibility />} />
+            {/* Settings - Unified Pinterest-style settings page */}
+            <Route path="settings" element={<UnifiedSettings />} />
+            <Route path="settings/*" element={<UnifiedSettings />} />
 
             {/* Help & Support */}
             <Route path="support" element={<HelpSupport />} />
 
-            {/* Legacy Account Settings Routes */}
-            <Route path="account-settings/account" element={<AccountSettings />} />
-            <Route path="account-settings/notifications" element={<NotificationSettings />} />
-            <Route path="account-settings/connections" element={<AccountSettings />} />
+            {/* Legacy Account Settings Routes - redirect to unified settings */}
+            <Route path="account-settings/*" element={<UnifiedSettings />} />
             
             {/* Layout Pages */}
             <Route path="layouts/without-menu" element={<GenericPage title="Without Menu" description="Layout without menu sidebar" />} />

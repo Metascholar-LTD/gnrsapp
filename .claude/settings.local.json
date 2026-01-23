@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(dir \"C:\\\\Users\\\\FJ\\\\Desktop\")",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }
