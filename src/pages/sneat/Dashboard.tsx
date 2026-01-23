@@ -254,8 +254,8 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
-        <div className="text-center">
+        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
+          <div className="text-center">
           <Loader2
             size={32}
             className="mb-3"
@@ -906,7 +906,7 @@ const Dashboard: React.FC = () => {
                     <Award size={16} />
                     Browse Scholarships
                   </Link>
-                </div>
+                  </div>
               ) : (
                 <div className="row g-3">
                   {/* Mock saved scholarships - replace with actual data */}
@@ -926,7 +926,7 @@ const Dashboard: React.FC = () => {
                           e.currentTarget.style.transform = 'translateY(0)';
                         }}
                       >
-                        <div className="card-body">
+            <div className="card-body">
                           <div className="d-flex align-items-start justify-content-between mb-2">
                             <div style={{
                               width: '40px',
@@ -939,8 +939,8 @@ const Dashboard: React.FC = () => {
                               flexShrink: 0
                             }}>
                               <Award size={20} style={{ color: colors.primary }} />
-                            </div>
-                          </div>
+                    </div>
+                  </div>
                           <h6 style={{
                             fontFamily: "'Crimson Text', Georgia, serif",
                             fontSize: '0.9375rem',
@@ -968,17 +968,17 @@ const Dashboard: React.FC = () => {
                           <div className="d-flex align-items-center gap-2" style={{ fontSize: '0.75rem', color: '#A8A29E' }}>
                             <Calendar size={12} />
                             <span>Deadline: {new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                          </div>
-                        </div>
-                      </div>
+                  </div>
                     </div>
+                  </div>
+                  </div>
                   ))}
-                </div>
+                    </div>
               )}
+                  </div>
+                  </div>
             </div>
           </div>
-        </div>
-      </div>
 
     </>
   );

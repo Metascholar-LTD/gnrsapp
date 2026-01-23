@@ -40,12 +40,12 @@ const NotificationSettings: React.FC = () => {
   if (isLoading) {
     return (
       <PageWrapper>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin" style={{ color: colors.primary }} />
             <p style={{ color: colors.textSecondary }}>Loading notification settings...</p>
-          </motion.div>
-        </div>
+        </motion.div>
+      </div>
       </PageWrapper>
     );
   }
