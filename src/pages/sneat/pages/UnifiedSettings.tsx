@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
@@ -34,6 +34,118 @@ import {
   ChevronUp,
   RefreshCw
 } from 'lucide-react';
+
+// Toggle Switch Component - Defined OUTSIDE main component to prevent recreation
+// Using memo to prevent unnecessary re-renders
+const ToggleSwitch = memo(({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      onToggle();
+    }}
+    className="relative flex-shrink-0"
+    style={{
+      width: '48px',
+      height: '28px',
+      borderRadius: '14px',
+      backgroundColor: enabled ? '#0076d3' : '#cdcdcd',
+      transition: 'background-color 0.2s ease',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 0
+    }}
+  >
+    <div
+      style={{
+        position: 'absolute',
+        top: '2px',
+        left: enabled ? '22px' : '2px',
+        width: '24px',
+        height: '24px',
+        borderRadius: '12px',
+        backgroundColor: '#fff',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+        transition: 'left 0.2s ease'
+      }}
+    />
+  </button>
+));
+
+ToggleSwitch.displayName = 'ToggleSwitch';
+
+// Notification Item Component - Defined OUTSIDE to prevent recreation
+interface NotificationItemProps {
+  title: string;
+  description?: string;
+  isExpanded: boolean;
+  onExpandToggle: () => void;
+  pushEnabled: boolean;
+  inAppEnabled: boolean;
+  onPushToggle: () => void;
+  onInAppToggle: () => void;
+}
+
+const NotificationItem = memo(({
+  title,
+  description,
+  isExpanded,
+  onExpandToggle,
+  pushEnabled,
+  inAppEnabled,
+  onPushToggle,
+  onInAppToggle
+}: NotificationItemProps) => {
+  const statusText = `${pushEnabled ? 'Push on' : 'Push off'}${inAppEnabled ? ', in-app on' : ''}`;
+
+  return (
+    <div style={{ borderBottom: '1px solid #efefef' }}>
+      <button
+        onClick={onExpandToggle}
+        className="w-full flex items-center justify-between py-4 px-1 text-left"
+        type="button"
+      >
+        <div>
+          <p style={{ fontSize: '16px', fontWeight: 600, color: '#111' }}>{title}</p>
+          {!isExpanded && (
+            <p style={{ fontSize: '14px', color: '#767676', marginTop: '2px' }}>{statusText}</p>
+          )}
+        </div>
+        {isExpanded ? <ChevronUp size={20} color="#767676" /> : <ChevronDown size={20} color="#767676" />}
+      </button>
+
+      {/* Using CSS for smooth height transition instead of Framer Motion */}
+      <div
+        style={{
+          maxHeight: isExpanded ? '200px' : '0',
+          opacity: isExpanded ? 1 : 0,
+          overflow: 'hidden',
+          transition: 'max-height 0.2s ease, opacity 0.2s ease'
+        }}
+      >
+        {description && (
+          <p style={{ fontSize: '14px', color: '#767676', marginBottom: '16px', paddingLeft: '4px' }}>
+            {description}
+          </p>
+        )}
+        <p style={{ fontSize: '14px', fontWeight: 600, color: '#111', marginBottom: '12px', paddingLeft: '4px' }}>
+          How do you want to be notified?
+        </p>
+        <div className="space-y-3 pb-4 pl-1">
+          <div className="flex items-center justify-between">
+            <span style={{ fontSize: '14px', color: '#111' }}>Push</span>
+            <ToggleSwitch enabled={pushEnabled} onToggle={onPushToggle} />
+          </div>
+          <div className="flex items-center justify-between">
+            <span style={{ fontSize: '14px', color: '#111' }}>In-app</span>
+            <ToggleSwitch enabled={inAppEnabled} onToggle={onInAppToggle} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+NotificationItem.displayName = 'NotificationItem';
 
 // Pinterest-style unified settings page
 const UnifiedSettings: React.FC = () => {
@@ -188,91 +300,6 @@ const UnifiedSettings: React.FC = () => {
     { id: 'privacy-data', label: 'Privacy and data' },
     { id: 'security', label: 'Security' }
   ];
-
-  // Toggle Switch Component - Pinterest style
-  const ToggleSwitch = ({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
-    <button
-      onClick={onToggle}
-      className="relative w-12 h-7 rounded-full transition-colors duration-200"
-      style={{ backgroundColor: enabled ? '#0076d3' : '#cdcdcd' }}
-    >
-      <motion.div
-        animate={{ x: enabled ? 22 : 2 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className="absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-md"
-      />
-    </button>
-  );
-
-  // Expandable notification item - Pinterest style
-  const NotificationItem = ({
-    title,
-    description,
-    itemKey,
-    pushEnabled,
-    inAppEnabled,
-    onPushToggle,
-    onInAppToggle
-  }: {
-    title: string;
-    description?: string;
-    itemKey: string;
-    pushEnabled: boolean;
-    inAppEnabled: boolean;
-    onPushToggle: () => void;
-    onInAppToggle: () => void;
-  }) => {
-    const isExpanded = expandedNotifications.has(itemKey);
-    const statusText = `${pushEnabled ? 'Push on' : 'Push off'}${inAppEnabled ? ', in-app on' : ''}`;
-
-    return (
-      <div style={{ borderBottom: '1px solid #efefef' }}>
-        <button
-          onClick={() => toggleNotificationExpand(itemKey)}
-          className="w-full flex items-center justify-between py-4 px-1 text-left"
-        >
-          <div>
-            <p style={{ fontSize: '16px', fontWeight: 600, color: '#111' }}>{title}</p>
-            {!isExpanded && (
-              <p style={{ fontSize: '14px', color: '#767676', marginTop: '2px' }}>{statusText}</p>
-            )}
-          </div>
-          {isExpanded ? <ChevronUp size={20} color="#767676" /> : <ChevronDown size={20} color="#767676" />}
-        </button>
-
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              {description && (
-                <p style={{ fontSize: '14px', color: '#767676', marginBottom: '16px', paddingLeft: '4px' }}>
-                  {description}
-                </p>
-              )}
-              <p style={{ fontSize: '14px', fontWeight: 600, color: '#111', marginBottom: '12px', paddingLeft: '4px' }}>
-                How do you want to be notified?
-              </p>
-              <div className="space-y-3 pb-4 pl-1">
-                <div className="flex items-center justify-between">
-                  <span style={{ fontSize: '14px', color: '#111' }}>Push</span>
-                  <ToggleSwitch enabled={pushEnabled} onToggle={onPushToggle} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span style={{ fontSize: '14px', color: '#111' }}>In-app</span>
-                  <ToggleSwitch enabled={inAppEnabled} onToggle={onInAppToggle} />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  };
 
   if (isLoading) {
     return (
@@ -668,7 +695,8 @@ const UnifiedSettings: React.FC = () => {
               <NotificationItem
                 title="Comments"
                 description="Get notified when someone comments on a post you created"
-                itemKey="commentsPublished"
+                isExpanded={expandedNotifications.has('commentsPublished')}
+                onExpandToggle={() => toggleNotificationExpand('commentsPublished')}
                 pushEnabled={notifications.commentsPublished.push}
                 inAppEnabled={notifications.commentsPublished.inApp}
                 onPushToggle={() => setNotifications(prev => ({
@@ -683,7 +711,8 @@ const UnifiedSettings: React.FC = () => {
 
               <NotificationItem
                 title="Reactions"
-                itemKey="reactionsPublished"
+                isExpanded={expandedNotifications.has('reactionsPublished')}
+                onExpandToggle={() => toggleNotificationExpand('reactionsPublished')}
                 pushEnabled={notifications.reactionsPublished.push}
                 inAppEnabled={notifications.reactionsPublished.inApp}
                 onPushToggle={() => setNotifications(prev => ({
@@ -698,7 +727,8 @@ const UnifiedSettings: React.FC = () => {
 
               <NotificationItem
                 title="Saves"
-                itemKey="savesPublished"
+                isExpanded={expandedNotifications.has('savesPublished')}
+                onExpandToggle={() => toggleNotificationExpand('savesPublished')}
                 pushEnabled={notifications.savesPublished.push}
                 inAppEnabled={notifications.savesPublished.inApp}
                 onPushToggle={() => setNotifications(prev => ({
@@ -713,7 +743,8 @@ const UnifiedSettings: React.FC = () => {
 
               <NotificationItem
                 title="Views and impressions"
-                itemKey="viewsPublished"
+                isExpanded={expandedNotifications.has('viewsPublished')}
+                onExpandToggle={() => toggleNotificationExpand('viewsPublished')}
                 pushEnabled={notifications.viewsPublished.push}
                 inAppEnabled={notifications.viewsPublished.inApp}
                 onPushToggle={() => setNotifications(prev => ({
@@ -733,7 +764,8 @@ const UnifiedSettings: React.FC = () => {
 
               <NotificationItem
                 title="Comments"
-                itemKey="commentsSaved"
+                isExpanded={expandedNotifications.has('commentsSaved')}
+                onExpandToggle={() => toggleNotificationExpand('commentsSaved')}
                 pushEnabled={notifications.commentsSaved.push}
                 inAppEnabled={notifications.commentsSaved.inApp}
                 onPushToggle={() => setNotifications(prev => ({
@@ -748,7 +780,8 @@ const UnifiedSettings: React.FC = () => {
 
               <NotificationItem
                 title="Mentions"
-                itemKey="mentionsSaved"
+                isExpanded={expandedNotifications.has('mentionsSaved')}
+                onExpandToggle={() => toggleNotificationExpand('mentionsSaved')}
                 pushEnabled={notifications.mentionsSaved.push}
                 inAppEnabled={notifications.mentionsSaved.inApp}
                 onPushToggle={() => setNotifications(prev => ({
@@ -763,7 +796,8 @@ const UnifiedSettings: React.FC = () => {
 
               <NotificationItem
                 title="Reminders"
-                itemKey="remindersSaved"
+                isExpanded={expandedNotifications.has('remindersSaved')}
+                onExpandToggle={() => toggleNotificationExpand('remindersSaved')}
                 pushEnabled={notifications.remindersSaved.push}
                 inAppEnabled={notifications.remindersSaved.inApp}
                 onPushToggle={() => setNotifications(prev => ({

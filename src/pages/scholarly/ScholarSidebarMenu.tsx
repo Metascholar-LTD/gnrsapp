@@ -128,24 +128,12 @@ const ScholarSidebarMenu: React.FC = () => {
         <span className="menu-header-text">Account</span>
       </li>
 
-      {/* Settings */}
-      <li className={`menu-item ${isMenuOpen('settings') ? 'open' : ''}`}>
-        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('settings', e)}>
+      {/* Settings - Unified Pinterest-style settings page */}
+      <li className={`menu-item ${location.pathname.startsWith('/scholar/settings') ? 'active' : ''}`}>
+        <Link to="/scholar/settings" className="menu-link">
           <Icon icon="hugeicons:settings-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Settings">Settings</div>
-        </a>
-        <ul className={`menu-sub ${isMenuOpen('settings') ? 'show' : ''}`}>
-          <li className="menu-item">
-            <Link to="/scholar/settings/account" className="menu-link">
-              <div data-i18n="Account Settings">Account Settings</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/scholar/settings/notifications" className="menu-link">
-              <div data-i18n="Notifications">Notification Settings</div>
-            </Link>
-          </li>
-        </ul>
+        </Link>
       </li>
 
       {/* Help & Support */}

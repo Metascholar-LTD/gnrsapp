@@ -32,10 +32,8 @@ const EmployerSidebarMenu: React.FC = () => {
     if (path.startsWith('/employer/subscription/')) {
       menusToOpen.add('subscription');
     }
-    if (path.startsWith('/employer/settings/')) {
-      menusToOpen.add('settings');
-    }
-    
+    // Settings is now a unified page, no need to expand submenu
+
     setOpenMenus(menusToOpen);
   }, [location.pathname]);
   
@@ -203,24 +201,12 @@ const EmployerSidebarMenu: React.FC = () => {
         </ul>
       </li>
 
-      {/* Settings */}
-      <li className={`menu-item ${isMenuOpen('settings') ? 'open' : ''}`}>
-        <a href="#" className="menu-link menu-toggle" onClick={(e) => toggleMenu('settings', e)}>
+      {/* Settings - Unified Pinterest-style settings page */}
+      <li className={`menu-item ${location.pathname.startsWith('/employer/settings') ? 'active' : ''}`}>
+        <Link to="/employer/settings" className="menu-link">
           <Icon icon="hugeicons:settings-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
           <div data-i18n="Settings">Settings</div>
-        </a>
-        <ul className={`menu-sub ${isMenuOpen('settings') ? 'show' : ''}`}>
-          <li className="menu-item">
-            <Link to="/employer/settings/account" className="menu-link">
-              <div data-i18n="Account Settings">Account Settings</div>
-            </Link>
-          </li>
-          <li className="menu-item">
-            <Link to="/employer/settings/notifications" className="menu-link">
-              <div data-i18n="Notifications">Notification Settings</div>
-            </Link>
-          </li>
-        </ul>
+        </Link>
       </li>
 
       {/* Help & Support */}

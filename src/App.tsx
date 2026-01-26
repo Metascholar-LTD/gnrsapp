@@ -111,7 +111,6 @@ import AdminLocalJobGigs from "./pages/admin/AdminLocalJobGigs";
 import AdminUniRanking from "./pages/admin/AdminUniRanking";
 import SneatLayout from "./pages/sneat/SneatLayout";
 import Dashboard from "./pages/sneat/Dashboard";
-import AccountSettings from "./pages/sneat/pages/AccountSettings";
 import { GenericPage, CardsPage, TablesPage, IconsPage, FormsBasicInputs, FormLayouts, ErrorPage, MaintenancePage } from "./pages/sneat/pages/SimplePages";
 // User Profile Pages
 import UserMyResources from "./pages/sneat/pages/MyResources";
@@ -126,9 +125,6 @@ import BecomeMentor from "./pages/sneat/pages/BecomeMentor";
 import ManageServices from "./pages/sneat/pages/ManageServices";
 import CustomerInquiries from "./pages/sneat/pages/CustomerInquiries";
 import RatingsReviews from "./pages/sneat/pages/RatingsReviews";
-import PrivacySettings from "./pages/sneat/pages/PrivacySettings";
-import NotificationSettings from "./pages/sneat/pages/NotificationSettings";
-import ProfileVisibility from "./pages/sneat/pages/ProfileVisibility";
 import UnifiedSettings from "./pages/sneat/pages/UnifiedSettings";
 import HelpSupport from "./pages/sneat/pages/HelpSupport";
 import EmployerLayout from "./pages/employer/EmployerLayout";
@@ -142,7 +138,7 @@ import AllGigs from "./pages/employer/AllGigs";
 import Applications from "./pages/employer/Applications";
 import ApplicationDetail from "./pages/employer/ApplicationDetail";
 import Drafts from "./pages/employer/Drafts";
-import EmployerProfileSettings from "./pages/employer/EmployerProfileSettings";
+import EmployerUnifiedSettings from "./pages/employer/EmployerUnifiedSettings";
 // Scholarly Ranking Platform
 import ScholarlyIndex from "./pages/scholarly/Index";
 import ScholarlyRankings from "./pages/scholarly/Rankings";
@@ -160,6 +156,7 @@ import ScholarLayout from "./pages/scholarly/ScholarLayout";
 import ScholarDashboard from "./pages/scholarly/ScholarDashboard";
 import SubmitPaper from "./pages/scholarly/SubmitPaper";
 import MyProfile from "./pages/scholarly/MyProfile";
+import ScholarUnifiedSettings from "./pages/scholarly/ScholarUnifiedSettings";
 import AllPapers from "./pages/scholarly/AllPapers";
 import MyPaperView from "./pages/scholarly/MyPaperView";
 import PendingReview from "./pages/scholarly/PendingReview";
@@ -275,6 +272,8 @@ const App = () => (
             <Route path="papers" element={<AllPapers />} />
             <Route path="papers/:id" element={<MyPaperView />} />
             <Route path="papers/pending" element={<PendingReview />} />
+            <Route path="settings" element={<ScholarUnifiedSettings />} />
+            <Route path="settings/*" element={<ScholarUnifiedSettings />} />
           </Route>
           {/* News Routes */}
           <Route path="/news" element={<NewsHub />} />
@@ -464,8 +463,8 @@ const App = () => (
             <Route path="candidates/*" element={<GenericPage title="Candidates" description="Shortlist and message candidates" />} />
             <Route path="analytics" element={<GenericPage title="Analytics" description="View candidate analytics" />} />
             <Route path="subscription/*" element={<GenericPage title="Subscription & Billing" description="Manage subscription and billing" />} />
-            <Route path="settings/account" element={<EmployerProfileSettings />} />
-            <Route path="settings/*" element={<GenericPage title="Settings" description="Account settings" />} />
+            <Route path="settings" element={<EmployerUnifiedSettings />} />
+            <Route path="settings/*" element={<EmployerUnifiedSettings />} />
             <Route path="support" element={<GenericPage title="Support" description="Help & Support" />} />
             <Route path="*" element={<GenericPage title="Page" />} />
           </Route>
