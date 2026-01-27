@@ -94,14 +94,6 @@ const ScholarSidebarMenu: React.FC = () => {
         <span className="menu-header-text">Profile & Metrics</span>
       </li>
 
-      {/* My Profile */}
-      <li className={`menu-item ${isActive('/scholar/profile') ? 'active' : ''}`}>
-        <Link to="/scholar/profile" className="menu-link">
-          <Icon icon="hugeicons:user-circle" className="menu-icon" style={{ fontSize: '1.5rem' }} />
-          <div data-i18n="My Profile">My Profile</div>
-        </Link>
-      </li>
-
       {/* EXPLORE SECTION */}
       <li className="menu-header small text-uppercase mt-3">
         <span className="menu-header-text">Explore</span>

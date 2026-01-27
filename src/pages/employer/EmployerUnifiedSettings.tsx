@@ -20,10 +20,12 @@ import {
   Bell,
   Shield,
   Eye,
+  EyeOff,
   Globe,
   ChevronDown,
   ChevronUp,
   CheckCircle2,
+  AlertTriangle,
   Image as ImageIcon
 } from 'lucide-react';
 
@@ -162,6 +164,29 @@ const EmployerUnifiedSettings: React.FC = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  
+  // Email change
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  
+  // Account deletion
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  
+  // Company editing
+  const [isEditingCompany, setIsEditingCompany] = useState(false);
+  const [isSavingCompany, setIsSavingCompany] = useState(false);
+  
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [useGoogleLogin, setUseGoogleLogin] = useState(false);
 
@@ -218,14 +243,16 @@ const EmployerUnifiedSettings: React.FC = () => {
       }
 
       if (profileData) {
-        setProfile(profileData);
+        const profile = profileData as any;
+        setProfile(profile);
+        setCurrentUserEmail(session.user.email || '');
         setFormData({
-          full_name: profileData.full_name || session.user.user_metadata?.full_name || '',
-          email: profileData.email || session.user.email || '',
-          phone: profileData.phone || '',
-          company_name: profileData.company_name || '',
-          bio: profileData.bio || '',
-          profile_image: profileData.profile_image || '',
+          full_name: profile.full_name || session.user.user_metadata?.full_name || '',
+          email: profile.email || session.user.email || '',
+          phone: profile.phone || '',
+          company_name: profile.company_name || '',
+          bio: profile.bio || '',
+          profile_image: profile.profile_image || '',
         });
       } else {
         // Create basic profile if doesn't exist
@@ -246,12 +273,13 @@ const EmployerUnifiedSettings: React.FC = () => {
         if (createError) throw createError;
 
         if (newProfile) {
-          setProfile(newProfile);
+          const profile = newProfile as any;
+          setProfile(profile);
           setFormData(prev => ({
             ...prev,
-            full_name: newProfile.full_name || '',
-            email: newProfile.email || session.user.email || '',
-            company_name: newProfile.company_name || '',
+            full_name: profile.full_name || '',
+            email: profile.email || session.user.email || '',
+            company_name: profile.company_name || '',
           }));
         }
       }
@@ -400,6 +428,216 @@ const EmployerUnifiedSettings: React.FC = () => {
       }
       return newSet;
     });
+  };
+
+  // Account management functions
+  const handleChangeEmail = async () => {
+    if (!newEmail.trim()) {
+      toast.error('Please enter a new email address');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    if (newEmail === currentUserEmail) {
+      toast.error('New email must be different from current email');
+      return;
+    }
+
+    setIsChangingEmail(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      
+      if (error) throw error;
+
+      toast.success('Email change request sent! Please check your new email inbox to confirm the change.');
+      setIsEditingEmail(false);
+      setNewEmail('');
+      await loadProfile();
+    } catch (error: any) {
+      console.error('Error changing email:', error);
+      toast.error(`Failed to change email: ${error.message}`);
+    } finally {
+      setIsChangingEmail(false);
+    }
+  };
+
+  const cancelEmailEdit = () => {
+    setIsEditingEmail(false);
+    setNewEmail('');
+  };
+
+  const handleChangePassword = async () => {
+    if (!passwordData.currentPassword) {
+      toast.error('Please enter your current password');
+      return;
+    }
+
+    if (!passwordData.newPassword) {
+      toast.error('Please enter a new password');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      toast.error('New password must be different from current password');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.email) {
+        throw new Error('No user session found');
+      }
+
+      // Verify current password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: session.user.email,
+        password: passwordData.currentPassword
+      });
+
+      if (signInError) {
+        throw new Error('Current password is incorrect');
+      }
+
+      // Update password
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+
+      if (error) throw error;
+
+      toast.success('Password changed successfully');
+      setIsEditingPassword(false);
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      toast.error(`Failed to change password: ${error.message}`);
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const cancelPasswordEdit = () => {
+    setIsEditingPassword(false);
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+  };
+
+  const handleSaveCompany = async () => {
+    if (!formData.company_name.trim()) {
+      toast.error('Please enter a company name');
+      return;
+    }
+
+    setIsSavingCompany(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        toast.error('Please sign in to update your profile');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('employers' as any)
+        .update({
+          company_name: formData.company_name || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', session.user.id);
+
+      if (error) throw error;
+
+      toast.success('Company name updated successfully');
+      setIsEditingCompany(false);
+      await loadProfile();
+    } catch (error: any) {
+      console.error('Error updating company name:', error);
+      toast.error(`Failed to update company name: ${error.message}`);
+    } finally {
+      setIsSavingCompany(false);
+    }
+  };
+
+  const cancelCompanyEdit = () => {
+    setIsEditingCompany(false);
+    // Reset to original value from profile
+    if (profile) {
+      setFormData(prev => ({
+        ...prev,
+        company_name: profile.company_name || ''
+      }));
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') {
+      toast.error('Please type DELETE to confirm');
+      return;
+    }
+
+    setIsDeletingAccount(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error('No user session found');
+      }
+
+      // Delete employer profile
+      const { error: profileError } = await (supabase as any)
+        .from('employers')
+        .delete()
+        .eq('user_id', session.user.id);
+
+      if (profileError) {
+        console.error('Error deleting profile:', profileError);
+      }
+
+      // Delete jobs associated with this employer
+      const { error: jobsError } = await (supabase as any)
+        .from('jobs')
+        .delete()
+        .eq('employer_id', session.user.id);
+
+      if (jobsError) {
+        console.error('Error deleting jobs:', jobsError);
+      }
+
+      // Sign out
+      await supabase.auth.signOut();
+      
+      toast.success('Account deletion initiated. Please contact support if you need immediate account removal.');
+      
+      // Redirect to home page
+      window.location.href = '/';
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      toast.error(`Failed to delete account: ${error.message}`);
+    } finally {
+      setIsDeletingAccount(false);
+      setShowDeleteConfirm(false);
+      setDeleteConfirmText('');
+    }
   };
 
   // Menu items
@@ -576,29 +814,283 @@ const EmployerUnifiedSettings: React.FC = () => {
             <div style={{ marginBottom: '32px' }}>
               <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#566a7f', marginBottom: '16px' }}>Your account</h3>
 
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid #efefef' }}>
-                  <div>
-                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#566a7f' }}>Email</p>
-                    <p style={{ fontSize: '14px', color: '#8592a3' }}>{formData.email}</p>
+              <div className="space-y-6">
+                {/* Email Section */}
+                <div style={{ borderBottom: '1px solid #efefef', paddingBottom: '24px' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: '#566a7f', marginBottom: '4px' }}>Email</p>
+                      {!isEditingEmail && (
+                        <p style={{ fontSize: '14px', color: '#8592a3' }}>{currentUserEmail || formData.email || 'Not set'}</p>
+                      )}
+                    </div>
+                    {!isEditingEmail && (
+                      <button 
+                        onClick={() => setIsEditingEmail(true)}
+                        style={{ fontSize: '14px', fontWeight: 600, color: '#696cff' }}
+                      >
+                        Change
+                      </button>
+                    )}
                   </div>
-                  <button style={{ fontSize: '14px', fontWeight: 600, color: '#696cff' }}>Change</button>
+
+                  {isEditingEmail && (
+                    <div className="space-y-4">
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 600, color: '#8592a3', display: 'block', marginBottom: '4px' }}>
+                          Current Email
+                        </label>
+                        <input
+                          type="email"
+                          value={currentUserEmail}
+                          disabled
+                          className="w-full px-4 py-3 rounded-lg border-2 bg-slate-50"
+                          style={{ borderColor: '#d9dee3', fontSize: '16px', color: '#8592a3' }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 600, color: '#8592a3', display: 'block', marginBottom: '4px' }}>
+                          New Email
+                        </label>
+                        <input
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          placeholder="Enter new email address"
+                          className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors"
+                          style={{ borderColor: '#d9dee3', fontSize: '16px', color: '#566a7f' }}
+                          onFocus={(e) => e.target.style.borderColor = '#696cff'}
+                          onBlur={(e) => e.target.style.borderColor = '#d9dee3'}
+                        />
+                      </div>
+                      
+                      <p style={{ fontSize: '12px', color: '#8592a3' }}>
+                        A confirmation email will be sent to your new email address.
+                      </p>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={cancelEmailEdit}
+                          disabled={isChangingEmail}
+                          className="px-4 py-2 rounded-lg font-semibold transition-colors"
+                          style={{ backgroundColor: '#f1f5f9', color: '#566a7f' }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleChangeEmail}
+                          disabled={isChangingEmail}
+                          className="px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                          style={{ backgroundColor: '#696cff', color: '#fff' }}
+                        >
+                          {isChangingEmail ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              Changing...
+                            </>
+                          ) : (
+                            'Save Changes'
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid #efefef' }}>
-                  <div>
-                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#566a7f' }}>Password</p>
-                    <p style={{ fontSize: '14px', color: '#8592a3' }}>********</p>
+                {/* Password Section */}
+                <div style={{ borderBottom: '1px solid #efefef', paddingBottom: '24px' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: '#566a7f', marginBottom: '4px' }}>Password</p>
+                      {!isEditingPassword && (
+                        <p style={{ fontSize: '14px', color: '#8592a3' }}>********</p>
+                      )}
+                    </div>
+                    {!isEditingPassword && (
+                      <button 
+                        onClick={() => setIsEditingPassword(true)}
+                        style={{ fontSize: '14px', fontWeight: 600, color: '#696cff' }}
+                      >
+                        Change
+                      </button>
+                    )}
                   </div>
-                  <button style={{ fontSize: '14px', fontWeight: 600, color: '#696cff' }}>Change</button>
+
+                  {isEditingPassword && (
+                    <div className="space-y-4">
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 600, color: '#8592a3', display: 'block', marginBottom: '4px' }}>
+                          Current Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showPasswords.current ? 'text' : 'password'}
+                            value={passwordData.currentPassword}
+                            onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                            placeholder="Enter current password"
+                            className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors pr-10"
+                            style={{ borderColor: '#d9dee3', fontSize: '16px', color: '#566a7f' }}
+                            onFocus={(e) => e.target.style.borderColor = '#696cff'}
+                            onBlur={(e) => e.target.style.borderColor = '#d9dee3'}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          >
+                            {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 600, color: '#8592a3', display: 'block', marginBottom: '4px' }}>
+                          New Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showPasswords.new ? 'text' : 'password'}
+                            value={passwordData.newPassword}
+                            onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                            placeholder="Enter new password"
+                            className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors pr-10"
+                            style={{ borderColor: '#d9dee3', fontSize: '16px', color: '#566a7f' }}
+                            onFocus={(e) => e.target.style.borderColor = '#696cff'}
+                            onBlur={(e) => e.target.style.borderColor = '#d9dee3'}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          >
+                            {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 600, color: '#8592a3', display: 'block', marginBottom: '4px' }}>
+                          Confirm New Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showPasswords.confirm ? 'text' : 'password'}
+                            value={passwordData.confirmPassword}
+                            onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                            placeholder="Confirm new password"
+                            className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors pr-10"
+                            style={{ borderColor: '#d9dee3', fontSize: '16px', color: '#566a7f' }}
+                            onFocus={(e) => e.target.style.borderColor = '#696cff'}
+                            onBlur={(e) => e.target.style.borderColor = '#d9dee3'}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          >
+                            {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <p style={{ fontSize: '12px', color: '#8592a3' }}>
+                        Password must be at least 6 characters long.
+                      </p>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={cancelPasswordEdit}
+                          disabled={isChangingPassword}
+                          className="px-4 py-2 rounded-lg font-semibold transition-colors"
+                          style={{ backgroundColor: '#f1f5f9', color: '#566a7f' }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleChangePassword}
+                          disabled={isChangingPassword}
+                          className="px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                          style={{ backgroundColor: '#696cff', color: '#fff' }}
+                        >
+                          {isChangingPassword ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              Changing...
+                            </>
+                          ) : (
+                            'Save Changes'
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid #efefef' }}>
-                  <div>
-                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#566a7f' }}>Company</p>
-                    <p style={{ fontSize: '14px', color: '#8592a3' }}>{formData.company_name || 'Not set'}</p>
+                {/* Company Section */}
+                <div style={{ borderBottom: '1px solid #efefef', paddingBottom: '24px' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: '#566a7f', marginBottom: '4px' }}>Company</p>
+                      {!isEditingCompany && (
+                        <p style={{ fontSize: '14px', color: '#8592a3' }}>{formData.company_name || 'Not set'}</p>
+                      )}
+                    </div>
+                    {!isEditingCompany && (
+                      <button 
+                        onClick={() => setIsEditingCompany(true)}
+                        style={{ fontSize: '14px', fontWeight: 600, color: '#696cff' }}
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
-                  <button style={{ fontSize: '14px', fontWeight: 600, color: '#696cff' }}>Manage</button>
+
+                  {isEditingCompany && (
+                    <div className="space-y-4">
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: 600, color: '#8592a3', display: 'block', marginBottom: '4px' }}>
+                          Company Name
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.company_name}
+                          onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
+                          placeholder="Enter company name"
+                          className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors"
+                          style={{ borderColor: '#d9dee3', fontSize: '16px', color: '#566a7f' }}
+                          onFocus={(e) => e.target.style.borderColor = '#696cff'}
+                          onBlur={(e) => e.target.style.borderColor = '#d9dee3'}
+                        />
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={cancelCompanyEdit}
+                          disabled={isSavingCompany}
+                          className="px-4 py-2 rounded-lg font-semibold transition-colors"
+                          style={{ backgroundColor: '#f1f5f9', color: '#566a7f' }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleSaveCompany}
+                          disabled={isSavingCompany}
+                          className="px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                          style={{ backgroundColor: '#696cff', color: '#fff' }}
+                        >
+                          {isSavingCompany ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            'Save Changes'
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -606,15 +1098,96 @@ const EmployerUnifiedSettings: React.FC = () => {
             <div style={{ marginTop: '48px' }}>
               <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#566a7f', marginBottom: '8px' }}>Delete account</h3>
               <p style={{ fontSize: '14px', color: '#8592a3', marginBottom: '16px' }}>
-                Permanently delete your employer account and all data
+                Permanently delete your employer account and all data. This action cannot be undone.
               </p>
               <button
+                onClick={() => setShowDeleteConfirm(true)}
                 className="px-4 py-2 rounded-lg font-semibold transition-colors"
-                style={{ backgroundColor: '#efefef', color: '#ff3e1d', fontSize: '14px' }}
+                style={{ backgroundColor: '#fef2f2', color: '#dc2626', fontSize: '14px' }}
               >
                 Delete account
               </button>
             </div>
+
+            {/* Delete Account Confirmation Modal */}
+            {showDeleteConfirm && (
+              <div 
+                className="fixed inset-0 flex items-center justify-center z-50"
+                style={{
+                  backdropFilter: 'blur(8px)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.1)'
+                }}
+                onClick={() => !isDeletingAccount && setShowDeleteConfirm(false)}
+              >
+                <div 
+                  className="bg-white rounded-xl p-6 max-w-md w-full mx-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-full" style={{ backgroundColor: '#fef2f2' }}>
+                      <AlertTriangle size={24} style={{ color: '#dc2626' }} />
+                    </div>
+                    <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#566a7f' }}>Delete Account</h2>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <p style={{ fontSize: '14px', color: '#8592a3' }}>
+                      This action cannot be undone. This will permanently delete your account, profile, and all associated data.
+                    </p>
+                    
+                    <div>
+                      <label style={{ fontSize: '12px', fontWeight: 600, color: '#8592a3', display: 'block', marginBottom: '4px' }}>
+                        Type <strong>DELETE</strong> to confirm
+                      </label>
+                      <input
+                        type="text"
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="DELETE"
+                        className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors"
+                        style={{ borderColor: '#d9dee3', fontSize: '16px', color: '#566a7f' }}
+                        onFocus={(e) => e.target.style.borderColor = '#dc2626'}
+                        onBlur={(e) => e.target.style.borderColor = '#d9dee3'}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      onClick={() => {
+                        setShowDeleteConfirm(false);
+                        setDeleteConfirmText('');
+                      }}
+                      disabled={isDeletingAccount}
+                      className="flex-1 px-4 py-2 rounded-lg font-semibold transition-colors"
+                      style={{ backgroundColor: '#f1f5f9', color: '#566a7f' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteAccount}
+                      disabled={isDeletingAccount || deleteConfirmText !== 'DELETE'}
+                      className="flex-1 px-4 py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      style={{ 
+                        backgroundColor: deleteConfirmText === 'DELETE' ? '#dc2626' : '#fca5a5',
+                        color: '#fff',
+                        opacity: deleteConfirmText === 'DELETE' ? 1 : 0.5,
+                        cursor: deleteConfirmText === 'DELETE' ? 'pointer' : 'not-allowed'
+                      }}
+                    >
+                      {isDeletingAccount ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        'Delete Account'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 

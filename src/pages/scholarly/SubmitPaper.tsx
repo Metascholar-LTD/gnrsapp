@@ -851,7 +851,7 @@ const SubmitPaper: React.FC = () => {
 
       if (!profile?.institution_id) {
         toast.error('Please complete your profile and set your institution affiliation before submitting a paper');
-        navigate('/scholar/profile');
+        navigate('/scholar/settings');
         return;
       }
 

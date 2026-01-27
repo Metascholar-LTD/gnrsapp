@@ -155,7 +155,6 @@ import ScholarProfile from "./pages/scholarly/ScholarProfile";
 import ScholarLayout from "./pages/scholarly/ScholarLayout";
 import ScholarDashboard from "./pages/scholarly/ScholarDashboard";
 import SubmitPaper from "./pages/scholarly/SubmitPaper";
-import MyProfile from "./pages/scholarly/MyProfile";
 import ScholarUnifiedSettings from "./pages/scholarly/ScholarUnifiedSettings";
 import AllPapers from "./pages/scholarly/AllPapers";
 import MyPaperView from "./pages/scholarly/MyPaperView";
@@ -267,7 +266,6 @@ const App = () => (
           <Route path="/scholar" element={<ScholarLayout />}>
             <Route index element={<ScholarDashboard />} />
             <Route path="dashboard" element={<ScholarDashboard />} />
-            <Route path="profile" element={<MyProfile />} />
             <Route path="submit-paper" element={<SubmitPaper />} />
             <Route path="papers" element={<AllPapers />} />
             <Route path="papers/:id" element={<MyPaperView />} />

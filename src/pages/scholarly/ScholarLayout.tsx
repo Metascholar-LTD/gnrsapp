@@ -1297,7 +1297,7 @@ const ScholarLayout: React.FC = () => {
                       <div className="dropdown-divider"></div>
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/scholar/profile">
+                      <Link className="dropdown-item" to="/scholar/settings">
                         <Icon icon="hugeicons:user-circle" style={{ fontSize: '1rem', marginRight: '0.5rem', display: 'inline-flex', verticalAlign: 'middle' }} />
                         <span className="align-middle">My Profile</span>
                       </Link>
