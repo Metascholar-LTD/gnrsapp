@@ -49,15 +49,135 @@ export function useAITutor() {
   const analyzeMaterial = useCallback(async (material: string): Promise<TopicAnalysis | null> => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-tutor', {
-        body: { action: 'analyze_material', material }
-      });
+      if (!material || !material.trim()) {
+        toast.error('Please provide material content to analyze');
+        return null;
+      }
 
-      if (error) throw error;
+      console.log('Calling bright-handler function with material length:', material.length);
+
+      let responseData;
+      let responseError;
+      
+      try {
+        const response = await supabase.functions.invoke('bright-handler', {
+          body: { action: 'analyze_material', material }
+        });
+        
+        responseData = response.data;
+        responseError = response.error;
+      } catch (invokeError: any) {
+        console.error('Function invoke error:', invokeError);
+        responseError = invokeError;
+      }
+
+      if (responseError) {
+        console.error('Supabase function error:', responseError);
+        
+        // Try to extract error message from multiple sources
+        let errorMessage = 'Unknown error';
+        
+        // Try error.message first
+        if (responseError.message) {
+          errorMessage = responseError.message;
+        }
+        
+        // Try to get error from context
+        if (responseError.context) {
+          // Try context.body
+          if (responseError.context.body) {
+            try {
+              const errorBody = typeof responseError.context.body === 'string' 
+                ? JSON.parse(responseError.context.body) 
+                : responseError.context.body;
+              if (errorBody.error) {
+                errorMessage = errorBody.error;
+              } else if (errorBody.message) {
+                errorMessage = errorBody.message;
+              }
+            } catch {
+              // If parsing fails, try as string
+              if (typeof responseError.context.body === 'string') {
+                errorMessage = responseError.context.body;
+              }
+            }
+          }
+          
+          // Try context.response
+          if (responseError.context.response) {
+            try {
+              const responseBody = typeof responseError.context.response === 'string'
+                ? JSON.parse(responseError.context.response)
+                : responseError.context.response;
+              if (responseBody.error) {
+                errorMessage = responseBody.error;
+              }
+            } catch {
+              // Ignore parse errors
+            }
+          }
+        }
+        
+        // Try error.error or error.details
+        if (responseError.error) {
+          errorMessage = typeof responseError.error === 'string' 
+            ? responseError.error 
+            : responseError.error.message || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      const data = responseData;
+
+      if (!data) {
+        throw new Error('No data received from analysis');
+      }
+
+      // Check if there's an error in the response
+      if (data.error) {
+        console.error('Error in response data:', data.error);
+        throw new Error(data.error);
+      }
+
+      console.log('Analysis successful, received data:', Object.keys(data));
       return data as TopicAnalysis;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error analyzing material:', err);
-      toast.error('Failed to analyze material');
+      
+      let errorMessage = 'Failed to analyze material';
+      
+      if (err?.message) {
+        errorMessage = err.message;
+      } else if (err?.error?.message) {
+        errorMessage = err.error.message;
+      } else if (err?.context?.body) {
+        try {
+          const errorBody = typeof err.context.body === 'string' 
+            ? JSON.parse(err.context.body) 
+            : err.context.body;
+          if (errorBody.error) {
+            errorMessage = errorBody.error;
+          }
+        } catch {
+          // Ignore parse errors
+        }
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
+      
+      // Show more specific error messages
+      if (errorMessage.includes('GEMINI_API_KEY') || errorMessage.includes('not configured')) {
+        errorMessage = 'AI service is not configured. Please contact support or check server configuration.';
+      } else if (errorMessage.includes('API error') || errorMessage.includes('Gemini')) {
+        errorMessage = 'AI service error. Please try again in a moment.';
+      } else if (errorMessage.includes('parse') || errorMessage.includes('JSON')) {
+        errorMessage = 'Failed to process AI response. Please try again.';
+      } else if (errorMessage.includes('500') || errorMessage.includes('Internal Server')) {
+        errorMessage = 'Server error occurred. Please check if the AI service is properly configured.';
+      }
+      
+      toast.error(errorMessage);
       return null;
     } finally {
       setIsLoading(false);
@@ -73,13 +193,19 @@ export function useAITutor() {
     setStreamedContent('');
     
     try {
+      // For streaming, we need to use fetch directly with Supabase function URL
+      // The Supabase client handles auth automatically, but for streaming we need direct fetch
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://iygdxidivqoukcsiszvt.supabase.co";
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5Z2R4aWRpdnFvdWtjc2lzenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MjExMTcsImV4cCI6MjA4MTM5NzExN30.EG9p2I-s43FokxOGxLKBy-NSWNo7VgflEHyw7xl0H1I";
+      
       const response = await fetch(
-        `https://iygdxidivqoukcsiszvt.supabase.co/functions/v1/ai-tutor`,
+        `${supabaseUrl}/functions/v1/bright-handler`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5Z2R4aWRpdnFvdWtjc2lzenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MjExMTcsImV4cCI6MjA4MTM5NzExN30.EG9p2I-s43FokxOGxLKBy-NSWNo7VgflEHyw7xl0H1I`
+            'Authorization': `Bearer ${supabaseKey}`,
+            'apikey': supabaseKey
           },
           body: JSON.stringify({
             action: 'chat',
@@ -90,7 +216,8 @@ export function useAITutor() {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to start chat');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to start chat');
       }
 
       const reader = response.body?.getReader();
@@ -144,7 +271,7 @@ export function useAITutor() {
   ): Promise<Question[]> => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-tutor', {
+      const { data, error } = await supabase.functions.invoke('bright-handler', {
         body: { action: 'generate_question', lessonContext }
       });
 
@@ -167,7 +294,7 @@ export function useAITutor() {
   ): Promise<{ isCorrect: boolean; feedback: string }> => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-tutor', {
+      const { data, error } = await supabase.functions.invoke('bright-handler', {
         body: {
           action: 'check_answer',
           question: { question, options, correctAnswer, userAnswer }
@@ -189,7 +316,7 @@ export function useAITutor() {
   ): Promise<string> => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-tutor', {
+      const { data, error } = await supabase.functions.invoke('bright-handler', {
         body: { action: 'get_summary', lessonContext }
       });
 

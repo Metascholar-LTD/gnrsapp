@@ -8,12 +8,16 @@ import {
   Loader2,
   Sparkles,
   BookOpen,
-  X
+  X,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useAITutor } from '@/hooks/useAITutor';
 import { cn } from '@/lib/utils';
+import { extractTextFromFile } from '@/utils/fileParser';
+import { toast } from 'sonner';
 
 interface MaterialUploadProps {
   onMaterialAnalyzed: (content: string, analysis: any) => void;
@@ -25,6 +29,8 @@ export function MaterialUpload({ onMaterialAnalyzed }: MaterialUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [extractedText, setExtractedText] = useState('');
   const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionError, setExtractionError] = useState<string | null>(null);
+  const [extractionSuccess, setExtractionSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { analyzeMaterial, isLoading } = useAITutor();
 
@@ -64,23 +70,32 @@ export function MaterialUpload({ onMaterialAnalyzed }: MaterialUploadProps) {
   const processFile = async (file: File) => {
     setSelectedFile(file);
     setIsExtracting(true);
+    setExtractionError(null);
+    setExtractionSuccess(false);
+    setExtractedText('');
     
     try {
-      // For text files, read directly
-      if (file.type === 'text/plain') {
-        const text = await file.text();
+      // Use smart file parser to extract text properly
+      const text = await extractTextFromFile(file);
+      
+      if (text && text.trim().length > 0) {
         setExtractedText(text);
+        setExtractionSuccess(true);
+        toast.success(`Successfully extracted ${text.length.toLocaleString()} characters from ${file.name}`);
       } else {
-        // For other files, we'll use a simplified extraction
-        // In production, you'd use a proper document parsing service
-        const text = await file.text().catch(() => 
-          `Content from: ${file.name}\n\nNote: This file type requires advanced parsing. Please paste the text content directly for best results.`
-        );
-        setExtractedText(text);
+        throw new Error('No text content found in file');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error processing file:', err);
-      setExtractedText(`Could not extract text from ${file.name}. Please paste the content directly.`);
+      const errorMessage = err.message || `Could not extract text from ${file.name}`;
+      setExtractionError(errorMessage);
+      toast.error(errorMessage);
+      
+      // Clear the file selection on error so user can try again
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } finally {
       setIsExtracting(false);
     }
@@ -99,6 +114,8 @@ export function MaterialUpload({ onMaterialAnalyzed }: MaterialUploadProps) {
   const clearFile = () => {
     setSelectedFile(null);
     setExtractedText('');
+    setExtractionError(null);
+    setExtractionSuccess(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -189,7 +206,29 @@ export function MaterialUpload({ onMaterialAnalyzed }: MaterialUploadProps) {
             {isExtracting && (
               <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Extracting content...
+                <span>Extracting text content from {selectedFile.name}...</span>
+              </div>
+            )}
+            
+            {extractionSuccess && extractedText && (
+              <div className="mt-4 flex items-center gap-2 text-sm text-emerald-600">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Text extracted successfully ({extractedText.length.toLocaleString()} characters)</span>
+              </div>
+            )}
+            
+            {extractionError && (
+              <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-rose-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-rose-800">Extraction Failed</p>
+                    <p className="text-xs text-rose-600 mt-1">{extractionError}</p>
+                    <p className="text-xs text-rose-600 mt-2">
+                      You can still paste the text content directly in the field below.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </motion.div>
