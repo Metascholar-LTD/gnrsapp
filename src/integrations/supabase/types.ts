@@ -1733,6 +1733,262 @@ export type Database = {
         }
         Relationships: []
       }
+      tutor_concept_progress: {
+        Row: {
+          concept_name: string
+          created_at: string | null
+          id: string
+          last_reviewed_at: string | null
+          needs_review: boolean | null
+          session_id: string
+          times_correct: number | null
+          times_incorrect: number | null
+          times_reviewed: number | null
+          understanding_level: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          concept_name: string
+          created_at?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          needs_review?: boolean | null
+          session_id: string
+          times_correct?: number | null
+          times_incorrect?: number | null
+          times_reviewed?: number | null
+          understanding_level?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          concept_name?: string
+          created_at?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          needs_review?: boolean | null
+          session_id?: string
+          times_correct?: number | null
+          times_incorrect?: number | null
+          times_reviewed?: number | null
+          understanding_level?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_concept_progress_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_lessons: {
+        Row: {
+          completed_at: string | null
+          content_summary: string | null
+          created_at: string | null
+          difficulty: string | null
+          id: string
+          lesson_order: number | null
+          mastery_percentage: number | null
+          questions_correct: number | null
+          questions_total: number | null
+          session_id: string
+          status: string | null
+          subtopic: string | null
+          title: string
+          topic: string
+          unlocked_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          content_summary?: string | null
+          created_at?: string | null
+          difficulty?: string | null
+          id?: string
+          lesson_order?: number | null
+          mastery_percentage?: number | null
+          questions_correct?: number | null
+          questions_total?: number | null
+          session_id: string
+          status?: string | null
+          subtopic?: string | null
+          title: string
+          topic: string
+          unlocked_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          content_summary?: string | null
+          created_at?: string | null
+          difficulty?: string | null
+          id?: string
+          lesson_order?: number | null
+          mastery_percentage?: number | null
+          questions_correct?: number | null
+          questions_total?: number | null
+          session_id?: string
+          status?: string | null
+          subtopic?: string | null
+          title?: string
+          topic?: string
+          unlocked_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_lessons_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_correct: boolean | null
+          lesson_id: string | null
+          message_type: string | null
+          metadata: Json | null
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          lesson_id?: string | null
+          message_type?: string | null
+          metadata?: Json | null
+          role: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          lesson_id?: string | null
+          message_type?: string | null
+          metadata?: Json | null
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_messages_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_sessions: {
+        Row: {
+          completed_lessons: number | null
+          created_at: string | null
+          difficulty_level: string | null
+          id: string
+          last_activity_at: string | null
+          learning_style: string | null
+          mastery_score: number | null
+          material_content: string | null
+          material_type: string | null
+          material_url: string | null
+          status: string | null
+          streak_days: number | null
+          title: string
+          topics: Json | null
+          total_lessons: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_lessons?: number | null
+          created_at?: string | null
+          difficulty_level?: string | null
+          id?: string
+          last_activity_at?: string | null
+          learning_style?: string | null
+          mastery_score?: number | null
+          material_content?: string | null
+          material_type?: string | null
+          material_url?: string | null
+          status?: string | null
+          streak_days?: number | null
+          title: string
+          topics?: Json | null
+          total_lessons?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_lessons?: number | null
+          created_at?: string | null
+          difficulty_level?: string | null
+          id?: string
+          last_activity_at?: string | null
+          learning_style?: string | null
+          mastery_score?: number | null
+          material_content?: string | null
+          material_type?: string | null
+          material_url?: string | null
+          status?: string | null
+          streak_days?: number | null
+          title?: string
+          topics?: Json | null
+          total_lessons?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tutor_streaks: {
+        Row: {
+          created_at: string | null
+          id: string
+          lessons_completed: number | null
+          minutes_studied: number | null
+          questions_answered: number | null
+          study_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lessons_completed?: number | null
+          minutes_studied?: number | null
+          questions_answered?: number | null
+          study_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lessons_completed?: number | null
+          minutes_studied?: number | null
+          questions_answered?: number | null
+          study_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       universities: {
         Row: {
           abbreviation: string | null
