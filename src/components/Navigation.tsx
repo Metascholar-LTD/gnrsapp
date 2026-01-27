@@ -104,7 +104,6 @@ export const Navigation = React.memo(() => {
     education: {
       sections: [
         { id: 'academic', label: 'Academic Resources', icon: 'fa-book' },
-        { id: 'engagement', label: 'Student Engagement', icon: 'fa-users' },
         { id: 'tools', label: 'Tools & Calculators', icon: 'fa-tools' }
       ],
       content: {
@@ -117,11 +116,6 @@ export const Navigation = React.memo(() => {
             { to: '/education/ebooks', label: 'E-books and Training Resources', icon: 'fa-file-pdf' }
           ]}
         ],
-        engagement: [
-          { title: 'Student Engagement', items: [
-            { to: '/education/ai-tutor', label: 'AI Study Tutor', icon: 'fa-robot' }
-          ]}
-        ],
         tools: [
           { title: 'Academic Tools', items: [
             { to: '/education/cgpa-calculator', label: 'CGPA Calculator', icon: 'fa-calculator' },
@@ -132,7 +126,6 @@ export const Navigation = React.memo(() => {
       },
       images: {
         academic: 'https://res.cloudinary.com/dsypclqxk/image/upload/v1763392517/medium-shot-students-classroom_bn5nbl.jpg',
-        engagement: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop&q=80',
         tools: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop&q=80'
       }
     },
