@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
 import { InfoCardGrid, InfoCardItem } from "@/components/education/InfoCardGrid";
 import { HeroButton } from "@/components/education/HeroButton";
 import { Button } from "@/components/ui/button";
+import { TutorWorkspace } from "@/components/ai-tutor/TutorWorkspace";
 import {
   Bot,
   Brain,
@@ -11,6 +13,9 @@ import {
   Sparkles,
   ShieldCheck,
   Layers,
+  Flame,
+  Target,
+  BookOpen,
 } from "lucide-react";
 
 const tutorFeatures: InfoCardItem[] = [
@@ -22,101 +27,158 @@ const tutorFeatures: InfoCardItem[] = [
   },
   {
     icon: FolderSearch,
-    title: "Resource Pairings",
-    description: "Suggests relevant lecture notes, past questions, or Udemy-style micro lessons.",
-    highlights: ["Learning path alignment", "Difficulty bands", "Downloadable notes"],
+    title: "Smart Material Analysis",
+    description: "Upload any study material and get a personalized learning path with topics, subtopics, and key concepts.",
+    highlights: ["PDF & Word support", "Topic extraction", "Difficulty assessment"],
   },
   {
     icon: ShieldCheck,
-    title: "Academic Integrity",
-    description: "Grounded outputs with plagiarism guards, reference prompts, and safe completion boundaries.",
-    highlights: ["No essay ghostwriting", "Citation reminders", "Bias checks"],
+    title: "Active Learning",
+    description: "Progressive questions from easy to challenging, with detailed explanations for every answer.",
+    highlights: ["Multiple choice & short answer", "Instant feedback", "Concept mastery tracking"],
   },
 ];
 
-const AiTutor = () => (
-  <EducationPageLayout
-    title="AI Study Tutor"
-    description="An ethical, research-grounded tutor that mirrors the clarity of the best Udemy instructors and Elsevier editors."
-    breadcrumbs={[
-      { label: "Home", href: "/" },
-      { label: "Education Hub" },
-      { label: "AI Tutor" },
-    ]}
-    heroStats={[
-      { label: "Sessions per day", value: "5,200" },
-      { label: "Average rating", value: "4.85 / 5" },
-      { label: "Fact-check confidence", value: "99.1%" },
-      { label: "Languages supported", value: "7" },
-    ]}
-    heroActions={
-      <HeroButton onClick={() => {}}>Launch tutor workspace</HeroButton>
-    }
-  >
-    <div className="space-y-16">
-      <EducationSection
-        eyebrow="Capabilities"
-        title="Your personal study intelligence"
-        description="Backed by curated academic corpora and real lecturer review."
-      >
-        <InfoCardGrid items={tutorFeatures} />
-      </EducationSection>
+const learningModes = [
+  { 
+    title: "Teach Me Like I'm 10", 
+    detail: "Super simple explanations with fun analogies and everyday examples.", 
+    icon: Sparkles 
+  },
+  { 
+    title: "Exam Mode", 
+    detail: "Focus on what's likely to be tested with key points and revision strategies.", 
+    icon: Target 
+  },
+  { 
+    title: "Deep Conceptual", 
+    detail: "Thorough exploration of the 'why' with connections between concepts.", 
+    icon: Brain 
+  },
+];
 
-      <EducationSection
-        eyebrow="Dialogue design"
-        title="Conversations that feel human"
-        description="Every prompt is structured to drive deeper thinking."
-      >
-        <div className="grid gap-6 md:grid-cols-3">
-          {[
-            { title: "Socratic prompts", detail: "Tutor responds with probing questions before revealing answers.", icon: Brain },
-            { title: "Mode switching", detail: "Toggle between explainer, quizzer, or project reviewer.", icon: Layers },
-            { title: "Session memory", detail: "Recalls your previous challenges and adapts follow-up sessions.", icon: MessageSquare },
-          ].map((item) => (
-            <article
-              key={item.title}
-              className="flex gap-4 rounded-3xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-900">
-                <item.icon className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{item.detail}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </EducationSection>
+const AiTutor = () => {
+  const [showWorkspace, setShowWorkspace] = useState(false);
 
-      <EducationSection
-        eyebrow="Quality control"
-        title="Guardrails for trust"
-        description="Humans remain in the loop."
-      >
-        <div className="rounded-3xl border border-slate-200/70 bg-slate-50 px-8 py-10">
+  if (showWorkspace) {
+    return <TutorWorkspace onClose={() => setShowWorkspace(false)} />;
+  }
+
+  return (
+    <EducationPageLayout
+      title="AI Study Tutor"
+      description="Your personal AI teacher that helps you truly understand, not memorize. Upload any material and start learning."
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Education Hub" },
+        { label: "AI Tutor" },
+      ]}
+      heroStats={[
+        { label: "Learning modes", value: "4" },
+        { label: "Average understanding", value: "94%" },
+        { label: "Topics supported", value: "Any" },
+        { label: "Languages", value: "7" },
+      ]}
+      heroActions={
+        <HeroButton onClick={() => setShowWorkspace(true)}>
+          Launch tutor workspace
+        </HeroButton>
+      }
+    >
+      <div className="space-y-16">
+        {/* Features section */}
+        <EducationSection
+          eyebrow="Capabilities"
+          title="Your personal study intelligence"
+          description="A caring, patient, and highly intelligent teacher that helps you understand any topic."
+        >
+          <InfoCardGrid items={tutorFeatures} />
+        </EducationSection>
+
+        {/* Learning modes section */}
+        <EducationSection
+          eyebrow="Learning Styles"
+          title="Learn the way you prefer"
+          description="Choose your learning style and the tutor adapts to your needs."
+        >
           <div className="grid gap-6 md:grid-cols-3">
+            {learningModes.map((item) => (
+              <article
+                key={item.title}
+                className="flex gap-4 rounded-3xl border border-slate-200/70 bg-white px-6 py-6 shadow-sm"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-900">
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{item.detail}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </EducationSection>
+
+        {/* Duolingo-inspired features */}
+        <EducationSection
+          eyebrow="Smart Features"
+          title="Gamified learning experience"
+          description="Stay motivated with streaks, progress tracking, and achievements."
+        >
+          <div className="rounded-3xl border border-slate-200/70 bg-slate-50 px-8 py-10">
+            <div className="grid gap-6 md:grid-cols-4">
+              {[
+                { icon: Flame, label: "Daily Streaks", stat: "Track your consistency", detail: "Build study habits with streak tracking" },
+                { icon: Target, label: "Progress Tracking", stat: "Visual progress", detail: "See your mastery grow over time" },
+                { icon: BookOpen, label: "Concept Maps", stat: "Connected learning", detail: "See how topics relate to each other" },
+                { icon: MessageSquare, label: "Session Recaps", stat: "Smart summaries", detail: "Get key takeaways after each session" },
+              ].map((metric) => (
+                <div key={metric.label} className="text-center">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm">
+                    <metric.icon className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <p className="mt-4 font-semibold text-slate-900">{metric.label}</p>
+                  <p className="mt-1 text-sm text-slate-600">{metric.detail}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <Button 
+                onClick={() => setShowWorkspace(true)}
+                className="h-12 rounded-xl bg-emerald-600 px-8 text-base font-medium hover:bg-emerald-700"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                Start Learning Now
+              </Button>
+            </div>
+          </div>
+        </EducationSection>
+
+        {/* How it works */}
+        <EducationSection
+          eyebrow="How it works"
+          title="Three simple steps"
+          description="Get started in minutes with any study material."
+        >
+          <div className="grid gap-8 md:grid-cols-3">
             {[
-              { label: "Expert reviewers", stat: "48 lecturers", detail: "audit answer quality weekly" },
-              { label: "Content refresh", stat: "Every 14 days", detail: "to reflect curriculum updates" },
-              { label: "Escalation rate", stat: "<0.6%", detail: "thanks to transparent explanations" },
-            ].map((metric) => (
-              <div key={metric.label}>
-                <p className="text-xs uppercase tracking-[0.3em] text-blue-500">{metric.label}</p>
-                <p className="mt-3 text-3xl font-semibold text-slate-900">{metric.stat}</p>
-                <p className="mt-2 text-sm text-slate-600">{metric.detail}</p>
+              { step: "1", title: "Upload Material", desc: "Drop your PDF, Word doc, or paste text directly. The tutor analyzes and extracts key topics." },
+              { step: "2", title: "Choose Your Style", desc: "Select how you want to learn - simple explanations, exam-focused, or deep conceptual." },
+              { step: "3", title: "Learn & Practice", desc: "Chat with your tutor, ask questions, take quizzes, and track your progress." },
+            ].map((item) => (
+              <div key={item.step} className="text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-xl font-bold text-emerald-600">
+                  {item.step}
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-slate-900">{item.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{item.desc}</p>
               </div>
             ))}
           </div>
-          <Button variant="outline" className="mt-8 h-10 rounded-xl border-slate-300">
-            <Sparkles className="mr-2 h-4 w-4" />
-            Read responsible AI policy
-          </Button>
-        </div>
-      </EducationSection>
-    </div>
-  </EducationPageLayout>
-);
+        </EducationSection>
+      </div>
+    </EducationPageLayout>
+  );
+};
 
 export default AiTutor;
-
