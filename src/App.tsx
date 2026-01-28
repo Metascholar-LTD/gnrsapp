@@ -45,6 +45,7 @@ import Mentorship from "./pages/education/Mentorship";
 import CampusAnnouncements from "./pages/education/CampusAnnouncements";
 import AcademicNotifications from "./pages/education/AcademicNotifications";
 import CgpaCalculator from "./pages/education/CgpaCalculator";
+import CalculateCGPA from "./pages/education/CalculateCGPA";
 import TimetableBuilder from "./pages/education/TimetableBuilder";
 import AiTutor from "./pages/education/AiTutor";
 import MyResources from "./pages/education/MyResources";
@@ -115,6 +116,7 @@ import { GenericPage, CardsPage, TablesPage, IconsPage, FormsBasicInputs, FormLa
 // User Profile Pages
 import UserMyResources from "./pages/sneat/pages/MyResources";
 import SavedResources from "./pages/sneat/pages/SavedResources";
+import CGPAHistory from "./pages/sneat/pages/CGPAHistory";
 import SavedScholarships from "./pages/sneat/pages/SavedScholarships";
 import MyArtisanProfile from "./pages/sneat/pages/MyArtisanProfile";
 import Messages from "./pages/sneat/pages/Messages";
@@ -197,6 +199,7 @@ const App = () => (
           <Route path="/education/campus-announcements" element={<CampusAnnouncements />} />
           <Route path="/education/academic-notifications" element={<AcademicNotifications />} />
           <Route path="/education/cgpa-calculator" element={<CgpaCalculator />} />
+          <Route path="/education/calculate-cgpa" element={<CalculateCGPA />} />
           <Route path="/education/timetable-builder" element={<TimetableBuilder />} />
           <Route path="/education/ai-tutor" element={<AiTutor />} />
           <Route path="/education/my-resources" element={<MyResources />} />
@@ -348,6 +351,7 @@ const App = () => (
             {/* Learning Section */}
             <Route path="courses" element={<UserMyResources />} />
             <Route path="saved-questions" element={<SavedResources />} />
+            <Route path="cgpa-history" element={<CGPAHistory />} />
 
             {/* Scholarships */}
             <Route path="scholarships/saved" element={<SavedScholarships />} />

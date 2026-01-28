@@ -88,6 +88,14 @@ const SidebarMenu: React.FC = () => {
         </Link>
       </li>
 
+      {/* CGPA History */}
+      <li className={`menu-item ${isActive('/userprofile/cgpa-history') ? 'active' : ''}`}>
+        <Link to="/userprofile/cgpa-history" className="menu-link">
+          <Icon icon="hugeicons:calculator-01" className="menu-icon" style={{ fontSize: '1.5rem' }} />
+          <div data-i18n="CGPA History">CGPA History</div>
+        </Link>
+      </li>
+
       {/* OPPORTUNITIES SECTION */}
       <li className="menu-header small text-uppercase mt-3">
         <span className="menu-header-text">Opportunities</span>

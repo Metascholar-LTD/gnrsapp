@@ -9,6 +9,7 @@ interface SectionProps {
   children: ReactNode;
   className?: string;
   variant?: "default" | "muted" | "contrast";
+  id?: string;
 }
 
 export const EducationSection = ({
@@ -19,6 +20,7 @@ export const EducationSection = ({
   children,
   className = "",
   variant = "default",
+  id,
 }: SectionProps) => {
   const variantClasses = {
     default: "bg-white",
@@ -27,7 +29,7 @@ export const EducationSection = ({
   } as const;
 
   return (
-    <section className={cn("education-section py-16", variantClasses[variant], className)}>
+    <section id={id} className={cn("education-section py-16", variantClasses[variant], className)}>
       <div className="container mx-auto px-4 relative z-[1]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">

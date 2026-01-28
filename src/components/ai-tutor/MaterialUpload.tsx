@@ -14,10 +14,14 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
+import { Spotlight } from '@/components/ui/spotlight';
+import { SplineScene } from '@/components/ui/spline-scene';
 import { useAITutor } from '@/hooks/useAITutor';
 import { cn } from '@/lib/utils';
 import { extractTextFromFile } from '@/utils/fileParser';
 import { toast } from 'sonner';
+import './MaterialUpload.css';
 
 interface MaterialUploadProps {
   onMaterialAnalyzed: (content: string, analysis: any) => void;
@@ -124,181 +128,201 @@ export function MaterialUpload({ onMaterialAnalyzed }: MaterialUploadProps) {
   const FileIcon = selectedFile ? getFileIcon(selectedFile.type) : FileText;
 
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6">
-      <div className="w-full max-w-2xl space-y-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100">
-            <BookOpen className="h-8 w-8 text-emerald-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900">Upload Your Learning Material</h2>
-          <p className="mt-2 text-slate-600">
-            Share your study material and I'll create a personalized learning journey for you
-          </p>
-        </motion.div>
+    <div className="material-upload-container flex h-full items-center justify-center p-4 min-[768px]:p-6 min-[1200px]:p-0 min-[1200px]:items-stretch min-[1200px]:w-full min-[1200px]:h-full min-[1200px]:m-0">
+      <Card className="material-upload-card w-full h-full min-h-[500px] bg-black/[0.96] relative overflow-hidden border-0 rounded-none shadow-none min-[1200px]:w-full min-[1200px]:h-full min-[1200px]:m-0">
+        <Spotlight
+          className="hidden min-[1200px]:block -top-40 left-0 md:left-60 md:-top-20"
+          fill="white"
+        />
+        
+        <div className="flex h-full flex-col min-[1200px]:flex-row">
+          {/* Left content - Upload Forms */}
+          <div className="flex-1 p-6 min-[768px]:p-8 relative z-10 flex flex-col justify-center min-[1200px]:max-w-lg min-[1200px]:ml-16 min-[1200px]:pl-0 min-[1200px]:pt-0 min-[1200px]:translate-x-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              {/* Header */}
+              <div>
+                <h1 className="text-3xl min-[768px]:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400">
+                  Upload Your Learning Material
+                </h1>
+                <p className="mt-3 text-neutral-300 text-sm min-[768px]:text-base">
+                  Share your study material and I'll create a personalized learning journey for you
+                </p>
+              </div>
 
-        {/* Upload area or file preview */}
-        {!selectedFile ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={handleDrop}
-            className={cn(
-              "relative rounded-2xl border-2 border-dashed p-8 text-center transition-all",
-              dragOver
-                ? "border-emerald-400 bg-emerald-50"
-                : "border-slate-200 bg-white hover:border-slate-300"
-            )}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
-              onChange={handleFileSelect}
-              className="absolute inset-0 cursor-pointer opacity-0"
-            />
-            <Upload className={cn(
-              "mx-auto h-12 w-12 transition-colors",
-              dragOver ? "text-emerald-500" : "text-slate-400"
-            )} />
-            <p className="mt-4 text-lg font-medium text-slate-700">
-              Drag and drop your file here
-            </p>
-            <p className="mt-1 text-sm text-slate-500">
-              or click to browse (PDF, Word, PowerPoint, Text)
-            </p>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="rounded-2xl border border-slate-200 bg-white p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
-                  <FileIcon className="h-6 w-6 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">{selectedFile.name}</p>
-                  <p className="text-sm text-slate-500">
-                    {(selectedFile.size / 1024).toFixed(1)} KB
+              {/* Upload area or file preview */}
+              {!selectedFile ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  className={cn(
+                    "relative rounded-xl border-2 border-dashed p-6 text-center transition-all",
+                    dragOver
+                      ? "border-emerald-400 bg-emerald-900/20"
+                      : "border-neutral-700 bg-neutral-900/30 hover:border-neutral-600"
+                  )}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                    onChange={handleFileSelect}
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                  />
+                  <Upload className={cn(
+                    "mx-auto h-10 w-10 transition-colors",
+                    dragOver ? "text-emerald-400" : "text-neutral-400"
+                  )} />
+                  <p className="mt-3 text-base font-medium text-neutral-200">
+                    Drag and drop your file here
                   </p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={clearFile}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            {isExtracting && (
-              <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Extracting text content from {selectedFile.name}...</span>
-              </div>
-            )}
-            
-            {extractionSuccess && extractedText && (
-              <div className="mt-4 flex items-center gap-2 text-sm text-emerald-600">
-                <CheckCircle2 className="h-4 w-4" />
-                <span>Text extracted successfully ({extractedText.length.toLocaleString()} characters)</span>
-              </div>
-            )}
-            
-            {extractionError && (
-              <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-rose-600 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-rose-800">Extraction Failed</p>
-                    <p className="text-xs text-rose-600 mt-1">{extractionError}</p>
-                    <p className="text-xs text-rose-600 mt-2">
-                      You can still paste the text content directly in the field below.
-                    </p>
+                  <p className="mt-1 text-sm text-neutral-400">
+                    or click to browse (PDF, Word, PowerPoint, Text)
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="rounded-xl border border-neutral-700 bg-neutral-900/30 p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-900/30 border border-emerald-700/50">
+                        <FileIcon className="h-5 w-5 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-neutral-100 text-sm">{selectedFile.name}</p>
+                        <p className="text-xs text-neutral-400">
+                          {(selectedFile.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={clearFile}
+                      className="text-neutral-400 hover:text-neutral-200 h-8 w-8"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                </div>
+                  
+                  {isExtracting && (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-neutral-400">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Extracting text content...</span>
+                    </div>
+                  )}
+                  
+                  {extractionSuccess && extractedText && (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-emerald-400">
+                      <CheckCircle2 className="h-3 w-3" />
+                      <span>Text extracted ({extractedText.length.toLocaleString()} chars)</span>
+                    </div>
+                  )}
+                  
+                  {extractionError && (
+                    <div className="mt-3 rounded-lg border border-rose-800/50 bg-rose-900/20 p-2">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-3 w-3 text-rose-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-xs font-medium text-rose-300">Extraction Failed</p>
+                          <p className="text-xs text-rose-400 mt-1">{extractionError}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Divider */}
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-neutral-700" />
+                <span className="text-xs text-neutral-500">or paste text directly</span>
+                <div className="h-px flex-1 bg-neutral-700" />
               </div>
-            )}
-          </motion.div>
-        )}
 
-        {/* Divider */}
-        <div className="flex items-center gap-4">
-          <div className="h-px flex-1 bg-slate-200" />
-          <span className="text-sm text-slate-400">or paste text directly</span>
-          <div className="h-px flex-1 bg-slate-200" />
+              {/* Text input */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Textarea
+                  value={extractedText || textInput}
+                  onChange={(e) => {
+                    if (extractedText) {
+                      setExtractedText(e.target.value);
+                    } else {
+                      setTextInput(e.target.value);
+                    }
+                  }}
+                  placeholder="Paste your lecture notes, textbook chapter, or any study material here..."
+                  className="min-h-[120px] resize-none rounded-xl border-neutral-700 bg-neutral-900/50 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-emerald-500 focus:ring-emerald-500/20"
+                />
+              </motion.div>
+
+              {/* Analyze button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex justify-center"
+              >
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={isLoading || (!extractedText && !textInput.trim())}
+                  className="h-11 px-8 rounded-xl bg-emerald-600 text-sm font-medium hover:bg-emerald-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing your material...
+                    </>
+                  ) : (
+                    'Start Learning'
+                  )}
+                </Button>
+              </motion.div>
+
+              {/* Tips */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="group relative inline-block text-center text-xs text-neutral-400"
+              >
+                <p className="relative inline-block pb-1">
+                  <strong className="text-neutral-300">Tip:</strong> The more detailed your material, the better I can help you understand it.
+                  <span
+                    className="absolute bottom-0 left-0 h-[2px] bg-emerald-500 transition-all duration-300 group-hover:bg-emerald-400"
+                    style={{
+                      width: '100%',
+                      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+                    }}
+                  />
+                </p>
+              </motion.div>
+            </motion.div>
+          </div>
+
+          {/* Right content - 3D Scene - Desktop only */}
+          <div className="hidden min-[1200px]:flex flex-1 relative min-h-0 min-[1200px]:translate-x-16">
+            <SplineScene 
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="w-full h-full"
+            />
+          </div>
         </div>
-
-        {/* Text input */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Textarea
-            value={extractedText || textInput}
-            onChange={(e) => {
-              if (extractedText) {
-                setExtractedText(e.target.value);
-              } else {
-                setTextInput(e.target.value);
-              }
-            }}
-            placeholder="Paste your lecture notes, textbook chapter, or any study material here..."
-            className="min-h-[160px] resize-none rounded-xl border-slate-200 bg-white text-base focus:border-emerald-300 focus:ring-emerald-200"
-          />
-        </motion.div>
-
-        {/* Analyze button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Button
-            onClick={handleAnalyze}
-            disabled={isLoading || (!extractedText && !textInput.trim())}
-            className="h-12 w-full rounded-xl bg-emerald-600 text-base font-medium hover:bg-emerald-700"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Analyzing your material...
-              </>
-            ) : (
-              <>
-                <Sparkles className="mr-2 h-5 w-5" />
-                Start Learning
-              </>
-            )}
-          </Button>
-        </motion.div>
-
-        {/* Tips */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500"
-        >
-          <p>
-            <strong>Tip:</strong> The more detailed your material, the better I can help you understand it.
-            Include definitions, examples, and key concepts for best results.
-          </p>
-        </motion.div>
-      </div>
+      </Card>
     </div>
   );
 }

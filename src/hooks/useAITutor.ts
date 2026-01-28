@@ -267,16 +267,36 @@ export function useAITutor() {
   }, []);
 
   const generateQuestions = useCallback(async (
-    lessonContext: LessonContext
+    lessonContext: LessonContext & { count?: number }
   ): Promise<Question[]> => {
     setIsLoading(true);
     try {
+      const requestedCount = lessonContext.count || 10;
+      console.log('Requesting questions:', { count: requestedCount, topic: lessonContext.topic });
+      
       const { data, error } = await supabase.functions.invoke('bright-handler', {
-        body: { action: 'generate_question', lessonContext }
+        body: { 
+          action: 'generate_question', 
+          lessonContext,
+          count: requestedCount
+        }
       });
 
-      if (error) throw error;
-      return data?.questions || [];
+      if (error) {
+        console.error('Error from API:', error);
+        throw error;
+      }
+      
+      const questions = data?.questions || [];
+      console.log('Received questions:', { requested: requestedCount, received: questions.length });
+      
+      // If we got fewer questions than requested, log it
+      if (questions.length < requestedCount) {
+        console.warn(`Only received ${questions.length} questions, requested ${requestedCount}`);
+      }
+      
+      // Return all questions we got (up to requested count)
+      return questions.slice(0, requestedCount);
     } catch (err) {
       console.error('Error generating questions:', err);
       toast.error('Failed to generate questions');

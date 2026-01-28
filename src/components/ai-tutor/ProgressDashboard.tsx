@@ -72,7 +72,7 @@ export function ProgressDashboard({
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       {/* Stats grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 min-[768px]:grid-cols-2 min-[1200px]:grid-cols-4">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -168,7 +168,7 @@ export function ProgressDashboard({
         className="rounded-2xl border border-slate-200 bg-white p-6"
       >
         <h3 className="text-lg font-semibold text-slate-900">Achievements</h3>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <div className="mt-4 grid gap-4 min-[768px]:grid-cols-3">
           {[
             { 
               icon: Flame, 

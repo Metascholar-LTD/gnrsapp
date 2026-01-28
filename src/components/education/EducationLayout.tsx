@@ -75,6 +75,7 @@ interface EducationPageLayoutProps {
   breadcrumbs: BreadcrumbItem[];
   heroStats?: HeroStat[];
   heroActions?: ReactNode;
+  heroStatsActions?: ReactNode;
   heroTheme?: HeroTheme;
   heroImage?: string;
   heroVideo?: string;
@@ -93,6 +94,7 @@ export const EducationPageLayout = ({
   breadcrumbs,
   heroStats,
   heroActions,
+  heroStatsActions,
   heroTheme,
   heroImage,
   heroVideo,
@@ -186,16 +188,23 @@ export const EducationPageLayout = ({
           </div>
 
           {heroStats && heroStats.length > 0 && (
-            <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {heroStats.map((stat) => (
-                <div key={stat.label} className="education-stat-card px-6 py-5 text-white">
-                  <p className="text-[11px] uppercase tracking-[0.35em] text-white">
-                    {stat.label}
-                  </p>
-                  <p className="text-3xl font-semibold mt-2 text-white">{stat.value}</p>
+            <>
+              <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {heroStats.map((stat) => (
+                  <div key={stat.label} className="education-stat-card px-6 py-5 text-white">
+                    <p className="text-[11px] uppercase tracking-[0.35em] text-white">
+                      {stat.label}
+                    </p>
+                    <p className="text-3xl font-semibold mt-2 text-white">{stat.value}</p>
+                  </div>
+                ))}
+              </div>
+              {heroStatsActions && (
+                <div className="mt-16 flex justify-center">
+                  {heroStatsActions}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </header>

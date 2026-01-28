@@ -77,7 +77,7 @@ const AiTutor = () => {
         { label: "Learning modes", value: "4" },
         { label: "Average understanding", value: "94%" },
         { label: "Topics supported", value: "Any" },
-        { label: "Languages", value: "7" },
+        { label: "File formats", value: "5+" },
       ]}
       heroActions={
         <HeroButton onClick={() => setShowWorkspace(true)}>
@@ -120,39 +120,55 @@ const AiTutor = () => {
         </EducationSection>
 
         {/* Duolingo-inspired features */}
-        <EducationSection
-          eyebrow="Smart Features"
-          title="Gamified learning experience"
-          description="Stay motivated with streaks, progress tracking, and achievements."
-        >
-          <div className="rounded-3xl border border-slate-200/70 bg-slate-50 px-8 py-10">
-            <div className="grid gap-6 md:grid-cols-4">
-              {[
-                { icon: Flame, label: "Daily Streaks", stat: "Track your consistency", detail: "Build study habits with streak tracking" },
-                { icon: Target, label: "Progress Tracking", stat: "Visual progress", detail: "See your mastery grow over time" },
-                { icon: BookOpen, label: "Concept Maps", stat: "Connected learning", detail: "See how topics relate to each other" },
-                { icon: MessageSquare, label: "Session Recaps", stat: "Smart summaries", detail: "Get key takeaways after each session" },
-              ].map((metric) => (
-                <div key={metric.label} className="text-center">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm">
-                    <metric.icon className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <p className="mt-4 font-semibold text-slate-900">{metric.label}</p>
-                  <p className="mt-1 text-sm text-slate-600">{metric.detail}</p>
+        <div className="-mt-16">
+          <section className="education-section py-16 bg-white">
+            <div className="container mx-auto px-4 relative z-[1]">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                {/* Button on the left */}
+                <div className="flex-shrink-0">
+                  <Button 
+                    onClick={() => setShowWorkspace(true)}
+                    className="h-12 rounded-xl bg-emerald-600 px-8 text-base font-medium hover:bg-emerald-700 animate-slow-bounce hover:animate-none transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                  >
+                    Start Learning Now
+                  </Button>
                 </div>
-              ))}
+                {/* Text on the right */}
+                <div className="max-w-3xl lg:text-right">
+                  <p className="text-xs uppercase tracking-[0.3em] text-blue-600 mb-3">
+                    Smart Features
+                  </p>
+                  <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
+                    Gamified learning experience
+                  </h2>
+                  <p className="mt-3 text-base text-slate-600 max-w-3xl lg:ml-auto">
+                    Stay motivated with streaks, progress tracking, and achievements.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-10">
+                <div className="rounded-3xl border border-slate-200/70 bg-slate-50 px-8 py-10">
+                  <div className="grid gap-6 md:grid-cols-4">
+                    {[
+                      { icon: Flame, label: "Daily Streaks", stat: "Track your consistency", detail: "Build study habits with streak tracking" },
+                      { icon: Target, label: "Progress Tracking", stat: "Visual progress", detail: "See your mastery grow over time" },
+                      { icon: BookOpen, label: "Concept Maps", stat: "Connected learning", detail: "See how topics relate to each other" },
+                      { icon: MessageSquare, label: "Session Recaps", stat: "Smart summaries", detail: "Get key takeaways after each session" },
+                    ].map((metric) => (
+                      <div key={metric.label} className="text-center">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm">
+                          <metric.icon className="h-6 w-6 text-black" />
+                        </div>
+                        <p className="mt-4 font-semibold text-slate-900">{metric.label}</p>
+                        <p className="mt-1 text-sm text-slate-600">{metric.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="mt-8 text-center">
-              <Button 
-                onClick={() => setShowWorkspace(true)}
-                className="h-12 rounded-xl bg-emerald-600 px-8 text-base font-medium hover:bg-emerald-700"
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                Start Learning Now
-              </Button>
-            </div>
-          </div>
-        </EducationSection>
+          </section>
+        </div>
 
         {/* How it works */}
         <EducationSection
@@ -167,7 +183,7 @@ const AiTutor = () => {
               { step: "3", title: "Learn & Practice", desc: "Chat with your tutor, ask questions, take quizzes, and track your progress." },
             ].map((item) => (
               <div key={item.step} className="text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-xl font-bold text-emerald-600">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl font-bold text-black">
                   {item.step}
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-slate-900">{item.title}</h3>

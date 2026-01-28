@@ -50,7 +50,7 @@ export function ConceptMap({ conceptMap, topics, onTopicClick }: ConceptMapProps
         </svg>
 
         {/* Topic nodes */}
-        <div className="relative z-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="relative z-10 grid gap-8 min-[768px]:grid-cols-2 min-[1200px]:grid-cols-3">
           {sortedTopics.map((topic, index) => (
             <motion.button
               key={topic.name}

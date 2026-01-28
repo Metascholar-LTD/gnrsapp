@@ -1,0 +1,18 @@
+/* MaterialUpload specific styles to ensure full coverage */
+.material-upload-container {
+  /* Remove all default spacing on desktop */
+}
+
+@media (min-width: 1200px) {
+  .material-upload-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .material-upload-card {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background-color: rgba(0, 0, 0, 0.96) !important;
+  }
+}

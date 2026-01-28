@@ -1,13 +1,4 @@
 import { motion } from 'framer-motion';
-import { 
-  Check, 
-  Lock, 
-  ChevronRight,
-  BookOpen,
-  Play,
-  Brain
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
@@ -52,10 +43,10 @@ export function LessonSidebar({
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-emerald-100 text-emerald-700';
-      case 'intermediate': return 'bg-amber-100 text-amber-700';
-      case 'advanced': return 'bg-rose-100 text-rose-700';
-      default: return 'bg-slate-100 text-slate-700';
+      case 'beginner': return '#10b981';
+      case 'intermediate': return '#f59e0b';
+      case 'advanced': return '#ef4444';
+      default: return '#64748b';
     }
   };
 
@@ -63,132 +54,291 @@ export function LessonSidebar({
   const progress = (completedCount / sortedTopics.length) * 100;
 
   return (
-    <div className="hidden w-80 flex-shrink-0 border-r border-slate-200 bg-white lg:block">
-      <div className="flex h-full flex-col">
-        {/* Progress header */}
-        <div className="border-b border-slate-100 p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-600">Your Progress</span>
-            <span className="text-sm font-bold text-emerald-600">
-              {completedCount}/{sortedTopics.length}
-            </span>
-          </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-            <motion.div
-              className="h-full bg-emerald-500"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-        </div>
+    <>
+      <style>{`
+        .ai-tutor-sidebar,
+        .ai-tutor-sidebar * {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
 
-        {/* Topics list */}
-        <ScrollArea className="flex-1">
-          <div className="p-3 space-y-1">
-            {sortedTopics.map((topic, index) => {
-              const status = getTopicStatus(topic, index);
-              const isActive = topic.name === currentTopic;
-              const isLocked = status === 'locked';
+        .ai-tutor-sidebar {
+          background-color: #fff !important;
+          box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
+        }
 
-              return (
-                <div key={topic.name}>
-                  <button
-                    onClick={() => !isLocked && onTopicSelect(topic.name)}
-                    disabled={isLocked}
-                    className={cn(
-                      "w-full rounded-xl p-3 text-left transition-all",
-                      isActive && "bg-emerald-50 ring-1 ring-emerald-200",
-                      !isActive && !isLocked && "hover:bg-slate-50",
-                      isLocked && "cursor-not-allowed opacity-50"
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
+        .ai-tutor-sidebar .menu-header {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.75rem !important;
+          font-weight: 600 !important;
+          color: #8E92BC !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.05em !important;
+          padding: 0.75rem 1.5rem 0.5rem !important;
+          margin-top: 0.5rem !important;
+        }
+
+        .ai-tutor-sidebar .menu-item {
+          margin: 0.125rem 0 !important;
+        }
+
+        .ai-tutor-sidebar .menu-link {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.875rem !important;
+          font-weight: 700 !important;
+          color: #54577A !important;
+          padding: 0.75rem 1.5rem !important;
+          border-radius: 0.5rem !important;
+          transition: all 0.2s ease !important;
+          display: flex !important;
+          align-items: flex-start !important;
+          justify-content: space-between !important;
+          width: 100% !important;
+          text-align: left !important;
+          background: transparent !important;
+          border: none !important;
+          cursor: pointer !important;
+          white-space: normal !important;
+          word-wrap: break-word !important;
+        }
+
+        .ai-tutor-sidebar .menu-item.active .menu-link,
+        .ai-tutor-sidebar .menu-link:hover {
+          color: #141522 !important;
+          background-color: rgba(30, 58, 95, 0.16) !important;
+        }
+
+        .ai-tutor-sidebar .menu-item.locked .menu-link {
+          color: #8E92BC !important;
+          opacity: 0.5 !important;
+          cursor: not-allowed !important;
+        }
+
+        .ai-tutor-sidebar .menu-item.completed .menu-link {
+          color: #10b981 !important;
+        }
+
+        .ai-tutor-sidebar .submenu-item {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.8125rem !important;
+          font-weight: 600 !important;
+          color: #54577A !important;
+          padding: 0.5rem 1.5rem 0.5rem 3.5rem !important;
+          border-radius: 0.375rem !important;
+          transition: all 0.2s ease !important;
+          display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          background: transparent !important;
+          border: none !important;
+          cursor: pointer !important;
+          white-space: normal !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+          line-height: 1.5 !important;
+        }
+
+        .ai-tutor-sidebar .submenu-item.active,
+        .ai-tutor-sidebar .submenu-item:hover {
+          color: #141522 !important;
+          background-color: rgba(30, 58, 95, 0.08) !important;
+        }
+
+        .ai-tutor-sidebar .progress-header {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          padding: 1rem 1.5rem !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        .ai-tutor-sidebar .progress-label {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.75rem !important;
+          font-weight: 600 !important;
+          color: #8E92BC !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.05em !important;
+          margin-bottom: 0.5rem !important;
+        }
+
+        .ai-tutor-sidebar .progress-value {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.875rem !important;
+          font-weight: 700 !important;
+          color: #141522 !important;
+        }
+
+        .ai-tutor-sidebar .difficulty-badge {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.6875rem !important;
+          font-weight: 600 !important;
+          padding: 0.25rem 0.5rem !important;
+          border-radius: 0.25rem !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.05em !important;
+        }
+
+        .ai-tutor-sidebar .time-badge {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.75rem !important;
+          font-weight: 600 !important;
+          color: #8E92BC !important;
+        }
+
+        .ai-tutor-sidebar .topic-meta {
+          display: flex !important;
+          align-items: center !important;
+          gap: 0.5rem !important;
+          margin-top: 0.25rem !important;
+        }
+
+        .ai-tutor-sidebar .topic-title {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.875rem !important;
+          font-weight: 700 !important;
+          color: inherit !important;
+          line-height: 1.5 !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+          white-space: normal !important;
+        }
+
+        .ai-tutor-sidebar .quiz-button {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-size: 0.875rem !important;
+          font-weight: 700 !important;
+          padding: 0.75rem 1.5rem !important;
+          border-radius: 0.5rem !important;
+          background-color: #141522 !important;
+          color: #fff !important;
+          border: none !important;
+          cursor: pointer !important;
+          transition: all 0.2s ease !important;
+          width: 100% !important;
+        }
+
+        .ai-tutor-sidebar .quiz-button:hover {
+          background-color: #1e293b !important;
+        }
+
+        /* Mobile & Tablet: hide non-essential UI to keep things clean */
+        @media (max-width: 1199.98px) {
+          .ai-tutor-sidebar .progress-header {
+            display: none !important;
+          }
+
+          .ai-tutor-sidebar .time-badge {
+            display: none !important;
+          }
+        }
+      `}</style>
+      <div className="ai-tutor-sidebar w-80 flex-shrink-0 border-r border-slate-200 bg-white">
+        <div className="flex h-full flex-col">
+          {/* Progress header */}
+          <div className="progress-header">
+            <div className="flex items-center justify-between mb-3">
+              <span className="progress-label">Your Progress</span>
+              <span className="progress-value">
+                {completedCount}/{sortedTopics.length}
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+              <motion.div
+                className="h-full bg-emerald-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+          </div>
+
+          {/* Topics list */}
+          <ScrollArea className="flex-1">
+            <div className="py-2">
+              {/* Learning Path Section */}
+              <div className="menu-header">Learning Path</div>
+              
+              <div className="space-y-1">
+                {sortedTopics.map((topic, index) => {
+                  const status = getTopicStatus(topic, index);
+                  const isActive = topic.name === currentTopic;
+                  const isLocked = status === 'locked';
+                  const isCompleted = status === 'completed';
+
+                  return (
+                    <div key={topic.name}>
                       <div className={cn(
-                        "mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full",
-                        status === 'completed' && "bg-emerald-500 text-white",
-                        status === 'available' && isActive && "bg-emerald-500 text-white",
-                        status === 'available' && !isActive && "border-2 border-slate-200",
-                        status === 'locked' && "bg-slate-100"
+                        "menu-item",
+                        isActive && "active",
+                        isLocked && "locked",
+                        isCompleted && "completed"
                       )}>
-                        {status === 'completed' ? (
-                          <Check className="h-3.5 w-3.5" />
-                        ) : status === 'locked' ? (
-                          <Lock className="h-3 w-3 text-slate-400" />
-                        ) : isActive ? (
-                          <Play className="h-3 w-3" />
-                        ) : (
-                          <span className="text-xs font-medium text-slate-400">{index + 1}</span>
-                        )}
+                        <button
+                          onClick={() => !isLocked && onTopicSelect(topic.name)}
+                          disabled={isLocked}
+                          className="menu-link"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="topic-title">
+                              {topic.name}
+                            </div>
+                            <div className="topic-meta">
+                              <span 
+                                className="difficulty-badge"
+                                style={{ 
+                                  backgroundColor: `${getDifficultyColor(topic.difficulty)}15`,
+                                  color: getDifficultyColor(topic.difficulty)
+                                }}
+                              >
+                                {topic.difficulty}
+                              </span>
+                              <span className="time-badge">
+                                ~{topic.estimatedMinutes} min
+                              </span>
+                            </div>
+                          </div>
+                        </button>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn(
-                          "font-medium truncate",
-                          isActive ? "text-emerald-700" : "text-slate-700"
-                        )}>
-                          {topic.name}
-                        </p>
-                        <div className="mt-1 flex items-center gap-2">
-                          <span className={cn(
-                            "rounded-full px-2 py-0.5 text-xs",
-                            getDifficultyColor(topic.difficulty)
-                          )}>
-                            {topic.difficulty}
-                          </span>
-                          <span className="text-xs text-slate-400">
-                            ~{topic.estimatedMinutes} min
-                          </span>
-                        </div>
-                      </div>
-                      {!isLocked && (
-                        <ChevronRight className={cn(
-                          "h-4 w-4 flex-shrink-0 transition-colors",
-                          isActive ? "text-emerald-500" : "text-slate-300"
-                        )} />
+
+                      {/* Subtopics */}
+                      {isActive && topic.subtopics.length > 0 && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="space-y-0.5 mt-1">
+                            {topic.subtopics.map((subtopic) => (
+                              <button
+                                key={subtopic}
+                                onClick={() => onTopicSelect(topic.name, subtopic)}
+                                className={cn(
+                                  "submenu-item",
+                                  currentSubtopic === subtopic && "active"
+                                )}
+                              >
+                                {subtopic}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
                       )}
                     </div>
-                  </button>
+                  );
+                })}
+              </div>
+            </div>
+          </ScrollArea>
 
-                  {/* Subtopics */}
-                  {isActive && topic.subtopics.length > 0 && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      className="ml-9 mt-1 space-y-0.5 overflow-hidden"
-                    >
-                      {topic.subtopics.map((subtopic) => (
-                        <button
-                          key={subtopic}
-                          onClick={() => onTopicSelect(topic.name, subtopic)}
-                          className={cn(
-                            "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                            currentSubtopic === subtopic
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "text-slate-600 hover:bg-slate-50"
-                          )}
-                        >
-                          {subtopic}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </div>
-              );
-            })}
+          {/* Quiz button */}
+          <div className="border-t border-slate-100 p-4">
+            <button
+              onClick={onStartQuiz}
+              className="quiz-button"
+            >
+              Test Your Knowledge
+            </button>
           </div>
-        </ScrollArea>
-
-        {/* Quiz button */}
-        <div className="border-t border-slate-100 p-4">
-          <Button
-            onClick={onStartQuiz}
-            className="w-full gap-2 bg-slate-900 hover:bg-slate-800"
-          >
-            <Brain className="h-4 w-4" />
-            Test Your Knowledge
-          </Button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

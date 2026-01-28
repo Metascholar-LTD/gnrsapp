@@ -1,48 +1,9 @@
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { EducationPageLayout } from "@/components/education/EducationLayout";
 import { EducationSection } from "@/components/education/Section";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plus,
-  Trash2,
-} from "lucide-react";
-
-type CourseEntry = {
-  id: string;
-  course: string;
-  credits: number;
-  grade: keyof typeof gradeScale;
-};
-
-const gradeScale = {
-  A: 4.0,
-  "B+": 3.5,
-  B: 3.0,
-  "C+": 2.5,
-  C: 2.0,
-  "D+": 1.5,
-  D: 1.0,
-  F: 0,
-};
-
-const createId = () =>
-  typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2, 10);
-
-const defaultRows: CourseEntry[] = [
-  { id: "row-1", course: "Advanced Calculus", credits: 3, grade: "A" },
-  { id: "row-2", course: "Thermodynamics", credits: 2, grade: "B+" },
-  { id: "row-3", course: "Technical Communication", credits: 2, grade: "A" },
-];
+import { Calculator } from "lucide-react";
 
 const studyTabs = ["Overview", "Course load", "Advisor sync"];
 
@@ -105,38 +66,11 @@ const HeroButton = ({ onClick, children }: HeroButtonProps) => (
 );
 
 const CgpaCalculator = () => {
-  const [courses, setCourses] = useState<CourseEntry[]>(defaultRows);
+  const navigate = useNavigate();
 
-  const updateCourse = (id: string, key: keyof CourseEntry, value: string) => {
-    setCourses((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              [key]: key === "credits" ? Number(value) || 0 : value,
-            }
-          : item
-      )
-    );
+  const scrollToCalculator = () => {
+    navigate("/education/calculate-cgpa");
   };
-
-  const addCourse = () => {
-    setCourses((prev) => [
-      ...prev,
-      { id: createId(), course: `Course ${prev.length + 1}`, credits: 3, grade: "B" },
-    ]);
-  };
-
-  const removeCourse = (id: string) => {
-    setCourses((prev) => (prev.length === 1 ? prev : prev.filter((item) => item.id !== id)));
-  };
-
-  const totalCredits = courses.reduce((sum, item) => sum + (item.credits || 0), 0);
-  const totalPoints = courses.reduce(
-    (sum, item) => sum + (item.credits || 0) * gradeScale[item.grade],
-    0
-  );
-  const cgpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "0.00";
 
   return (
     <EducationPageLayout
@@ -158,8 +92,36 @@ const CgpaCalculator = () => {
       heroActions={
         <>
           <HeroButton onClick={() => {}}>Export summary</HeroButton>
-          <HeroButton onClick={() => {}}>Sync with advisor</HeroButton>
         </>
+      }
+      heroStatsActions={
+        <motion.button
+          onClick={scrollToCalculator}
+          className="group relative inline-block text-sm font-semibold text-white transition-colors duration-300 hover:text-emerald-200"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.6,
+            delay: 0.3,
+            ease: [0.16, 1, 0.3, 1]
+          }}
+        >
+          <motion.span
+            className="relative inline-block pb-1 flex items-center gap-1.5"
+            whileHover={{ x: 2 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <Calculator className="w-4 h-4" />
+            Access Calculator
+            <span
+              className="absolute bottom-0 left-0 h-[2px] bg-white transition-all duration-300 group-hover:bg-emerald-200"
+              style={{
+                width: 'calc(100% + 14px)',
+                clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)'
+              }}
+            />
+          </motion.span>
+        </motion.button>
       }
     >
       <div className="space-y-8 sm:space-y-12 lg:space-y-16">
@@ -180,9 +142,9 @@ const CgpaCalculator = () => {
               </div>
               <dl className="grid gap-4 sm:gap-6 sm:grid-cols-3">
                 {[
-                  { label: "Advising sessions", value: "24 / month" },
-                  { label: "Scholarships tracked", value: "18 active" },
-                  { label: "Playbooks", value: "42 templates" },
+                  { label: "Grading systems", value: "3 supported" },
+                  { label: "Calculations saved", value: "24 entries" },
+                  { label: "Courses tracked", value: "142 total" },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 sm:p-5 shadow-sm">
                     <dt className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-slate-500">{stat.label}</dt>
@@ -285,104 +247,6 @@ const CgpaCalculator = () => {
             </div>
           </div>
         </EducationSection>
-
-        <div className="relative isolate overflow-hidden rounded-[24px] sm:rounded-[32px] md:rounded-[40px] lg:rounded-[56px] border border-white/10 shadow-[0_45px_120px_rgba(10,10,20,0.45)] mx-2 sm:mx-4 md:mx-0" data-animate="fade-up">
-          <img
-            className="absolute inset-0 h-full w-full object-cover"
-            src="https://images.unsplash.com/photo-1498079022511-d15614cb1c02?auto=format&fit=crop&w=2000&q=80"
-            alt="Students collaborating"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-[#17141e]/85" />
-          <EducationSection
-            eyebrow="Calculator"
-            title="Compute your CGPA in seconds"
-            description="Add your courses, credits, and grades. The calculator automatically derives total quality points."
-            variant="contrast"
-            className="relative z-10 !bg-transparent !bg-none text-white [&::after]:hidden"
-          actions={
-            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-              <HeroButton onClick={() => setCourses(defaultRows)}>
-                Reset rows
-              </HeroButton>
-              <HeroButton onClick={addCourse}>
-                <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                Add course
-              </HeroButton>
-            </div>
-          }
-          >
-            <div
-              className="rounded-[20px] sm:rounded-[24px] md:rounded-[32px] border border-white/20 bg-white/95 p-4 sm:p-5 md:p-6 shadow-[0_30px_80px_rgba(15,23,42,0.25)] backdrop-blur text-slate-900"
-            >
-              <div className="grid grid-cols-[2fr_1fr_1fr_auto] sm:grid-cols-[3fr_1fr_1fr_auto] gap-2 sm:gap-3 md:gap-4 rounded-xl sm:rounded-2xl bg-slate-50/70 px-2 sm:px-3 md:px-4 py-2 sm:py-3 text-[9px] sm:text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.3em] sm:tracking-[0.35em] text-slate-700">
-                <span className="text-slate-700 truncate">Course title</span>
-                <span className="text-slate-700 text-center sm:text-left">Credits</span>
-                <span className="text-slate-700 text-center sm:text-left">Grade</span>
-                <span />
-              </div>
-              <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-                {courses.map((course) => (
-                  <div
-                    key={course.id}
-                    className="grid grid-cols-[2fr_1fr_1fr_auto] sm:grid-cols-[3fr_1fr_1fr_auto] gap-2 sm:gap-3 md:gap-4 rounded-xl sm:rounded-2xl border border-slate-200/60 bg-white p-3 sm:p-4 shadow-sm"
-                    data-animate="fade-up"
-                    data-delay="1"
-                  >
-                    <Input
-                      value={course.course}
-                      onChange={(e) => updateCourse(course.id, "course", e.target.value)}
-                      placeholder="Course name"
-                      className="h-10 sm:h-11 rounded-lg sm:rounded-xl border-slate-200 text-sm sm:text-base text-slate-900 placeholder:text-slate-500 bg-white"
-                    />
-                    <Input
-                      type="number"
-                      min={0}
-                      value={course.credits}
-                      onChange={(e) => updateCourse(course.id, "credits", e.target.value)}
-                      className="h-10 sm:h-11 rounded-lg sm:rounded-xl border-slate-200 text-sm sm:text-base text-slate-900 placeholder:text-slate-500 bg-white"
-                    />
-                    <Select
-                      value={course.grade}
-                      onValueChange={(value) => updateCourse(course.id, "grade", value as keyof typeof gradeScale)}
-                    >
-                      <SelectTrigger className="h-10 sm:h-11 rounded-lg sm:rounded-xl border-slate-200 text-sm sm:text-base text-slate-900 bg-white [&>span]:text-slate-900">
-                        <SelectValue placeholder="Grade" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white text-slate-900">
-                        {Object.entries(gradeScale).map(([letter]) => (
-                          <SelectItem key={letter} value={letter} className="text-slate-900 focus:bg-slate-100 focus:text-slate-900">
-                            {letter}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button variant="ghost" className="h-10 w-10 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl text-slate-600 hover:text-red-600 p-0" onClick={() => removeCourse(course.id)} disabled={courses.length === 1}>
-                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 sm:mt-8 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                {[
-                  { label: "Total credits", value: totalCredits },
-                  { label: "Total quality points", value: totalPoints.toFixed(2) },
-                  { label: "Current CGPA", value: cgpa },
-                ].map((metric) => (
-                  <div
-                    key={metric.label}
-                    className="rounded-xl sm:rounded-2xl border border-slate-100 bg-white/80 p-4 sm:p-5 shadow-inner transition-transform hover:-translate-y-1"
-                    data-animate="fade-up"
-                    data-delay="2"
-                  >
-                    <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.3em] sm:tracking-[0.35em] text-slate-600 font-semibold">{metric.label}</p>
-                    <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-semibold text-slate-900">{metric.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </EducationSection>
-        </div>
       </div>
     </EducationPageLayout>
   );
