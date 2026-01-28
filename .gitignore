@@ -30,6 +30,7 @@ dist-ssr
 /meta-consult
 /Resume_Builder
 /pages
+/academic-planner-pro
 
 # Large unused dependencies
 /public/nutrient-viewer

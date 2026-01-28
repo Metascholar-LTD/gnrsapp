@@ -10,7 +10,6 @@ import {
   AlarmClock,
   Map,
   Share2,
-  PenTool,
 } from "lucide-react";
 
 const builderFeatures: InfoCardItem[] = [
@@ -119,10 +118,6 @@ const TimetableBuilder = () => (
               </div>
             ))}
           </div>
-          <Button variant="outline" className="mt-8 h-10 rounded-xl border-slate-300">
-            <PenTool className="mr-2 h-4 w-4" />
-            Request a custom template
-          </Button>
         </div>
       </EducationSection>
     </div>
